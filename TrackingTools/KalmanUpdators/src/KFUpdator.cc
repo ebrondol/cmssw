@@ -27,6 +27,7 @@ template <unsigned int D>
 TrajectoryStateOnSurface KFUpdator::update(const TrajectoryStateOnSurface& tsos,
 				           const TrackingRecHit& aRecHit) const {
 
+  std::cout << "Calling KFUpdator::update for TrackingRecHit" << std::endl;
   typedef typename AlgebraicROOTObject<D,5>::Matrix MatD5;
   typedef typename AlgebraicROOTObject<5,D>::Matrix Mat5D;
   typedef typename AlgebraicROOTObject<D,D>::SymMatrix SMatDD;
@@ -105,6 +106,7 @@ template <unsigned int D>
 TrajectoryStateOnSurface KFUpdator::update(const TrajectoryStateOnSurface& tsos,
 				           const TransientTrackingRecHit& aRecHit) const {
 
+  std::cout << "Calling KFUpdator::update for TransientTrackingRecHit" << std::endl;
   typedef typename AlgebraicROOTObject<D,5>::Matrix MatD5;
   typedef typename AlgebraicROOTObject<5,D>::Matrix Mat5D;
   typedef typename AlgebraicROOTObject<D,D>::SymMatrix SMatDD;
@@ -113,10 +115,13 @@ TrajectoryStateOnSurface KFUpdator::update(const TrajectoryStateOnSurface& tsos,
 
   MeasurementExtractor me(tsos);
 
+  std::cout << "eccomi" << std::endl;
+  typedef typename AlgebraicROOTObject<D,5>::Matrix MatD5;
   AlgebraicVector5 x = tsos.localParameters().vector();
   const AlgebraicSymMatrix55 &C = (tsos.localError().matrix());
   // Measurement matrix
   MatD5 H = asSMatrix<D,5>(aRecHit.projectionMatrix());
+  std::cout << "scomparso" << std::endl;
 
   // Residuals of aPredictedState w.r.t. aRecHit, 
   VecD r = asSVector<D>(aRecHit.parameters()) - me.measuredParameters<D>(aRecHit);
