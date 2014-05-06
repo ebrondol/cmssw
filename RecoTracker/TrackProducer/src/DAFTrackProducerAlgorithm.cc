@@ -34,6 +34,7 @@ void DAFTrackProducerAlgorithm::runWithCandidate(const TrackingGeometry * theG,
 						 const reco::BeamSpot& bs,
 					         AlgoProductCollection& algoResults) const
 {
+  std::cout << "//////////////////////////////////////////////////////////////////////////////////"<<std::endl;
   std::cout << "DAFTrackProducerAlgorithm::runWithCandidate: Number of Trajectories: " << theTrajectoryCollection.size() << std::endl;
   edm::LogInfo("TrackProducer") << "Number of Trajectories: " << theTrajectoryCollection.size() << "\n";
   int cont = 0;
@@ -67,9 +68,9 @@ void DAFTrackProducerAlgorithm::runWithCandidate(const TrackingGeometry * theG,
         if (vtraj.size()){
 
           std::cout << "Seed direction is " << vtraj.front().seed().direction() 
-                    << "  Traj direction is " << vtraj.front().direction();
+                    << ".Traj direction is " << vtraj.front().direction() <<  std::endl;
 	  LogDebug("DAFTrackProducerAlgorithm") << "Seed direction is " << vtraj.front().seed().direction() 
-	 	                                << "  Traj direction is " << vtraj.front().direction(); 
+	 	                                << ".Traj direction is " << vtraj.front().direction();
 
 	  std::pair<TransientTrackingRecHit::RecHitContainer, TrajectoryStateOnSurface> curiterationhits = 
 										updateHits(vtraj,updator,*ian);
@@ -130,25 +131,30 @@ DAFTrackProducerAlgorithm::collectHits(const std::vector<Trajectory>& vtraj,
     				       const MultiRecHitCollector* measurementCollector,
                         	       const MeasurementTrackerEvent *measTk) const{
 
-  std::cout << "Calling DAFTrackProducerAlgorithm::collectHits" << std::endl;
   LogDebug("DAFTrackProducerAlgorithm") << "Calling DAFTrackProducerAlgorithm::collectHits";
-	TransientTrackingRecHit::RecHitContainer hits;
-	//ERICA: takes the trajectory measurement from the MeasurementCollector of the first element of vtraj 
-	//	 -> why the first?
-	std::vector<TrajectoryMeasurement> collectedmeas = measurementCollector->recHits(vtraj.front(), measTk);
+  TransientTrackingRecHit::RecHitContainer hits;
+  //ERICA: takes the trajectory measurement from the MeasurementCollector of the first element of vtraj 
+  //	 -> why the first?
+  std::vector<TrajectoryMeasurement> collectedmeas = measurementCollector->recHits(vtraj.front(), measTk);
 
-	//ERICA: if the MeasurementCollector is empty, make an "empty" pair 
-	//	 else taking the collected measured hits and building the pair
-        if( collectedmeas.empty() ) 
-	    return std::make_pair(TransientTrackingRecHit::RecHitContainer(), TrajectoryStateOnSurface());
-        for( std::vector<TrajectoryMeasurement>::const_iterator iter = collectedmeas.begin(); 
-	     iter!=collectedmeas.end(); iter++ ){
-        	hits.push_back(iter->recHit());
-        }
-	//ERICA: TrajectoryStateWithArbitraryError() == Creates a TrajectoryState with the same parameters 
-	//	 as the input one, but with "infinite" errors, i.e. errors so big that they don't
-	// 	 bias a fit starting with this state. 
-        return std::make_pair(hits,TrajectoryStateWithArbitraryError()(collectedmeas.front().predictedState()));	
+  //ERICA: if the MeasurementCollector is empty, make an "empty" pair 
+  //	 else taking the collected measured hits and building the pair
+  if( collectedmeas.empty() ) 
+    return std::make_pair(TransientTrackingRecHit::RecHitContainer(), TrajectoryStateOnSurface());
+
+  for( std::vector<TrajectoryMeasurement>::const_iterator iter = collectedmeas.begin(); 
+       iter!=collectedmeas.end(); iter++ ){
+
+    hits.push_back(iter->recHit());
+
+  }
+
+  //ERICA: TrajectoryStateWithArbitraryError() == Creates a TrajectoryState with the same parameters 
+  //	 as the input one, but with "infinite" errors, i.e. errors so big that they don't
+  // 	 bias a fit starting with this state. 
+
+  return std::make_pair(hits,TrajectoryStateWithArbitraryError()(collectedmeas.front().predictedState()));	
+
 }
 
 std::pair<TransientTrackingRecHit::RecHitContainer, TrajectoryStateOnSurface>
@@ -162,9 +168,9 @@ DAFTrackProducerAlgorithm::updateHits(const std::vector<Trajectory>& vtraj,
 
 	//ERICA: I run inversely on the trajectory obtained and update the state
         for (imeas = vmeas.rbegin(); imeas != vmeas.rend(); imeas++){
-//              TransientTrackingRecHit::RecHitPointer updated = updator->update(imeas->recHit(), 
-//							imeas->updatedState(), annealing);
-//              hits.push_back(updated);
+              TransientTrackingRecHit::RecHitPointer updated = updator->update(imeas->recHit(), 
+							imeas->updatedState(), annealing);
+              hits.push_back(updated);
         }
         return std::make_pair(hits,TrajectoryStateWithArbitraryError()(vmeas.back().updatedState()));
 }
@@ -180,12 +186,12 @@ void DAFTrackProducerAlgorithm::fit(const std::pair<TransientTrackingRecHit::Rec
                                                                  BasicTrajectorySeed::recHitContainer(),
                                                                  vtraj.front().seed().direction()),
                                                                  hits.first, hits.second);
-  std::cout << "swapped! vtraj size before: " << vtraj.size() << std::endl;
-  std::cout << "swapped! newVec size before: " << newVec.size() << std::endl;
+
+  if(newVec.size()==0) std::cout << "Fit no valid. Trajectory vec size: " << newVec.size() << std::endl;
+
   vtraj.reserve(newVec.size());
   vtraj.swap(newVec);
-  std::cout << "swapped! newVec size: " << newVec.size() << std::endl;
-  std::cout << "swapped! vtraj size: " << vtraj.size() << std::endl;
+
   LogDebug("DAFTrackProducerAlgorithm") << "swapped!" << std::endl;
 
 }
@@ -202,7 +208,7 @@ bool DAFTrackProducerAlgorithm::buildTrack (const std::vector<Trajectory>& vtraj
   //perform the fit: the result's size is 1 if it succeded, 0 if fails
   
   
-  std::cout <<" FITTER FOUND "<< vtraj.size() << " TRAJECTORIES" << std::endl;
+  std::cout <<"DAFTrackProducerAlgorithm::buildTrack : FOUND "<< vtraj.size() << " TRAJECTORIES" << std::endl;
   LogDebug("DAFTrackProducerAlgorithm") <<" FITTER FOUND "<< vtraj.size() << " TRAJECTORIES" << std::endl;;
   TrajectoryStateOnSurface innertsos;
   

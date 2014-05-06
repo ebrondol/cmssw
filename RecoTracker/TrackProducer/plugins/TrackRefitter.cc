@@ -74,8 +74,9 @@ void TrackRefitter::produce(edm::Event& theEvent, const edm::EventSetup& setup)
     {
       edm::Handle<reco::TrackCollection> theTCollection;
       getFromEvt(theEvent,theTCollection,bs);
-//ERICA
-std::cout << "TrackRefitter::produce::none: Number of Trajectories: " << (*theTCollection).size() << std::endl;
+
+      std::cout << "TrackRefitter::produce(none):Number of Trajectories:" << (*theTCollection).size() <<std::endl;
+
       if (theTCollection.failedToGet()){
 	edm::LogError("TrackRefitter")<<"could not get the reco::TrackCollection."; break;}
       LogDebug("TrackRefitter") << "run the algorithm" << "\n";
@@ -143,6 +144,8 @@ std::cout << "TrackRefitter::produce::none: Number of Trajectories: " << (*theTC
   
   //put everything in th event
   putInEvt(theEvent, thePropagator.product(), theMeasTk.product(), outputRHColl, outputTColl, outputTEColl, outputTrajectoryColl, algoResults);
+  std::cout << "TrackRefitter::produce(none): End." << std::endl;
+  std::cout << "//////////////////////////////////////////////////////////////////////////////////\n"<<std::endl;
   LogDebug("TrackRefitter") << "end" << "\n";
 }
 

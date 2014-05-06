@@ -56,7 +56,7 @@ Trajectory KFTrajectoryFitter::fitOne(const TrajectorySeed& aSeed,
 #ifdef EDM_ML_DEBUG
   LogDebug("TrackFitters")
     <<" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n"
-    <<" KFTrajectoryFitter::fit starting with " << hits.size() <<" HITS";
+    <<" KFTrajectoryFitter::fitOne starting with " << hits.size() <<" HITS";
   
   for (unsigned int j=0;j<hits.size();j++) { 
     if (hits[j]->det()) 
@@ -67,6 +67,7 @@ Trajectory KFTrajectoryFitter::fitOne(const TrajectorySeed& aSeed,
   }
   LogTrace("TrackFitters") << " INITIAL STATE "<< firstPredTsos;
 #endif
+
   std::cout <<" ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n"
     <<" KFTrajectoryFitter::fit starting with " << hits.size() <<" HITS" << std::endl;
 
@@ -174,10 +175,10 @@ Trajectory KFTrajectoryFitter::fitOne(const TrajectorySeed& aSeed,
 	    myTraj.push(TM(predTsos, *ihit,0,theGeometry->idToLayer((*ihit)->geographicalId()) ));
 	    
 	  }else{
-	  std::cout << "THE Precise HIT IS VALID: updating currTsos" << "\n";
+	  std::cout << "  The " << hitcounter << " precise hit is valid: updating currTsos ... " << "\n";
 	  LogTrace("TrackFitters") << "THE Precise HIT IS VALID: updating currTsos" << "\n";
 	  currTsos = updator()->update(predTsos, *preciseHit);
-	  std::cout << "KFTrajectoryFitter::fit: updated currTsos" << "\n";
+	  std::cout << "  The currTsos has been updated." << "\n";
 	  //check for valid hits with no det (refitter with constraints)
 	  bool badState = (!currTsos.isValid())
           || (hit.geographicalId().det() == DetId::Tracker
@@ -189,26 +190,27 @@ Trajectory KFTrajectoryFitter::fitOne(const TrajectorySeed& aSeed,
 	  if unlikely(badState){
 	    if (!currTsos.isValid()) {
 	      edm::LogError("FailedUpdate") <<"updating with the hit failed. Not updating the trajectory with the hit";
+	      //ERICA	
 	      std::cout <<"updating with the hit failed. Not updating the trajectory with the hit";
             } 
 	    else if (edm::isNotFinite(currTsos.localParameters().qbp())) {
               edm::LogError("TrajectoryNaN")<<"Trajectory has NaN";
+	      //ERICA
               std::cout<<"Trajectory has NaN";
             }
 	    else{ 
               LogTrace("FailedUpdate")<<"updated state is valid but pretty bad, skipping. currTsos " <<currTsos<<"\n predTsos "<<predTsos;
+	      //ERICA
               std::cout  <<"updated state is valid but pretty bad, skipping. currTsos "	<<currTsos<<"\n predTsos "<<predTsos;
             }
+	    std::cout << "The current state is valid but is a badState." << std::endl;
 	    myTraj.push(TM(predTsos, *ihit,0,theGeometry->idToLayer((*ihit)->geographicalId())  ));
-	    std::cout << "myTraj.push1" << std::endl;
 	    //There is a no-fail policy here. So, it's time to give up
 	    //Keep the traj with invalid TSOS so that it's clear what happened
 	    if( myTraj.foundHits() >= minHits_ ) {
-	      std::cout << " breaking trajectory" << "\n";
 	      LogDebug("TrackFitters") << " breaking trajectory" << "\n";
 	      break;      
 	    } else {        
-	      std::cout << " killing trajectory" << "\n";       
 	      LogDebug("TrackFitters") << " killing trajectory" << "\n";       
 	      return Trajectory();
 	    }
@@ -232,17 +234,20 @@ Trajectory KFTrajectoryFitter::fitOne(const TrajectorySeed& aSeed,
       myTraj.push(TM(predTsos, *ihit,0,theGeometry->idToLayer((*ihit)->geographicalId())  ));
     }
    
-    std::cout << "predTsos !" << "\n" << predTsos << "\n"
-      <<"currTsos !" << "\n"  << currTsos; 
+    std::cout << "  The predTsos is" << "\n" << predTsos << std::endl;
+    std::cout << "  The currTsos is" << "\n"  << currTsos << std::endl ; 
+    std::cout << "  Ending the " << hitcounter << " hit. \n" << std::endl ; 
     LogTrace("TrackFitters")
       << "predTsos !" << "\n"
       << predTsos << "\n"
       <<"currTsos !" << "\n"
       << currTsos;
+
   }  
   
   LogDebug("TrackFitters") << "Found 1 trajectory with " << myTraj.foundHits() << " valid hits\n";
-  std::cout << "Found 1 trajectory with " << myTraj.foundHits() << " valid hits\n";
+  std::cout <<" KFTrajectoryFitter::fitOne ending with 1 trajectory with " << myTraj.foundHits() <<" valid hits." << std::endl;
+  std::cout <<" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n" << std::endl;
   
   return ret;
 }

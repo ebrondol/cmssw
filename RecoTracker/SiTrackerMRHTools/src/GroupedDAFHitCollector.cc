@@ -20,7 +20,7 @@
 
 vector<TrajectoryMeasurement> GroupedDAFHitCollector::recHits(const Trajectory& traj, const MeasurementTrackerEvent *theMTE) const{
 
-	std::cout << "Calling GroupedDAFHitCollector::recHits" << std::endl;
+	std::cout << " Calling GroupedDAFHitCollector::recHits" << std::endl;
 	//ERICA: replace theLM  
 	LayerMeasurements theLM (theMTE->measurementTracker(), *theMTE);
 
@@ -58,6 +58,7 @@ vector<TrajectoryMeasurement> GroupedDAFHitCollector::recHits(const Trajectory& 
 	//for the moment no hit are lookerd for in these layers
 	//remind that:
 	//groupedMeasurements will return at least a measurement with an invalid hit with no detid
+	std::cout << " Layer "  << mol.back().first  << " has " << mol.back().second.size() << " measurements.\n";
 	LogDebug("MultiRecHitCollector") << "Layer "  << mol.back().first  << " has " << mol.back().second.size() << " measurements";
 	//debug
         LogTrace("MultiRecHitCollector") << "Original measurements are:";
@@ -97,10 +98,14 @@ vector<TrajectoryMeasurement> GroupedDAFHitCollector::recHits(const Trajectory& 
                 vector<TrajectoryMeasurement>::const_iterator iend = (*imol).second.end();
                 for (vector<TrajectoryMeasurement>::const_iterator imeas = ibeg; imeas != iend; ++imeas){
                         if (imeas->recHit()->isValid()){
+                          std::cout << "  Valid Hit with DetId " << imeas->recHit()->geographicalId().rawId()
+                                    << " local position " << imeas->recHit()->hit()->localPosition() << std::endl;
                           LogTrace("MultiRecHitCollector") << "Valid Hit with DetId " << imeas->recHit()->geographicalId().rawId()
 							   << " local position " << imeas->recHit()->hit()->localPosition();
 			    //<< " on " << giulioGetLayer(imeas->recHit()->geographicalId());
                         } else {
+                          std::cout << "  Invalid Hit with DetId " << imeas->recHit()->geographicalId().rawId() 
+				    << std::endl;
                           LogTrace("MultiRecHitCollector") << "Invalid Hit with DetId " << imeas->recHit()->geographicalId().rawId();
 			  //<< " on " << giulioGetLayer(imeas->recHit()->geographicalId());
                         }
@@ -112,7 +117,9 @@ vector<TrajectoryMeasurement> GroupedDAFHitCollector::recHits(const Trajectory& 
 		current = (*imol).second.front().updatedState();
 		//if (current.isValid()) current.rescaleError(10);
 	}
-	std::cout << "GroupedDAFHitCollector::recHits >> Original Measurement size "  << meas.size() << " GroupedDAFHitCollector returned " << result.size() << " measurements" << std::endl;
+	std::cout << " Ending GroupedDAFHitCollector::recHits >> Original Measurement size "  << meas.size() 
+		  << " GroupedDAFHitCollector returned " << result.size() << " measurements" << std::endl;
+	std::cout << std::endl;
 	LogTrace("MultiRecHitCollector") << "Original Measurement size "  << meas.size() << " GroupedDAFHitCollector returned " << result.size() << " measurements";
 	//results are sorted in the fitting direction
 
@@ -152,7 +159,7 @@ void GroupedDAFHitCollector::buildMultiRecHits(const vector<TrajectoryMeasuremen
 	//we build a MultiRecHit out of each group
 	//groups are sorted along momentum or opposite to momentum, 
 	//measurements in groups are sorted with increating chi2
-	std::cout << "Found " << measgroup.size() << " groups for this layer.";
+	std::cout << " Found " << measgroup.size() << " groups for this layer.";
 	LogTrace("MultiRecHitCollector") << "Found " << measgroup.size() << " groups for this layer";
 	//trajectory state to store the last valid TrajectoryState (if present) to be used 
 	//to add an invalid Measurement in case no valid state or no valid hits are found in any group
@@ -164,7 +171,7 @@ void GroupedDAFHitCollector::buildMultiRecHits(const vector<TrajectoryMeasuremen
                         continue;		
 		}
 		//debug
-                std::cout << "This group has " << igroup->measurements().size() << " measurements." << std::endl;
+                std::cout << "  This group has " << igroup->measurements().size() << " measurements." << std::endl;
                 LogTrace("MultiRecHitCollector") << "This group has " << igroup->measurements().size() << " measurements";
                 LogTrace("MultiRecHitCollector") << "This group has the following " << igroup->detGroup().size() << " detector ids: " << endl;
                 for (DetGroup::const_iterator idet = igroup->detGroup().begin(); idet != igroup->detGroup().end(); ++idet){
@@ -178,16 +185,18 @@ void GroupedDAFHitCollector::buildMultiRecHits(const vector<TrajectoryMeasuremen
 			//we ese the recHits method; anyway only simple hits, not MultiHits should be present 
 			if (imeas->recHit()->getType() != TrackingRecHit::missing) {
 				LogTrace("MultiRecHitCollector") << "This hit is valid ";
-				std::cout << "This hit is valid " << std::endl;
+				std::cout << "  This hit is valid " << std::endl;
 				hits.push_back(imeas->recHit()->hit());
 			}
 		}
 		if (hits.empty()){
+			std::cout << "  No valid hits found in current group ";
 			LogTrace("MultiRecHitCollector") << "No valid hits found in current group ";
 			continue;
 		}
 		//ERICA: In what sense "the best"?? 
-		std::cout << "The best TSOS in this group is " << state << " it lays on surface located at " << state.surface().position() << std::endl;
+		std::cout << " The best TSOS in this group is " << state 
+			  << " it lays on surface located at " << state.surface().position() << std::endl;
 		LogTrace("MultiRecHitCollector") << "The best TSOS in this group is " << state << " it lays on surface located at " << state.surface().position();
 #ifdef _debug_GroupedDAFHitCollector_	
 		LogTrace("MultiRecHitCollector") << "For the MRH on this group the following hits will be used"; 
@@ -203,6 +212,7 @@ void GroupedDAFHitCollector::buildMultiRecHits(const vector<TrajectoryMeasuremen
 #endif
 		//ERICA: Why I pass all the hits and only the TSOS of igroup->measurements().front().predictedState() 
 		result.push_back(TrajectoryMeasurement(state,theUpdator->buildMultiRecHit(hits, state)));
+		std::cout << std::endl;
 	}
 
 	//can this happen? it means that the measgroup was not empty but no valid measurement was found inside

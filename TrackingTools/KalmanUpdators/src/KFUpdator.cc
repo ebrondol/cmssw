@@ -27,7 +27,7 @@ template <unsigned int D>
 TrajectoryStateOnSurface KFUpdator::update(const TrajectoryStateOnSurface& tsos,
 				           const TrackingRecHit& aRecHit) const {
 
-  std::cout << "Calling KFUpdator::update for TrackingRecHit" << std::endl;
+  std::cout << "   Calling KFUpdator::update for TrackingRecHit" << std::endl;
   typedef typename AlgebraicROOTObject<D,5>::Matrix MatD5;
   typedef typename AlgebraicROOTObject<5,D>::Matrix Mat5D;
   typedef typename AlgebraicROOTObject<D,D>::SymMatrix SMatDD;
@@ -94,6 +94,8 @@ TrajectoryStateOnSurface KFUpdator::update(const TrajectoryStateOnSurface& tsos,
     return TrajectoryStateOnSurface( LocalTrajectoryParameters(fsv, pzSign),
 				     LocalTrajectoryError(fse), tsos.surface(),&(tsos.globalParameters().magneticField()), tsos.surfaceSide() );
   }else {
+    //ERICA	
+    std::cout << "   KFUpdator could not invert martix. The matrix is:\n"<< (V+VMeas);
     edm::LogError("KFUpdator")<<" could not invert martix:\n"<< (V+VMeas);
     return TrajectoryStateOnSurface();
   }

@@ -40,7 +40,7 @@ MRHChi2MeasurementEstimator::estimate(const TrajectoryStateOnSurface& tsos,
 std::pair<bool, double> MRHChi2MeasurementEstimator::estimate(const TrajectoryStateOnSurface& tsos,
                                    const TrackingRecHit& aRecHit) const {
 
-std::cout << "Calling MRHChi2MeasurementEstimator::estimate" << std::endl;
+//std::cout << "Calling MRHChi2MeasurementEstimator::estimate" << std::endl;
   switch (aRecHit.dimension()) {
     case 2:       return estimate<2>(tsos,aRecHit);
     //ERICA: avoid the not-2D  hit due to the final sum  
@@ -65,11 +65,11 @@ std::pair<bool, double> MRHChi2MeasurementEstimator::estimate(const TrajectorySt
   double est=0;
 
   double annealing = mHit.getAnnealingFactor();
-  std::cout << "Current annealing factor is " << annealing << std::endl;               
+//  std::cout << "Current annealing factor is " << annealing << std::endl;               
   LogDebug("MRHChi2MeasurementEstimator") << "Current annealing factor is " << annealing;               
 
   TransientTrackingRecHit::ConstRecHitContainer components = mHit.transientHits();
-  std::cout << " and this hit has " << components.size() << " components" << std::endl;     
+//  std::cout << " and this hit has " << components.size() << " components" << std::endl;     
   LogDebug("MRHChi2MeasurementEstimator") << "this hit has " << components.size() << " components";     
 
   for (TransientTrackingRecHit::ConstRecHitContainer::const_iterator iter = components.begin(); iter != components.end(); iter++){              
@@ -95,7 +95,7 @@ std::pair<bool, double> MRHChi2MeasurementEstimator::estimate(const TrajectorySt
       edm::LogError("SiTrackerMultiRecHitUpdator")<<"SiTrackerMultiRecHitUpdator::ComputeParameters2dim: W not valid!"<<std::endl;
     }
 
-    std::cout << "Hit with weight " << (*iter)->weight() << std::endl; 
+//    std::cout << "Hit with weight " << (*iter)->weight() << std::endl; 
     LogDebug("MRHChi2MeasurementEstimator") << "Hit with weight " << (*iter)->weight(); 
     est += ROOT::Math::Similarity(r, V)*((*iter)->weight());
   }     
