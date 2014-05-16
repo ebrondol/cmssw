@@ -33,7 +33,7 @@ KFTrajectorySmoother::~KFTrajectorySmoother() {
 Trajectory
 KFTrajectorySmoother::trajectory(const Trajectory& aTraj) const {
 
-  std::cout << " Calling KFTrajectorySmoother::trajectory " <<std::endl;
+//  std::cout << " Calling KFTrajectorySmoother::trajectory " <<std::endl;
   if(aTraj.empty()) return Trajectory();
 
   if (  aTraj.direction() == alongMomentum) {
@@ -267,7 +267,7 @@ KFTrajectorySmoother::trajectory(const Trajectory& aTraj) const {
     }
   } // for loop
   
-  std::cout << " Ending KFTrajectorySmoother::trajectory." << std::endl;
+//  std::cout << " Ending KFTrajectorySmoother::trajectory." << std::endl;
   return ret; 
   
 }

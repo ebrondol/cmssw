@@ -27,7 +27,6 @@ template <unsigned int D>
 TrajectoryStateOnSurface KFUpdator::update(const TrajectoryStateOnSurface& tsos,
 				           const TrackingRecHit& aRecHit) const {
 
-  std::cout << "   Calling KFUpdator::update for TrackingRecHit" << std::endl;
   typedef typename AlgebraicROOTObject<D,5>::Matrix MatD5;
   typedef typename AlgebraicROOTObject<5,D>::Matrix Mat5D;
   typedef typename AlgebraicROOTObject<D,D>::SymMatrix SMatDD;
@@ -108,7 +107,6 @@ template <unsigned int D>
 TrajectoryStateOnSurface KFUpdator::update(const TrajectoryStateOnSurface& tsos,
 				           const TransientTrackingRecHit& aRecHit) const {
 
-  std::cout << "Calling KFUpdator::update for TransientTrackingRecHit" << std::endl;
   typedef typename AlgebraicROOTObject<D,5>::Matrix MatD5;
   typedef typename AlgebraicROOTObject<5,D>::Matrix Mat5D;
   typedef typename AlgebraicROOTObject<D,D>::SymMatrix SMatDD;

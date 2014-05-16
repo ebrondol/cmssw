@@ -61,11 +61,11 @@ std::pair<bool, double> MRHChi2MeasurementEstimator::estimate(const TrajectorySt
                                                 const TrackingRecHit& aRecHit) const {
   //ERICA: tsos parameters or not?? (Look MeasurementExtractor me(tsos) )
 
+  //better be a multihit...
   TSiTrackerMultiRecHit const & mHit = dynamic_cast<TSiTrackerMultiRecHit const &>(aRecHit);  
   double est=0;
 
   double annealing = mHit.getAnnealingFactor();
-//  std::cout << "Current annealing factor is " << annealing << std::endl;               
   LogDebug("MRHChi2MeasurementEstimator") << "Current annealing factor is " << annealing;               
 
   TransientTrackingRecHit::ConstRecHitContainer components = mHit.transientHits();

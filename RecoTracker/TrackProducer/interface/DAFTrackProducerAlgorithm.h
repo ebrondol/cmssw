@@ -1,3 +1,10 @@
+/** \class DAFTrackProducerAlgorithm
+  *  All is needed to run the deterministic annealing algorithm. Ported from ORCA. 
+  *
+  *  \author tropiano, genta
+  *  \review in May 2014 by brondolin 
+  */
+
 #ifndef DAFTrackProducerAlgorithm_h
 #define DAFTrackProducerAlgorithm_h
 
@@ -9,6 +16,7 @@
 
 class MagneticField;
 class TrackingGeometry;
+class TrajAnnealing;
 class TrajectoryFitter;
 class Trajectory;
 class TrajectoryStateOnSurface;
@@ -24,13 +32,12 @@ class DAFTrackProducerAlgorithm {
 
    typedef std::pair<Trajectory*, std::pair<reco::Track*,PropagationDirection> > AlgoProduct;
    typedef std::vector< AlgoProduct >  AlgoProductCollection;
+//   typedef std::pair<Trajectory, float> TrajAnnealing;
+   typedef std::vector<TrajAnnealing> TrajAnnealingCollection;
   
  public:
 
-  /// Constructor
   DAFTrackProducerAlgorithm(const edm::ParameterSet& pset):conf_(pset){}
-
-  /// Destructor
   ~DAFTrackProducerAlgorithm() {}
   
   /// Run the Final Fit taking TrackCandidates as input
@@ -44,41 +51,46 @@ class DAFTrackProducerAlgorithm {
 			const MultiRecHitCollector* measurementTracker,
 			const SiTrackerMultiRecHitUpdator*,
 			const reco::BeamSpot&,
-			AlgoProductCollection &) const;
+			AlgoProductCollection &,
+			TrajAnnealingCollection &) const;
 
  private:
   /// Construct Tracks to be put in the event
-  bool buildTrack(const std::vector<Trajectory>&,
+  bool buildTrack(const Trajectory,
 		  AlgoProductCollection& algoResults,
 		  float,
 		  const reco::BeamSpot&) const;
 
   /// accomplishes the fitting-smoothing step for each annealing value
-  void fit(const std::pair<TransientTrackingRecHit::RecHitContainer, TrajectoryStateOnSurface>& hits,
-           const TrajectoryFitter * theFitter,
-           std::vector<Trajectory>& vtraj) const;
+  Trajectory fit(const std::pair<TransientTrackingRecHit::RecHitContainer,
+                                    TrajectoryStateOnSurface>& hits,
+                                    const TrajectoryFitter * theFitter,
+                                    Trajectory vtraj) const;
 
   //calculates the ndof according to the DAF prescription
-  float calculateNdof(const std::vector<Trajectory>& vtraj) const;
+  float calculateNdof(const Trajectory vtraj) const;
 
   //creates MultiRecHits out of a KF trajectory 	
   std::pair<TransientTrackingRecHit::RecHitContainer, TrajectoryStateOnSurface> collectHits(
-              const std::vector<Trajectory>& vtraj,
+              const Trajectory vtraj,
               const MultiRecHitCollector* measurementCollector,
-              const MeasurementTrackerEvent *measTk 	) const;
+              const MeasurementTrackerEvent *measTk     ) const;
 
   //updates the hits with the specified annealing factor
-  std::pair<TransientTrackingRecHit::RecHitContainer, TrajectoryStateOnSurface>
-  updateHits(const std::vector<Trajectory>& vtraj,
-             const SiTrackerMultiRecHitUpdator* updator,
-             double annealing) const; 
+  std::pair<TransientTrackingRecHit::RecHitContainer, TrajectoryStateOnSurface> updateHits(
+	      const Trajectory vtraj,
+              const SiTrackerMultiRecHitUpdator* updator,
+              double annealing) const; 
 
   //removes from the trajectory isolated hits with very low weight
   void filter(const TrajectoryFitter* fitter, 
 	      std::vector<Trajectory>& input, 
 	      int minhits, std::vector<Trajectory>& output) const;
 
+  std::pair<float, std::vector<float> > getAnnealingWeight( const TrackingRecHit& aRecHit ) const;
+ 
   edm::ParameterSet conf_;
+//  TrajAnnealingCollection trajann;
 };
 
 #endif
