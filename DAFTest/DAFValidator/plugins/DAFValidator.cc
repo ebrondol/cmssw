@@ -37,10 +37,26 @@ DAFValidator::DAFValidator(const edm::ParameterSet& iConfig):
   trackingParticleTag_(iConfig.getParameter<edm::InputTag>("trackingParticleLabel")),
   associatorTag_(iConfig.getParameter<edm::InputTag>("associator"))
 {
-   //now do what ever initialization is needed
-   edm::Service<TFileService> fs;
-   histo_maxweight = fs->make<TH1F>("Weight", "max weight of the mrh components ", 110, 0, 1.1);
-   annealing_weight = fs->make<TH2F>("AnnWeight","Changing of weights as a funct of annealing", 1000, 0.0, 1.0, 90, 0, 90);
+  //now do what ever initialization is needed
+  edm::Service<TFileService> fs;
+  annealing_weight = fs->make<TH2F>("AnnWeight","Changing of weights as a funct of annealing", 1000, 0.0, 1.0, 90, 0, 90);
+  annealing_weight_tgraph = fs->make<TGraph>();
+ 
+  //histos 
+  histo_maxweight = fs->make<TH1F>("Weight", "max weight of the mrh components ", 110, 0, 1.1);
+  processtype_withassociatedsimhit_merged = fs->make<TH1F>("Process_Type_merged", "type of the process(merged_simhit)", 20, 0, 20);
+  processtype_withassociatedsimhit = fs->make<TH1F>("Process_Type", "type of the process", 20, 0, 20);
+  Hit_Histo = fs->make<TH1F>("Momentum_of_Hit", "momentum of the hit", 100, 0, 100);
+  MergedHisto = fs->make<TH1F>("Histogram_Hit_Merged", "type of the hit", 5, 0, 5);
+  NotMergedHisto = fs->make<TH1F>("Histogram_Hit_NotMerged", "type of the hit", 5, 0, 5);
+  weight_vs_processtype_merged = fs->make<TH2F>("WeightVsProcessType", "weight vs proc type", 20, 0, 20,  110, 0, 1.1 );
+  weight_vs_processtype_notmerged = fs->make<TH2F>("WeightVsProcessTypeNotMerged", "weight vs proc type not merged", 20, 0, 20,  110, 0, 1.1 );
+  pull_vs_weight = fs->make<TH2F>("PullVsWeight", "pull vs weight", 100, 0, 20,  110, 0, 1.1 );
+  Merged_vs_weight = fs->make<TH2F>("HitsMergedVsWeight", "hits vs weight", 5, 0, 5,  110, 0, 1.1 );
+  NotMerged_vs_weight = fs->make<TH2F>("HitsNotMergedVsWeight", "hits vs weight", 5, 0, 5,  110, 0, 1.1 );
+  NotMergedPos = fs->make<TH2F>("BadHitsPositionNotMerged", "badposition", 600, -30, 30,  2400, -1200, 1200);
+  MergedPos = fs->make<TH2F>("BadHitsPositionMerged()", "badposition", 600, -30, 30,  2400, -1200, 1200);
+  
 }
 
 DAFValidator::~DAFValidator()
@@ -81,8 +97,10 @@ DAFValidator::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     std::vector<float> Weights = iTA->weights();
     float ann;
     ann = iTA->getAnnealing();
-    for(unsigned int i = 0; i < Weights.size(); i++)
+    for(unsigned int i = 0; i < Weights.size(); i++, nHitsAnn++)
     {
+      annealing_weight_tgraph->SetPoint(nHitsAnn,Weights.at(i),ann);
+
       annealing_weight->Fill(Weights.at(i),ann);
     }
   }
@@ -207,7 +225,9 @@ void DAFValidator::analyzeHits(const TrackingParticle* tpref,
         maxweight=1;
       }
     }
-
+std::cout << "rechit: " << rechit << " with Type: " << getType(rechit) <<std::endl; 
+std::vector<const TrackingRecHit*> hits_prova = rechit->recHits();
+std::cout << "rechit->recHits() components" << hits_prova.size() << std::endl;
      if(rechit){
  
       if (getType(rechit)==2.)
@@ -377,6 +397,7 @@ void DAFValidator::beginJob()
 // ------------ method called once each job just after ending the event loop  ------------
 void DAFValidator::endJob()
 {
+  
 }
 
 // ------------ method called when starting to processes a run  ------------
@@ -412,6 +433,7 @@ void DAFValidator::beginRun(edm::Run const&, edm::EventSetup const&)
   event=0;
   mergedtype=0;
   notmergedtype=0;
+  nHitsAnn=0;
 
 }
 
@@ -419,6 +441,29 @@ void DAFValidator::beginRun(edm::Run const&, edm::EventSetup const&)
 // ------------ method called when ending the processing of a run  ------------
 void DAFValidator::endRun(edm::Run const&, edm::EventSetup const&)
 {
+  //drawing
+  TCanvas* c = new TCanvas();
+  c -> cd();
+  c -> SetGridx();
+  c -> SetGridy();
+/*  annealing_weight -> GetXaxis() -> SetTitle("weights");
+  annealing_weight -> GetYaxis() -> SetTitle("annealing value");
+  annealing_weight -> GetXaxis() -> SetTitleSize(0.05);
+  annealing_weight -> GetYaxis() -> SetTitleSize(0.05);
+  annealing_weight -> GetXaxis() -> SetLabelSize(0.04);
+  annealing_weight -> GetYaxis() -> SetLabelSize(0.04);
+  annealing_weight->Draw("P");
+*/
+  annealing_weight_tgraph -> GetXaxis() -> SetTitle("weights");
+  annealing_weight_tgraph -> GetYaxis() -> SetTitle("annealing value");
+  annealing_weight_tgraph -> GetXaxis() -> SetTitleSize(0.04);
+  annealing_weight_tgraph -> GetYaxis() -> SetTitleSize(0.04);
+  annealing_weight_tgraph -> GetXaxis() -> SetLabelSize(0.03);
+  annealing_weight_tgraph -> GetYaxis() -> SetLabelSize(0.03);
+  annealing_weight_tgraph -> SetMarkerStyle(29);
+//  annealing_weight_tgraph -> SetMarkerSize(2);
+  annealing_weight_tgraph -> Draw("AP");
+  c->Print("annweighttgraphPlot.pdf", "pdf");
 }
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
@@ -442,7 +487,7 @@ void DAFValidator::fillDAFHistos(std::vector<PSimHit>& matched,
                                  const TrackerGeometry* geom){
   //check the hit validity
   if (!matched.size()){
-    edm::LogError("DAFValidator") << "empty simhit vector: this multirechit has no corresponding simhits";
+    edm::LogError("DAFValidator") << "fillDAFHistos: this multirechit has no corresponding simhits";
     return;
   }
 
@@ -512,7 +557,7 @@ float DAFValidator::calculatepull(const TrackingRecHit* hit,
 void DAFValidator::fillPHistos(std::vector<PSimHit>& components){
   //check the hit validity
   if (!components.size()){
-    edm::LogError("DAFValidator") << "empty rechit vector: this multirechit has no hits";
+    edm::LogError("DAFValidator") << "fillPHistos: this multirechit has no hits";
     return;
   }
 

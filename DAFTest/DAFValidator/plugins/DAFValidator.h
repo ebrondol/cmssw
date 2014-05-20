@@ -37,6 +37,8 @@
 #include "TH2F.h"
 #include "TTree.h"
 #include "TFile.h"
+#include "TGraph.h"
+#include "TCanvas.h"
 
 class TrackerHitAssociator;
 class TrackerGeometry;
@@ -79,7 +81,6 @@ class DAFValidator : public edm::EDAnalyzer
 	edm::InputTag tracksTag_;
 	edm::InputTag trackingParticleTag_;
 	edm::InputTag associatorTag_;
-        TFile* output;
         TH1F* histo_maxweight;
         TH2F* weight_withassociatedsimhit_vs_type;
         TH2F* weight_withassociatedsimhit_vs_r;
@@ -129,9 +130,9 @@ class DAFValidator : public edm::EDAnalyzer
         float RecoTracknum;
 
   	//ERICA
-	edm::EDGetTokenT<edm::View<reco::Track> >     token_recoTracks;
         TH2F* annealing_weight;
-	
+        int nHitsAnn;
+        TGraph* annealing_weight_tgraph;	
 
 };
 #endif

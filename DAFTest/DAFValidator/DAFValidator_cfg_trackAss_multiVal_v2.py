@@ -36,7 +36,7 @@ secFiles.extend( [
        ] );
 
 process.source = source
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 
 ### conditions
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
@@ -88,7 +88,7 @@ process.load("Validation.Configuration.postValidation_cff")
 process.quickTrackAssociatorByHits.SimToRecoDenominator = cms.string('reco')
 
 ########### configuration MultiTrackValidator ########
-process.multiTrackValidator.outputFile = 'multiprova.root'#multitrackvalidator_DAF_mupt10.root'
+process.multiTrackValidator.outputFile = 'validator_multitrackvalidator_DAF_SingleMuPt10_100evts.root'
 process.multiTrackValidator.associators = ['quickTrackAssociatorByHits']
 process.multiTrackValidator.skipHistoFit=cms.untracked.bool(False)
 #process.cutsRecoTracks.quality = cms.vstring('','highPurity')
@@ -117,7 +117,7 @@ process.demo = cms.EDAnalyzer('DAFValidator',
 )
 
 process.TFileService = cms.Service("TFileService",
-               fileName = cms.string('multiprova_2_100evts.root')
+               fileName = cms.string('validator_DAFValidator_SingleMuPt10_100evts.root')
 )
 
 process.validation = cms.Sequence(
