@@ -22,6 +22,7 @@
 #include "DataFormats/TrackingRecHit/interface/TrackingRecHitFwd.h"
 #include "RecoTracker/TransientTrackingRecHit/interface/TSiTrackerMultiRecHit.h"
 #include "SimDataFormats/TrackingHit/interface/PSimHit.h"
+//#include "DataFormats/RecoCandidate/interface/TrackAssociation.h"
 
 using namespace std;
 using namespace edm;
@@ -31,8 +32,10 @@ typedef TransientTrackingRecHit::ConstRecHitPointer ConstRecHitPointer;
 int event = 0;
 
 DAFValidator::DAFValidator(const edm::ParameterSet& iConfig):
+  theConf_(iConfig),
   tracksTag_(iConfig.getUntrackedParameter<edm::InputTag>("tracks")),
-  trackingParticleTag_(iConfig.getParameter<edm::InputTag>("trackingParticleLabel"))
+  trackingParticleTag_(iConfig.getParameter<edm::InputTag>("trackingParticleLabel")),
+  associatorTag_(iConfig.getParameter<edm::InputTag>("associator"))
 {
    //now do what ever initialization is needed
    edm::Service<TFileService> fs;
@@ -61,7 +64,7 @@ DAFValidator::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 //  iEvent.getByLabel(tracksTag_, trackCollection);
 
   //get the track collection
-  edm::Handle<View<reco::Track> >  trackCollection;
+  Handle<View<Track>>  trackCollection;
   iEvent.getByLabel(tracksTag_, trackCollection);
 
   //get the trajectory annealing collection
@@ -87,32 +90,29 @@ DAFValidator::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   //CMSSW_5_1_3
   //get tracker geometry
-  edm::ESHandle<TrackerGeometry> tkgeom;
+  ESHandle<TrackerGeometry> tkgeom;
   iSetup.get<TrackerDigiGeometryRecord>().get(tkgeom);
-
-  //track associator
-  //string associatorName = theConf.getParameter<string>("TrackAssociator");
-  edm::ESHandle<TrackAssociatorBase> associatorHandle;
-std::cout << "qui1" << std::endl;
-  iSetup.get<TrackAssociatorRecord>().get("TrackAssociatorByHits",associatorHandle);
 
   //get the tracking particle collection
   //ERICA: file config deve contenerli!! Cercali o chiedi
   Handle<TrackingParticleCollection> trackingParticleCollection;
-std::cout << "qui2" << std::endl;
   iEvent.getByLabel(trackingParticleTag_, trackingParticleCollection);
-
   //  float SimTracknum=trackingParticleCollection->size();
-   
-  //ERICA: hit associator :: CHECK IT
-std::cout << "qui3" << std::endl;
-  TrackerHitAssociator hitAssociate(iEvent);//.getParameter<ParameterSet>("HitAssociatorPSet"));
-   
-  //associate the tracking particles to the reco track 
+
+  //hit associator :: CHECK IT
+  TrackerHitAssociator hitAssociate(iEvent, theConf_);//.getParameter<ParameterSet>("HitAssociatorPSet"));
+
+  //track associator (tracking particles to the reco track): first try
+  ESHandle<TrackAssociatorBase> associatorHandle;
+  iSetup.get<TrackAssociatorRecord>().get("TrackAssociatorByHits",associatorHandle);
   //ERICA:: NEED Handle<View<reco::Track>> 
-std::cout << "qui4" << std::endl;
-  reco::RecoToSimCollection RecsimColl = associatorHandle.product()->associateRecoToSim(trackCollection, trackingParticleCollection, &iEvent, &iSetup);
-std::cout << "qui5" << std::endl;
+  reco::RecoToSimCollection RecsimColl = associatorHandle->associateRecoToSim(trackCollection, trackingParticleCollection, &iEvent, &iSetup);
+
+  //track associator (tracking particles to the reco track): second try
+  //ERICA: problem "trackingParticleRecoTrackAsssociation" module not found
+  //Handle<reco::RecoToSimCollection> RecsimCollHandle;
+  //iEvent.getByLabel("trackingParticleRecoTrackAsssociation", RecsimCollHandle);
+  //reco::RecoToSimCollection RecsimColl = *RecsimCollHandle;
 
 
   //loop over the recotrack looking for corresponding trackingparticle
@@ -269,21 +269,21 @@ void DAFValidator::analyzeHits(const TrackingParticle* tpref,
               //do the association between rechits and simhits 
 	      vector<PSimHit> matchedhits;
 	      vector<SimHitIdpr> simhitids; 
-//            matchedhits = hitassociator.associateHit(*rechit1);
-//            simhitids = hitassociator.associateHitId(*rechit1);
-//             fillDAFHistos(matchedhits, maxweight, rechit1, geom);
-//             fillPHistos(matchedhits);
+              matchedhits = hitassociator.associateHit(*rechit1);
+              simhitids = hitassociator.associateHitId(*rechit1);
+              fillDAFHistos(matchedhits, maxweight, rechit1, geom);
+              fillPHistos(matchedhits);
           
               if(matchedhits.size()!=1){
                 notmergedtype=0;
-//                mergedtype=fillMergedHisto(simhitids,matchedhits,tpref,maxweight,geom);
+                mergedtype=fillMergedHisto(simhitids,matchedhits,tpref,maxweight,geom);
              
               }
 
               else{
       
                 mergedtype=0;
-//                notmergedtype=fillNotMergedHisto(simhitids,matchedhits,tpref,maxweight,geom);
+                notmergedtype=fillNotMergedHisto(simhitids,matchedhits,tpref,maxweight,geom);
                 
               }
 
@@ -339,23 +339,23 @@ void DAFValidator::analyzeHits(const TrackingParticle* tpref,
         hittype=getType(rechit);
         detId=rechit->geographicalId().rawId();
 
-          //ERICA :: fixed  hit associator !! 
-          //do the association between rechits and simhits 
-              vector<PSimHit> matchedhits;
-              vector<SimHitIdpr> simhitids;
-//            matchedhits = hitassociator.associateHit(*rechit);
-//            simhitids = hitassociator.associateHitId(*rechit);
-//        fillDAFHistos(matchedhits, maxweight, rechit, geom);
-//        fillPHistos(matchedhits);
+        //ERICA :: fixed  hit associator !! 
+        //do the association between rechits and simhits 
+        vector<PSimHit> matchedhits;
+        vector<SimHitIdpr> simhitids;
+        matchedhits = hitassociator.associateHit(*rechit);
+        simhitids = hitassociator.associateHitId(*rechit);
+        fillDAFHistos(matchedhits, maxweight, rechit, geom);
+        fillPHistos(matchedhits);
 
         if(matchedhits.size()!=1){
           notmergedtype=0;
-//          mergedtype=fillMergedHisto(simhitids,matchedhits,tpref,maxweight,geom);
+          mergedtype=fillMergedHisto(simhitids,matchedhits,tpref,maxweight,geom);
         }
  
         else{
           mergedtype=0;
-//          notmergedtype=fillNotMergedHisto(simhitids,matchedhits,tpref,maxweight,geom);
+          notmergedtype=fillNotMergedHisto(simhitids,matchedhits,tpref,maxweight,geom);
        }
  
         mrhit->Fill();

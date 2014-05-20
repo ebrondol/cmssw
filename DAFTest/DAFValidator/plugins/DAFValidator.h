@@ -75,9 +75,10 @@ class DAFValidator : public edm::EDAnalyzer
 	std::pair<float, std::vector<float> > getAnnealingWeight( const TrackingRecHit& aRecHit ) const;
   
   private:
-        edm::ParameterSet theConf;
+        edm::ParameterSet theConf_;
 	edm::InputTag tracksTag_;
 	edm::InputTag trackingParticleTag_;
+	edm::InputTag associatorTag_;
         TFile* output;
         TH1F* histo_maxweight;
         TH2F* weight_withassociatedsimhit_vs_type;
