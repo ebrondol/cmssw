@@ -33,6 +33,7 @@ KFTrajectorySmoother::~KFTrajectorySmoother() {
 Trajectory
 KFTrajectorySmoother::trajectory(const Trajectory& aTraj) const {
 
+//  std::cout << std::endl;
   if(aTraj.empty()) return Trajectory();
 
   if (  aTraj.direction() == alongMomentum) {
@@ -48,6 +49,8 @@ KFTrajectorySmoother::trajectory(const Trajectory& aTraj) const {
   myTraj.reserve(avtm.size());
   
   
+//  std::cout << " +++++++++++//////+++++++++++++++++///////+++++++  \n";
+//  std::cout << " KFTrajectorySmoother::trajectory starting with " <<  avtm.size() << " HITS\n";
   
 #ifdef EDM_ML_DEBUG
   LogDebug("TrackFitters") << "KFTrajectorySmoother::trajectories starting with " << avtm.size() << " HITS\n";
@@ -75,6 +78,7 @@ KFTrajectorySmoother::trajectory(const Trajectory& aTraj) const {
     //check surface just for safety: should never be ==0 because they are skipped in the fitter 
     if unlikely( hit->surface()==nullptr ) {
 	LogDebug("TrackFitters")<< " Error: invalid hit with no GeomDet attached .... skipping";
+//std::cout << " Error: invalid hit with no GeomDet attached .... skipping";
 	continue;
       }
 
@@ -93,6 +97,7 @@ KFTrajectorySmoother::trajectory(const Trajectory& aTraj) const {
       }
 
     if(hit->isValid()) {
+//std::cout << "----------------- HIT #" << hitcounter << " (VALID)-----------------------\n";
  
 #ifdef EDM_ML_DEBUG
       LogDebug("TrackFitters")
@@ -172,7 +177,6 @@ KFTrajectorySmoother::trajectory(const Trajectory& aTraj) const {
 	}
       
       TransientTrackingRecHit::RecHitPointer preciseHit = hit->clone(combTsos);
-      
       if unlikely(!preciseHit->isValid()){
 	  LogTrace("TrackFitters") << "THE Precise HIT IS NOT VALID: using currTsos = predTsos" << "\n";
 	  currTsos = predTsos;
@@ -223,6 +227,11 @@ KFTrajectorySmoother::trajectory(const Trajectory& aTraj) const {
 	  << smooTsos << "\n"
 	  << "smoothing estimate (with combTSOS)=" << estimate << "\n"
 	  << "filtering estimate=" << itm->estimate() << "\n";
+//std::cout << "predTsos !" << "\n" << predTsos << "\n"
+//          << "currTsos !" << "\n" << currTsos << "\n"
+//          << "smooTsos !" << "\n" << smooTsos << "\n"
+//          << "smoothing estimate (with combTSOS)=" << estimate << "\n"
+//          << "filtering estimate=" << itm->estimate() << "\n\n";
 	
 	//check for valid hits with no det (refitter with constraints)
 	if (preciseHit->det()) myTraj.push(TM(itm->forwardPredictedState(),
@@ -243,6 +252,7 @@ KFTrajectorySmoother::trajectory(const Trajectory& aTraj) const {
     } else {
       LogDebug("TrackFitters") 
 	<< "----------------- HIT #" << hitcounter << " (INVALID)-----------------------";      
+//std::cout << "----------------- HIT #" << hitcounter << " (INVALID)-----------------------\n";      
       
       //no update
       currTsos = predTsos;
@@ -266,6 +276,8 @@ KFTrajectorySmoother::trajectory(const Trajectory& aTraj) const {
     }
   } // for loop
   
+//  std::cout << " KFTrajectorySmoother::trajectory ending with " <<  myTraj.foundHits() << " HITS\n";
+//  std::cout << " +++++++++++//////+++++++++++++++++///////+++++++  \n";
   return ret; 
   
 }
