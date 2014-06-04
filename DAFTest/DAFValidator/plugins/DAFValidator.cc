@@ -22,7 +22,6 @@
 #include "DataFormats/TrackingRecHit/interface/TrackingRecHitFwd.h"
 #include "RecoTracker/TransientTrackingRecHit/interface/TSiTrackerMultiRecHit.h"
 #include "SimDataFormats/TrackingHit/interface/PSimHit.h"
-//#include "DataFormats/RecoCandidate/interface/TrackAssociation.h"
 
 using namespace std;
 using namespace edm;
@@ -79,11 +78,6 @@ DAFValidator::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   using namespace reco;
   event++;
-//  cout << "Number of Event: " << event << endl;
-
-  //ERICA version :: get the track collection
-//  Handle<TrackCollection> trackCollection;
-//  iEvent.getByLabel(tracksTag_, trackCollection);
 
   //get the track collection
   Handle<View<Track>>  trackCollection;
@@ -143,26 +137,17 @@ DAFValidator::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   iSetup.get<TrackerDigiGeometryRecord>().get(tkgeom);
 
   //get the tracking particle collection
-  //ERICA: file config deve contenerli!! Cercali o chiedi
   Handle<TrackingParticleCollection> trackingParticleCollection;
   iEvent.getByLabel(trackingParticleTag_, trackingParticleCollection);
   //  float SimTracknum=trackingParticleCollection->size();
 
   //hit associator :: CHECK IT
-  TrackerHitAssociator hitAssociate(iEvent, theConf_);//.getParameter<ParameterSet>("HitAssociatorPSet"));
+  TrackerHitAssociator hitAssociate(iEvent, theConf_);
 
-  //track associator (tracking particles to the reco track): first try
+  //track associator (tracking particles to the reco track)
   ESHandle<TrackAssociatorBase> associatorHandle;
   iSetup.get<TrackAssociatorRecord>().get("TrackAssociatorByChi2",associatorHandle);
-  //ERICA:: NEED Handle<View<reco::Track>> 
   reco::RecoToSimCollection RecsimColl = associatorHandle->associateRecoToSim(trackCollection, trackingParticleCollection, &iEvent, &iSetup);
-
-  //track associator (tracking particles to the reco track): second try
-  //ERICA: problem "trackingParticleRecoTrackAsssociation" module not found
-  //Handle<reco::RecoToSimCollection> RecsimCollHandle;
-  //iEvent.getByLabel("trackingParticleRecoTrackAsssociation", RecsimCollHandle);
-  //reco::RecoToSimCollection RecsimColl = *RecsimCollHandle;
-
 
   //loop over the recotrack looking for corresponding trackingparticle
   int i = 0;
@@ -215,7 +200,7 @@ void DAFValidator::analyzeHits(const TrackingParticle* tpref,
 
 
   if (!tpref || !rtref) {
-//    cout << "something wrong: tpref = " << tpref << " rtref = " << rtref << endl;
+    cout << "something wrong: tpref = " << tpref << " rtref = " << rtref << endl;
     return;
   }
 
@@ -507,18 +492,9 @@ void DAFValidator::endRun(edm::Run const&, edm::EventSetup const&)
   annealing_weight_tot -> Add(annealing_weight_tgraph5);
   annealing_weight_tot -> Add(annealing_weight_tgraph6);
   annealing_weight_tot -> Draw("ap");
-/*  annealing_weight_tgraph1 -> GetXaxis() -> SetTitle("weights");
-  annealing_weight_tgraph1 -> GetYaxis() -> SetTitle("annealing value");
-  annealing_weight_tgraph1 -> GetXaxis() -> SetTitleSize(0.04);
-  annealing_weight_tgraph1 -> GetYaxis() -> SetTitleSize(0.04);
-  annealing_weight_tgraph1 -> GetXaxis() -> SetLabelSize(0.03);
-  annealing_weight_tgraph1 -> GetYaxis() -> SetLabelSize(0.03);
-//  annealing_weight_tgraph1 -> SetMarkerStyle(29);
-//  annealing_weight_tgraph1 -> SetMarkerSize(2);
-  annealing_weight_tgraph1 -> Draw("AP");
-*/
-  c->Print("annweighttgraphPlot.pdf", "pdf");
-  c->SaveAs("annweighttgraphPlot.C");
+
+//  c->Print("annweighttgraphPlot.pdf", "pdf");
+//  c->SaveAs("annweighttgraphPlot.C");
 
 
 }
@@ -547,7 +523,7 @@ void DAFValidator::fillDAFHistos(std::vector<PSimHit>& matched,
 
   //check the hit validity
   if (!matched.size()){
-//    edm::LogError("DAFValidator") << "fillDAFHistos: this multirechit has no corresponding simhits";
+    edm::LogError("DAFValidator") << "fillDAFHistos: this multirechit has no corresponding simhits";
     return;
   }
 
@@ -616,7 +592,7 @@ float DAFValidator::calculatepull(const TrackingRecHit* hit,
 void DAFValidator::fillPHistos(std::vector<PSimHit>& components){
   //check the hit validity
   if (!components.size()){
-//    edm::LogError("DAFValidator") << "fillPHistos: this multirechit has no hits";
+    edm::LogError("DAFValidator") << "fillPHistos: this multirechit has no hits";
     return;
   }
 
@@ -631,7 +607,7 @@ int DAFValidator::fillMergedHisto(const std::vector<SimHitIdpr>& simhitids, cons
                                   const TrackingParticle* tpref, float weight, const TrackerGeometry* geom) const
 {
 
-//  if (simhitids.empty()) {cout << "something wrong" << endl;}
+  if (simhitids.empty()) {cout << "something wrong" << endl;}
   GlobalPoint point;
   //unsigned int simcount=0;
   for (TrackingParticle::g4t_iterator g4T = tpref -> g4Track_begin(); g4T !=  tpref -> g4Track_end(); ++g4T){
@@ -654,7 +630,7 @@ int DAFValidator::fillMergedHisto(const std::vector<SimHitIdpr>& simhitids, cons
 int DAFValidator::fillNotMergedHisto(const std::vector<SimHitIdpr>& simhitids, const std::vector<PSimHit>& simhits,
                                      const TrackingParticle* tpref, float weight, const TrackerGeometry* geom) const
 {
-//  if (simhitids.empty()) {cout << "something wrong" << endl;}
+  if (simhitids.empty()) {cout << "something wrong" << endl;}
 
   vector<PSimHit>::const_iterator isimid = simhits.begin();
   //int simcount=0; 

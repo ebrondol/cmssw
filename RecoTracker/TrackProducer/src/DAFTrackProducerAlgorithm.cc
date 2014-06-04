@@ -21,7 +21,6 @@
 
 void DAFTrackProducerAlgorithm::runWithCandidate(const TrackingGeometry * theG,
 					         const MagneticField * theMF,
-					         //const TrackCandidateCollection& theTrajectoryCollection,
 						 const std::vector<Trajectory>& theTrajectoryCollection,
 						 const MeasurementTrackerEvent *measTk,
 					         const TrajectoryFitter * theFitter,
@@ -32,8 +31,6 @@ void DAFTrackProducerAlgorithm::runWithCandidate(const TrackingGeometry * theG,
 					         AlgoProductCollection& algoResults,
 						 TrajAnnealingCollection& trajann) const
 {
-//  std::cout << "//////////////////////////////////////////////////////////////////////////////////"<<std::endl;
-//  std::cout << "DAFTrackProducerAlgorithm::runWithCandidate: Number of Trajectories: " << theTrajectoryCollection.size() << std::endl;
   edm::LogInfo("TrackProducer") << "Number of Trajectories: " << theTrajectoryCollection.size() << "\n";
   int cont = 0;
 
@@ -49,15 +46,13 @@ void DAFTrackProducerAlgorithm::runWithCandidate(const TrackingGeometry * theG,
     //no need to have std::vector<Trajectory> vtraj !
     if ( (*ivtraj).isValid() ){
 
-//      std::cout << " The trajectory is valid. " << std::endl;
       edm::LogInfo("TrackProducer") << "The trajectory is valid. \n";
 
       //getting the MultiRecHit collection and the trajectory with a first fit-smooth round
       std::pair<TransientTrackingRecHit::RecHitContainer, TrajectoryStateOnSurface> hits = 
 							collectHits(*ivtraj, measurementCollector, &*measTk);
-
       currentTraj = fit(hits, theFitter, *ivtraj);
-//      std::cout << " Starting the annealing program." << std::endl;
+
       //starting the annealing program
       for (std::vector<double>::const_iterator ian = updator->getAnnealingProgram().begin(); 
            ian != updator->getAnnealingProgram().end(); ian++){
@@ -76,7 +71,6 @@ void DAFTrackProducerAlgorithm::runWithCandidate(const TrackingGeometry * theG,
 	  TrajAnnealing temp(currentTraj, *ian);
 	  trajann.push_back(temp);
 
-//          std::cout << " Ending the annealing program with value "<<(*ian)<<std::endl;
           LogDebug("DAFTrackProducerAlgorithm") << "done annealing value "  <<  (*ian) ;
 
 	} 
@@ -85,7 +79,7 @@ void DAFTrackProducerAlgorithm::runWithCandidate(const TrackingGeometry * theG,
 
       } //end of annealing program
 
-      std::cout << (1.*checkHits(*ivtraj, currentTraj))/(1.*(*ivtraj).measurements().size())*100. <<  std::endl;
+      //std::cout << (1.*checkHits(*ivtraj, currentTraj))/(1.*(*ivtraj).measurements().size())*100. <<  std::endl;
 
       LogDebug("DAFTrackProducerAlgorithm") << "Ended annealing program " << std::endl;
 
@@ -114,9 +108,6 @@ void DAFTrackProducerAlgorithm::runWithCandidate(const TrackingGeometry * theG,
 
   } //end run on track collection
 
-//  std::cout << "DAFTrackProducerAlgorithm::runWithCandidate: End. \n";
-//  std::cout << "DAFTrackProducerAlgorithm::runWithCandidate: Number of Tracks found: " << cont << "\n";
-//  std::cout << "//////////////////////////////////////////////////////////////////////////////////"<<std::endl;
   LogDebug("TrackProducer") << "Number of Tracks found: " << cont << "\n";
 
 }
@@ -127,7 +118,6 @@ DAFTrackProducerAlgorithm::collectHits(const Trajectory vtraj,
                                        const MeasurementTrackerEvent *measTk) const
 {
 
-//  std::cout << " Collecting hits ..." << std::endl; 
   LogDebug("DAFTrackProducerAlgorithm") << "Calling DAFTrackProducerAlgorithm::collectHits";
 
   //getting the traj measurements from the MeasurementCollector 
@@ -148,7 +138,6 @@ DAFTrackProducerAlgorithm::collectHits(const Trajectory vtraj,
   
   }
   
-//  std::cout << " Collected " << nHits << " MRHits. " << std::endl;
 
   //TrajectoryStateWithArbitraryError() == Creates a TrajectoryState with the same parameters 
   //     as the input one, but with "infinite" errors, i.e. errors so big that they don't
@@ -157,8 +146,6 @@ DAFTrackProducerAlgorithm::collectHits(const Trajectory vtraj,
 
   // I do not have to rescale the error because it is already rescaled in the fit code 
   TrajectoryStateOnSurface initialStateFromTrack = collectedmeas.front().predictedState();
-  // error is rescaled, but correlation are kept.
-  //initialStateFromTrack.rescaleError(10);
 
   return std::make_pair(hits, initialStateFromTrack);
 
@@ -192,7 +179,6 @@ Trajectory DAFTrackProducerAlgorithm::fit(const std::pair<TransientTrackingRecHi
                                     const TrajectoryFitter * theFitter,
                                     Trajectory vtraj) const {
 
-//  std::cout << "Calling DAFTrackProducerAlgorithm::fit" << std::endl;
 
   //creating a new trajectory starting from the direction of the seed of the input one and the hits
   Trajectory newVec = theFitter->fitOne(TrajectorySeed(PTrajectoryStateOnDet(),
@@ -202,7 +188,7 @@ Trajectory DAFTrackProducerAlgorithm::fit(const std::pair<TransientTrackingRecHi
 
   if( newVec.isValid() )  return newVec; 
   else{
-//    std::cout << "Fit no valid." << std::endl;
+    //std::cout << "Fit no valid." << std::endl;
     return Trajectory();
   }
 
@@ -217,7 +203,6 @@ bool DAFTrackProducerAlgorithm::buildTrack (const Trajectory vtraj,
   reco::Track * theTrack;
   Trajectory * theTraj; 
       
-//  std::cout <<"Calling DAFTrackProducerAlgorithm::buildTrack" << std::endl;
   LogDebug("DAFTrackProducerAlgorithm") <<" BUILDER " << std::endl;;
   TrajectoryStateOnSurface innertsos;
   
@@ -340,7 +325,7 @@ int DAFTrackProducerAlgorithm::checkHits( Trajectory iInitTraj, const Trajectory
   int ihit = 0;
 
   if ( initmeasurements.empty() || finalmeasurements.empty() || initmeasurements.size() != finalmeasurements.size() ){
-//    std::cout << "Initial or Final Trajectory empty or with different size." << std::endl;
+    //std::cout << "Initial or Final Trajectory empty or with different size." << std::endl;
     return 0;
   }
           
@@ -351,9 +336,6 @@ int DAFTrackProducerAlgorithm::checkHits( Trajectory iInitTraj, const Trajectory
     if(!initHit->isValid() && ihit == 0 ) continue;
 
     if(initHit->isValid()){
-
-//      std::cout << ihit << "  Valid Hit with DetId " << jmeas->recHit()->geographicalId().rawId()
-//                << " global position " << jmeas->recHit()->hit()->globalPosition() << "\n";
 
       TrajectoryMeasurement imeas = finalmeasurements.at(ihit);
       const TrackingRecHit* finalHit = imeas.recHit()->hit();
@@ -382,16 +364,13 @@ int DAFTrackProducerAlgorithm::checkHits( Trajectory iInitTraj, const Trajectory
 
         if( myref1 == myref2 ){
           nSame++; 	
-//          std::cout << " MaxWeightHit with global position " << (MaxWeightHit)->globalPosition() << "\n";
         }
       }
     } else {
 
-//      std::cout << ihit << "Invalid hit of the initial track.\n";
       TrajectoryMeasurement imeas = finalmeasurements.at(ihit);
       const TrackingRecHit* finalHit = imeas.recHit()->hit();
       if(!finalHit->isValid()){
-//        std::cout << " Also invalid hit of the final DAF track.\n";
         nSame++;
       }
     }

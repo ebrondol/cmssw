@@ -45,7 +45,6 @@ Trajectory KFFittingSmoother::fitOne(const TrajectorySeed& aSeed,
 				  const TrajectoryStateOnSurface& firstPredTsos,
 				  fitType type) const 
 {
-//  std::cout << "Calling KFFittingSmoother::fit" << std::endl;
   LogDebug("TrackFitters") << "In KFFittingSmoother::fit";
 
   if ( hits.empty() ) return Trajectory();
@@ -297,7 +296,6 @@ Trajectory KFFittingSmoother::fitOne(const TrajectorySeed& aSeed,
     
     LogTrace("TrackFitters") << "end: returning smoothed trajectory with chi2=" 
 			     << smoothed.chiSquared() ;
-//    std::cout << "Ending KFFittingSmoother::fit with chi2=" << smoothed.chiSquared() << std::endl;
 
     //LogTrace("TrackFitters") << "dump hits before return";
     //Trajectory::DataContainer meas = smoothed[0].measurements();

@@ -18,8 +18,6 @@ SiTrackerMultiRecHitUpdator::SiTrackerMultiRecHitUpdator(const TransientTracking
   theHitPropagator(hitpropagator),
   theChi2Cut(Chi2Cut),
   theAnnealingProgram(anAnnealingProgram){}
-//theAnnealingStep(0),
-//theIsUpdating(true){}
 
 
 TransientTrackingRecHit::RecHitPointer  SiTrackerMultiRecHitUpdator::buildMultiRecHit(const std::vector<const TrackingRecHit*>& rhv,
@@ -96,7 +94,6 @@ TransientTrackingRecHit::RecHitPointer SiTrackerMultiRecHitUpdator::update( Tran
 
       TransientTrackingRecHit::RecHitPointer cloned = theHitPropagator->project<GenericProjectedRecHit2D>(*iter, *geomdet, tsos);
       //if it is used a sensor by sensor grouping this should not appear
-//      std::cout << "   WARNING: Hit does not belong to the same surface :: propagated" << std::endl;
       LogTrace("SiTrackerMultiRecHitUpdator") << "hit propagated";
       if (cloned->isValid()) updatedcomponents.push_back(cloned);
 
@@ -105,14 +102,12 @@ TransientTrackingRecHit::RecHitPointer SiTrackerMultiRecHitUpdator::update( Tran
       TransientTrackingRecHit::RecHitPointer cloned = (*iter)->clone(tsos);
       if (cloned->isValid()){
         updatedcomponents.push_back(cloned);
-//      std::cout << "   Hit belongs to the same surface :: cloned" << std::endl;
       LogTrace("SiTrackerMultiRecHitUpdator") << "hit cloned";
       }
     }
   }	
 
   std::vector<std::pair<const TrackingRecHit*, float> > mymap;
-//  std::vector<std::pair<const TrackingRecHit*, std::pair<float,double> > > normmapWeightAnnealing;
   std::vector<std::pair<const TrackingRecHit*, float> > normmap;
   
   double a_sum=0, c_sum=0;
@@ -120,10 +115,6 @@ TransientTrackingRecHit::RecHitPointer SiTrackerMultiRecHitUpdator::update( Tran
 
   for(std::vector<TransientTrackingRecHit::RecHitPointer>::iterator ihit = updatedcomponents.begin(); 
 	ihit != updatedcomponents.end(); ihit++) {
-
-    //Older version of the code:
-    //AlgebraicVector2 r(asSVector<2>((*ihit)->parameters()) - tsospos);
-    //AlgebraicSymMatrix22 V(asSMatrix<2>((*ihit)->parametersError()))
 
     double a_i = ComputeWeight(tsos, *(*ihit), false, annealing); //exp(-0.5*Chi2)/(2.*M_PI*sqrt(det));
     double c_i = ComputeWeight(tsos, *(*ihit), true, annealing);  //exp(-0.5*theChi2Cut/annealing)/(2.*M_PI*sqrt(det));
@@ -136,27 +127,19 @@ TransientTrackingRecHit::RecHitPointer SiTrackerMultiRecHitUpdator::update( Tran
   
   unsigned int counter = 0;
   TransientTrackingRecHit::ConstRecHitContainer finalcomponents;
-//  std::cout << " Filling finalComponents ..." << std::endl; 
   for(std::vector<TransientTrackingRecHit::RecHitPointer>::iterator ihit = updatedcomponents.begin(); 
 	ihit != updatedcomponents.end(); ihit++) {
 
-    //uncomment lines below to have like ORCA
     double p = ((mymap[counter].second)/total_sum > 1.e-6 ? (mymap[counter].second)/total_sum : 1.e-6);
-    //float p = ((mymap[counter].second)/total_sum > 0.01 ? (mymap[counter].second)/total_sum : 1.e-6);
+    //ORCA: float p = ((mymap[counter].second)/total_sum > 0.01 ? (mymap[counter].second)/total_sum : 1.e-6);
     normmap.push_back(std::pair<const TrackingRecHit*,float>(mymap[counter].first, p));
 
-    //storing the weight in the component TransientTrackingRecHit too for MRHChi2Estimator
+    //storing the weight in the component TransientTrackingRecHit 
     (*ihit)->setWeight(p);
     (*ihit)->setAnnealingFactor(annealing);
 
     finalcomponents.push_back(*ihit);
 
-//    std::cout << "    Component hit type " << typeid(*mymap[counter].first).name()
-//                                         << "\n\t position " << mymap[counter].first->globalPosition()
-//                                         //<< "\t error " << mymap[counter].first->globalPositionError()
-//                                         << "\n\t with weight " << (*ihit)->weight() 
-//					 << "\t and annealing " << (*ihit)->getAnnealingFactor() << std::endl;
-	
     LogTrace("SiTrackerMultiRecHitUpdator")<< "Component hit type " << typeid(*mymap[counter].first).name() 
 					   << " position " << mymap[counter].first->localPosition() 
 					   << " error " << mymap[counter].first->localPositionError()
@@ -164,11 +147,10 @@ TransientTrackingRecHit::RecHitPointer SiTrackerMultiRecHitUpdator::update( Tran
     counter++;
   }
  
-  //ERICA: I do not understand what is the utility to do that. 
   //mymap = normmap;
   SiTrackerMultiRecHitUpdator::LocalParameters param = calcParameters(tsos, finalcomponents);
 
-  //Older constructor:
+  //CMSSW531 constructor:
   //SiTrackerMultiRecHit updated(param.first, param.second, normmap.front().first->>geographicalId(), normmap);
 
   SiTrackerMultiRecHit updated(param.first, param.second, *normmap.front().first->det(), normmap);
@@ -232,7 +214,6 @@ double SiTrackerMultiRecHitUpdator::ComputeWeight(const TrajectoryStateOnSurface
   KfComponentsHolder holder;
   holder.template setup<N>(&r, &V, &H, &pf, &rMeas, &VMeas, x, C);
   aRecHit.getKfComponents(holder);
-//  if(!CutWeight) std::cout << " Get KF components: RecHitPosition " << r << std::endl;
 
   typename AlgebraicROOTObject<N>::Vector diff;
   diff = r - tsospos;
@@ -242,7 +223,7 @@ double SiTrackerMultiRecHitUpdator::ComputeWeight(const TrajectoryStateOnSurface
   W = V;
   //V += me.measuredError(*ihit);// result = b*V + H*C*H.T()
 
-  //ERICA: ierr will be set to true when inversion is successfull
+  //ierr will be set to true when inversion is successfull
   bool ierr = invertPosDefMatrix(W);
 
   //Det2 method will preserve the content of the Matrix 
@@ -272,10 +253,6 @@ SiTrackerMultiRecHitUpdator::LocalParameters SiTrackerMultiRecHitUpdator::calcPa
   AlgebraicVector2 m_sum;
 
   for(TransientTrackingRecHit::ConstRecHitContainer::const_iterator ihit = map.begin(); ihit != map.end(); ihit ++) {
-    //ERICA: old version of the code
-    //AlgebraicVector2 m(asSVector<2>((*ihit)->parameters()));
-    //AlgebraicSymMatrix22 V(asSMatrix<2>((*ihit)->parametersError()));
-    //AlgebraicSymMatrix22 W(V.Inverse(ierr));
 
     std::pair<AlgebraicVector2,AlgebraicSymMatrix22> PositionAndError22;
     PositionAndError22 = ComputeParameters2dim(tsos, *(*ihit));
@@ -288,7 +265,6 @@ SiTrackerMultiRecHitUpdator::LocalParameters SiTrackerMultiRecHitUpdator::calcPa
   AlgebraicSymMatrix22 V_sum = W_sum; 
   bool ierr = invertPosDefMatrix(V_sum);
   if( !ierr ) {
-//    std::cout <<"SiTrackerMultiRecHitUpdator::calcParameters: V_sum not valid!"<<std::endl;
     edm::LogError("SiTrackerMultiRecHitUpdator")<<"SiTrackerMultiRecHitUpdator::calcParameters: V_sum not valid!"<<std::endl;
   }
   
@@ -303,7 +279,6 @@ SiTrackerMultiRecHitUpdator::LocalParameters SiTrackerMultiRecHitUpdator::calcPa
 std::pair<AlgebraicVector2,AlgebraicSymMatrix22> SiTrackerMultiRecHitUpdator::ComputeParameters2dim(const TrajectoryStateOnSurface& tsos,
 						                                                    const TransientTrackingRecHit& aRecHit) const{
 
-//     std::cout << " Calling SiTrackerMultiRecHitUpdator::ComputeParameters2dim" << std::endl;
      switch (aRecHit.dimension()) {
          case 2:       return ComputeParameters2dim<2>(tsos,aRecHit);
          //avoiding the not-2D  hit due to the matrix final sum  
@@ -311,7 +286,6 @@ std::pair<AlgebraicVector2,AlgebraicSymMatrix22> SiTrackerMultiRecHitUpdator::Co
 	   AlgebraicVector2 dummyVector2D (0.0,0.0);
 	   AlgebraicSymMatrix22 dummyMatrix2D;
 	   dummyMatrix2D(0,0) = dummyMatrix2D(1,0) = dummyMatrix2D(1,1) = 0.0;
-//           std::cout << "WARNING:The hit is not 2D: does not count in the parameters calculation." <<  std::endl;
            return std::make_pair(dummyVector2D,dummyMatrix2D);
          } 
      }
@@ -341,7 +315,6 @@ std::pair<AlgebraicVector2,AlgebraicSymMatrix22> SiTrackerMultiRecHitUpdator::Co
   Wtemp = V;
   bool ierr = invertPosDefMatrix(Wtemp);
   if( !ierr ) {
-//    std::cout <<"SiTrackerMultiRecHitUpdator::ComputeParameters2dim: W not valid!"<<std::endl;
     edm::LogError("SiTrackerMultiRecHitUpdator")<<"SiTrackerMultiRecHitUpdator::ComputeParameters2dim: W not valid!"<<std::endl;
   }
 

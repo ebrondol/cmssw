@@ -1,3 +1,11 @@
+/** \class TrajAnnealing
+  *  Allow to save all the traj info
+  *  for each annealing cycle 
+  *  suitable for algorithm like DAF
+  *
+  *  \author in May 2014 by brondolin 
+  */
+
 #ifndef DataFormats_TrajAnnealing_h
 #define DataFormats_TrajAnnealing_h
 
