@@ -77,4 +77,15 @@ int SiTrackerMultiRecHit::dimension() const{
 void SiTrackerMultiRecHit::getKfComponents( KfComponentsHolder & holder ) const { 
   if (dimension() == 1)  getKfComponents1D(holder); 
   if (dimension() == 2)  getKfComponents2D(holder); 
-} 
+}
+
+double SiTrackerMultiRecHit::getWeightsSum() const{
+
+  double sum = 0.0;
+  for(unsigned int i = 0; i < theWeights.size(); i++)
+    sum += theWeights[i];
+//sum = std::accumulate(theWeights.begin(), theWeights.end(), 0);
+  return sum;
+
+}
+ 

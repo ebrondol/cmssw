@@ -1,8 +1,8 @@
-#ifndef TrackingTools_ESProducers_KFUpdatorESProducer_h
-#define TrackingTools_ESProducers_KFUpdatorESProducer_h
+#ifndef TrackingTools_ESProducers_MRHKFUpdatorESProducer_h
+#define TrackingTools_ESProducers_MRHKFUpdatorESProducer_h
 
-/** KFUpdatorESProducer
- *  ESProducer for KFUpdator class.
+/** MRHKFUpdatorESProducer
+ *  ESProducer for MRHKFUpdator class.
  *
  *  \author cerati
  */
@@ -10,14 +10,13 @@
 #include "FWCore/Framework/interface/ESProducer.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "TrackingTools/Records/interface/TrackingComponentsRecord.h"
-#include "TrackingTools/KalmanUpdators/interface/KFUpdator.h"
 #include "TrackingTools/KalmanUpdators/interface/MRHKFUpdator.h"
 #include <boost/shared_ptr.hpp>
 
-class  KFUpdatorESProducer: public edm::ESProducer{
+class  MRHKFUpdatorESProducer: public edm::ESProducer{
  public:
-  KFUpdatorESProducer(const edm::ParameterSet & p);
-  virtual ~KFUpdatorESProducer(); 
+  MRHKFUpdatorESProducer(const edm::ParameterSet & p);
+  virtual ~MRHKFUpdatorESProducer(); 
   boost::shared_ptr<TrajectoryStateUpdator> produce(const TrackingComponentsRecord &);
  private:
   boost::shared_ptr<TrajectoryStateUpdator> _updator;

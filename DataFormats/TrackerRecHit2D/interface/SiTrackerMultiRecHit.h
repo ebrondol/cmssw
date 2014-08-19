@@ -54,6 +54,9 @@ public:
   //get the annealing
   virtual double getAnnealingFactor() const { return annealing_; }
 	
+  //get the sum of the weights
+  virtual double getWeightsSum() const;
+
   bool sharesInput(const TrackingRecHit* other,
 		   SharedInputType what) const;
 
