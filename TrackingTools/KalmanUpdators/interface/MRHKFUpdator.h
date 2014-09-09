@@ -29,11 +29,11 @@ public:
   TrajectoryStateOnSurface update(const TrajectoryStateOnSurface&,
                                   const TrackingRecHit&) const;
 
-  TrajectoryStateOnSurface updateMRH(const TrajectoryStateOnSurface&,
-                                  const TrackingRecHit&, float weight) const;
+//  TrajectoryStateOnSurface updateMRH(const TrajectoryStateOnSurface&,
+//                                  const TrackingRecHit&, float weight) const;
 
   template <unsigned int D> TrajectoryStateOnSurface updateMRH(const TrajectoryStateOnSurface&,
-                                                            const TrackingRecHit&, float weight) const;
+                                                               const TrackingRecHit&) const;
 
   virtual MRHKFUpdator * clone() const {
     return new MRHKFUpdator(*this);

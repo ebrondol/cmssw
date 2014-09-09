@@ -7,14 +7,16 @@ import TrackingTools.TrackFitters.KFTrajectoryFitterESProducer_cfi
 MRHTrajectoryFitter = TrackingTools.TrackFitters.KFTrajectoryFitterESProducer_cfi.KFTrajectoryFitter.clone(
     ComponentName = 'MRHFitter',
     Estimator = 'MRHChi2',
-    Updator = 'MRHKFUpdator', 
+    Updator = 'KFUpdator', 
+#    Updator = 'MRHKFUpdator', 
     Propagator = 'RungeKuttaTrackerPropagator'
     )
 import TrackingTools.TrackFitters.KFTrajectorySmootherESProducer_cfi
 MRHTrajectorySmoother = TrackingTools.TrackFitters.KFTrajectorySmootherESProducer_cfi.KFTrajectorySmoother.clone(
     ComponentName = 'MRHSmoother',
     Estimator = 'MRHChi2',
-    Updator = 'MRHKFUpdator', 
+    Updator = 'KFUpdator', 
+#    Updator = 'MRHKFUpdator', 
     Propagator = 'RungeKuttaTrackerPropagator'
     )
 

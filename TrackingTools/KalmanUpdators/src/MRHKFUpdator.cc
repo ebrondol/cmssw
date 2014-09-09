@@ -1,15 +1,4 @@
-#include "TrackingTools/KalmanUpdators/interface/MRHKFUpdator.h"
-
-#include "DataFormats/TrackerRecHit2D/interface/SiTrackerMultiRecHit.h"
-#include "FWCore/MessageLogger/interface/MessageLogger.h"
-//#include "TrackingTools/PatternTools/interface/MeasurementExtractor.h"
-//#include "TrackingTools/TransientTrackingRecHit/interface/TransientTrackingRecHit.h"
-//#include "DataFormats/GeometrySurface/interface/Plane.h"
-#include "DataFormats/TrackingRecHit/interface/KfComponentsHolder.h"
-#include "DataFormats/Math/interface/invertPosDefMatrix.h"
-#include "DataFormats/Math/interface/ProjectMatrix.h"
-
-/*  OLD  MRH KF Updator
+/*  FIRST MRH KF Updator
 #include "TrackingTools/KalmanUpdators/interface/MRHKFUpdator.h"
 
 #include "DataFormats/TrackerRecHit2D/interface/SiTrackerMultiRecHit.h"
@@ -94,7 +83,16 @@ TrajectoryStateOnSurface MRHKFUpdator::update(const TrajectoryStateOnSurface& ts
 }
 */
 
+/*  SECOND MRH KF Updator
 //with this method the KFUpdator is not needed anymore!!
+#include "TrackingTools/KalmanUpdators/interface/MRHKFUpdator.h"
+
+#include "DataFormats/TrackerRecHit2D/interface/SiTrackerMultiRecHit.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
+#include "DataFormats/TrackingRecHit/interface/KfComponentsHolder.h"
+#include "DataFormats/Math/interface/invertPosDefMatrix.h"
+#include "DataFormats/Math/interface/ProjectMatrix.h"
+
 TrajectoryStateOnSurface MRHKFUpdator::update(const TrajectoryStateOnSurface& tsos,
                                               const TrackingRecHit& aRecHit) const {
 
@@ -190,6 +188,114 @@ TrajectoryStateOnSurface MRHKFUpdator::updateMRH(const TrajectoryStateOnSurface&
   if (ok) {
     return TrajectoryStateOnSurface( LocalTrajectoryParameters(fsv, pzSign),
 				     LocalTrajectoryError(fse), tsos.surface(),&(tsos.globalParameters().magneticField()), tsos.surfaceSide() );
+  }else {
+    edm::LogError("MRHKFUpdator")<<" could not invert martix:\n"<< (V+VMeas);
+    return TrajectoryStateOnSurface();
+  }
+
+}
+*/
+
+
+/*  THIRD MRH KF Updator */
+#include "TrackingTools/KalmanUpdators/interface/MRHKFUpdator.h"
+
+#include "DataFormats/TrackerRecHit2D/interface/SiTrackerMultiRecHit.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
+#include "DataFormats/TrackingRecHit/interface/KfComponentsHolder.h"
+#include "DataFormats/Math/interface/invertPosDefMatrix.h"
+#include "DataFormats/Math/interface/ProjectMatrix.h"
+
+TrajectoryStateOnSurface MRHKFUpdator::update(const TrajectoryStateOnSurface& tsos,
+                                              const TrackingRecHit& aRecHit) const {
+
+    LogTrace("MRHKFUpdator") << "Calling MRHKFUpdator ... ";
+
+    switch (aRecHit.dimension()) {
+        case 1: return updateMRH<1>(tsos,aRecHit);
+        case 2: return updateMRH<2>(tsos,aRecHit);
+        case 3: return updateMRH<3>(tsos,aRecHit);
+        case 4: return updateMRH<4>(tsos,aRecHit);
+        case 5: return updateMRH<5>(tsos,aRecHit);
+    }
+    throw cms::Exception("Rec hit of invalid dimension (not 1,2,3,4,5)") <<
+         "The value was " << aRecHit.dimension() << 
+        ", type is " << typeid(aRecHit).name() << "\n";
+}
+
+
+template <unsigned int D>
+TrajectoryStateOnSurface MRHKFUpdator::updateMRH(const TrajectoryStateOnSurface& tsos,
+                                                 const TrackingRecHit& aRecHit) const {
+
+  typedef typename AlgebraicROOTObject<D,5>::Matrix MatD5;
+  typedef typename AlgebraicROOTObject<5,D>::Matrix Mat5D;
+  typedef typename AlgebraicROOTObject<D,D>::SymMatrix SMatDD;
+  typedef typename AlgebraicROOTObject<D>::Vector VecD;
+  double pzSign = tsos.localParameters().pzSign();
+
+  auto && x = tsos.localParameters().vector();
+  auto && C = tsos.localError().matrix();
+
+  // Computation of gain matrix for MRH
+  ProjectMatrix<double,5,D>  pf;
+  MatD5 H; 
+  VecD r, rMeas; 
+  SMatDD V, VMeas;
+
+  KfComponentsHolder holder; 
+  holder.template setup<D>(&r, &V, &H, &pf, &rMeas, &VMeas, x, C);
+  aRecHit.getKfComponents(holder);
+  
+  SiTrackerMultiRecHit const & mHit = dynamic_cast<SiTrackerMultiRecHit const &>(aRecHit);
+  SMatDD R = mHit.getWeightsSum() * V + VMeas;
+    LogTrace("MRHKFUpdator") << " r: " << r;
+    LogTrace("MRHKFUpdator") << " rMeas: " << rMeas;
+  LogTrace("MRHKFUpdator") << "\tpos tsos: " << x;
+  LogTrace("MRHKFUpdator") << "\tcov tsos: " << C;
+  LogTrace("MRHKFUpdator") << "\tV: " << V;
+  LogTrace("MRHKFUpdator") << "\tVMeas: " << VMeas;
+  LogTrace("MRHKFUpdator") << "\tR: " << R;
+  bool ok = invertPosDefMatrix(R);
+  LogTrace("MRHKFUpdator") << "\tinverted R: " << R;
+
+  Mat5D K;
+  AlgebraicMatrix55 M = AlgebraicMatrixID();
+  K = (C * ROOT::Math::Transpose(H)) * R;
+  LogTrace("MRHKFUpdator") << "\tK: " << K;
+  M -= K * H;
+
+  // Compute covariance matrix of local filtered state vector
+  AlgebraicSymMatrix55 fse = ROOT::Math::Similarity(M, C) + ROOT::Math::Similarity(K, V);
+
+
+  // Compute local filtered state vector
+  std::vector<const TrackingRecHit*> components = mHit.recHits();
+  LogTrace("MRHKFUpdator") << " This MRH has " << components.size() << " components";
+  VecD r_tot;
+  int iComp = 0;
+  for(std::vector<const TrackingRecHit*>::const_iterator iter = components.begin(); iter != components.end(); iter++, iComp++){
+
+    (**iter).getKfComponents(holder);
+    LogTrace("MRHKFUpdator") << "#" << iComp << " component of the MRH:";
+    LogTrace("MRHKFUpdator") << " r: " << r;
+    LogTrace("MRHKFUpdator") << " rMeas: " << rMeas;
+    LogTrace("MRHKFUpdator") << "\tV: " << V;
+    r -= rMeas;
+    LogTrace("MRHKFUpdator") << " rnew: " << r;
+    LogTrace("MRHKFUpdator") << " r-rMeas: " << r-rMeas;
+    r_tot += mHit.weight(iComp) * r;
+    LogTrace("MRHKFUpdator") << " rtot: " << r_tot;
+
+  }
+
+
+  LogTrace("MRHKFUpdator") << "\tK: " << K;
+  AlgebraicVector5 fsv = x + K * r_tot;
+
+  if (ok) {
+    return TrajectoryStateOnSurface( LocalTrajectoryParameters(fsv, pzSign),
+                                     LocalTrajectoryError(fse), tsos.surface(),&(tsos.globalParameters().magneticField()), tsos.surfaceSide() );
   }else {
     edm::LogError("MRHKFUpdator")<<" could not invert martix:\n"<< (V+VMeas);
     return TrajectoryStateOnSurface();

@@ -14,9 +14,9 @@ using namespace edm;
 
 KFUpdatorESProducer::KFUpdatorESProducer(const edm::ParameterSet & p) 
 {
-  std::string myname = p.getParameter<std::string>("ComponentName");
+  UpdatorName = p.getParameter<std::string>("ComponentName");
   pset_ = p;
-  setWhatProduced(this,myname);
+  setWhatProduced(this,UpdatorName);
 }
 
 KFUpdatorESProducer::~KFUpdatorESProducer() {}
@@ -27,7 +27,6 @@ KFUpdatorESProducer::produce(const TrackingComponentsRecord & iRecord){
 //     delete _updator;
 //     _updator = 0;
 //   }
-  
   _updator  = boost::shared_ptr<TrajectoryStateUpdator>(new KFUpdator());
   return _updator;
 }

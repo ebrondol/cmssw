@@ -2,7 +2,8 @@ import FWCore.ParameterSet.Config as cms
 
 
 # KFUpdatorESProducer used by the fitting-smoother for MRH
-from TrackingTools.KalmanUpdators.MRHKFUpdatorESProducer_cfi import *
+from TrackingTools.KalmanUpdators.KFUpdatorESProducer_cfi import *
+#from TrackingTools.KalmanUpdators.MRHKFUpdatorESProducer_cfi import *
 
 # Chi2MeasurementEstimatorESProducer used by the fitting-smootheri for MRH
 from TrackingTools.KalmanUpdators.MRHChi2MeasurementEstimatorESProducer_cfi import *
