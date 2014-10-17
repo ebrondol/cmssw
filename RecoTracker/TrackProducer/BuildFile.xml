@@ -21,6 +21,7 @@
 <use   name="TrackingTools/Records"/>
 <use   name="RecoTracker/TransientTrackingRecHit"/>
 <use   name="TrackingTools/TrackFitters"/>
+<use   name="TrackingTools/TrajectoryCleaning"/>
 <use   name="TrackingTools/TrajectoryState"/>
 <use   name="TrackingTools/KalmanUpdators"/>
 <use   name="Utilities/General"/>

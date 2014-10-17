@@ -23,7 +23,7 @@
 #include "DataFormats/TrackerRecHit2D/interface/TkCloner.h"
 #include "TrackingTools/PatternTools/interface/TrajAnnealing.h"
 #include "TrackingTools/TrackFitters/interface/TrajectoryStateCombiner.h"
-
+#include "TrackingTools/TrajectoryCleaning/interface/TrajectoryCleaner.h"
 
 DAFTrackProducerAlgorithm::DAFTrackProducerAlgorithm(const edm::ParameterSet& conf):
   conf_(conf),
@@ -39,12 +39,14 @@ void DAFTrackProducerAlgorithm::runWithCandidate(const TrackingGeometry * theG,
 						 const MultiRecHitCollector* measurementCollector,
 						 const SiTrackerMultiRecHitUpdator* updator,
 						 const reco::BeamSpot& bs,
+						 const TrajectoryCleaner* theTrajCleaner, 
 					         AlgoProductCollection& algoResults,
 						 TrajAnnealingCollection& trajann,
 						 bool TrajAnnSaving_) const
 {
   LogDebug("DAFTrackProducerAlgorithm") << "Number of Trajectories: " << theTrajectoryCollection.size() << "\n";
   int cont = 0;
+  std::vector<Trajectory> theDAFTrajectories;
 
   //running on src trajectory collection
   for (std::vector<Trajectory>::const_iterator ivtraj = theTrajectoryCollection.begin(); 
@@ -114,7 +116,10 @@ void DAFTrackProducerAlgorithm::runWithCandidate(const TrackingGeometry * theG,
 
         bool ok = buildTrack(currentTraj, algoResults, ndof, bs) ;
 	// or filtered?
-        if(ok) cont++;
+        if(ok){
+	  cont++;
+          theDAFTrajectories.push_back(currentTraj);
+	}
 
       }
       else{
@@ -127,7 +132,11 @@ void DAFTrackProducerAlgorithm::runWithCandidate(const TrackingGeometry * theG,
 
   } //end run on track collection
 
-  LogDebug("DAFTrackProducerAlgorithm") << "Number of Tracks found: " << cont << "\n";
+  LogDebug("DAFTrackProducerAlgorithm") << "Number of Tracks found: " << cont;
+  LogDebug("DAFTrackProducerAlgorithm") << "Number of Trajectories found: " << theDAFTrajectories.size() << "\n";
+
+  theTrajCleaner->clean(theDAFTrajectories);
+  LogDebug("DAFTrackProducerAlgorithm") << "Number of Tracks found after cleaning: " << theDAFTrajectories.size() << "\n";
 
 }
 /*------------------------------------------------------------------------------------------------------*/

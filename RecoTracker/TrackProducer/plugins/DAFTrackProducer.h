@@ -29,6 +29,7 @@ private:
   void putInEvtTrajAnn(edm::Event& theEvent, TrajAnnealingCollection & trajannResults,
                 std::auto_ptr<TrajAnnealingCollection>& selTrajAnn);
 
+  std::string theTrajectoryCleanerName;
   bool TrajAnnSaving_;
   edm::EDGetToken src_;
   

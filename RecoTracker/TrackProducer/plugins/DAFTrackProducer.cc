@@ -13,7 +13,7 @@
 #include "TrackingTools/PatternTools/interface/TrajAnnealing.h"
 #include "TrackingTools/PatternTools/interface/TrajTrackAssociation.h"
 #include "TrackingTools/Records/interface/TrackingComponentsRecord.h"
-
+#include "TrackingTools/TrajectoryCleaning/interface/TrajectoryCleaner.h"
 
 
 DAFTrackProducer::DAFTrackProducer(const edm::ParameterSet& iConfig):
@@ -35,6 +35,7 @@ DAFTrackProducer::DAFTrackProducer(const edm::ParameterSet& iConfig):
   produces<TrajTrackAssociationCollection>();
   produces<TrajAnnealingCollection>().setBranchAlias( alias_ + "TrajectoryAnnealing" );
 
+  theTrajectoryCleanerName = iConfig.getParameter<std::string>("TrajectoryCleaner");
   TrajAnnSaving_ = iConfig.getParameter<bool>("TrajAnnealingSaving");
 }
 
@@ -67,6 +68,11 @@ void DAFTrackProducer::produce(edm::Event& theEvent, const edm::EventSetup& setu
   std::string updatorName = getConf().getParameter<std::string>("UpdatorName");	
   setup.get<MultiRecHitRecord>().get(updatorName, updatorHandle);	 
 
+  //get the cleaner
+  edm::ESHandle<TrajectoryCleaner> trajectoryCleaner;
+  std::cout << theTrajectoryCleanerName << std::endl;
+  setup.get<TrajectoryCleaner::Record>().get(theTrajectoryCleanerName, trajectoryCleaner);
+
   //get MeasurementTrackerEvent
   edm::Handle<MeasurementTrackerEvent> mte;
   theEvent.getByToken(mteSrc_, mte);
@@ -88,7 +94,8 @@ void DAFTrackProducer::produce(edm::Event& theEvent, const edm::EventSetup& setu
     LogDebug("DAFTrackProducer") << "run the DAF algorithm" << "\n";
     theAlgo.runWithCandidate(theG.product(), theMF.product(), *theTrajectoryCollection, &*mte,
                              theFitter.product(), theBuilder.product(), 
-			     measurementCollectorHandle.product(), updatorHandle.product(), bs, 
+			     measurementCollectorHandle.product(), updatorHandle.product(), bs,
+			     trajectoryCleaner.product(),	 
 			     algoResults, trajannResults, TrajAnnSaving_);
     
   } catch (cms::Exception &e){ 

@@ -9,11 +9,12 @@
 #define DAFTrackProducerAlgorithm_h
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "TrackingTools/TransientTrackingRecHit/interface/TransientTrackingRecHit.h"
 #include "DataFormats/TrackCandidate/interface/TrackCandidateCollection.h"
 #include "DataFormats/TrajectorySeed/interface/PropagationDirection.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "RecoTracker/MeasurementDet/interface/MeasurementTrackerEvent.h"
+#include "TrackingTools/TransientTrackingRecHit/interface/TransientTrackingRecHit.h"
+#include "TrackingTools/TrajectoryCleaning/interface/TrajectoryCleaner.h"
 
 class MagneticField;
 class TrackingGeometry;
@@ -50,6 +51,7 @@ class DAFTrackProducerAlgorithm {
 			const MultiRecHitCollector* measurementTracker,
 			const SiTrackerMultiRecHitUpdator*,
 			const reco::BeamSpot&,
+		        const TrajectoryCleaner*,
 			AlgoProductCollection &,
 			TrajAnnealingCollection &,
 			bool ) const;
@@ -91,12 +93,16 @@ class DAFTrackProducerAlgorithm {
 
   int countingGoodHits(const Trajectory traj) const;
 
+  //checks sequentially if the hits are changed after DAF
   int checkHits( Trajectory iInitTraj, const Trajectory iFinalTraj) const; 
 
+  //debug
   void PrintHit(const TrackingRecHit* const& hit, TrajectoryStateOnSurface& tsos) const;
 
+  //initializes cfg object
   edm::ParameterSet conf_;
   int minHits_;  
+
 };
 
 #endif

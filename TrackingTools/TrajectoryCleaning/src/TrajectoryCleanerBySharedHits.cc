@@ -3,6 +3,7 @@
 #include "TrackingTools/TransientTrackingRecHit/interface/RecHitComparatorByPosition.h"
 
 #include "TrackingTools/TrajectoryCleaning/src/OtherHashMaps.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 
 //#define DEBUG_PRINT(X) X
@@ -40,6 +41,8 @@ using namespace std;
 
 void TrajectoryCleanerBySharedHits::clean( TrajectoryPointerContainer & tc) const
 {
+  LogDebug("TrajectoryCleanerBySharedHits") << "Calling TrajectoryCleanerBySharedHits::clean with " << theFraction
+ << "shared hits cleaner.";
   if (tc.size() <= 1) return; // nothing to clean
 
   auto & theRecHitMap = theMaps.theRecHitMap;
@@ -47,16 +50,17 @@ void TrajectoryCleanerBySharedHits::clean( TrajectoryPointerContainer & tc) cons
   theRecHitMap.clear(10*tc.size());           // set 10*tc.size() active buckets
                                               // numbers are not optimized
 
-  DEBUG_PRINT(std::cout << "Filling RecHit map" << std::endl);
+  LogDebug("TrajectoryCleanerBySharedHits") << "Filling RecHit map" ;
+
   for (TrajectoryPointerContainer::iterator
 	 it = tc.begin(); it != tc.end(); ++it) {
-    DEBUG_PRINT(std::cout << "  Processing trajectory " << *it << " (" << (*it)->foundHits() << " valid hits)" << std::endl);
+    LogDebug("TrajectoryCleanerBySharedHits") << "  Processing trajectory " << *it << " (" << (*it)->foundHits() << " valid hits)" ;
     const Trajectory::DataContainer & pd = (*it)->measurements();
     for (Trajectory::DataContainer::const_iterator im = pd.begin();
     	 im != pd.end(); im++) {
       const TransientTrackingRecHit* theRecHit = &(*(*im).recHit());
       if (theRecHit->isValid()) {
-        DEBUG_PRINT(std::cout << "    Added hit " << theRecHit << " for trajectory " << *it << std::endl);
+        LogDebug("TrajectoryCleanerBySharedHits") << "    Added hit " << theRecHit << " for trajectory " << *it;
         theRecHitMap.insert(theRecHit, *it);
       }
     }
@@ -69,7 +73,7 @@ void TrajectoryCleanerBySharedHits::clean( TrajectoryPointerContainer & tc) cons
   for (TrajectoryCleaner::TrajectoryPointerIterator
 	 itt = tc.begin(); itt != tc.end(); ++itt) {
     if((*itt)->isValid()){  
-      DEBUG_PRINT(std::cout << "  Processing trajectory " << *itt << " (" << (*itt)->foundHits() << " valid hits)" << std::endl);
+      LogDebug("TrajectoryCleanerBySharedHits") << "  Processing trajectory " << *itt << " (" << (*itt)->foundHits() << " valid hits)";
       theTrajMap.clear();
       const Trajectory::DataContainer & pd = (*itt)->measurements();
       for (Trajectory::DataContainer::const_iterator im = pd.begin();
@@ -77,7 +81,7 @@ void TrajectoryCleanerBySharedHits::clean( TrajectoryPointerContainer & tc) cons
 	//RC const TransientTrackingRecHit* theRecHit = ((*im).recHit());
 	const TransientTrackingRecHit* theRecHit = &(*(*im).recHit());
         if (theRecHit->isValid()) {
-          DEBUG_PRINT(std::cout << "    Searching for overlaps on hit " << theRecHit << " for trajectory " << *itt << std::endl);
+          LogDebug("TrajectoryCleanerBySharedHits") << "    Searching for overlaps on hit " << theRecHit << " for trajectory " << *itt;
           for (RecHitMap::value_iterator ivec = theRecHitMap.values(theRecHit);
                 ivec.good(); ++ivec) {
               if (*ivec != *itt){
