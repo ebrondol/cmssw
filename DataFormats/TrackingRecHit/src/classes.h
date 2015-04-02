@@ -6,6 +6,8 @@
 #include "DataFormats/TrackingRecHit/interface/InvalidTrackingRecHit.h"
 #include "DataFormats/TrackingRecHit/interface/RecSegment.h"
 #include "DataFormats/TrackingRecHit/interface/VectorHit.h"
+#include "DataFormats/Common/interface/DetSetVector.h"
+#include "DataFormats/Common/interface/DetSetVectorNew.h"
 #include "DataFormats/Common/interface/Wrapper.h"
 
 namespace {
@@ -27,7 +29,9 @@ namespace {
     edm::Wrapper<TrackingRecHitCollection> w1;
     
     std::vector<VectorHit> vh1;
-    VectorHitCollection wh1;
-    VectorHitCollectionNew wh1_new;    
+    VectorHitCollection vhc1;
+    VectorHitCollectionNew vhc1_new;
+    edm::Wrapper<VectorHitCollection> wh1;
+    edm::Wrapper<VectorHitCollectionNew> wh1_new;    
   };
 }
