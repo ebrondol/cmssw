@@ -82,6 +82,8 @@ namespace cms
     SiPixelStubBuilderBase * StubBuilder_;
     bool ReadyToBuild_;
 
+    //typedef Phase2TrackerCluster1D::FastFiller Collector;
+
     //! Optional limit on the total number of clusters
     //int32_t maxTotalStubs_;
   };

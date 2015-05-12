@@ -186,7 +186,8 @@ std::vector<VectorHit> VectorHitBuilder::buildVectorHits(StackGeomDet stack, std
     MeasurementPoint mpCluInn(innerClus_iter->center(), innerClus_iter->column() + 0.5);
     Local3DPoint localPosCluInn   = gDUnitInn->topology().localPosition(mpCluInn);
     //FIXME::ERICA non funziona.
-    //LocalError localPosCluInnErr  = gDUnitInn->topology().localError(mpCluInn);
+    MeasurementError mpCluInnErr(0.0,0.0,0.0);
+    LocalError localPosCluInnErr  = gDUnitInn->topology().localError(mpCluInn,mpCluInnErr);
     Global3DPoint globalPosCluInn = gDUnitInn->surface().toGlobal(localPosCluInn);
 
     std::vector<Phase2TrackerCluster1D>::const_iterator outerClus_iter;
@@ -212,6 +213,7 @@ std::vector<VectorHit> VectorHitBuilder::buildVectorHits(StackGeomDet stack, std
       std::cout << "\t outer local pos in the inner sof " << localPosCluOutINN << std::endl;
       std::cout << "\t local vec " << localVec << std::endl;
       std::cout << "\t local vec in the inner sof " << localVecINN << std::endl;
+      std::cout << "\t local error vec in the inner sof " << localPosCluInnErr << std::endl;
 
       VectorHit vh = VectorHit(localPosCluInn, localVecINN);
     }

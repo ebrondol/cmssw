@@ -25,7 +25,7 @@
 class VectorHit : public RecSegment {
  public:
 
-  VectorHit() : thePosition(), theDirection(), theCovMatrix(), theDimension(0) { std::cout << "qui ci faccio un bel Vector Hit!!" << std::endl;}
+  VectorHit() : thePosition(), theDirection(), theCovMatrix(), theDimension(0) {}
   VectorHit(const LocalPoint& posInner, const LocalVector& dir) ;
 
   ~VectorHit() ;

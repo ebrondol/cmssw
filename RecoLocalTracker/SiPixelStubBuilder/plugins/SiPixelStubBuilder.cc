@@ -91,7 +91,6 @@ namespace cms
     eventSetup.get< IdealGeometryRecord >().get(tTopoHandle);
     const TrackerTopology* tkTopo = tTopoHandle.product();
 
-    // check on the input clusters
     setupStubFindingAlgorithm(*tkGeom, *tkTopo);
 
     // check on the input clusters
