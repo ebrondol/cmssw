@@ -14,6 +14,9 @@
 #include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
 #include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
 
+//CPE
+#include "RecoLocalTracker/Records/interface/TkStripCPERecord.h"
+
 // Data Formats
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include "DataFormats/DetId/interface/DetId.h"
@@ -38,8 +41,9 @@ namespace cms
   //---------------------------------------------------------------------------
   //!  Constructor: set the ParameterSet and defer all thinking to setupStubBuilder().
   //---------------------------------------------------------------------------
-  SiPixelStubBuilder::SiPixelStubBuilder(edm::ParameterSet const& conf) : 
+  SiPixelStubBuilder::SiPixelStubBuilder(edm::ParameterSet const& conf) :
     Conf_(conf),
+    CPEtag_(conf.getParameter<edm::ESInputTag>("phase2stripCPE")),
     ClustersInputTag_( conf.getParameter<edm::InputTag>( "Clusters" ) ),
     StubBuilderAlgo_("None"),
     StubBuilder_(0),
@@ -56,16 +60,16 @@ namespace cms
   }
 
   // Destructor
-  SiPixelStubBuilder::~SiPixelStubBuilder() { 
+  SiPixelStubBuilder::~SiPixelStubBuilder() {
     delete StubBuilder_;
-  }  
+  }
 
-  //void SiPixelStubBuilder::beginJob( const edm::EventSetup& es ) 
-  void SiPixelStubBuilder::beginJob( ) 
+  //void SiPixelStubBuilder::beginJob( const edm::EventSetup& es )
+  void SiPixelStubBuilder::beginJob( )
   {
     std::cout << "SiPixelStubBuilder::beginJob()" << std::endl;
   }
-  
+
   //---------------------------------------------------------------------------
   //! The "Event" entrypoint: gets called by framework for every event
   //---------------------------------------------------------------------------
@@ -85,11 +89,13 @@ namespace cms
     // get the geometry
     edm::ESHandle< TrackerGeometry > geomHandle;
     eventSetup.get< TrackerDigiGeometryRecord >().get( geomHandle );
-    const TrackerGeometry* tkGeom = &(*geomHandle);    
+    const TrackerGeometry* tkGeom = &(*geomHandle);
 
     edm::ESHandle< TrackerTopology > tTopoHandle;
     eventSetup.get< IdealGeometryRecord >().get(tTopoHandle);
     const TrackerTopology* tkTopo = tTopoHandle.product();
+
+    eventSetup.get< TkStripCPERecord >().get(CPEtag_, parameterestimator);
 
     setupStubFindingAlgorithm(*tkGeom, *tkTopo);
 
@@ -119,7 +125,7 @@ namespace cms
   }
 
   //---------------------------------------------------------------------------
-  //  Set up the specific algorithm we are going to use.  
+  //  Set up the specific algorithm we are going to use.
   //---------------------------------------------------------------------------
   void SiPixelStubBuilder::setupStubFindingAlgorithm( const TrackerGeometry& geom,
              const TrackerTopology& topo )  {
@@ -128,7 +134,7 @@ namespace cms
     if ( StubBuilderAlgo_ == "VectorHitBuilder" ) {
       StubBuilder_ = new VectorHitBuilder(Conf_, geom, topo);
       ReadyToBuild_ = true;
-    } 
+    }
     else {
       std::cout << " Choice " << StubBuilderAlgo_ << " is invalid.\n" ;
       ReadyToBuild_ = false;
@@ -147,7 +153,7 @@ namespace cms
       return;
     }
 
-    std::vector< std::pair< StackGeomDet, std::vector<Phase2TrackerCluster1D> > > groupClusterBySM;    
+    std::vector< std::pair< StackGeomDet, std::vector<Phase2TrackerCluster1D> > > groupClusterBySM;
     groupClusterBySM = StubBuilder_->groupinginStackModules(clusters);
 
 /*
@@ -162,7 +168,7 @@ namespace cms
 */
 
 /*
- 
+
 
       if ((maxTotalClusters_ >= 0) && (numberOfClusters > maxTotalClusters_)) {
         edm::LogError("TooManyClusters") <<  "Limit on the number of clusters exceeded. An empty cluster collection will be produced instead.\n";
@@ -170,12 +176,12 @@ namespace cms
         empty.swap(output);
         break;
       }
-    } 
+    }
 // end of DetUnit loop
-    
-    //LogDebug ("SiPixelStubBuilder") << " Executing " 
+
+    //LogDebug ("SiPixelStubBuilder") << " Executing "
     //      << StubBuilderAlgo_ << " resulted in " << numberOfClusters
-    //				    << " SiPixelClusters in " << numberOfDetUnits << " DetUnits."; 
+    //				    << " SiPixelClusters in " << numberOfDetUnits << " DetUnits.";
 */
   }
 
@@ -183,7 +189,7 @@ namespace cms
   void SiPixelStubBuilder::check(const edmNew::DetSetVector<Phase2TrackerCluster1D>& clusters,
              const TrackerGeometry& geom,
              const TrackerTopology& topo){
-  
+
     int nCluster = 0;
     int numberOfDSV = 0;
     edmNew::DetSetVector<Phase2TrackerCluster1D>::const_iterator DSViter;
@@ -196,7 +202,7 @@ namespace cms
       DetId detId(rawid);
       unsigned int layer(StubBuilder_->getLayerNumber(detId, &topo));
       unsigned int module(StubBuilder_->getModuleNumber(detId, &topo));
-      
+
       // get the geom of the tracker
       const GeomDetUnit* geomDetUnit(geom.idToDetUnit(detId));
       const PixelGeomDetUnit* theGeomDet = dynamic_cast< const PixelGeomDetUnit* >(geomDetUnit);
@@ -219,6 +225,7 @@ namespace cms
         MeasurementPoint mpClu(clustIt->center(), clustIt->column() + 0.5);
         Local3DPoint localPosClu = geomDetUnit->topology().localPosition(mpClu);
         Global3DPoint globalPosClu = geomDetUnit->surface().toGlobal(localPosClu);
+        //FIXME StripClusterParameterEstimator::LocalValues parameters =  parameterestimator->localParameters(*clustIt,geomDetUnit);
 
         std::cout << "\t local  pos " << localPosClu << std::endl;
         std::cout << "\t global pos " << globalPosClu << std::endl;

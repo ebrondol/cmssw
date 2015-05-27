@@ -27,6 +27,7 @@
 #include "DataFormats/Phase2TrackerCluster/interface/Phase2TrackerCluster1D.h"
 #include "DataFormats/SiPixelStub/interface/SiPixelStub.h"
 
+#include "RecoLocalTracker/ClusterParameterEstimator/interface/StripClusterParameterEstimator.h"
 
 #include "FWCore/Framework/interface/EDProducer.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -69,18 +70,20 @@ namespace cms
              edmNew::DetSetVector<Phase2TrackerCluster1D> );
 
     //--- Get the layer && module given the geometry
-    //unsigned int getLayerNumber(const DetId& , 
+    //unsigned int getLayerNumber(const DetId& ,
     //		 	        const TrackerTopology* );
-    //unsigned int getModuleNumber(const DetId& , 
+    //unsigned int getModuleNumber(const DetId& ,
     //		 	         const TrackerTopology* );
 
   private:
 
     edm::ParameterSet Conf_;
+    edm::ESInputTag CPEtag_;
     edm::InputTag ClustersInputTag_;
-    std::string StubBuilderAlgo_;               
+    std::string StubBuilderAlgo_;
     SiPixelStubBuilderBase * StubBuilder_;
     bool ReadyToBuild_;
+    edm::ESHandle< StripClusterParameterEstimator > parameterestimator;
 
     //typedef Phase2TrackerCluster1D::FastFiller Collector;
 
