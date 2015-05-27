@@ -17,16 +17,16 @@ VectorHit::VectorHit(const LocalPoint& posInner,
   thePosition=LocalPoint(posInner);
   theDirection=LocalVector(dir);
   std::cout << "New vector hit!" << std::endl;
-  
+
 }
 
 
 /*
 VectorHit::VectorHit(const DTChamberRecSegment2D& phiSeg,
-			       const DTSLRecSegment2D& zedSeg,  
+			       const DTSLRecSegment2D& zedSeg,
 			       const LocalPoint& posZInCh,
 			       const LocalVector& dirZInCh):
-  RecSegment(phiSeg.chamberId()), 
+  RecSegment(phiSeg.chamberId()),
   theProjection(full),
   thePhiSeg(phiSeg),
   theZedSeg(zedSeg),
@@ -65,14 +65,14 @@ VectorHit::VectorHit(const DTChamberRecSegment2D& phiSeg,
 
 
 VectorHit::VectorHit(const DTChamberRecSegment2D& phiSeg) :
-  RecSegment(phiSeg.chamberId()), 
+  RecSegment(phiSeg.chamberId()),
   theProjection(phi),
   thePhiSeg(phiSeg),
   theZedSeg(DTSLRecSegment2D()),
   theDimension(2)
 {
   thePosition=thePhiSeg.localPosition();
-  
+
   theDirection=thePhiSeg.localDirection();
 
   // set cov matrix
@@ -92,10 +92,10 @@ VectorHit::VectorHit(const DTSLRecSegment2D& zedSeg,
   theZedSeg(zedSeg),
   theDimension(2)
 {
-  
+
   LocalPoint posZAt0=posZInCh+
     dirZInCh*(-posZInCh.z()/cos(dirZInCh.theta()));
-  
+
   thePosition=posZAt0;
   theDirection = dirZInCh;
 
@@ -118,13 +118,13 @@ AlgebraicVector VectorHit::parameters() const {
     result[2] = thePosition.x();
     result[3] = thePosition.y();
     result[0] = theDirection.x()/theDirection.z();
-    result[1] = theDirection.y()/theDirection.z();    
+    result[1] = theDirection.y()/theDirection.z();
     return result;
-  } 
+  }
 
   AlgebraicVector result(2);
   if (theProjection==phi) {
-    // (dx/dz,x)  
+    // (dx/dz,x)
     result[1] = thePosition.x();
     result[0] = theDirection.x()/theDirection.z();
   } else if (theProjection==Z) {
@@ -138,7 +138,7 @@ AlgebraicVector VectorHit::parameters() const {
 }
 
 
-AlgebraicSymMatrix VectorHit::parametersError() const { 
+AlgebraicSymMatrix VectorHit::parametersError() const {
 /*
   if (dimension()==4) {
     return theCovMatrix;
@@ -163,7 +163,7 @@ AlgebraicSymMatrix VectorHit::parametersError() const {
 AlgebraicMatrix VectorHit::projectionMatrix() const {
 
 //  static bool isInitialized=false;
-  static AlgebraicMatrix the4DProjectionMatrix(4, 5, 0); 
+  static AlgebraicMatrix the4DProjectionMatrix(4, 5, 0);
 /*
   static AlgebraicMatrix the2DPhiProjMatrix(2, 5, 0);
   static AlgebraicMatrix the2DZProjMatrix(2, 5, 0);
@@ -183,7 +183,7 @@ AlgebraicMatrix VectorHit::projectionMatrix() const {
     isInitialized= true;
   }
 
-  if (dimension()==4) { 
+  if (dimension()==4) {
     return the4DProjectionMatrix;
   } else if (theProjection==phi) {
     return the2DPhiProjMatrix;
@@ -248,8 +248,8 @@ void VectorHit::setCovMatrixForZed(const LocalPoint& posZInCh){
   // Var(q') = DeltaZ^2*Var(m) + Var(q) + 2*DeltaZ*Cov(m,q)
   // cout << "Var(q') = DeltaZ^2*Var(m) + Var(q) + 2*DeltaZ*Cov(m,q)" << endl;
   // cout << "Var(q')= " << posZInCh.z()*posZInCh.z() << "*" <<
-  //   theZedSeg.parametersError()[0][0] << " + " << 
-  //   theZedSeg.parametersError()[1][1] << " + " << 
+  //   theZedSeg.parametersError()[0][0] << " + " <<
+  //   theZedSeg.parametersError()[1][1] << " + " <<
   //   2*posZInCh.z() << "*" << theZedSeg.parametersError()[0][1] ;
   theCovMatrix[3][3] =
     2.*(posZInCh.z()*posZInCh.z())*theZedSeg.parametersError()[0][0] +
@@ -259,7 +259,7 @@ void VectorHit::setCovMatrixForZed(const LocalPoint& posZInCh){
 }
 */
 std::ostream& operator<<(std::ostream& os, const VectorHit& vh) {
-  os << "Pos " << vh.localPosition() << 
+  os << "Pos " << vh.localPosition() <<
     " Dir: " << vh.localDirection() <<
     " dim: " << vh.dimension() <<
     " chi2/ndof: " << vh.chi2() << "/" << vh.degreesOfFreedom() << " :";
@@ -276,7 +276,7 @@ std::ostream& operator<<(std::ostream& os, const VectorHit& vh) {
 
 /// Access to component RecHits (if any)
 std::vector<const TrackingRecHit*> VectorHit::recHits() const{
-  std::vector<const TrackingRecHit*> pointersOfRecHits; 
+  std::vector<const TrackingRecHit*> pointersOfRecHits;
 /*
   if (hasPhi()) pointersOfRecHits.push_back(phiSegment());
   if (hasZed()) pointersOfRecHits.push_back(zSegment());
@@ -288,11 +288,11 @@ std::vector<const TrackingRecHit*> VectorHit::recHits() const{
 /// Non-const access to component RecHits (if any)
 std::vector<TrackingRecHit*> VectorHit::recHits(){
 
-  std::vector<TrackingRecHit*> pointersOfRecHits; 
+  std::vector<TrackingRecHit*> pointersOfRecHits;
 /*
   if (hasPhi()) pointersOfRecHits.push_back(phiSegment());
   if (hasZed()) pointersOfRecHits.push_back(zSegment());
-*/  
+*/
   return pointersOfRecHits;
 }
 
