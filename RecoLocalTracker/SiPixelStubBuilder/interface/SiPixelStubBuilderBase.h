@@ -1,6 +1,9 @@
 #ifndef RecoLocalTracker_SiPixelClusterizer_SiPixelStubBuilderBase_H
 #define RecoLocalTracker_SiPixelClusterizer_SiPixelStubBuilderBase_H
 
+#include "FWCore/Framework/interface/ESHandle.h"
+#include "DataFormats/Common/interface/Handle.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include "DataFormats/Common/interface/DetSetVectorNew.h"
 #include "DataFormats/Phase2TrackerCluster/interface/Phase2TrackerCluster1D.h"
@@ -8,58 +11,44 @@
 #include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "Geometry/TrackerGeometryBuilder/interface/StackGeomDet.h"
-#include <map>
-#include <vector>
+#include "RecoLocalTracker/ClusterParameterEstimator/interface/StripClusterParameterEstimator.h"
+#include "DataFormats/TrackingRecHit/interface/VectorHit.h"
 
-class PixelGeomDetUnit;
+namespace edm {
+   class ParameterSet;
+   template<typename T> class RefGetter;
+   class EventSetup;
+}
 
-/**
- * Abstract interface for Pixel Clusterizers
- */
 class SiPixelStubBuilderBase {
-public:
+
+ public:
   typedef edmNew::DetSetVector<SiPixelStub> output_t;
   typedef std::pair< StackGeomDet, std::vector<Phase2TrackerCluster1D> > StackClusters;
 
-  // Virtual destructor, this is a base class.
+  SiPixelStubBuilderBase(const edm::ParameterSet&);
   virtual ~SiPixelStubBuilderBase() {}
+  void initialize(const edm::EventSetup&);
 
-  // grouping clusters
-  virtual std::vector< StackClusters > groupinginStackModules(const edmNew::DetSetVector<Phase2TrackerCluster1D>& clusters) = 0;
+  //FIXME::ERICA::this should be template, return different collection for different algo used!!
+  virtual VectorHitCollectionNew run(const edmNew::DetSetVector<Phase2TrackerCluster1D>& clusters) = 0;
 
   // Build stubs in a DetUnit
-  virtual void buildDetUnit( const edm::DetSetVector<Phase2TrackerCluster1D> & input,	
+  virtual void buildDetUnit( const edm::DetSetVector<Phase2TrackerCluster1D> & input,
 			     output_t& output) = 0;
 
-  unsigned int getLayerNumber(const DetId& detid, const TrackerTopology* topo) {
-    if (detid.det() == DetId::Tracker) {
-        if (detid.subdetId() == PixelSubdetector::PixelBarrel) {
-          return (topo->pxbLayer(detid));
-        }
-        // ERICA::chech: E+ 100; E- 200 : needed?
-        else if (detid.subdetId() == PixelSubdetector::PixelEndcap) {
-          return (100 * topo->pxfSide(detid) + topo->pxfDisk(detid));
-        }
-        else return 999;
-    }
-    return 999;
-  }
+  unsigned int getLayerNumber(const DetId& detid);
+  unsigned int getModuleNumber(const DetId& detid);
+  void printClusters(const edmNew::DetSetVector<Phase2TrackerCluster1D>& clusters);
 
+  const TrackerGeometry* theTkGeom;
+  const TrackerTopology* theTkTopo;
+  edm::ESHandle< StripClusterParameterEstimator > parameterestimator;
 
-  unsigned int getModuleNumber(const DetId& detid, const TrackerTopology* topo) {
-    if (detid.det() == DetId::Tracker) {
-        if (detid.subdetId() == PixelSubdetector::PixelBarrel) {
-          return ( topo->pxbModule(detid) );
-        }
-        else if (detid.subdetId() == PixelSubdetector::PixelEndcap) {
-          return ( topo->pxfModule(detid) );
-        }
-        else return 999;
-    }
-    return 999;
-  }
-//  protected:
+private:
+  edm::ESInputTag cpeTag;
 
+//  typedef SiStripRecHit2DCollection::FastFiller Collector;
 
 };
 
