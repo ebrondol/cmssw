@@ -10,16 +10,33 @@
 //#include "FWCore/Utilities/interface/Exception.h"
 
 VectorHit::VectorHit(const LocalPoint& posInner,
-                     const LocalVector& dir):
-  theCovMatrix(),
+                     const LocalVector& dir,
+                     const AlgebraicSymMatrix& covMatrix,
+		     const double& Chi2):
+  thePosition(posInner),
+  theDirection(dir),
+  theCovMatrix(covMatrix),
+  theChi2(Chi2),
   theDimension(4)
 {
-  thePosition=LocalPoint(posInner);
-  theDirection=LocalVector(dir);
+//  thePosition=LocalPoint(posInner);
+//  theDirection=LocalVector(dir);
+//  theCovMatrix=covMatrix;
+//  theChi2=Chi2;
   std::cout << "New vector hit!" << std::endl;
 
 }
 
+VectorHit::VectorHit(const LocalPoint& posInner,
+                     const LocalVector& dir,
+                     const VectorHit2D& vh2Dzx, const VectorHit2D& vh2Dzy):
+  thePosition(posInner),
+  theDirection(dir),
+  theDimension(4)
+{
+  std::cout << "New vector hit!" << std::endl;
+
+}
 
 /*
 VectorHit::VectorHit(const DTChamberRecSegment2D& phiSeg,
@@ -138,8 +155,8 @@ AlgebraicVector VectorHit::parameters() const {
 }
 
 
-AlgebraicSymMatrix VectorHit::parametersError() const {
 /*
+AlgebraicSymMatrix VectorHit::parametersError() const {
   if (dimension()==4) {
     return theCovMatrix;
   }
@@ -155,9 +172,8 @@ AlgebraicSymMatrix VectorHit::parametersError() const {
     result[1][1] = theCovMatrix[3][3]; //S(y)
   }
   return result;
-*/
-    return theCovMatrix; // ERICA::non c'era prima
 }
+*/
 
 
 AlgebraicMatrix VectorHit::projectionMatrix() const {
@@ -206,15 +222,6 @@ LocalError VectorHit::localDirectionError() const {
 }
 
 
-double VectorHit::chi2() const {
-  double result=0;
-/*
-  if (hasPhi()) result+=thePhiSeg.chi2();
-  if (hasZed()) result+=theZedSeg.chi2();
-*/
-  return result;
-}
-
 
 int VectorHit::degreesOfFreedom() const {
   int result=0;
@@ -259,17 +266,13 @@ void VectorHit::setCovMatrixForZed(const LocalPoint& posZInCh){
 }
 */
 std::ostream& operator<<(std::ostream& os, const VectorHit& vh) {
+
   os << "Pos " << vh.localPosition() <<
-    " Dir: " << vh.localDirection() <<
+    " Dir: " << vh.localDirection() << "\n" <<
+    " cov: " << vh.parametersError() <<
     " dim: " << vh.dimension() <<
     " chi2/ndof: " << vh.chi2() << "/" << vh.degreesOfFreedom() << " :";
-/*
-  if (seg.hasPhi()) os << seg.phiSegment()->recHits().size();
-  else os << 0;
-  os << ":";
-  if (seg.hasZed()) os << seg.zSegment()->recHits().size();
-  else os << 0;
-*/
+
   return os;
 }
 

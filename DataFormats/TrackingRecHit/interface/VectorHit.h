@@ -11,22 +11,20 @@
  */
 
 #include "DataFormats/TrackingRecHit/interface/RecSegment.h"
+#include "DataFormats/TrackingRecHit/interface/VectorHit2D.h"
 
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include "DataFormats/Common/interface/DetSetVectorNew.h"
-
-/* Collaborating Class Declarations */
-//#include "DataFormats/DTRecHit/interface/DTSLRecSegment2D.h"
-//#include "DataFormats/DTRecHit/interface/DTChamberRecSegment2D.h"
-
-/* C++ Headers */
-//#include <iosfwd>
 
 class VectorHit : public RecSegment {
  public:
 
   VectorHit() : thePosition(), theDirection(), theCovMatrix(), theDimension(0) {}
-  VectorHit(const LocalPoint& posInner, const LocalVector& dir) ;
+  VectorHit(const LocalPoint& posInner, const LocalVector& dir, 
+            const AlgebraicSymMatrix& covMatrix,
+            const double& Chi2) ;
+  VectorHit(const LocalPoint& posInner, const LocalVector& dir, 
+            const VectorHit2D& vh2Dzx, const VectorHit2D& vh2Dzy) ;
 
   ~VectorHit() ;
   virtual VectorHit* clone() const { return new VectorHit(*this);}
@@ -50,32 +48,24 @@ class VectorHit : public RecSegment {
 
 
 */
-  /// Covariance matrix fo parameters()
-  AlgebraicSymMatrix parametersError() const ;
+  // returning methods
+  virtual LocalPoint localPosition() const { return thePosition; }
+  virtual LocalVector localDirection() const { return theDirection; }
+  AlgebraicSymMatrix parametersError() const { return theCovMatrix; };
+  virtual double chi2() const { return theChi2; }
+  virtual int dimension() const { return theDimension; }
 
   /// The projection matrix relates the trajectory state parameters to the segment parameters().
   virtual AlgebraicMatrix projectionMatrix() const;
 
-  /// Local position in Chamber frame
-  virtual LocalPoint localPosition() const { return thePosition;}
-
   /// Local position error in Chamber frame
   virtual LocalError localPositionError() const ;
 
-  /// Local direction in Chamber frame
-  virtual LocalVector localDirection() const { return theDirection; }
-
   /// Local direction error in the Chamber frame
   virtual LocalError localDirectionError() const ;
-
-  // Chi2 of the segment fit
-  virtual double chi2() const ;
   
   // Degrees of freedom of the segment fit
   virtual int degreesOfFreedom() const ;
-
-  // Dimension (in parameter space)
-  virtual int dimension() const { return theDimension; }
 
   // Access to component RecHits (if any)
   virtual std::vector<const TrackingRecHit*> recHits() const ;
@@ -128,8 +118,8 @@ class VectorHit : public RecSegment {
   /// the Z segment
   DTSLRecSegment2D *zSegment() {return &theZedSeg;}
 */
-  LocalPoint thePosition;   // in chamber frame
-  LocalVector theDirection; // in chamber frame
+  LocalPoint thePosition;
+  LocalVector theDirection; 
 
 //  void setCovMatrixForZed(const LocalPoint& posZInCh);
     
@@ -141,11 +131,12 @@ class VectorHit : public RecSegment {
   // mat[0][2]=cov(dx/dz,x)
   // mat[1][3]=cov(dy/dz,y)
   AlgebraicSymMatrix theCovMatrix; 
+  double theChi2;
+  int theDimension; // the dimension of this rechit
 /*
   DTChamberRecSegment2D thePhiSeg;
   DTSLRecSegment2D theZedSeg;
 */
-  int theDimension; // the dimension of this rechit
 
 };
 
