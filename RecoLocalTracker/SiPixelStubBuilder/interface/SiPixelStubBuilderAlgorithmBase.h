@@ -1,5 +1,5 @@
-#ifndef RecoLocalTracker_SiPixelClusterizer_SiPixelStubBuilderBase_H
-#define RecoLocalTracker_SiPixelClusterizer_SiPixelStubBuilderBase_H
+#ifndef RecoLocalTracker_SiPixelClusterizer_SiPixelStubBuilderAlgorithmBase_H
+#define RecoLocalTracker_SiPixelClusterizer_SiPixelStubBuilderAlgorithmBase_H
 
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "DataFormats/Common/interface/Handle.h"
@@ -20,14 +20,14 @@ namespace edm {
    class EventSetup;
 }
 
-class SiPixelStubBuilderBase {
+class SiPixelStubBuilderAlgorithmBase {
 
  public:
   typedef edmNew::DetSetVector<SiPixelStub> output_t;
   typedef std::pair< StackGeomDet, std::vector<Phase2TrackerCluster1D> > StackClusters;
 
-  SiPixelStubBuilderBase(const edm::ParameterSet&);
-  virtual ~SiPixelStubBuilderBase() {}
+  SiPixelStubBuilderAlgorithmBase(const edm::ParameterSet&);
+  virtual ~SiPixelStubBuilderAlgorithmBase() {}
   void initialize(const edm::EventSetup&);
 
   //FIXME::ERICA::this should be template, return different collection for different algo used!!

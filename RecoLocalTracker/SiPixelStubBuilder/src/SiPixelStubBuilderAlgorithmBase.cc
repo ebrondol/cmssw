@@ -1,4 +1,4 @@
-#include "RecoLocalTracker/SiPixelStubBuilder/interface/SiPixelStubBuilderBase.h"
+#include "RecoLocalTracker/SiPixelStubBuilder/interface/SiPixelStubBuilderAlgorithmBase.h"
 #include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
 #include "RecoLocalTracker/Records/interface/TkStripCPERecord.h"
@@ -7,11 +7,11 @@
 #include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
 #include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
 
-SiPixelStubBuilderBase::SiPixelStubBuilderBase(const edm::ParameterSet& conf) :
+SiPixelStubBuilderAlgorithmBase::SiPixelStubBuilderAlgorithmBase(const edm::ParameterSet& conf) :
   cpeTag(conf.getParameter<edm::ESInputTag>("CPE"))
 {}
 
-void SiPixelStubBuilderBase::initialize(const edm::EventSetup& es)
+void SiPixelStubBuilderAlgorithmBase::initialize(const edm::EventSetup& es)
 {
   //FIXME:ask Vincenzo
   /*
@@ -41,7 +41,7 @@ void SiPixelStubBuilderBase::initialize(const edm::EventSetup& es)
   es.get< TkStripCPERecord >().get(cpeTag, parameterestimator);
 }
 
-unsigned int SiPixelStubBuilderBase::getLayerNumber(const DetId& detid) {
+unsigned int SiPixelStubBuilderAlgorithmBase::getLayerNumber(const DetId& detid) {
   if (detid.det() == DetId::Tracker) {
       if (detid.subdetId() == PixelSubdetector::PixelBarrel) {
         return (theTkTopo->pxbLayer(detid));
@@ -55,7 +55,7 @@ unsigned int SiPixelStubBuilderBase::getLayerNumber(const DetId& detid) {
   return 999;
 }
 
-unsigned int SiPixelStubBuilderBase::getModuleNumber(const DetId& detid) {
+unsigned int SiPixelStubBuilderAlgorithmBase::getModuleNumber(const DetId& detid) {
   if (detid.det() == DetId::Tracker) {
       if (detid.subdetId() == PixelSubdetector::PixelBarrel) {
         return ( theTkTopo->pxbModule(detid) );
@@ -68,7 +68,7 @@ unsigned int SiPixelStubBuilderBase::getModuleNumber(const DetId& detid) {
   return 999;
 }
 
-void SiPixelStubBuilderBase::printClusters(const edmNew::DetSetVector<Phase2TrackerCluster1D>& clusters){
+void SiPixelStubBuilderAlgorithmBase::printClusters(const edmNew::DetSetVector<Phase2TrackerCluster1D>& clusters){
 
   int nCluster = 0;
   int numberOfDSV = 0;
