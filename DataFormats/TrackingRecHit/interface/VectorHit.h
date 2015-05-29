@@ -21,7 +21,7 @@ class VectorHit : public RecSegment {
 
   VectorHit() : thePosition(), theDirection(), theCovMatrix(), theDimension(0) {}
   VectorHit(const LocalPoint& posInner, const LocalVector& dir, 
-            const AlgebraicSymMatrix& covMatrix,
+            const AlgebraicSymMatrix44& covMatrix,
             const double& Chi2) ;
   VectorHit(const LocalPoint& posInner, const LocalVector& dir, 
             const VectorHit2D& vh2Dzx, const VectorHit2D& vh2Dzy) ;
@@ -51,7 +51,7 @@ class VectorHit : public RecSegment {
   // returning methods
   virtual LocalPoint localPosition() const { return thePosition; }
   virtual LocalVector localDirection() const { return theDirection; }
-  AlgebraicSymMatrix parametersError() const { return theCovMatrix; };
+  AlgebraicSymMatrix parametersError() const ;
   virtual double chi2() const { return theChi2; }
   virtual int dimension() const { return theDimension; }
 
@@ -72,6 +72,11 @@ class VectorHit : public RecSegment {
 
   // Non-const access to component RecHits (if any)
   virtual std::vector<TrackingRecHit*> recHits() ;
+
+  // setting methods
+  void setPosition(LocalPoint pos) { thePosition = pos; }
+  void setDirection(LocalVector dir) { theDirection = dir; }
+  void setCovMatrix(AlgebraicSymMatrix44 mat) { theCovMatrix = mat; }
 
 /*
 
@@ -94,15 +99,6 @@ class VectorHit : public RecSegment {
     return hasZed()? &theZedSeg : 0;
   }
     
-  /// Set position
-  void setPosition(LocalPoint pos) { thePosition = pos; }
-
-  /// Set direction
-  void setDirection(LocalVector dir) { theDirection = dir; }
-
-  /// Set covariance matrix
-  void setCovMatrix(AlgebraicSymMatrix mat) { theCovMatrix = mat; }
-
   /// The (specific) DetId of the chamber on which the segment resides 
   virtual DTChamberId chamberId() const;
 */    
@@ -111,13 +107,10 @@ class VectorHit : public RecSegment {
   /// Which projections are actually there
   enum Projection {full, phi, Z, none};
   Projection theProjection;
-
-  /// the superPhi segment 
-  DTChamberRecSegment2D *phiSegment() {return &thePhiSeg;}
-    
-  /// the Z segment
-  DTSLRecSegment2D *zSegment() {return &theZedSeg;}
 */
+
+  //VectorHit2D *ZXSegment() {return &theVh2Dzx;}
+  //VectorHit2D *ZYSegment() {return &theVh2Dzy;}
   LocalPoint thePosition;
   LocalVector theDirection; 
 
@@ -130,13 +123,11 @@ class VectorHit : public RecSegment {
   // mat[3][3]=sigma (y)
   // mat[0][2]=cov(dx/dz,x)
   // mat[1][3]=cov(dy/dz,y)
-  AlgebraicSymMatrix theCovMatrix; 
+  AlgebraicSymMatrix44 theCovMatrix; 
   double theChi2;
-  int theDimension; // the dimension of this rechit
-/*
-  DTChamberRecSegment2D thePhiSeg;
-  DTSLRecSegment2D theZedSeg;
-*/
+  int theDimension; 
+  //VectorHit2D theVh2Dzx;
+  //VectorHit2D theVh2Dzy;
 
 };
 

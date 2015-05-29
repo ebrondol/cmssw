@@ -11,7 +11,7 @@
 
 VectorHit::VectorHit(const LocalPoint& posInner,
                      const LocalVector& dir,
-                     const AlgebraicSymMatrix& covMatrix,
+                     const AlgebraicSymMatrix44& covMatrix,
 		     const double& Chi2):
   thePosition(posInner),
   theDirection(dir),
@@ -19,10 +19,6 @@ VectorHit::VectorHit(const LocalPoint& posInner,
   theChi2(Chi2),
   theDimension(4)
 {
-//  thePosition=LocalPoint(posInner);
-//  theDirection=LocalVector(dir);
-//  theCovMatrix=covMatrix;
-//  theChi2=Chi2;
   std::cout << "New vector hit!" << std::endl;
 
 }
@@ -34,8 +30,20 @@ VectorHit::VectorHit(const LocalPoint& posInner,
   theDirection(dir),
   theDimension(4)
 {
-  std::cout << "New vector hit!" << std::endl;
+  //building the cov matrix 4x4 starting from the 2x2
+  AlgebraicSymMatrix22 covMatZX = vh2Dzx.covMatrix();
+  AlgebraicSymMatrix22 covMatZY = vh2Dzy.covMatrix();
 
+  theCovMatrix[0][0] = covMatZX[0][0];   // sigma (dx/dz)
+  theCovMatrix[1][1] = covMatZY[0][0];   // sigma (dy/dz)
+  theCovMatrix[2][2] = covMatZX[1][1];   // sigma (x)
+  theCovMatrix[3][3] = covMatZY[1][1];   // sigma (y)
+  theCovMatrix[0][2] = covMatZX[0][1];   // cov(dx/dz,x)
+  theCovMatrix[1][3] = covMatZY[0][1];   // cov(dy/dz,y)
+ 
+  theChi2 = vh2Dzx.chi2() + vh2Dzy.chi2();
+
+  std::cout << "New vector hit!" << std::endl;
 }
 
 /*
@@ -81,25 +89,6 @@ VectorHit::VectorHit(const DTChamberRecSegment2D& phiSeg,
 }
 
 
-VectorHit::VectorHit(const DTChamberRecSegment2D& phiSeg) :
-  RecSegment(phiSeg.chamberId()),
-  theProjection(phi),
-  thePhiSeg(phiSeg),
-  theZedSeg(DTSLRecSegment2D()),
-  theDimension(2)
-{
-  thePosition=thePhiSeg.localPosition();
-
-  theDirection=thePhiSeg.localDirection();
-
-  // set cov matrix
-  theCovMatrix=AlgebraicSymMatrix(4);
-  theCovMatrix[0][0]=phiSeg.covMatrix()[0][0]; //sigma (dx/dz)
-  theCovMatrix[0][2]=phiSeg.covMatrix()[0][1]; //cov(dx/dz,x)
-  theCovMatrix[2][2]=phiSeg.covMatrix()[1][1]; //sigma (x)
-}
-
-
 VectorHit::VectorHit(const DTSLRecSegment2D& zedSeg,
 			       const LocalPoint& posZInCh,
 			       const LocalVector& dirZInCh) :
@@ -127,53 +116,16 @@ VectorHit::~VectorHit() {}
 
 AlgebraicVector VectorHit::parameters() const {
 
-/*
-  if (dimension()==4) {
     // (dx/dz,dy/dz,x,y)
     AlgebraicVector result(4);
 
-    result[2] = thePosition.x();
-    result[3] = thePosition.y();
     result[0] = theDirection.x()/theDirection.z();
     result[1] = theDirection.y()/theDirection.z();
+    result[2] = thePosition.x();
+    result[3] = thePosition.y();
     return result;
-  }
 
-  AlgebraicVector result(2);
-  if (theProjection==phi) {
-    // (dx/dz,x)
-    result[1] = thePosition.x();
-    result[0] = theDirection.x()/theDirection.z();
-  } else if (theProjection==Z) {
-    // (dy/dz,y) (note we are in the chamber r.f.)
-    result[1] = thePosition.y();
-    result[0] = theDirection.y()/theDirection.z();
-
-  }
-  return result;
-*/ return AlgebraicVector(); //ERICA::non c'era prima
 }
-
-
-/*
-AlgebraicSymMatrix VectorHit::parametersError() const {
-  if (dimension()==4) {
-    return theCovMatrix;
-  }
-
-  AlgebraicSymMatrix result(2);
-  if (theProjection==phi) {
-    result[0][0] = theCovMatrix[0][0]; //S(dx/dz)
-    result[0][1] = theCovMatrix[0][2]; //Cov(dx/dz,x)
-    result[1][1] = theCovMatrix[2][2]; //S(x)
-  } else if (theProjection==Z) {
-    result[0][0] = theCovMatrix[1][1]; //S(dy/dz)
-    result[0][1] = theCovMatrix[1][3]; //Cov(dy/dz,y)
-    result[1][1] = theCovMatrix[3][3]; //S(y)
-  }
-  return result;
-}
-*/
 
 
 AlgebraicMatrix VectorHit::projectionMatrix() const {
@@ -229,6 +181,18 @@ int VectorHit::degreesOfFreedom() const {
   if (hasPhi()) result+=thePhiSeg.degreesOfFreedom();
   if (hasZed()) result+=theZedSeg.degreesOfFreedom();
 */
+  return result;
+}
+
+AlgebraicSymMatrix VectorHit::parametersError() const {
+
+  //think about a more efficient method
+  AlgebraicSymMatrix result(4);
+  for(int i = 0; i < theDimension; i++){
+    for(int j = 0; j < theDimension; j++){
+      result[i][j] = theCovMatrix[i][j];
+    }
+  }
   return result;
 }
 
