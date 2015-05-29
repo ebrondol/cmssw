@@ -131,10 +131,8 @@ class VectorHit : public RecSegment {
 
 };
 
-///FIXME IMPLEMENT COMPARISON OPERATORS PROPERLY
 inline bool operator<( const VectorHit& one, const VectorHit& other) {
 
-  // right now the comparison is done with the chi2
   if ( one.chi2() > other.chi2() ) {
     return true;
   }

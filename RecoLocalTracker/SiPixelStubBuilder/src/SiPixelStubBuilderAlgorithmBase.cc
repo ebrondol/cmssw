@@ -8,6 +8,7 @@
 #include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
 
 SiPixelStubBuilderAlgorithmBase::SiPixelStubBuilderAlgorithmBase(const edm::ParameterSet& conf) :
+  nMaxVHforeachStack(conf.getParameter<int>("maxStubsinaStack")),
   cpeTag(conf.getParameter<edm::ESInputTag>("CPE"))
 {}
 
@@ -114,5 +115,21 @@ void SiPixelStubBuilderAlgorithmBase::printClusters(const edmNew::DetSetVector<P
     }
   }
   std::cout << " Number of input clusters: " << nCluster << std::endl;
+
+}
+
+
+void SiPixelStubBuilderAlgorithmBase::loadDetSetVector( std::map< DetId,std::vector<VectorHit> >& theMap, edmNew::DetSetVector<VectorHit>& theCollection ) const{
+
+  std::map<DetId,std::vector<VectorHit> >::const_iterator it = theMap.begin();
+ std::map<DetId,std::vector<VectorHit> >::const_iterator  lastDet = theMap.end();
+ for( ; it != lastDet ; ++it ) {
+   edmNew::DetSetVector<VectorHit>::FastFiller vh_col(theCollection, it->first);
+   std::vector<VectorHit>::const_iterator vh_it = it->second.begin();
+   std::vector<VectorHit>::const_iterator vh_end = it->second.end();
+   for( ; vh_it != vh_end ; ++vh_it)  {
+     vh_col.push_back(*vh_it);
+   }
+ }
 
 }

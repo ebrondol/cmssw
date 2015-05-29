@@ -7,7 +7,6 @@
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include "DataFormats/Common/interface/DetSetVectorNew.h"
 #include "DataFormats/Phase2TrackerCluster/interface/Phase2TrackerCluster1D.h"
-#include "DataFormats/SiPixelStub/interface/SiPixelStub.h"
 #include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "Geometry/TrackerGeometryBuilder/interface/StackGeomDet.h"
@@ -23,7 +22,7 @@ namespace edm {
 class SiPixelStubBuilderAlgorithmBase {
 
  public:
-  typedef edmNew::DetSetVector<SiPixelStub> output_t;
+  typedef edmNew::DetSetVector<VectorHit> output_t;
   typedef std::pair< StackGeomDet, std::vector<Phase2TrackerCluster1D> > StackClusters;
 
   SiPixelStubBuilderAlgorithmBase(const edm::ParameterSet&);
@@ -40,13 +39,16 @@ class SiPixelStubBuilderAlgorithmBase {
   unsigned int getLayerNumber(const DetId& detid);
   unsigned int getModuleNumber(const DetId& detid);
   void printClusters(const edmNew::DetSetVector<Phase2TrackerCluster1D>& clusters);
+  void loadDetSetVector( std::map< DetId,std::vector<VectorHit> >& theMap, edmNew::DetSetVector<VectorHit>& theCollection ) const ;
 
   const TrackerGeometry* theTkGeom;
   const TrackerTopology* theTkTopo;
   edm::ESHandle< StripClusterParameterEstimator > parameterestimator;
+  unsigned int nMaxVHforeachStack;
 
 private:
   edm::ESInputTag cpeTag;
+
 
 //  typedef SiStripRecHit2DCollection::FastFiller Collector;
 

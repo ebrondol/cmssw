@@ -8,8 +8,8 @@
 VectorHitCollectionNew VectorHitBuilderAlgorithm::run(const edmNew::DetSetVector<Phase2TrackerCluster1D>& clusters){
 
   VectorHitCollectionNew result;
-  //std::vector< std::pair< StackGeomDet, std::vector<Phase2TrackerCluster1D> > > groupClusterBySM;
-  //groupClusterBySM = groupinginStackModules(clusters);
+  std::map< DetId, std::vector<VectorHit> > temporary;
+  std::vector<VectorHit> preliminaryresult;
 
   //loop over the DetSetVector
   edmNew::DetSetVector<Phase2TrackerCluster1D>::const_iterator DSViter;
@@ -43,14 +43,27 @@ VectorHitCollectionNew VectorHitBuilderAlgorithm::run(const edmNew::DetSetVector
 
         std::cout << "\t with " << int(innerClustersInStack.size() + outerClustersInStack.size()) << " clusters associated." << std::endl;
 
-        //ERICA::check if creating the VH here or somewhere else
-        std::vector<VectorHit> vhInStack = buildVectorHits(stack, innerClustersInStack, outerClustersInStack);
+        std::vector<VectorHit> vhsInStack = buildVectorHits(stack, innerClustersInStack, outerClustersInStack);
+        preliminaryresult.insert(preliminaryresult.end(),vhsInStack.begin(), vhsInStack.end());
+
+        temporary[rawDetId1] = vhsInStack;
 
         innerClustersInStack.clear();
         outerClustersInStack.clear();
+        vhsInStack.clear();
+
       }
     }
   }
+
+  //for( std::vector<VectorHit>::const_iterator vh_iter = preliminaryresult.begin() ; vh_iter != preliminaryresult.end(); vh_iter++) {
+  for( auto& vh: preliminaryresult ){
+
+    std::cout << "\t vectorhit in output " << vh << std::endl;
+
+  }
+
+  loadDetSetVector(temporary, result);
 
   return result;
 
@@ -77,6 +90,12 @@ bool VectorHitBuilderAlgorithm::checkModuleCompatibility(DetId detId1, DetId det
   return false;
 }
 
+bool VectorHitBuilderAlgorithm::checkClustersCompatibility(Local3DPoint& posinner, Local3DPoint& posouter, LocalError& errinner, LocalError& errouter){
+
+  return true;
+
+}
+
 StackGeomDet VectorHitBuilderAlgorithm::createNewStack(DetId detId1, DetId detId2){
 
   //creation of the stack: the plane is the inner one
@@ -89,76 +108,98 @@ StackGeomDet VectorHitBuilderAlgorithm::createNewStack(DetId detId1, DetId detId
   return StackGeomDet(sf,geomDetUnit1,geomDetUnit2);
 }
 
-
-
 //----------------------------------------------------------------------------
 //ERICA::in the DT code the global position is used to compute the alpha angle and put a cut on that.
 std::vector<VectorHit> VectorHitBuilderAlgorithm::buildVectorHits(StackGeomDet stack, std::vector<Phase2TrackerCluster1D> innerClus, std::vector<Phase2TrackerCluster1D> outerClus){
 
   std::vector<VectorHit> result;
+
   std::vector<Phase2TrackerCluster1D>::const_iterator innerClus_iter;
-  const GeomDetUnit* gDUnitInn = stack.innerDet();
-  const GeomDetUnit* gDUnitOut = stack.outerDet();
   for( innerClus_iter = innerClus.begin(); innerClus_iter != innerClus.end(); innerClus_iter++ ){
-
-    MeasurementPoint mpCluInn(innerClus_iter->center(), innerClus_iter->column() + 0.5);
-    Local3DPoint localPosCluInn   = gDUnitInn->topology().localPosition(mpCluInn);
-
-    //FIXME::you should put the correct error when the StripCPE is ready
-    //FIXME StripClusterParameterEstimator::LocalValues parameters = parameterestimator->localParameters(*innerClus_iter,*gDUnitInn);
-    MeasurementError meCluInn(1./12,0.0,1./12);
-    LocalError localErrCluInn  = gDUnitInn->topology().localError(mpCluInn,meCluInn);
 
     std::vector<Phase2TrackerCluster1D>::const_iterator outerClus_iter;
     for( outerClus_iter = outerClus.begin(); outerClus_iter != outerClus.end(); outerClus_iter++ ){
 
-      MeasurementPoint mpCluOut(outerClus_iter->center(), outerClus_iter->column() + 0.5);
-      Local3DPoint localPosCluOut = gDUnitOut->topology().localPosition(mpCluOut);
-      Global3DPoint globalPosCluOut = gDUnitOut->surface().toGlobal(localPosCluOut);
-      Local3DPoint localPosCluOutINN = gDUnitInn->surface().toLocal(globalPosCluOut);
-
-      //FIXME::you should put the correct error when the StripCPE is ready
-      //FIXME StripClusterParameterEstimator::LocalValues parameters =  parameterestimator->localParameters(*clustIt,geomDetUnit);
-      MeasurementError meCluOut(1./12,0.0,1./12);
-      LocalError localErrCluOutINN = gDUnitInn->topology().localError(mpCluOut,meCluOut);
-
-      //in the inner reference of frame
-      Local3DVector localVecINN = localPosCluOutINN - localPosCluInn;
-
-      //debug
-      //Global3DPoint globalPosCluInn = gDUnitInn->surface().toGlobal(localPosCluInn);
-      //std::cout << "\t inner global pos " << globalPosCluInn << std::endl;
-      //std::cout << "\t outer global pos " << globalPosCluOut << std::endl;
-      //std::cout << "\t outer local pos " << localPosCluOut << std::endl;
-
-      std::cout << "\t inner local pos " << localPosCluInn << " with error: " << localErrCluInn << std::endl;
-      std::cout << "\t outer local pos in the inner sof " << localPosCluOutINN << " with error: " << localErrCluOutINN << std::endl;
-      std::cout << "\t local vec in the inner sof " << localVecINN << std::endl;
-
-      AlgebraicSymMatrix covMat2Dzx(2);
-      AlgebraicSymMatrix covMat2Dzy(2);
-      double chi22Dzx = 0.0;
-      double chi22Dzy = 0.0;
-
-      fit2Dzx(localPosCluInn, localPosCluOutINN, localErrCluInn,localErrCluOutINN, covMat2Dzx, chi22Dzx);
-      //VectorHit2D vh2Dzx = VectorHit2D(localVecINN, covMat2Dzx, chi22Dzx);
-      fit2Dzy(localPosCluInn, localPosCluOutINN, localErrCluInn,localErrCluOutINN, covMat2Dzy, chi22Dzy);
-
-      double chi2 = chi22Dzx + chi22Dzy;
-      VectorHit vh = VectorHit(localPosCluInn, localVecINN, covMat2Dzx, chi2);
-
+      VectorHit vh = buildVectorHit( stack, *innerClus_iter, *outerClus_iter);
       std::cout << "\t vectorhit " << vh << std::endl;
+      result.push_back(vh);
+
     }
 
+  }
+  //sorting vhs for best chi2
+  std::sort(result.begin(), result.end());
+
+  if( result.size() > nMaxVHforeachStack ){
+    result.erase(result.begin()+nMaxVHforeachStack, result.end());
   }
 
   return result;
 
 }
 
+VectorHit VectorHitBuilderAlgorithm::buildVectorHit(StackGeomDet stack, const Phase2TrackerCluster1D& inner, const Phase2TrackerCluster1D& outer){
+
+  const GeomDetUnit* gDUnitInn = stack.innerDet();
+  const GeomDetUnit* gDUnitOut = stack.outerDet();
+
+  //FIXME::you should put the correct error when the StripCPE is ready
+  //FIXME StripClusterParameterEstimator::LocalValues parameters = parameterestimator->localParameters(*innerClus_iter,*gDUnitInn);
+  MeasurementPoint mpCluInn(inner.center(), inner.column() + 0.5);
+  Local3DPoint localPosCluInn = gDUnitInn->topology().localPosition(mpCluInn);
+  MeasurementError meCluInn(1./12,0.0,1./12);
+  LocalError localErrCluInn  = gDUnitInn->topology().localError(mpCluInn,meCluInn);
+
+  //FIXME::you should put the correct error when the StripCPE is ready
+  //FIXME StripClusterParameterEstimator::LocalValues parameters =  parameterestimator->localParameters(*clustIt,geomDetUnit);
+  MeasurementPoint mpCluOut(outer.center(), outer.column() + 0.5);
+  Local3DPoint localPosCluOut = gDUnitOut->topology().localPosition(mpCluOut);
+  Global3DPoint globalPosCluOut = gDUnitOut->surface().toGlobal(localPosCluOut);
+  Local3DPoint localPosCluOutINN = gDUnitInn->surface().toLocal(globalPosCluOut);
+  MeasurementError meCluOut(1./12,0.0,1./12);
+  LocalError localErrCluOutINN = gDUnitInn->topology().localError(mpCluOut,meCluOut);
+
+  //debug
+  //Global3DPoint globalPosCluInn = gDUnitInn->surface().toGlobal(localPosCluInn);
+  //std::cout << "\t inner global pos " << globalPosCluInn << std::endl;
+  //std::cout << "\t outer global pos " << globalPosCluOut << std::endl;
+  //std::cout << "\t outer local pos " << localPosCluOut << std::endl;
+
+  std::cout << "\t inner local pos " << localPosCluInn << " with error: " << localErrCluInn << std::endl;
+  std::cout << "\t outer local pos in the inner sof " << localPosCluOutINN << " with error: " << localErrCluOutINN << std::endl;
+
+  bool ok = checkClustersCompatibility(localPosCluInn, localPosCluOutINN, localErrCluInn, localErrCluOutINN);
+
+  if(ok){
+
+    //in the inner reference of frame
+    Local3DVector localVecINN = localPosCluOutINN - localPosCluInn;
+    std::cout << "\t local vec in the inner sof " << localVecINN << std::endl;
+
+    AlgebraicSymMatrix22 covMat2Dzx;
+    double chi22Dzx = 0.0;
+    fit2Dzx(localPosCluInn, localPosCluOutINN, localErrCluInn,localErrCluOutINN, covMat2Dzx, chi22Dzx);
+    VectorHit2D vh2Dzx = VectorHit2D(localVecINN, covMat2Dzx, chi22Dzx);
+
+    AlgebraicSymMatrix22 covMat2Dzy;
+    double chi22Dzy = 0.0;
+    fit2Dzy(localPosCluInn, localPosCluOutINN, localErrCluInn,localErrCluOutINN, covMat2Dzy, chi22Dzy);
+    VectorHit2D vh2Dzy = VectorHit2D(localVecINN, covMat2Dzy, chi22Dzy);
+
+    VectorHit vh = VectorHit(localPosCluInn, localVecINN, vh2Dzx, vh2Dzy);
+    return vh;
+
+  }
+
+  return VectorHit();
+
+}
+
+
+
 void VectorHitBuilderAlgorithm::fit2Dzx(const Local3DPoint lpCI, const Local3DPoint lpCO,
                            const LocalError leCI, const LocalError leCO,
-                           AlgebraicSymMatrix& covMatrix,
+                           AlgebraicSymMatrix22& covMatrix,
                            double& chi2){
   std::vector<float> x = {lpCI.z(), lpCO.z()};
   std::vector<float> y = {lpCI.x(), lpCO.x()};
@@ -174,7 +215,7 @@ void VectorHitBuilderAlgorithm::fit2Dzx(const Local3DPoint lpCI, const Local3DPo
 
 void VectorHitBuilderAlgorithm::fit2Dzy(const Local3DPoint lpCI, const Local3DPoint lpCO,
                            const LocalError leCI, const LocalError leCO,
-                           AlgebraicSymMatrix& covMatrix,
+                           AlgebraicSymMatrix22& covMatrix,
                            double& chi2){
   std::vector<float> x = {lpCI.z(), lpCO.z()};
   std::vector<float> y = {lpCI.y(), lpCO.y()};
@@ -191,7 +232,7 @@ void VectorHitBuilderAlgorithm::fit2Dzy(const Local3DPoint lpCI, const Local3DPo
 void VectorHitBuilderAlgorithm::fit(const std::vector<float>& x,
                           const std::vector<float>& y,
                           const std::vector<float>& sigy,
-                          AlgebraicSymMatrix& covMatrix,
+                          AlgebraicSymMatrix22& covMatrix,
                           double& chi2){
 
   if(x.size() != y.size() || x.size() != sigy.size()){
@@ -207,7 +248,6 @@ void VectorHitBuilderAlgorithm::fit(const std::vector<float>& x,
 
   theFitter->fit(x,y,x.size(),sigy,slope,intercept,covss,covii,covsi);
 
-  covMatrix = AlgebraicSymMatrix(2);
   covMatrix[0][0] = covss; // this is var(dy/dz)
   covMatrix[1][1] = covii; // this is var(y)
   covMatrix[1][0] = covsi; // this is cov(dy/dz,y)
@@ -221,7 +261,6 @@ void VectorHitBuilderAlgorithm::fit(const std::vector<float>& x,
   //not useful now, maybe one day
   //LocalPoint pos = LocalPoint(intercept,0.,0.);
   //LocalVector dir = LocalVector(-slope,0.,-1.).unit();
-  std::cout << "VectorHitBuilderAlgorithm::fit" << std::endl;
 
 }
 //----------------------------------------------------------------------------

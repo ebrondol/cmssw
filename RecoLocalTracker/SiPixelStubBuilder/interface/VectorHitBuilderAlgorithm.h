@@ -24,10 +24,13 @@ class VectorHitBuilderAlgorithm : public SiPixelStubBuilderAlgorithmBase {
 
   VectorHitCollectionNew run(const edmNew::DetSetVector<Phase2TrackerCluster1D>& clusters);
   bool checkModuleCompatibility(DetId detId1, DetId detId2);
+  //not implemented yet
+  bool checkClustersCompatibility(Local3DPoint& posinner, Local3DPoint& posouter, LocalError& errinner, LocalError& errouter);
   StackGeomDet createNewStack(DetId detId1, DetId detId2);
   std::vector<VectorHit> buildVectorHits(StackGeomDet stack,
                                          std::vector<Phase2TrackerCluster1D> innerClus,
                                          std::vector<Phase2TrackerCluster1D> outerClus);
+  VectorHit buildVectorHit(StackGeomDet stack, const Phase2TrackerCluster1D& inner, const Phase2TrackerCluster1D& outer);
 
   // Full I/O in DetSet
   void buildDetUnit( const edm::DetSetVector<Phase2TrackerCluster1D> & input,
@@ -35,15 +38,15 @@ class VectorHitBuilderAlgorithm : public SiPixelStubBuilderAlgorithmBase {
 
   void fit2Dzx(const Local3DPoint lpCI, const Local3DPoint lpCO,
                const LocalError leCI, const LocalError leCO,
-               AlgebraicSymMatrix& covMatrix, double& chi2);
+               AlgebraicSymMatrix22& covMatrix, double& chi2);
   void fit2Dzy(const Local3DPoint lpCI, const Local3DPoint lpCO,
                const LocalError leCI, const LocalError leCO,
-               AlgebraicSymMatrix& covMatrix, double& chi2);
+               AlgebraicSymMatrix22& covMatrix, double& chi2);
 
   void fit(const std::vector<float>& x,
            const std::vector<float>& y,
            const std::vector<float>& sigy,
-           AlgebraicSymMatrix& covMatrix, double& chi2);
+           AlgebraicSymMatrix22& covMatrix, double& chi2);
 
 //  void build( const edm::DetSet<Phase2TrackerCluster1D> & input,
 //                     output_t::FastFiller& output);

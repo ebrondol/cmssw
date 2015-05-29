@@ -52,6 +52,9 @@ void SiPixelStubBuilder::produce(edm::Event& event, const edm::EventSetup& es)
  // }
 
 
+
+
+
   // write output to file
   event.put( outputClusterAccept, "ClusterAccepted" );
   event.put( outputVHAccepted, offlinestubsTag + "Accepted" );
@@ -74,8 +77,7 @@ void SiPixelStubBuilder::setupAlgorithm(edm::ParameterSet const& conf) {
 }
 
 
-void SiPixelStubBuilder::run(const edmNew::DetSetVector<Phase2TrackerCluster1D>& clusters,
-  VectorHitCollectionNew output ){
+void SiPixelStubBuilder::run(const edmNew::DetSetVector<Phase2TrackerCluster1D>& clusters, VectorHitCollectionNew output ){
 
   if ( !readytobuild ) {
     std::cout << " No stub builder algorithm was found - cannot run!" ;
@@ -83,6 +85,7 @@ void SiPixelStubBuilder::run(const edmNew::DetSetVector<Phase2TrackerCluster1D>&
   }
 
   output = stubsBuilder->run(clusters);
+  std::cout << " Executing " << algoTag << " resulted in " << output.size() << "." << std::endl;
   //std::vector< std::pair< StackGeomDet, std::vector<Phase2TrackerCluster1D> > > groupClusterBySM;
   //groupClusterBySM = stubsBuilder->groupinginStackModules(clusters);
 /*
@@ -95,7 +98,7 @@ void SiPixelStubBuilder::run(const edmNew::DetSetVector<Phase2TrackerCluster1D>&
 numberOfClusters += spc.size();
     }
 */
-  //ERICA::max number in total o per stack? Think about it.
+  //max number in total
   unsigned int numberOfStubs = output.size();
 
   if(numberOfStubs > maxOfflinestubs) {
