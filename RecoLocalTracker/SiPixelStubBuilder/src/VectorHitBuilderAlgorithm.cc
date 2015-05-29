@@ -2,6 +2,8 @@
 #include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
 #include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
 #include "Geometry/CommonTopologies/interface/PixelTopology.h"
+#include "DataFormats/TrackingRecHit/interface/VectorHit2D.h"
+
 
 VectorHitCollectionNew VectorHitBuilderAlgorithm::run(const edmNew::DetSetVector<Phase2TrackerCluster1D>& clusters){
 
@@ -133,11 +135,17 @@ std::vector<VectorHit> VectorHitBuilderAlgorithm::buildVectorHits(StackGeomDet s
       std::cout << "\t outer local pos in the inner sof " << localPosCluOutINN << " with error: " << localErrCluOutINN << std::endl;
       std::cout << "\t local vec in the inner sof " << localVecINN << std::endl;
 
-      AlgebraicSymMatrix covMat(2);
-      double chi2 = 0.0;
-      fit(localPosCluInn, localPosCluOutINN, localErrCluInn,localErrCluOutINN, covMat, chi2);
+      AlgebraicSymMatrix covMat2Dzx(2);
+      AlgebraicSymMatrix covMat2Dzy(2);
+      double chi22Dzx = 0.0;
+      double chi22Dzy = 0.0;
 
-      VectorHit vh = VectorHit(localPosCluInn, localVecINN, covMat, chi2);
+      fit2Dzx(localPosCluInn, localPosCluOutINN, localErrCluInn,localErrCluOutINN, covMat2Dzx, chi22Dzx);
+      //VectorHit2D vh2Dzx = VectorHit2D(localVecINN, covMat2Dzx, chi22Dzx);
+      fit2Dzy(localPosCluInn, localPosCluOutINN, localErrCluInn,localErrCluOutINN, covMat2Dzy, chi22Dzy);
+
+      double chi2 = chi22Dzx + chi22Dzy;
+      VectorHit vh = VectorHit(localPosCluInn, localVecINN, covMat2Dzx, chi2);
 
       std::cout << "\t vectorhit " << vh << std::endl;
     }
@@ -148,7 +156,7 @@ std::vector<VectorHit> VectorHitBuilderAlgorithm::buildVectorHits(StackGeomDet s
 
 }
 
-void VectorHitBuilderAlgorithm::fit(const Local3DPoint lpCI, const Local3DPoint lpCO,
+void VectorHitBuilderAlgorithm::fit2Dzx(const Local3DPoint lpCI, const Local3DPoint lpCO,
                            const LocalError leCI, const LocalError leCO,
                            AlgebraicSymMatrix& covMatrix,
                            double& chi2){
@@ -164,6 +172,21 @@ void VectorHitBuilderAlgorithm::fit(const Local3DPoint lpCI, const Local3DPoint 
 
 }
 
+void VectorHitBuilderAlgorithm::fit2Dzy(const Local3DPoint lpCI, const Local3DPoint lpCO,
+                           const LocalError leCI, const LocalError leCO,
+                           AlgebraicSymMatrix& covMatrix,
+                           double& chi2){
+  std::vector<float> x = {lpCI.z(), lpCO.z()};
+  std::vector<float> y = {lpCI.y(), lpCO.y()};
+  float sqCI = sqrt(leCI.yy());
+  float sqCO = sqrt(leCO.yy());
+  std::vector<float> sigy = {sqCI, sqCO};
+
+  fit(x,y,sigy,covMatrix,chi2);
+
+  return;
+
+}
 
 void VectorHitBuilderAlgorithm::fit(const std::vector<float>& x,
                           const std::vector<float>& y,

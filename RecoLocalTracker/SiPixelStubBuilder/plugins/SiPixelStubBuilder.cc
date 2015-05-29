@@ -1,5 +1,5 @@
 #include "RecoLocalTracker/SiPixelStubBuilder/plugins/SiPixelStubBuilder.h"
-#include "RecoLocalTracker/SiPixelStubBuilder/interface/VectorHitBuilder.h"
+#include "RecoLocalTracker/SiPixelStubBuilder/interface/VectorHitBuilderAlgorithm.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
@@ -63,8 +63,8 @@ void SiPixelStubBuilder::produce(edm::Event& event, const edm::EventSetup& es)
 
 void SiPixelStubBuilder::setupAlgorithm(edm::ParameterSet const& conf) {
 
-  if ( algoTag == "VectorHitBuilder" ) {
-    stubsBuilder = new VectorHitBuilder(conf);
+  if ( algoTag == "VectorHitBuilderAlgorithm" ) {
+    stubsBuilder = new VectorHitBuilderAlgorithm(conf);
     readytobuild = true;
   } else {
     std::cout << " Choice " << algoTag << " is invalid.\n" ;

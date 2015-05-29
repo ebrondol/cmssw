@@ -18,7 +18,7 @@
 class VectorHitBuilderAlgorithm : public SiPixelStubBuilderAlgorithmBase {
  public:
 
-  VectorHitBuilderAlgorithm(const edm::ParameterSet& conf) : 
+  VectorHitBuilderAlgorithm(const edm::ParameterSet& conf) :
     SiPixelStubBuilderAlgorithmBase(conf), theFitter(new LinearFit()) {};
   ~VectorHitBuilderAlgorithm() { delete theFitter; };
 
@@ -33,9 +33,12 @@ class VectorHitBuilderAlgorithm : public SiPixelStubBuilderAlgorithmBase {
   void buildDetUnit( const edm::DetSetVector<Phase2TrackerCluster1D> & input,
                      output_t& output);
 
-  void fit(const Local3DPoint lpCI, const Local3DPoint lpCO,
-           const LocalError leCI, const LocalError leCO,
-           AlgebraicSymMatrix& covMatrix, double& chi2);
+  void fit2Dzx(const Local3DPoint lpCI, const Local3DPoint lpCO,
+               const LocalError leCI, const LocalError leCO,
+               AlgebraicSymMatrix& covMatrix, double& chi2);
+  void fit2Dzy(const Local3DPoint lpCI, const Local3DPoint lpCO,
+               const LocalError leCI, const LocalError leCO,
+               AlgebraicSymMatrix& covMatrix, double& chi2);
 
   void fit(const std::vector<float>& x,
            const std::vector<float>& y,

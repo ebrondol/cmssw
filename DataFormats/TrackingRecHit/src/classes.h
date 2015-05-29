@@ -6,6 +6,7 @@
 #include "DataFormats/TrackingRecHit/interface/InvalidTrackingRecHit.h"
 #include "DataFormats/TrackingRecHit/interface/RecSegment.h"
 #include "DataFormats/TrackingRecHit/interface/VectorHit.h"
+#include "DataFormats/TrackingRecHit/interface/VectorHit2D.h"
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include "DataFormats/Common/interface/DetSetVectorNew.h"
 #include "DataFormats/Common/interface/Wrapper.h"

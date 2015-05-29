@@ -9,7 +9,7 @@
 
 #include "FWCore/Framework/interface/EDProducer.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "RecoLocalTracker/SiPixelStubBuilder/interface/SiPixelStubBuilderBase.h"
+#include "RecoLocalTracker/SiPixelStubBuilder/interface/SiPixelStubBuilderAlgorithmBase.h"
 #include "DataFormats/Phase2TrackerCluster/interface/Phase2TrackerCluster1D.h"
 #include "DataFormats/TrackingRecHit/interface/VectorHit.h"
 
@@ -27,7 +27,7 @@ class SiPixelStubBuilder : public edm::EDProducer
 
  private:
 
-  SiPixelStubBuilderBase * stubsBuilder;
+  SiPixelStubBuilderAlgorithmBase * stubsBuilder;
   std::string offlinestubsTag;
   unsigned int maxOfflinestubs;
   std::string algoTag;
