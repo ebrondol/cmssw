@@ -55,14 +55,6 @@ class VectorHitBuilderAlgorithm : public SiPixelStubBuilderAlgorithmBase {
  private:
    LinearFit* theFitter;
 
-   template<class T> void buildDetUnit_(const T& input, output_t& output) {
-   for(typename T::const_iterator it = input.begin(); it!=input.end(); it++) {
-     output_t::FastFiller ff(output, it->detId());
-//     build(*it, ff);
-     if(ff.empty()) ff.abort();
-   }
- }
-
 };
 
 #endif

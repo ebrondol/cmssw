@@ -18,10 +18,7 @@ VectorHit::VectorHit(const LocalPoint& posInner,
   theCovMatrix(covMatrix),
   theChi2(Chi2),
   theDimension(4)
-{
-  std::cout << "New vector hit!" << std::endl;
-
-}
+{}
 
 VectorHit::VectorHit(const LocalPoint& posInner,
                      const LocalVector& dir,
@@ -42,8 +39,6 @@ VectorHit::VectorHit(const LocalPoint& posInner,
   theCovMatrix[1][3] = covMatZY[0][1];   // cov(dy/dz,y)
  
   theChi2 = vh2Dzx.chi2() + vh2Dzy.chi2();
-
-  std::cout << "New vector hit!" << std::endl;
 }
 
 /*

@@ -22,7 +22,7 @@ SiPixelStubBuilder::~SiPixelStubBuilder() {
 
 void SiPixelStubBuilder::produce(edm::Event& event, const edm::EventSetup& es)
 {
-  std::cout << "SiPixelStubBuilder::produce() begin" << std::endl;
+  LogDebug("SiPixelStubBuilder") << "SiPixelStubBuilder::produce() begin";
 
   // get input clusters data
   edm::Handle< edmNew::DetSetVector<Phase2TrackerCluster1D> >  clustersHandle;
@@ -34,7 +34,7 @@ void SiPixelStubBuilder::produce(edm::Event& event, const edm::EventSetup& es)
   std::auto_ptr< VectorHitCollectionNew > outputVHRejected( new VectorHitCollectionNew() );
 
   if(readytobuild)  stubsBuilder->initialize(es);
-  else std::cout << "Impossible initialization of builder!!" << std::endl;
+  else edm::LogError("SiPixelStubBuilder") << "Impossible initialization of builder!!";
 
   // check on the input clusters
   stubsBuilder->printClusters(*clustersHandle);
@@ -60,7 +60,7 @@ void SiPixelStubBuilder::produce(edm::Event& event, const edm::EventSetup& es)
   event.put( outputVHAccepted, offlinestubsTag + "Accepted" );
   event.put( outputVHRejected, offlinestubsTag + "Rejected" );
 
-  //std::cout << "found\n" << outputVHAccepted->dataSize()   << "  stubs in mono detectors\n" ;
+  //LogDebug("SiPixelStubBuilder") << "found\n" << outputVHAccepted->dataSize()   << "  stubs in mono detectors\n" ;
 
 }
 
@@ -70,7 +70,7 @@ void SiPixelStubBuilder::setupAlgorithm(edm::ParameterSet const& conf) {
     stubsBuilder = new VectorHitBuilderAlgorithm(conf);
     readytobuild = true;
   } else {
-    std::cout << " Choice " << algoTag << " is invalid.\n" ;
+    edm::LogError("SiPixelStubBuilder") << " Choice " << algoTag << " is invalid.\n" ;
     readytobuild = false;
   }
 
@@ -80,34 +80,22 @@ void SiPixelStubBuilder::setupAlgorithm(edm::ParameterSet const& conf) {
 void SiPixelStubBuilder::run(const edmNew::DetSetVector<Phase2TrackerCluster1D>& clusters, VectorHitCollectionNew output ){
 
   if ( !readytobuild ) {
-    std::cout << " No stub builder algorithm was found - cannot run!" ;
+    edm::LogError("SiPixelStubBuilder") << " No stub builder algorithm was found - cannot run!" ;
     return;
   }
 
   output = stubsBuilder->run(clusters);
-  std::cout << " Executing " << algoTag << " resulted in " << output.size() << "." << std::endl;
-  //std::vector< std::pair< StackGeomDet, std::vector<Phase2TrackerCluster1D> > > groupClusterBySM;
-  //groupClusterBySM = stubsBuilder->groupinginStackModules(clusters);
-/*
-    // Produce stubs for this DetUnit and store them in a DetSetVector
-    edmNew::DetSetVector<SiPixelCluster>::FastFiller spc(output, DSViter->detId());
-    _stubBuilder->clusterizeDetUnit(*DSViter, pixDet, badChannels, spc);
-    if ( spc.empty() ) {
-      spc.abort();
-    } else {
-numberOfClusters += spc.size();
-    }
-*/
+
   //max number in total
   unsigned int numberOfStubs = output.size();
 
   if(numberOfStubs > maxOfflinestubs) {
-    std::cout <<  "Limit on the number of stubs exceeded. An empty output collection will be produced instead.\n";
+    edm::LogError("SiPixelStubBuilder") <<  "Limit on the number of stubs exceeded. An empty output collection will be produced instead.\n";
     VectorHitCollectionNew empty;
     empty.swap(output);
   }
 
-  std::cout << " Executing " << algoTag << " resulted in " << numberOfStubs << "." << std::endl;
+  LogDebug("SiPixelStubBuilder") << " Executing " << algoTag << " resulted in " << numberOfStubs << ".";
 
 
 }

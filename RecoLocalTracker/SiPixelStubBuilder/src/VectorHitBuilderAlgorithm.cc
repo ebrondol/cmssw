@@ -7,9 +7,10 @@
 
 VectorHitCollectionNew VectorHitBuilderAlgorithm::run(const edmNew::DetSetVector<Phase2TrackerCluster1D>& clusters){
 
+  LogDebug("VectorHitBuilderAlgorithm") << "Run VectorHitBuilderAlgorithm ... " ;
+
   VectorHitCollectionNew result;
   std::map< DetId, std::vector<VectorHit> > temporary;
-  std::vector<VectorHit> preliminaryresult;
 
   //loop over the DetSetVector
   edmNew::DetSetVector<Phase2TrackerCluster1D>::const_iterator DSViter;
@@ -28,7 +29,7 @@ VectorHitCollectionNew VectorHitBuilderAlgorithm::run(const edmNew::DetSetVector
       if(sameStack) {
 
         StackGeomDet stack = createNewStack(detId1, detId2);
-        std::cout << "  Stack created with DetIds: " << rawDetId1 << "," << rawDetId2;
+        LogDebug("VectorHitBuilderAlgorithm") << "  Stack created with DetIds: " << rawDetId1 << "," << rawDetId2;
         std::vector<Phase2TrackerCluster1D> innerClustersInStack;
         std::vector<Phase2TrackerCluster1D> outerClustersInStack;
 
@@ -41,11 +42,9 @@ VectorHitCollectionNew VectorHitBuilderAlgorithm::run(const edmNew::DetSetVector
           outerClustersInStack.push_back(*clustIt);
         }
 
-        std::cout << "\t with " << int(innerClustersInStack.size() + outerClustersInStack.size()) << " clusters associated." << std::endl;
+        LogTrace("VectorHitBuilderAlgorithm") << "\t with " << int(innerClustersInStack.size() + outerClustersInStack.size()) << " clusters associated.";
 
         std::vector<VectorHit> vhsInStack = buildVectorHits(stack, innerClustersInStack, outerClustersInStack);
-        preliminaryresult.insert(preliminaryresult.end(),vhsInStack.begin(), vhsInStack.end());
-
         temporary[rawDetId1] = vhsInStack;
 
         innerClustersInStack.clear();
@@ -54,13 +53,6 @@ VectorHitCollectionNew VectorHitBuilderAlgorithm::run(const edmNew::DetSetVector
 
       }
     }
-  }
-
-  //for( std::vector<VectorHit>::const_iterator vh_iter = preliminaryresult.begin() ; vh_iter != preliminaryresult.end(); vh_iter++) {
-  for( auto& vh: preliminaryresult ){
-
-    std::cout << "\t vectorhit in output " << vh << std::endl;
-
   }
 
   loadDetSetVector(temporary, result);
@@ -82,7 +74,7 @@ bool VectorHitBuilderAlgorithm::checkModuleCompatibility(DetId detId1, DetId det
   if(module1%2 != 0){
     unsigned int module2 = getModuleNumber(detId2);
     if(module2 == module1+1) {
-      std::cout << "Modules ("<< module1 << "," << module2 <<") are compatible!" << std::endl;
+      LogDebug("VectorHitBuilderAlgorithm") << "Modules ("<< module1 << "," << module2 <<") are compatible!";
       return true;
     }
 
@@ -121,7 +113,7 @@ std::vector<VectorHit> VectorHitBuilderAlgorithm::buildVectorHits(StackGeomDet s
     for( outerClus_iter = outerClus.begin(); outerClus_iter != outerClus.end(); outerClus_iter++ ){
 
       VectorHit vh = buildVectorHit( stack, *innerClus_iter, *outerClus_iter);
-      std::cout << "\t vectorhit " << vh << std::endl;
+      LogTrace("VectorHitBuilderAlgorithm") << "\t vectorhit " << vh;
       result.push_back(vh);
 
     }
@@ -161,12 +153,12 @@ VectorHit VectorHitBuilderAlgorithm::buildVectorHit(StackGeomDet stack, const Ph
 
   //debug
   //Global3DPoint globalPosCluInn = gDUnitInn->surface().toGlobal(localPosCluInn);
-  //std::cout << "\t inner global pos " << globalPosCluInn << std::endl;
-  //std::cout << "\t outer global pos " << globalPosCluOut << std::endl;
-  //std::cout << "\t outer local pos " << localPosCluOut << std::endl;
+  //LogDebug("VectorHitBuilderAlgorithm") << "\t inner global pos " << globalPosCluInn;
+  //LogDebug("VectorHitBuilderAlgorithm") << "\t outer global pos " << globalPosCluOut;
+  //LogDebug("VectorHitBuilderAlgorithm") << "\t outer local pos " << localPosCluOut;
 
-  std::cout << "\t inner local pos " << localPosCluInn << " with error: " << localErrCluInn << std::endl;
-  std::cout << "\t outer local pos in the inner sof " << localPosCluOutINN << " with error: " << localErrCluOutINN << std::endl;
+  LogTrace("VectorHitBuilderAlgorithm") << "\t inner local pos " << localPosCluInn << " with error: " << localErrCluInn;
+  LogTrace("VectorHitBuilderAlgorithm") << "\t outer local pos in the inner sof " << localPosCluOutINN << " with error: " << localErrCluOutINN;
 
   bool ok = checkClustersCompatibility(localPosCluInn, localPosCluOutINN, localErrCluInn, localErrCluOutINN);
 
@@ -174,7 +166,7 @@ VectorHit VectorHitBuilderAlgorithm::buildVectorHit(StackGeomDet stack, const Ph
 
     //in the inner reference of frame
     Local3DVector localVecINN = localPosCluOutINN - localPosCluInn;
-    std::cout << "\t local vec in the inner sof " << localVecINN << std::endl;
+    LogTrace("VectorHitBuilderAlgorithm") << "\t local vec in the inner sof " << localVecINN;
 
     AlgebraicSymMatrix22 covMat2Dzx;
     double chi22Dzx = 0.0;
@@ -236,7 +228,7 @@ void VectorHitBuilderAlgorithm::fit(const std::vector<float>& x,
                           double& chi2){
 
   if(x.size() != y.size() || x.size() != sigy.size()){
-    std::cout << "Different size for x,z !! No fit possible." << std::endl;
+    edm::LogError("VectorHitBuilderAlgorithm") << "Different size for x,z !! No fit possible.";
     return;
   }
 
@@ -261,13 +253,5 @@ void VectorHitBuilderAlgorithm::fit(const std::vector<float>& x,
   //not useful now, maybe one day
   //LocalPoint pos = LocalPoint(intercept,0.,0.);
   //LocalVector dir = LocalVector(-slope,0.,-1.).unit();
-
-}
-//----------------------------------------------------------------------------
-void VectorHitBuilderAlgorithm::buildDetUnit( const edm::DetSetVector<Phase2TrackerCluster1D> & input,
-                                     output_t& output)  {
-
-  buildDetUnit_(input, output);
-
 
 }
