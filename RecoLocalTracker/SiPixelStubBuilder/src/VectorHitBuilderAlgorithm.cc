@@ -4,13 +4,15 @@
 #include "Geometry/CommonTopologies/interface/PixelTopology.h"
 #include "DataFormats/TrackingRecHit/interface/VectorHit2D.h"
 
-
-VectorHitCollectionNew VectorHitBuilderAlgorithm::run(const edmNew::DetSetVector<Phase2TrackerCluster1D>& clusters){
+//FIXME::ERICA: not clear yet how to fullfill the acc/rej output
+void VectorHitBuilderAlgorithm::run(const edmNew::DetSetVector<Phase2TrackerCluster1D>& clusters, VectorHitCollectionNew& vhAcc, VectorHitCollectionNew& vhRej,
+  edmNew::DetSetVector<Phase2TrackerCluster1D>& clustersAcc, edmNew::DetSetVector<Phase2TrackerCluster1D>& clustersRej){
 
   LogDebug("VectorHitBuilderAlgorithm") << "Run VectorHitBuilderAlgorithm ... " ;
 
-  VectorHitCollectionNew result;
   std::map< DetId, std::vector<VectorHit> > temporary;
+  //std::map< DetId, std::vector<VectorHit> > tempVHacc, tempVHrej;
+  //std::map< DetId, std::vector<Phase2TrackerCluster1D> > tempCLacc, tempCLrej;
 
   //loop over the DetSetVector
   edmNew::DetSetVector<Phase2TrackerCluster1D>::const_iterator DSViter;
@@ -20,11 +22,12 @@ VectorHitCollectionNew VectorHitBuilderAlgorithm::run(const edmNew::DetSetVector
     DetId detId1(rawDetId1);
 
     edmNew::DetSetVector<Phase2TrackerCluster1D>::const_iterator DSViter2;
+    bool sameStack = false;
     for( DSViter2 = DSViter+1 ; DSViter2 != clusters.end(); DSViter2++){
 
       unsigned int rawDetId2(DSViter2->detId());
       DetId detId2(rawDetId2);
-      bool sameStack = checkModuleCompatibility(detId1, detId2);
+      sameStack = checkModuleCompatibility(detId1, detId2);
 
       if(sameStack) {
 
@@ -53,11 +56,12 @@ VectorHitCollectionNew VectorHitBuilderAlgorithm::run(const edmNew::DetSetVector
 
       }
     }
+
   }
 
-  loadDetSetVector(temporary, result);
+  loadDetSetVector(temporary, vhAcc);
 
-  return result;
+  return;
 
 }
 

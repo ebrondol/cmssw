@@ -22,7 +22,8 @@ class VectorHitBuilderAlgorithm : public SiPixelStubBuilderAlgorithmBase {
     SiPixelStubBuilderAlgorithmBase(conf), theFitter(new LinearFit()) {};
   ~VectorHitBuilderAlgorithm() { delete theFitter; };
 
-  VectorHitCollectionNew run(const edmNew::DetSetVector<Phase2TrackerCluster1D>& clusters);
+  void run(const edmNew::DetSetVector<Phase2TrackerCluster1D>& clusters, VectorHitCollectionNew& vhAcc, VectorHitCollectionNew& vhRej, 
+    edmNew::DetSetVector<Phase2TrackerCluster1D>& clustersAcc, edmNew::DetSetVector<Phase2TrackerCluster1D>& clustersRej );
   bool checkModuleCompatibility(DetId detId1, DetId detId2);
   //not implemented yet
   bool checkClustersCompatibility(Local3DPoint& posinner, Local3DPoint& posouter, LocalError& errinner, LocalError& errouter);
@@ -33,8 +34,8 @@ class VectorHitBuilderAlgorithm : public SiPixelStubBuilderAlgorithmBase {
   VectorHit buildVectorHit(StackGeomDet stack, const Phase2TrackerCluster1D& inner, const Phase2TrackerCluster1D& outer);
 
   // Full I/O in DetSet
-  void buildDetUnit( const edm::DetSetVector<Phase2TrackerCluster1D> & input,
-                     output_t& output);
+  //void buildDetUnit( const edm::DetSetVector<Phase2TrackerCluster1D> & input,
+  //                   output_t& output);
 
   void fit2Dzx(const Local3DPoint lpCI, const Local3DPoint lpCO,
                const LocalError leCI, const LocalError leCO,

@@ -22,7 +22,9 @@ class SiPixelStubBuilder : public edm::EDProducer
   virtual ~SiPixelStubBuilder();
   virtual void produce(edm::Event&, const edm::EventSetup&);
   void setupAlgorithm(edm::ParameterSet const& conf);
-  void run(const edmNew::DetSetVector<Phase2TrackerCluster1D>& , VectorHitCollectionNew );
+  void run(const edmNew::DetSetVector<Phase2TrackerCluster1D>& clusters,
+           edmNew::DetSetVector<Phase2TrackerCluster1D>& clustersAcc, edmNew::DetSetVector<Phase2TrackerCluster1D>& clustersRej,
+           VectorHitCollectionNew& outputAcc, VectorHitCollectionNew& outputRej);
 
 
  private:

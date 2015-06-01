@@ -30,7 +30,8 @@ class SiPixelStubBuilderAlgorithmBase {
   void initialize(const edm::EventSetup&);
 
   //FIXME::ERICA::this should be template, return different collection for different algo used!!
-  virtual VectorHitCollectionNew run(const edmNew::DetSetVector<Phase2TrackerCluster1D>& clusters) = 0;
+  virtual void run(const edmNew::DetSetVector<Phase2TrackerCluster1D>& clusters, VectorHitCollectionNew& vhAcc, VectorHitCollectionNew& vhRej, 
+    edmNew::DetSetVector<Phase2TrackerCluster1D>& clustersAcc, edmNew::DetSetVector<Phase2TrackerCluster1D>& clustersRej) = 0;
 
   unsigned int getLayerNumber(const DetId& detid);
   unsigned int getModuleNumber(const DetId& detid);
