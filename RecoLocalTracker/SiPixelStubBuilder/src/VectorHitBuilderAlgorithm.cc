@@ -119,10 +119,10 @@ std::vector<VectorHit> VectorHitBuilderAlgorithm::buildVectorHits(StackGeomDet s
       VectorHit vh = buildVectorHit( stack, *innerClus_iter, *outerClus_iter);
       LogTrace("VectorHitBuilderAlgorithm") << "\t vectorhit " << vh;
 
-      //put a protection: the VH can also be empty!!
-      //vh.isValid()?
-
-      result.push_back(vh);
+      //protection: the VH can also be empty!!
+      if (vh.isValid()){
+        result.push_back(vh);
+      }
 
     }
 
@@ -190,7 +190,7 @@ VectorHit VectorHitBuilderAlgorithm::buildVectorHit(StackGeomDet stack, const Ph
     fit2Dzy(localPosCluInn, localPosCluOutINN, localErrCluInn,localErrCluOutINN, pos2Dzy, dir2Dzy, covMat2Dzy, chi22Dzy);
     VectorHit2D vh2Dzy = VectorHit2D(pos2Dzy, dir2Dzy, covMat2Dzy, chi22Dzy);
 
-    VectorHit vh = VectorHit(vh2Dzx, vh2Dzy);
+    VectorHit vh = VectorHit(stack.innerDet()->geographicalId(), vh2Dzx, vh2Dzy);
     return vh;
 
   }

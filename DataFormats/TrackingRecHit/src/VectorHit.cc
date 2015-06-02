@@ -1,18 +1,12 @@
-/** \file
- *
- * $Date: 2009/09/21 10:13:37 $
- * $Revision: 1.15 $
- * \author Stefano Lacaprara - INFN Legnaro <stefano.lacaprara@pd.infn.it>
- * \author Riccardo Bellan - INFN TO <riccardo.bellan@cern.ch>
- */
-
 #include "DataFormats/TrackingRecHit/interface/VectorHit.h"
 //#include "FWCore/Utilities/interface/Exception.h"
 
-VectorHit::VectorHit(const LocalPoint& posInner,
+VectorHit::VectorHit(DetId id,
+                     const LocalPoint& posInner,
                      const LocalVector& dir,
                      const AlgebraicSymMatrix44& covMatrix,
 		     const double& Chi2):
+  RecSegment(id),
   thePosition(posInner),
   theDirection(dir),
   theCovMatrix(covMatrix),
@@ -20,7 +14,8 @@ VectorHit::VectorHit(const LocalPoint& posInner,
   theDimension(4)
 {}
 
-VectorHit::VectorHit(const VectorHit2D& vh2Dzx, const VectorHit2D& vh2Dzy):
+VectorHit::VectorHit(DetId id,const VectorHit2D& vh2Dzx, const VectorHit2D& vh2Dzy):
+  RecSegment(id),
   theDimension(4)
 {
   thePosition = LocalPoint(vh2Dzx.localPosition().x(), vh2Dzy.localPosition().x(), 0.);

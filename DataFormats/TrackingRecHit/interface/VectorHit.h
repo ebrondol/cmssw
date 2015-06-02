@@ -19,11 +19,11 @@
 class VectorHit : public RecSegment {
  public:
 
-  VectorHit() : thePosition(), theDirection(), theCovMatrix(), theDimension(0) {}
-  VectorHit(const LocalPoint& posInner, const LocalVector& dir, 
+  VectorHit() : thePosition(), theDirection(), theCovMatrix(), theDimension(0) { setType(bad); }
+  VectorHit(DetId id, const LocalPoint& posInner, const LocalVector& dir, 
             const AlgebraicSymMatrix44& covMatrix,
             const double& Chi2) ;
-  VectorHit(const VectorHit2D& vh2Dzx, const VectorHit2D& vh2Dzy) ;
+  VectorHit(DetId id, const VectorHit2D& vh2Dzx, const VectorHit2D& vh2Dzy) ;
 
   ~VectorHit() ;
   virtual VectorHit* clone() const { return new VectorHit(*this);}
