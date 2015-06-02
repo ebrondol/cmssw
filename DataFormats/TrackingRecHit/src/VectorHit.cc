@@ -20,13 +20,16 @@ VectorHit::VectorHit(const LocalPoint& posInner,
   theDimension(4)
 {}
 
-VectorHit::VectorHit(const LocalPoint& posInner,
-                     const LocalVector& dir,
-                     const VectorHit2D& vh2Dzx, const VectorHit2D& vh2Dzy):
-  thePosition(posInner),
-  theDirection(dir),
+VectorHit::VectorHit(const VectorHit2D& vh2Dzx, const VectorHit2D& vh2Dzy):
   theDimension(4)
 {
+  thePosition = LocalPoint(vh2Dzx.localPosition().x(), vh2Dzy.localPosition().x(), 0.);
+
+  // given the actual definition of chamber refFrame, (with z poiniting to IP),
+  // the zed component of direction is negative.
+  theDirection = LocalVector(vh2Dzx.localDirection().x(), vh2Dzy.localDirection().x(), -1.);
+  theDirection = theDirection.unit();
+
   //building the cov matrix 4x4 starting from the 2x2
   AlgebraicSymMatrix22 covMatZX = vh2Dzx.covMatrix();
   AlgebraicSymMatrix22 covMatZY = vh2Dzy.covMatrix();
@@ -169,15 +172,6 @@ LocalError VectorHit::localDirectionError() const {
 }
 
 
-
-int VectorHit::degreesOfFreedom() const {
-  int result=0;
-/*
-  if (hasPhi()) result+=thePhiSeg.degreesOfFreedom();
-  if (hasZed()) result+=theZedSeg.degreesOfFreedom();
-*/
-  return result;
-}
 
 AlgebraicSymMatrix VectorHit::parametersError() const {
 

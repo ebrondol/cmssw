@@ -118,6 +118,10 @@ std::vector<VectorHit> VectorHitBuilderAlgorithm::buildVectorHits(StackGeomDet s
 
       VectorHit vh = buildVectorHit( stack, *innerClus_iter, *outerClus_iter);
       LogTrace("VectorHitBuilderAlgorithm") << "\t vectorhit " << vh;
+
+      //put a protection: the VH can also be empty!!
+      //vh.isValid()?
+
       result.push_back(vh);
 
     }
@@ -174,15 +178,19 @@ VectorHit VectorHitBuilderAlgorithm::buildVectorHit(StackGeomDet stack, const Ph
 
     AlgebraicSymMatrix22 covMat2Dzx;
     double chi22Dzx = 0.0;
-    fit2Dzx(localPosCluInn, localPosCluOutINN, localErrCluInn,localErrCluOutINN, covMat2Dzx, chi22Dzx);
-    VectorHit2D vh2Dzx = VectorHit2D(localVecINN, covMat2Dzx, chi22Dzx);
+    Local3DPoint pos2Dzx;
+    Local3DVector dir2Dzx;
+    fit2Dzx(localPosCluInn, localPosCluOutINN, localErrCluInn,localErrCluOutINN, pos2Dzx, dir2Dzx, covMat2Dzx, chi22Dzx);
+    VectorHit2D vh2Dzx = VectorHit2D(pos2Dzx, dir2Dzx, covMat2Dzx, chi22Dzx);
 
     AlgebraicSymMatrix22 covMat2Dzy;
     double chi22Dzy = 0.0;
-    fit2Dzy(localPosCluInn, localPosCluOutINN, localErrCluInn,localErrCluOutINN, covMat2Dzy, chi22Dzy);
-    VectorHit2D vh2Dzy = VectorHit2D(localVecINN, covMat2Dzy, chi22Dzy);
+    Local3DPoint pos2Dzy;
+    Local3DVector dir2Dzy;
+    fit2Dzy(localPosCluInn, localPosCluOutINN, localErrCluInn,localErrCluOutINN, pos2Dzy, dir2Dzy, covMat2Dzy, chi22Dzy);
+    VectorHit2D vh2Dzy = VectorHit2D(pos2Dzy, dir2Dzy, covMat2Dzy, chi22Dzy);
 
-    VectorHit vh = VectorHit(localPosCluInn, localVecINN, vh2Dzx, vh2Dzy);
+    VectorHit vh = VectorHit(vh2Dzx, vh2Dzy);
     return vh;
 
   }
@@ -195,6 +203,7 @@ VectorHit VectorHitBuilderAlgorithm::buildVectorHit(StackGeomDet stack, const Ph
 
 void VectorHitBuilderAlgorithm::fit2Dzx(const Local3DPoint lpCI, const Local3DPoint lpCO,
                            const LocalError leCI, const LocalError leCO,
+                           Local3DPoint& pos, Local3DVector& dir,
                            AlgebraicSymMatrix22& covMatrix,
                            double& chi2){
   std::vector<float> x = {lpCI.z(), lpCO.z()};
@@ -203,7 +212,7 @@ void VectorHitBuilderAlgorithm::fit2Dzx(const Local3DPoint lpCI, const Local3DPo
   float sqCO = sqrt(leCO.xx());
   std::vector<float> sigy = {sqCI, sqCO};
 
-  fit(x,y,sigy,covMatrix,chi2);
+  fit(x,y,sigy,pos,dir,covMatrix,chi2);
 
   return;
 
@@ -211,6 +220,7 @@ void VectorHitBuilderAlgorithm::fit2Dzx(const Local3DPoint lpCI, const Local3DPo
 
 void VectorHitBuilderAlgorithm::fit2Dzy(const Local3DPoint lpCI, const Local3DPoint lpCO,
                            const LocalError leCI, const LocalError leCO,
+                           Local3DPoint& pos, Local3DVector& dir,
                            AlgebraicSymMatrix22& covMatrix,
                            double& chi2){
   std::vector<float> x = {lpCI.z(), lpCO.z()};
@@ -219,7 +229,7 @@ void VectorHitBuilderAlgorithm::fit2Dzy(const Local3DPoint lpCI, const Local3DPo
   float sqCO = sqrt(leCO.yy());
   std::vector<float> sigy = {sqCI, sqCO};
 
-  fit(x,y,sigy,covMatrix,chi2);
+  fit(x,y,sigy,pos,dir,covMatrix,chi2);
 
   return;
 
@@ -228,6 +238,7 @@ void VectorHitBuilderAlgorithm::fit2Dzy(const Local3DPoint lpCI, const Local3DPo
 void VectorHitBuilderAlgorithm::fit(const std::vector<float>& x,
                           const std::vector<float>& y,
                           const std::vector<float>& sigy,
+                          Local3DPoint& pos, Local3DVector& dir,
                           AlgebraicSymMatrix22& covMatrix,
                           double& chi2){
 
@@ -254,8 +265,7 @@ void VectorHitBuilderAlgorithm::fit(const std::vector<float>& x,
     chi2 += dy*dy;
  }
 
-  //not useful now, maybe one day
-  //LocalPoint pos = LocalPoint(intercept,0.,0.);
-  //LocalVector dir = LocalVector(-slope,0.,-1.).unit();
+  pos = Local3DPoint(intercept,0.,0.);
+  dir = LocalVector(-slope,0.,-1.);
 
 }

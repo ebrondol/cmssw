@@ -23,8 +23,7 @@ class VectorHit : public RecSegment {
   VectorHit(const LocalPoint& posInner, const LocalVector& dir, 
             const AlgebraicSymMatrix44& covMatrix,
             const double& Chi2) ;
-  VectorHit(const LocalPoint& posInner, const LocalVector& dir, 
-            const VectorHit2D& vh2Dzx, const VectorHit2D& vh2Dzy) ;
+  VectorHit(const VectorHit2D& vh2Dzx, const VectorHit2D& vh2Dzy) ;
 
   ~VectorHit() ;
   virtual VectorHit* clone() const { return new VectorHit(*this);}
@@ -65,7 +64,7 @@ class VectorHit : public RecSegment {
   virtual LocalError localDirectionError() const ;
   
   // Degrees of freedom of the segment fit
-  virtual int degreesOfFreedom() const ;
+  virtual int degreesOfFreedom() const { return 0; } //number of hits (2+2) - dimension
 
   // Access to component RecHits (if any)
   virtual std::vector<const TrackingRecHit*> recHits() const ;

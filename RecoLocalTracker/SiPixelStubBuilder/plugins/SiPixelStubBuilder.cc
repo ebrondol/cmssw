@@ -44,7 +44,7 @@ void SiPixelStubBuilder::produce(edm::Event& event, const edm::EventSetup& es)
   // running the stub building algorithm
   //ERICA::output should be moved in the different algo classes?
   run( *clustersHandle, *outputClustersAccepted, *outputClustersRejected, *outputVHAccepted, *outputVHRejected);
-
+/*
   unsigned int numberOfStubs = 0;
   edmNew::DetSetVector<VectorHit>::const_iterator DSViter;
   for( DSViter = (*outputVHAccepted).begin() ; DSViter != (*outputVHAccepted).end(); DSViter++){
@@ -62,14 +62,14 @@ void SiPixelStubBuilder::produce(edm::Event& event, const edm::EventSetup& es)
     VectorHitCollectionNew empty;
     empty.swap(outputAcc);
   }
-
+*/
   // write output to file
   event.put( outputClustersAccepted, "ClustersAccepted" );
   event.put( outputClustersRejected, "ClustersRejected" );
   event.put( outputVHAccepted, offlinestubsTag + "Accepted" );
   event.put( outputVHRejected, offlinestubsTag + "Rejected" );
 
-  LogDebug("SiPixelStubBuilder") << " Executing " << algoTag << " resulted in " << numberOfStubs << ".";
+//  LogDebug("SiPixelStubBuilder") << " Executing " << algoTag << " resulted in " << numberOfStubs << ".";
   //LogDebug("SiPixelStubBuilder") << "found\n" << outputVHAccepted->dataSize()   << " .\n" ;
 
 }

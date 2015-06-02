@@ -19,8 +19,8 @@
   <class name="VectorHit" ClassVersion="14">
    <version ClassVersion="14" checksum="3272438142"/>
   </class>
-  <class name="VectorHit2D" ClassVersion="13">
-   <version ClassVersion="13" checksum="510537000"/>
+  <class name="VectorHit2D" ClassVersion="14">
+   <version ClassVersion="14" checksum="333065919"/>
   </class>
   <class name="std::vector<TrackingRecHit*>"/>
   <class name="edm::OwnVector<TrackingRecHit, edm::ClonePolicy<TrackingRecHit> >"/>

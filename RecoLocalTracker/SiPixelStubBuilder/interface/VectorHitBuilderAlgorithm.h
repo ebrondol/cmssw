@@ -22,7 +22,7 @@ class VectorHitBuilderAlgorithm : public SiPixelStubBuilderAlgorithmBase {
     SiPixelStubBuilderAlgorithmBase(conf), theFitter(new LinearFit()) {};
   ~VectorHitBuilderAlgorithm() { delete theFitter; };
 
-  void run(const edmNew::DetSetVector<Phase2TrackerCluster1D>& clusters, VectorHitCollectionNew& vhAcc, VectorHitCollectionNew& vhRej, 
+  void run(const edmNew::DetSetVector<Phase2TrackerCluster1D>& clusters, VectorHitCollectionNew& vhAcc, VectorHitCollectionNew& vhRej,
     edmNew::DetSetVector<Phase2TrackerCluster1D>& clustersAcc, edmNew::DetSetVector<Phase2TrackerCluster1D>& clustersRej );
   bool checkModuleCompatibility(DetId detId1, DetId detId2);
   //not implemented yet
@@ -39,14 +39,17 @@ class VectorHitBuilderAlgorithm : public SiPixelStubBuilderAlgorithmBase {
 
   void fit2Dzx(const Local3DPoint lpCI, const Local3DPoint lpCO,
                const LocalError leCI, const LocalError leCO,
+               Local3DPoint& pos, Local3DVector& dir,
                AlgebraicSymMatrix22& covMatrix, double& chi2);
   void fit2Dzy(const Local3DPoint lpCI, const Local3DPoint lpCO,
                const LocalError leCI, const LocalError leCO,
+               Local3DPoint& pos, Local3DVector& dir,
                AlgebraicSymMatrix22& covMatrix, double& chi2);
 
   void fit(const std::vector<float>& x,
            const std::vector<float>& y,
            const std::vector<float>& sigy,
+           Local3DPoint& pos, Local3DVector& dir,
            AlgebraicSymMatrix22& covMatrix, double& chi2);
 
 //  void build( const edm::DetSet<Phase2TrackerCluster1D> & input,
