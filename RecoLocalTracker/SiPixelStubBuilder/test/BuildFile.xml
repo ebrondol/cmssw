@@ -22,11 +22,21 @@
 <use   name="DataFormats/Phase2TrackerCluster"/>
 <use   name="DataFormats/ParticleFlowCandidate"/>
 <use   name="DataFormats/ParticleFlowReco"/>
+<library   file="ClustersValidationTGraph.cc" name="Phase2TrackerClusterizerValidationTGraph">
+  <flags   EDM_PLUGIN="1"/>
+  <flags CXXFLAGS="-g3"/>
+</library>
 <library   file="ClustersValidation.cc" name="Phase2TrackerClusterizerValidation">
   <flags   EDM_PLUGIN="1"/>
   <flags CXXFLAGS="-g3"/>
 </library>
 <library   file="VectorHitsValidation.cc" name="VectorHitsBuilderValidation">
+  <flags   EDM_PLUGIN="1"/>
+  <flags CXXFLAGS="-g3"/>
+</library>
+<use   name="DataFormats/L1TrackTrigger"/>
+<use   name="SimDataFormats/TrackingAnalysis"/>
+<library   file="AnalyzerClusterStub.cc" name="AnalyzerClusterStubNew">
   <flags   EDM_PLUGIN="1"/>
   <flags CXXFLAGS="-g3"/>
 </library>

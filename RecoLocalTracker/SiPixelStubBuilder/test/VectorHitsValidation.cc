@@ -24,8 +24,8 @@
 #include "DataFormats/DetId/interface/DetId.h"
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Phase2TrackerCluster/interface/Phase2TrackerCluster1D.h"
-#include "DataFormats/Phase2TrackerDigi/interface/Phase2TrackerDigi.h"
-#include "DataFormats/SiPixelDigi/interface/PixelDigi.h"
+//#include "DataFormats/Phase2TrackerDigi/interface/Phase2TrackerDigi.h"
+//#include "DataFormats/SiPixelDigi/interface/PixelDigi.h"
 
 #include "SimDataFormats/TrackerDigiSimLink/interface/PixelDigiSimLink.h"
 #include "SimDataFormats/Track/interface/SimTrackContainer.h"
@@ -37,9 +37,13 @@
 
 #include "DataFormats/TrackingRecHit/interface/VectorHit.h"
 
-#include <TH2F.h>
 #include <TH1F.h>
+#include <TH2F.h>
+#include <TGraph.h>
 #include <THStack.h>
+#include <TCanvas.h>
+#include <TArrow.h>
+
 
 
 struct ClusterHistos {
@@ -78,16 +82,20 @@ class VectorHitsBuilderValidation : public edm::EDAnalyzer {
     private:
 
         std::map< unsigned int, ClusterHistos >::iterator createLayerHistograms(unsigned int);
+        void CreateVHsGraph(const std::vector<Global3DPoint>,const  std::vector<Global3DVector> );
         unsigned int getLayerNumber(const DetId&, const TrackerTopology*);
         unsigned int getSimTrackId(const edm::Handle< edm::DetSetVector< PixelDigiSimLink > >&, const DetId&, unsigned int);
 
         edm::InputTag src_;
         edm::InputTag src2_;
         edm::InputTag links_;
-        TH2F* trackerLayout_;
-        TH2F* trackerLayoutXY_;
+        TH2F* trackerLayout_[3];
+        TH2F* trackerLayoutXY_[3];
         TH2F* trackerLayoutXYBar_;
         TH2F* trackerLayoutXYEC_;
+        TCanvas* c;
+        std::vector<TArrow*> arrowVHs;
+
 
         std::map< unsigned int, ClusterHistos > histograms_;
 
@@ -105,19 +113,29 @@ VectorHitsBuilderValidation::VectorHitsBuilderValidation(const edm::ParameterSet
         fs->file().cd("/");
         TFileDirectory td = fs->mkdir("Common");
         // Create common histograms
-        trackerLayout_ = td.make< TH2F >("RVsZ", "R vs. z position", 6000, -300.0, 300.0, 1200, 0.0, 120.0);
-        trackerLayoutXY_ = td.make< TH2F >("XVsY", "x vs. y position", 2400, -120.0, 120.0, 2400, -120.0, 120.0);
+        trackerLayout_[0] = td.make< TH2F >("RVsZ_Mixed", "R vs. z position", 6000, -300.0, 300.0, 1200, 0.0, 120.0);
+        trackerLayout_[1] = td.make< TH2F >("RVsZ_Pixel", "R vs. z position", 6000, -300.0, 300.0, 1200, 0.0, 120.0);
+        trackerLayout_[2] = td.make< TH2F >("RVsZ_Strip", "R vs. z position", 6000, -300.0, 300.0, 1200, 0.0, 120.0);
+        trackerLayoutXY_[0] = td.make< TH2F >("XVsY_Mixed", "x vs. y position", 2400, -120.0, 120.0, 2400, -120.0, 120.0);
+        trackerLayoutXY_[1] = td.make< TH2F >("XVsY_Pixel", "x vs. y position", 2400, -120.0, 120.0, 2400, -120.0, 120.0);
+        trackerLayoutXY_[2] = td.make< TH2F >("XVsY_Strip", "x vs. y position", 2400, -120.0, 120.0, 2400, -120.0, 120.0);
+
         trackerLayoutXYBar_ = td.make< TH2F >("XVsYBar", "x vs. y position", 2400, -120.0, 120.0, 2400, -120.0, 120.0);
         trackerLayoutXYEC_ = td.make< TH2F >("XVsYEC", "x vs. y position", 2400, -120.0, 120.0, 2400, -120.0, 120.0);
+
+        //drawing VHs arrows
+        c = new TCanvas();
+        c->cd();
+
     }
 
-void VectorHitsBuilderValidation::endJob() { }
+void VectorHitsBuilderValidation::endJob() {}
 
 void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::EventSetup& eventSetup) {
 
-    /*
-     * Get the needed objects
-     */
+
+    // Get the needed objects
+
 
     // Get the clusters
     edm::Handle< Phase2TrackerCluster1DCollectionNew > clusters;
@@ -183,15 +201,17 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
         simHitsTrackIdIt->second.push_back(*simHitIt);
     }
 
-    /*
-     * Validation
-     */
+
+    // Validation
+    std::vector<Global3DPoint> glVHs;
+    std::vector<Global3DVector> dirVHs;
 
     // Loop over modules
     for (VectorHitCollectionNew::const_iterator DSViter = vhs->begin(); DSViter != vhs->end(); ++DSViter) {
 
         // Get the detector unit's id
         unsigned int rawid(DSViter->detId());
+	std::cout << rawid << std::endl;
         DetId detId(rawid);
         unsigned int layer(getLayerNumber(detId, tTopo));
 
@@ -209,6 +229,7 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
         // Number of clusters
         unsigned int nVHsPixel(0), nVHsStrip(0);
 
+
         // Loop over the clusters in the detector unit
         for (edmNew::DetSet< VectorHit >::const_iterator vhIt = DSViter->begin(); vhIt != DSViter->end(); ++vhIt) {
 
@@ -220,34 +241,57 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
                std::cout << localPosVH << std::endl;
 
                Global3DPoint globalPosVH = geomDetUnit->surface().toGlobal(localPosVH);
-               std::cout << globalPosVH << std::endl;
+               glVHs.push_back(globalPosVH);
+               //std::cout << globalPosVH << std::endl;
 
+               Local3DVector localDirVH = vhIt->localDirection();
+               std::cout << localDirVH << std::endl;
+
+               //Global3DVector globalDirVH = geomDetUnit->surface().toGlobal(localDirVH);
+               VectorHit vh = *vhIt;
+               Global3DVector globalDirVH = vh.globalDirection(geomDetUnit->surface());
+               dirVHs.push_back(globalDirVH);
+               std::cout << globalDirVH << std::endl;
+               std::cout << std::endl;
 
                // Fill the position histograms
-                           trackerLayout_->Fill(globalPosVH.z(), globalPosVH.perp());
-                           trackerLayoutXY_->Fill(globalPosVH.x(), globalPosVH.y());
-                           if (layer < 100) trackerLayoutXYBar_->Fill(globalPosVH.x(), globalPosVH.y());
-                           else trackerLayoutXYEC_->Fill(globalPosVH.x(), globalPosVH.y());
-
-                           histogramLayer->second.localPosXY[0]->Fill(localPosVH.x(), localPosVH.y());
-                           histogramLayer->second.globalPosXY[0]->Fill(globalPosVH.x(), globalPosVH.y());
-
-                           // Pixel module
-                           if (topol.ncolumns() == 32) {
-                               histogramLayer->second.localPosXY[1]->Fill(localPosVH.x(), localPosVH.y());
-                               histogramLayer->second.globalPosXY[1]->Fill(globalPosVH.x(), globalPosVH.y());
-                               ++nVHsPixel;
-                           }
-                           // Strip module
-                           else if (topol.ncolumns() == 2) {
-                               histogramLayer->second.localPosXY[2]->Fill(localPosVH.x(), localPosVH.y());
-                               histogramLayer->second.globalPosXY[2]->Fill(globalPosVH.x(), globalPosVH.y());
-                               ++nVHsStrip;
-                           }
+               trackerLayout_[0]->Fill(globalPosVH.z(), globalPosVH.perp());
+               trackerLayoutXY_[0]->Fill(globalPosVH.x(), globalPosVH.y());
 
 
+               TArrow* vh_arrow = new TArrow(globalPosVH.z(), globalPosVH.perp(), 100.0, 100.0, 0.05,"|>");
+               vh_arrow->Draw("same");
 
-             }
+               if (layer < 100) trackerLayoutXYBar_->Fill(globalPosVH.x(), globalPosVH.y());
+               else trackerLayoutXYEC_->Fill(globalPosVH.x(), globalPosVH.y());
+
+               histogramLayer->second.localPosXY[0]->Fill(localPosVH.x(), localPosVH.y());
+               histogramLayer->second.globalPosXY[0]->Fill(globalPosVH.x(), globalPosVH.y());
+
+               // Pixel module
+               if (topol.ncolumns() == 32) {
+                   trackerLayout_[1]->Fill(globalPosVH.z(), globalPosVH.perp());
+                   trackerLayoutXY_[1]->Fill(globalPosVH.x(), globalPosVH.y());
+
+                   histogramLayer->second.localPosXY[1]->Fill(localPosVH.x(), localPosVH.y());
+                   histogramLayer->second.globalPosXY[1]->Fill(globalPosVH.x(), globalPosVH.y());
+                   ++nVHsPixel;
+               }
+               // Strip module
+               else if (topol.ncolumns() == 2) {
+                 trackerLayout_[2]->Fill(globalPosVH.z(), globalPosVH.perp());
+                 trackerLayoutXY_[2]->Fill(globalPosVH.x(), globalPosVH.y());
+
+                 histogramLayer->second.localPosXY[2]->Fill(localPosVH.x(), localPosVH.y());
+                 histogramLayer->second.globalPosXY[2]->Fill(globalPosVH.x(), globalPosVH.y());
+                 ++nVHsStrip;
+              }
+
+
+
+          }
+
+
 
 
 /*
@@ -328,6 +372,9 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
         if (nVHsStrip) histogramLayer->second.numberClusterStrip->Fill(nVHsStrip);
 
     }
+
+    CreateVHsGraph(glVHs, dirVHs);
+
 }
 
 // Create the histograms
@@ -453,14 +500,51 @@ std::map< unsigned int, ClusterHistos >::iterator VectorHitsBuilderValidation::c
     histoName.str(""); histoName << "Other_Digis" << tag.c_str() <<  id;
     local_histos.otherSimHits= td.make< TH1F >(histoName.str().c_str(), histoName.str().c_str(), 10, 0., 10.);
 
-    /*
-     * End
-     */
 
     std::pair< std::map< unsigned int, ClusterHistos >::iterator, bool > insertedIt(histograms_.insert(std::make_pair(ival, local_histos)));
     fs->file().cd("/");
 
     return insertedIt.first;
+}
+
+void VectorHitsBuilderValidation::CreateVHsGraph(const std::vector<Global3DPoint> glVHs,const std::vector<Global3DVector> dirVHs){
+
+  if(glVHs.size() != dirVHs.size()){
+    std::cout << "Cannot fullfil the graphs for this event. Return." << std::endl;
+    return;
+  }
+
+  TGraph* gRZ = new TGraph();
+  gRZ->SetName("XVsY");
+
+  for(unsigned int nVH = 0; nVH < glVHs.size(); nVH++){
+    gRZ->SetPoint(nVH, glVHs.at(nVH).x(), glVHs.at(nVH).y());
+    //gRZ->SetPoint(nVH, glVHs.at(nVH).z(), glVHs.at(nVH).perp());
+
+  }
+
+  gRZ->SetMarkerColor(2);
+  gRZ->SetMarkerSize(20);
+  gRZ->Draw("AP");
+
+  for(unsigned int nVH = 0; nVH < glVHs.size(); nVH++){
+    //std::cout << glVHs.at(nVH) << std::endl;
+    //std::cout << dirVHs.at(nVH) << std::endl;
+    //std::cout << std::endl;
+    //Global3DPoint finalpos = glVHs.at(nVH) + dirVHs.at(nVH);
+    TArrow* vh_arrow = new TArrow(glVHs.at(nVH).x(), glVHs.at(nVH).y(), glVHs.at(nVH).x() + dirVHs.at(nVH).x(), glVHs.at(nVH).y() + dirVHs.at(nVH).y(),0.05,">");
+    //TArrow* vh_arrow = new TArrow(glVHs.at(nVH).z(), glVHs.at(nVH).perp(), glVHs.at(nVH).z() + dirVHs.at(nVH).z(), glVHs.at(nVH).perp() + dirVHs.at(nVH).perp(),0.05,"|>");
+
+    vh_arrow->SetLineWidth(2);
+    vh_arrow->Draw("same");
+
+
+  }
+
+  c->SaveAs("vhs_global.root", "root");
+  c->Print("vhs_global.pdf", "pdf");
+
+  return;
 }
 
 unsigned int VectorHitsBuilderValidation::getLayerNumber(const DetId& detid, const TrackerTopology* topo) {
