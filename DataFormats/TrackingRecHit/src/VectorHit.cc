@@ -20,10 +20,8 @@ VectorHit::VectorHit(DetId id,const VectorHit2D& vh2Dzx, const VectorHit2D& vh2D
 {
   thePosition = LocalPoint(vh2Dzx.localPosition().x(), vh2Dzy.localPosition().x(), 0.);
 
-  // given the actual definition of chamber refFrame, (with z poiniting to IP),
-  // the zed component of direction is negative.
-  theDirection = LocalVector(vh2Dzx.localDirection().x(), vh2Dzy.localDirection().x(), -1.);
-  theDirection = theDirection.unit();
+  theDirection = LocalVector(vh2Dzx.localDirection().x(), vh2Dzy.localDirection().x(), vh2Dzy.localDirection().z());
+  //theDirection = theDirection.unit();
 
   //building the cov matrix 4x4 starting from the 2x2
   AlgebraicSymMatrix22 covMatZX = vh2Dzx.covMatrix();
@@ -35,7 +33,7 @@ VectorHit::VectorHit(DetId id,const VectorHit2D& vh2Dzx, const VectorHit2D& vh2D
   theCovMatrix[3][3] = covMatZY[1][1];   // sigma (y)
   theCovMatrix[0][2] = covMatZX[0][1];   // cov(dx/dz,x)
   theCovMatrix[1][3] = covMatZY[0][1];   // cov(dy/dz,y)
- 
+
   theChi2 = vh2Dzx.chi2() + vh2Dzy.chi2();
 }
 
@@ -112,14 +110,19 @@ AlgebraicVector VectorHit::parameters() const {
     // (dx/dz,dy/dz,x,y)
     AlgebraicVector result(4);
 
-    result[0] = theDirection.x()/theDirection.z();
-    result[1] = theDirection.y()/theDirection.z();
+    result[0] = theDirection.x();
+    result[1] = theDirection.y();
     result[2] = thePosition.x();
     result[3] = thePosition.y();
     return result;
 
 }
 
+Global3DVector VectorHit::globalDirection( const Surface& surf ) {
+  Local3DVector theLocalDelta = LocalVector(theDirection.x()*theDirection.z(), theDirection.y()*theDirection.z(), theDirection.z());
+  Global3DVector g = surf.toGlobal(theLocalDelta);
+  return g;
+}
 
 AlgebraicMatrix VectorHit::projectionMatrix() const {
 

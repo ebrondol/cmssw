@@ -16,11 +16,15 @@
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include "DataFormats/Common/interface/DetSetVectorNew.h"
 
+#include "DataFormats/GeometrySurface/interface/Surface.h"
+
+
 class VectorHit : public RecSegment {
- public:
+
+  public:
 
   VectorHit() : thePosition(), theDirection(), theCovMatrix(), theDimension(0) { setType(bad); }
-  VectorHit(DetId id, const LocalPoint& posInner, const LocalVector& dir, 
+  VectorHit(DetId id, const LocalPoint& posInner, const LocalVector& dir,
             const AlgebraicSymMatrix44& covMatrix,
             const double& Chi2) ;
   VectorHit(DetId id, const VectorHit2D& vh2Dzx, const VectorHit2D& vh2Dzy) ;
@@ -28,14 +32,14 @@ class VectorHit : public RecSegment {
   ~VectorHit() ;
   virtual VectorHit* clone() const { return new VectorHit(*this);}
 
-  // Parameters of the segment, for the track fit 
+  // Parameters of the segment, for the track fit
   // For a 4D segment: (dx/dy,dy/dz,x,y)
   // FIXME::getKFcomponents ??
   AlgebraicVector parameters() const ;
 /*
   friend class DTSegmentUpdator;
   VectorHit() : theProjection(none), theDimension(0) {}
-  
+
   /// Construct from phi and Z projections
   VectorHit(const DTChamberRecSegment2D& phiSeg, const DTSLRecSegment2D& zedSeg, const LocalPoint& posZInCh, const LocalVector& dirZInCh);
 
@@ -54,6 +58,9 @@ class VectorHit : public RecSegment {
   virtual double chi2() const { return theChi2; }
   virtual int dimension() const { return theDimension; }
 
+  //ERICA:change name! This method returns the delta (not the direction) in global coordinates
+  Global3DVector globalDirection( const Surface& surf );
+
   /// The projection matrix relates the trajectory state parameters to the segment parameters().
   virtual AlgebraicMatrix projectionMatrix() const;
 
@@ -62,7 +69,7 @@ class VectorHit : public RecSegment {
 
   /// Local direction error in the Chamber frame
   virtual LocalError localDirectionError() const ;
-  
+
   // Degrees of freedom of the segment fit
   virtual int degreesOfFreedom() const { return 0; } //number of hits (2+2) - dimension
 
@@ -81,26 +88,26 @@ class VectorHit : public RecSegment {
 
   //--- Extension of the interface
 
-  
+
   /// Does it have the Phi projection?
   bool hasPhi() const {return (theProjection==full || theProjection==phi);}
-  
+
   /// Does it have the Z projection?
   bool hasZed() const {return (theProjection==full || theProjection==Z);}
-  
+
   /// The superPhi segment: 0 if no phi projection available
   const DTChamberRecSegment2D *phiSegment() const {
     return hasPhi()? &thePhiSeg: 0;
   }
-    
+
   /// The Z segment: 0 if not zed projection available
   const DTSLRecSegment2D *zSegment() const {
     return hasZed()? &theZedSeg : 0;
   }
-    
-  /// The (specific) DetId of the chamber on which the segment resides 
+
+  /// The (specific) DetId of the chamber on which the segment resides
   virtual DTChamberId chamberId() const;
-*/    
+*/
  private:
 /*
   /// Which projections are actually there
@@ -111,10 +118,10 @@ class VectorHit : public RecSegment {
   //VectorHit2D *ZXSegment() {return &theVh2Dzx;}
   //VectorHit2D *ZYSegment() {return &theVh2Dzy;}
   LocalPoint thePosition;
-  LocalVector theDirection; 
+  LocalVector theDirection;
 
 //  void setCovMatrixForZed(const LocalPoint& posZInCh);
-    
+
   // the covariance matrix, has the following meaning
   // mat[0][0]=sigma (dx/dz)
   // mat[1][1]=sigma (dy/dz)
@@ -122,9 +129,9 @@ class VectorHit : public RecSegment {
   // mat[3][3]=sigma (y)
   // mat[0][2]=cov(dx/dz,x)
   // mat[1][3]=cov(dy/dz,y)
-  AlgebraicSymMatrix44 theCovMatrix; 
+  AlgebraicSymMatrix44 theCovMatrix;
   double theChi2;
-  int theDimension; 
+  int theDimension;
   //VectorHit2D theVh2Dzx;
   //VectorHit2D theVh2Dzy;
 
@@ -145,4 +152,3 @@ typedef edm::DetSetVector<VectorHit> VectorHitCollection;
 typedef edmNew::DetSetVector<VectorHit> VectorHitCollectionNew;
 
 #endif // TrackingRecHit_VectorHit_h
-
