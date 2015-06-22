@@ -6,14 +6,14 @@
 
 std::string folderName = "/afs/cern.ch/work/e/ebrondol/MatchingHitsInHLLHC/CMSSW_6_2_0_SLHC25_patch1/src/RecoLocalTracker/SiPixelStubBuilder/test/";
 std::string FileName1 = "cluster_validation_graph.root";
-//std::string FileName2 = "vh_validation.root";
-std::string FileName2 = "vhs_global.root";
+std::string FileName2 = "vh_validation.root";
+//std::string FileName2 = "vhs_global.root";
 
 
 std::string baseFolderRootName = "analysis/Common/";
 std::string FolderRootName1 = baseFolderRootName ;
-//std::string FolderRootName2 = baseFolderRootName ;
-std::string FolderRootName2 = "" ;
+std::string FolderRootName2 = baseFolderRootName ;
+//std::string FolderRootName2 = "" ;
 
 std::string extension = "pdf";
 std::string outputFileName = "VHcomparison.";
@@ -24,13 +24,25 @@ void VHcomparison()
   TCanvas* dummy = new TCanvas("dummy","",0,0,700,600);
   dummy -> Print((outputFileName+extension+"[").c_str(),extension.c_str());
 
+  PlotComparisonClusters();
   //PlotComparisonMaker1D();
   //PlotRatios();
-  PlotComparisonMaker2DandProfile();
+  //PlotComparisonMaker2DandProfile();
   //PlotPulls();
 
   dummy -> Print((outputFileName+extension+"]").c_str(),extension.c_str());
 
+  return;
+}
+
+void PlotComparisonClusters()
+{
+  FolderRootName2 = baseFolderRootName + "Positions/";
+  PlotComparisonClustersPixelStrip("RVsZ", true);
+  PlotComparisonClustersPixelStrip("XVsY", true);
+
+  FolderRootName2 = baseFolderRootName + "Directions/";
+  PlotComparisonClustersPixelStripVHArray("XVsY", true);
   return;
 }
 
@@ -58,18 +70,14 @@ void PlotComparisonMaker1D()
 
 void PlotComparisonMaker2DandProfile()
 {
-  //PlotComparisonClustersPixelStrip("RVsZ", true);
-  //PlotComparisonClustersPixelStrip("XVsY", false);
-  PlotComparisonClustersPixelStripVHArray("XVsY", true);
-
-  //PlotComparisonMakerProfile("nhits_vs_eta_pfx", false, false);
-  //PlotComparisonMakerProfile("nPXBhits_vs_eta_pfx", false, false);
+  PlotComparisonMakerProfile("nhits_vs_eta_pfx", false, false);
+  PlotComparisonMakerProfile("nPXBhits_vs_eta_pfx", false, false);
 
   //Residuals plots
-  //PlotComparisonMaker2D("dxyres_vs_eta", true);
-  //PlotComparisonMaker2D("dzres_vs_eta", true);
-  //PlotComparisonMaker2D("phires_vs_eta", true);
-  //PlotComparisonMaker2D("ptres_vs_eta", true);
+  PlotComparisonMaker2D("dxyres_vs_eta", true);
+  PlotComparisonMaker2D("dzres_vs_eta", true);
+  PlotComparisonMaker2D("phires_vs_eta", true);
+  PlotComparisonMaker2D("ptres_vs_eta", true);
   return;
 }
 
@@ -232,8 +240,8 @@ void PlotComparisonMaker2D(const char* HistoName,  bool proj = false, bool debug
     std::cout << "histo1*: " << histo1 << ", histo2*: " << histo2 << std::endl;
     if(!proj) 	 c1 -> Print((string(HistoName)+".pdf").c_str(), "pdf");
     else	       c1 -> Print((string(HistoName)+"_ProjY.pdf").c_str(), "pdf");
-//  c1 -> Print((string(HistoName)+"_"+Associator+".png").c_str(), "png");
-//  c1 -> SaveAs((string(HistoName)+"Comparison.C").c_str());
+  //c1 -> Print((string(HistoName)+"_"+Associator+".png").c_str(), "png");
+  //c1 -> SaveAs((string(HistoName)+"Comparison.C").c_str());
   }
   c1 -> Print((outputFileName+extension).c_str(),extension.c_str());
 
@@ -258,7 +266,7 @@ void PlotComparisonClustersPixelStripVHArray(const char* HistoName, bool debug =
 
   histo1pixel = (TGraph*)( f1->Get((FolderRootName1+HistoName+"_Pixel").c_str()) );
   histo1strip = (TGraph*)( f1->Get((FolderRootName1+HistoName+"_Strip").c_str()) );
-  TCanvas* canvasArray = (TCanvas*) f2->Get("c1") ;
+  TCanvas* canvasArray = (TCanvas*) f2->Get((FolderRootName2+HistoName+"_Mixed").c_str()) ;
 
   if(debug)     std::cout << "graph1*: " << histo1pixel << ", graph2*: " << histo1strip << std::endl;
 
@@ -328,8 +336,8 @@ void PlotComparisonClustersPixelStripVHArray(const char* HistoName, bool debug =
   if(debug){
     c1 -> Print((string(HistoName)+".pdf").c_str(), "pdf");
 
-//  c1 -> Print((string(HistoName)+"_"+Associator+".png").c_str(), "png");
-//  c1 -> SaveAs((string(HistoName)+"Comparison.C").c_str());
+  //c1 -> Print((string(HistoName)+"_"+Associator+".png").c_str(), "png");
+  //c1 -> SaveAs((string(HistoName)+"Comparison.C").c_str());
   }
   c1 -> Print((outputFileName+extension).c_str(),extension.c_str());
 
@@ -349,15 +357,15 @@ void PlotComparisonClustersPixelStrip(const char* HistoName, bool debug = false 
   if(debug)     std::cout << "InputRootFolder1: " << FolderRootName1 << std::endl;
   if(debug)     std::cout << "InputRootFolder2: " << FolderRootName2 << std::endl;
 
-  TH2D* histo1pixel = new TH2D();
-  TH2D* histo1strip = new TH2D();
-  TH2D* histo2pixel = new TH2D();
-  TH2D* histo2strip = new TH2D();
+  TGraph* histo1pixel = new TGraph();
+  TGraph* histo1strip = new TGraph();
+  TGraph* histo2pixel = new TGraph();
+  TGraph* histo2strip = new TGraph();
 
-  histo1pixel = (TH2D*)( f1->Get((FolderRootName1+HistoName+"_Pixel").c_str()) );
-  histo2pixel = (TH2D*)( f2->Get((FolderRootName2+HistoName+"_Pixel").c_str()) );
-  histo1strip = (TH2D*)( f1->Get((FolderRootName1+HistoName+"_Strip").c_str()) );
-  histo2strip = (TH2D*)( f2->Get((FolderRootName2+HistoName+"_Strip").c_str()) );
+  histo1pixel = (TGraph*)( f1->Get((FolderRootName1+HistoName+"_Pixel").c_str()) );
+  histo2pixel = (TGraph*)( f2->Get((FolderRootName2+HistoName+"_Pixel").c_str()) );
+  histo1strip = (TGraph*)( f1->Get((FolderRootName1+HistoName+"_Strip").c_str()) );
+  histo2strip = (TGraph*)( f2->Get((FolderRootName2+HistoName+"_Strip").c_str()) );
 
   if(debug)     std::cout << "histo1*: " << histo1pixel << ", histo2*: " << histo2pixel << std::endl;
 
@@ -379,18 +387,18 @@ void PlotComparisonClustersPixelStrip(const char* HistoName, bool debug = false 
   histo2strip -> SetMarkerStyle(22);
   histo2strip -> SetLineColor(93);
 
-  histo1pixel -> GetYaxis() -> SetTitle(HistoName);
-  histo1pixel -> GetXaxis() -> SetTitle("");
-  //histo1pixel -> GetXaxis() -> SetTitle("Y [cm]");
-  //histo1pixel -> GetYaxis() -> SetTitle("X [cm]");
+  histo1strip -> GetYaxis() -> SetTitle(HistoName);
+  histo1strip -> GetXaxis() -> SetTitle("");
+  //histo1strip -> GetXaxis() -> SetTitle("Y [cm]");
+  //histo1strip -> GetYaxis() -> SetTitle("X [cm]");
 
-  histo1pixel -> GetYaxis() -> SetTitleOffset(2);
-  histo1pixel -> GetXaxis() -> SetTitleOffset(2);
+  histo1strip -> GetYaxis() -> SetTitleOffset(2);
+  histo1strip -> GetXaxis() -> SetTitleOffset(2);
 
-  histo1pixel -> GetXaxis() -> SetTitleSize(0.03);
-  histo1pixel -> GetYaxis() -> SetTitleSize(0.03);
-  histo1pixel -> GetXaxis() -> SetLabelSize(0.03);
-  histo1pixel -> GetYaxis() -> SetLabelSize(0.03);
+  histo1strip -> GetXaxis() -> SetTitleSize(0.03);
+  histo1strip -> GetYaxis() -> SetTitleSize(0.03);
+  histo1strip -> GetXaxis() -> SetLabelSize(0.03);
+  histo1strip -> GetYaxis() -> SetLabelSize(0.03);
   //if(histo2D)  histo1 -> GetXaxis() -> SetRangeUser(-0.01,0.01);
 
   TLegend* legend = new TLegend(0.16, 0.77, 0.45, 0.92);
@@ -404,8 +412,8 @@ void PlotComparisonClustersPixelStrip(const char* HistoName, bool debug = false 
   legend -> AddEntry(histo2pixel,"VectorHits Pixels","PL");
   legend -> AddEntry(histo2strip,"VectorHits Strips","PL");
 
-  histo1pixel -> Draw("P");
-  histo1strip -> Draw("Psame");
+  histo1strip -> Draw("AP");
+  histo1pixel -> Draw("Psame");
   histo2pixel -> Draw("Psame");
   histo2strip -> Draw("Psame");
 

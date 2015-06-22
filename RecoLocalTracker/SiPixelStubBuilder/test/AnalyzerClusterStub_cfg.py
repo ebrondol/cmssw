@@ -44,7 +44,7 @@ process.source = cms.Source("PoolSource",
     secondaryFileNames = cms.untracked.vstring(),
 #     fileNames = cms.untracked.vstring('file:TenMuPt_0_20_ExtendedPhase2TkBE5D_10000_DIGI_L1_DIGI2RAW_L1TT_RECO.root')
 #     fileNames = cms.untracked.vstring('file:TenMuPt_0_20_ExtendedPhase2TkBE5D_10000_DIGI_L1_DIGI2RAW_L1TT_RECO_140PU.root')
-     fileNames = cms.untracked.vstring('file:step3_untilLOCALRECO.root')
+     fileNames = cms.untracked.vstring('file:step3_newclusters_SLHC25.root')
 
 #     fileNames = cms.untracked.vstring('file:TenMuPt_2_ExtendedPhase2TkBE5D_5000_DIGI_L1_DIGI2RAW_L1TT_RECO.root',
 #                                       #'file:TenMuPt_10_ExtendedPhase2TkBE5D_5000_DIGI_L1_DIGI2RAW_L1TT_RECO.root',
