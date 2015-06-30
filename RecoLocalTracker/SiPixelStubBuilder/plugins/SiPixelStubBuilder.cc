@@ -39,12 +39,12 @@ void SiPixelStubBuilder::produce(edm::Event& event, const edm::EventSetup& es)
   else edm::LogError("SiPixelStubBuilder") << "Impossible initialization of builder!!";
 
   // check on the input clusters
-  //stubsBuilder->printClusters(*clustersHandle);
+  stubsBuilder->printClusters(*clustersHandle);
 
   // running the stub building algorithm
   //ERICA::output should be moved in the different algo classes?
   run( *clustersHandle, *outputClustersAccepted, *outputClustersRejected, *outputVHAccepted, *outputVHRejected);
-/*
+
   unsigned int numberOfStubs = 0;
   edmNew::DetSetVector<VectorHit>::const_iterator DSViter;
   for( DSViter = (*outputVHAccepted).begin() ; DSViter != (*outputVHAccepted).end(); DSViter++){
@@ -56,7 +56,7 @@ void SiPixelStubBuilder::produce(edm::Event& event, const edm::EventSetup& es)
     }
 
   }
-
+/*
   if(numberOfStubs > maxOfflinestubs) {
     edm::LogError("SiPixelStubBuilder") <<  "Limit on the number of stubs exceeded. An empty output collection will be produced instead.\n";
     VectorHitCollectionNew empty;
@@ -70,7 +70,7 @@ void SiPixelStubBuilder::produce(edm::Event& event, const edm::EventSetup& es)
   event.put( outputVHRejected, offlinestubsTag + "Rejected" );
 
 //  LogDebug("SiPixelStubBuilder") << " Executing " << algoTag << " resulted in " << numberOfStubs << ".";
-  //LogDebug("SiPixelStubBuilder") << "found\n" << outputVHAccepted->dataSize()   << " .\n" ;
+  LogDebug("SiPixelStubBuilder") << "found\n" << numberOfStubs << " .\n" ;
 
 }
 

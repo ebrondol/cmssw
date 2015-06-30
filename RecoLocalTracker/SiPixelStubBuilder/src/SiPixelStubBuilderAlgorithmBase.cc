@@ -56,6 +56,19 @@ unsigned int SiPixelStubBuilderAlgorithmBase::getLayerNumber(const DetId& detid)
   return 999;
 }
 
+//ERICA:maybe SubLayer not the best name possible....
+unsigned int SiPixelStubBuilderAlgorithmBase::getSubLayerNumber(const DetId& detid) {
+  if (detid.det() == DetId::Tracker) {
+    if (detid.subdetId() == PixelSubdetector::PixelBarrel) {
+      return (theTkTopo->pxbLadder(detid));
+    } else if (detid.subdetId() == PixelSubdetector::PixelEndcap) {
+      return (theTkTopo->pxfBlade(detid));
+    }
+    else return 999;
+  }
+  return 999;
+}
+
 unsigned int SiPixelStubBuilderAlgorithmBase::getModuleNumber(const DetId& detid) {
   if (detid.det() == DetId::Tracker) {
       if (detid.subdetId() == PixelSubdetector::PixelBarrel) {
@@ -92,12 +105,14 @@ void SiPixelStubBuilderAlgorithmBase::printClusters(const edmNew::DetSetVector<P
       const PixelTopology& topol = theGeomDet->specificTopology();
 
       unsigned int layer = getLayerNumber(detId);
+      unsigned int sublayer = getSubLayerNumber(detId);
       unsigned int module = getModuleNumber(detId);
       std::cout << "Layer:" << layer << std::endl;
-      if(topol.ncolumns() == 32) std::cout << "Pixel cluster with detId:" << rawid << "(module:" << module
-             << ") in DetSet#" << numberOfDSV << std::endl;
-      else if(topol.ncolumns() == 2 ) std::cout << "Strip cluster with detId " << rawid << "(module:" << module
-             << ") in DetSet#" << numberOfDSV << std::endl;
+      std::cout << "SubLayer:" << sublayer << std::endl;
+      if(topol.ncolumns() == 32) 
+        std::cout << "Pixel cluster with detId:" << rawid << "(module:" << module << ") in DetSet#" << numberOfDSV << std::endl;
+      else if(topol.ncolumns() == 2 ) 
+        std::cout << "Strip cluster with detId " << rawid << "(module:" << module << ") in DetSet#" << numberOfDSV << std::endl;
       else std::cout << "no module?!" << std::endl;
 
       if (!geomDetUnit) break;
@@ -106,11 +121,11 @@ void SiPixelStubBuilderAlgorithmBase::printClusters(const edmNew::DetSetVector<P
       MeasurementPoint mpClu(clustIt->center(), clustIt->column() + 0.5);
       Local3DPoint localPosClu = geomDetUnit->topology().localPosition(mpClu);
       Global3DPoint globalPosClu = geomDetUnit->surface().toGlobal(localPosClu);
-      MeasurementError meClu(1./12,0.0,1./12);
-      LocalError localErrClu = geomDetUnit->topology().localError(mpClu,meClu);
+      //MeasurementError meClu(1./12,0.0,1./12);
+      //LocalError localErrClu = geomDetUnit->topology().localError(mpClu,meClu);
 
       std::cout << "\t global pos " << globalPosClu ;
-      std::cout << "\t local  pos " << localPosClu << "with err " << localErrClu << std::endl;
+      //std::cout << "\t local  pos " << localPosClu << "with err " << localErrClu << std::endl;
 
     }
   }

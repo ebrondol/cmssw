@@ -34,6 +34,7 @@ class SiPixelStubBuilderAlgorithmBase {
     edmNew::DetSetVector<Phase2TrackerCluster1D>& clustersAcc, edmNew::DetSetVector<Phase2TrackerCluster1D>& clustersRej) = 0;
 
   unsigned int getLayerNumber(const DetId& detid);
+  unsigned int getSubLayerNumber(const DetId& detid);
   unsigned int getModuleNumber(const DetId& detid);
   void printClusters(const edmNew::DetSetVector<Phase2TrackerCluster1D>& clusters);
   void loadDetSetVector( std::map< DetId,std::vector<VectorHit> >& theMap, edmNew::DetSetVector<VectorHit>& theCollection ) const ;
