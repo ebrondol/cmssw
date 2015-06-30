@@ -39,7 +39,6 @@
 
 #include <TH1F.h>
 #include <TGraph.h>
-#include <TGraph.h>
 #include <THStack.h>
 #include <TCanvas.h>
 #include <TArrow.h>
@@ -82,7 +81,8 @@ class VectorHitsBuilderValidation : public edm::EDAnalyzer {
     private:
 
         std::map< unsigned int, ClusterHistos >::iterator createLayerHistograms(unsigned int);
-        void CreateVHsGraph(const std::vector<Global3DPoint>,const  std::vector<Global3DVector> );
+        void CreateVHsXYGraph( const std::vector<Global3DPoint>,const  std::vector<Global3DVector> );
+        void CreateVHsRZGraph( const std::vector<Global3DPoint>,const  std::vector<Global3DVector> );
         unsigned int getLayerNumber(const DetId&, const TrackerTopology*);
         unsigned int getSimTrackId(const edm::Handle< edm::DetSetVector< PixelDigiSimLink > >&, const DetId&, unsigned int);
 
@@ -93,9 +93,9 @@ class VectorHitsBuilderValidation : public edm::EDAnalyzer {
         TGraph* trackerLayoutXY_[3];
         TGraph* trackerLayoutXYBar_;
         TGraph* trackerLayoutXYEC_;
-        TCanvas* VHXY_[3];
-        std::vector<TArrow*> arrowVHs;
-
+        TCanvas* VHXY_;
+        TCanvas* VHRZ_;
+        //std::vector<TArrow*> arrowVHs;
 
         std::map< unsigned int, ClusterHistos > histograms_;
 
@@ -123,21 +123,24 @@ void VectorHitsBuilderValidation::beginJob() {
   trackerLayoutRZ_[2] = tdPos.make< TGraph >();
   trackerLayoutRZ_[2] -> SetName("RVsZ_Strip");
   trackerLayoutXY_[0] = tdPos.make< TGraph >();
-  trackerLayoutXY_[0] -> SetName("XVsY_Mixed");
+  trackerLayoutXY_[0] -> SetName("YVsX_Mixed");
   trackerLayoutXY_[1] = tdPos.make< TGraph >();
-  trackerLayoutXY_[1] -> SetName("XVsY_Pixel");
+  trackerLayoutXY_[1] -> SetName("YVsX_Pixel");
   trackerLayoutXY_[2] = tdPos.make< TGraph >();
-  trackerLayoutXY_[2] -> SetName("XVsY_Strip");
+  trackerLayoutXY_[2] -> SetName("YVsX_Strip");
   trackerLayoutXYBar_ = tdPos.make< TGraph >();
-  trackerLayoutXYBar_ -> SetName("XVsYBar");
+  trackerLayoutXYBar_ -> SetName("YVsXBar");
   trackerLayoutXYEC_ = tdPos.make< TGraph >();
-  trackerLayoutXYEC_ -> SetName("XVsYEC");
+  trackerLayoutXYEC_ -> SetName("YVsXEC");
 
   //drawing VHs arrows
   TFileDirectory tdArr = td.mkdir("Directions");
-  VHXY_[0] = tdArr.make< TCanvas >(); VHXY_[0] -> SetName("XVsY_Mixed");
-  VHXY_[1] = tdArr.make< TCanvas >(); VHXY_[1] -> SetName("XVsY_Pixel");
-  VHXY_[2] = tdArr.make< TCanvas >(); VHXY_[2] -> SetName("XVsY_Strip");
+  VHRZ_ = tdArr.make< TCanvas >(); VHRZ_ -> SetName("RVsZ_Mixed");
+  VHXY_ = tdArr.make< TCanvas >(); VHXY_ -> SetName("YVsX_Mixed");
+
+  //VHXY_[0] = tdArr.make< TCanvas >(); VHXY_[0] -> SetName("YVsX_Mixed");
+  //VHXY_[1] = tdArr.make< TCanvas >(); VHXY_[1] -> SetName("YVsX_Pixel");
+  //VHXY_[2] = tdArr.make< TCanvas >(); VHXY_[2] -> SetName("YVsX_Strip");
 
 
 }
@@ -255,7 +258,7 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
 
                Global3DPoint globalPosVH = geomDetUnit->surface().toGlobal(localPosVH);
                glVHs.push_back(globalPosVH);
-               std::cout << globalPosVH << std::endl;
+               //std::cout << globalPosVH << std::endl;
 
                //Local3DVector localDirVH = vhIt->localDirection();
                //std::cout << localDirVH << std::endl;
@@ -268,22 +271,22 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
 
                // Fill the position histograms
                trackerLayoutRZ_[0]->SetPoint(nVHsTot, globalPosVH.z(), globalPosVH.perp());
-               trackerLayoutXY_[0]->SetPoint(nVHsTot, globalPosVH.y(), globalPosVH.x());
+               trackerLayoutXY_[0]->SetPoint(nVHsTot, globalPosVH.x(), globalPosVH.y());
 
-               if (layer < 100) trackerLayoutXYBar_->SetPoint(nVHsTot, globalPosVH.y(), globalPosVH.x());
-               else trackerLayoutXYEC_->SetPoint(nVHsTot, globalPosVH.y(), globalPosVH.x());
+               if (layer < 100) trackerLayoutXYBar_->SetPoint(nVHsTot, globalPosVH.x(), globalPosVH.y());
+               else trackerLayoutXYEC_->SetPoint(nVHsTot, globalPosVH.x(), globalPosVH.y());
 
                histogramLayer->second.localPosXY[0]->SetPoint(nVHsTot, localPosVH.x(), localPosVH.y());
-               histogramLayer->second.globalPosXY[0]->SetPoint(nVHsTot, globalPosVH.y(), globalPosVH.x());
+               histogramLayer->second.globalPosXY[0]->SetPoint(nVHsTot, globalPosVH.x(), globalPosVH.y());
 
                // Pixel module
                if (topol.ncolumns() == 32) {
 
                  trackerLayoutRZ_[1]->SetPoint(nVHsPixelTot, globalPosVH.z(), globalPosVH.perp());
-                 trackerLayoutXY_[1]->SetPoint(nVHsPixelTot, globalPosVH.y(), globalPosVH.x());
+                 trackerLayoutXY_[1]->SetPoint(nVHsPixelTot, globalPosVH.x(), globalPosVH.y());
 
                  histogramLayer->second.localPosXY[1]->SetPoint(nVHsPixelTot, localPosVH.x(), localPosVH.y());
-                 histogramLayer->second.globalPosXY[1]->SetPoint(nVHsPixelTot, globalPosVH.y(), globalPosVH.x());
+                 histogramLayer->second.globalPosXY[1]->SetPoint(nVHsPixelTot, globalPosVH.x(), globalPosVH.y());
 
                  ++nVHsPixel;
                  ++nVHsPixelTot;
@@ -291,10 +294,10 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
                // Strip module
                else if (topol.ncolumns() == 2) {
                  trackerLayoutRZ_[2]->SetPoint(nVHsStripTot, globalPosVH.z(), globalPosVH.perp());
-                 trackerLayoutXY_[2]->SetPoint(nVHsStripTot, globalPosVH.y(), globalPosVH.x());
+                 trackerLayoutXY_[2]->SetPoint(nVHsStripTot, globalPosVH.x(), globalPosVH.y());
 
                  histogramLayer->second.localPosXY[2]->SetPoint(nVHsStripTot, localPosVH.x(), localPosVH.y());
-                 histogramLayer->second.globalPosXY[2]->SetPoint(nVHsStripTot, globalPosVH.y(), globalPosVH.x());
+                 histogramLayer->second.globalPosXY[2]->SetPoint(nVHsStripTot, globalPosVH.x(), globalPosVH.y());
 
                  ++nVHsStrip;
                  ++nVHsStripTot;
@@ -385,7 +388,8 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
 
     }
 
-    CreateVHsGraph(glVHs, dirVHs);
+    CreateVHsXYGraph(glVHs, dirVHs);
+    CreateVHsRZGraph(glVHs, dirVHs);
 
 }
 
@@ -525,27 +529,70 @@ std::map< unsigned int, ClusterHistos >::iterator VectorHitsBuilderValidation::c
     return insertedIt.first;
 }
 
-void VectorHitsBuilderValidation::CreateVHsGraph(const std::vector<Global3DPoint> glVHs,const std::vector<Global3DVector> dirVHs){
-//ERICA::try to implement for different canvas!
-//Problem: not closing! Is it a real problem?
-  VHXY_[0]->cd();
+void VectorHitsBuilderValidation::CreateVHsXYGraph(const std::vector<Global3DPoint> glVHs,const std::vector<Global3DVector> dirVHs){
 
   if(glVHs.size() != dirVHs.size()){
     std::cout << "Cannot fullfil the graphs for this event. Return." << std::endl;
     return;
   }
 
+  // opening canvas and drawing XY TGraph
+  VHXY_->cd();
   trackerLayoutXY_[0]->Draw("AP");
 
+  float finalposX, finalposY;
+
   for(unsigned int nVH = 0; nVH < glVHs.size(); nVH++){
-    //std::cout << glVHs.at(nVH) << std::endl;
-    //std::cout << dirVHs.at(nVH) << std::endl;
+
+    finalposX = glVHs.at(nVH).x() + dirVHs.at(nVH).x();
+    finalposY = glVHs.at(nVH).y() + dirVHs.at(nVH).y();
+    std::cout << glVHs.at(nVH) << " " << " \tr: " << glVHs.at(nVH).perp() << std::endl;
+    std::cout << dirVHs.at(nVH).x() << "," << dirVHs.at(nVH).y() << std::endl;
+
+    //same r
+    if((fabs(dirVHs.at(nVH).x()) < 10e-5) && (fabs(dirVHs.at(nVH).y()) < 10e-5)){
+
+      std::cout << "same pos!";
+
+    } else {
+
+      TArrow* vh_arrow = new TArrow(glVHs.at(nVH).x(), glVHs.at(nVH).y(), finalposX, finalposY, 0.05, ">");
+      vh_arrow->SetLineWidth(2);
+      vh_arrow->Draw("same");
+
+    }
+
+
+  }
+
+  return;
+}
+
+void VectorHitsBuilderValidation::CreateVHsRZGraph(const std::vector<Global3DPoint> glVHs,const std::vector<Global3DVector> dirVHs){
+
+  if(glVHs.size() != dirVHs.size()){
+    std::cout << "Cannot fullfil the graphs for this event. Return." << std::endl;
+    return;
+  }
+
+  // opening canvas and drawing RZ TGraph
+  VHRZ_->cd();
+  trackerLayoutRZ_[0]->Draw("AP");
+
+  float finalposX, finalposY, finalposR, finalposZ;
+
+  for(unsigned int nVH = 0; nVH < glVHs.size(); nVH++){
+
+    finalposX = glVHs.at(nVH).x() + dirVHs.at(nVH).x();
+    finalposY = glVHs.at(nVH).y() + dirVHs.at(nVH).y();
+    finalposR = sqrt( pow(finalposX,2) + pow(finalposY,2) );
+    finalposZ = glVHs.at(nVH).z() + dirVHs.at(nVH).z();
+
+    //std::cout << dirVHs.at(nVH) " " << " \tr: " << dirVHs.at(nVH).perp() << std::endl;
+    //std::cout << finalposX << ", " << finalposY << " " << " \tr: " << finalposR << std::endl;
     //std::cout << std::endl;
 
-    //Global3DPoint finalpos = glVHs.at(nVH) + dirVHs.at(nVH);
-    TArrow* vh_arrow = new TArrow(glVHs.at(nVH).y(), glVHs.at(nVH).x(), glVHs.at(nVH).y() + dirVHs.at(nVH).y(), glVHs.at(nVH).x() + dirVHs.at(nVH).x(),0.05,">");
-    //TArrow* vh_arrow = new TArrow(glVHs.at(nVH).z(), glVHs.at(nVH).perp(), glVHs.at(nVH).z() + dirVHs.at(nVH).z(), glVHs.at(nVH).perp() + dirVHs.at(nVH).perp(),0.05,"|>");
-
+    TArrow* vh_arrow = new TArrow(glVHs.at(nVH).z(), glVHs.at(nVH).perp(), finalposZ, finalposR, 0.05, "|>");
     vh_arrow->SetLineWidth(2);
     vh_arrow->Draw("same");
 

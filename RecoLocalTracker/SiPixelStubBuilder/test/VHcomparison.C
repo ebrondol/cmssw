@@ -4,23 +4,24 @@
 
 #include <iomanip>
 
+string skipEvent = "0";
 std::string folderName = "/afs/cern.ch/work/e/ebrondol/MatchingHitsInHLLHC/CMSSW_6_2_0_SLHC25_patch1/src/RecoLocalTracker/SiPixelStubBuilder/test/";
-std::string FileName1 = "cluster_validation_graph.root";
-std::string FileName2 = "vh_validation.root";
-//std::string FileName2 = "vhs_global.root";
+std::string FileName1 = "cluster_validation_graph.root";//"clusVal" + skipEvent + ".root";
+std::string FileName2 = "vh_validation.root";//"vhVal" + skipEvent + ".root";
 
 
 std::string baseFolderRootName = "analysis/Common/";
 std::string FolderRootName1 = baseFolderRootName ;
 std::string FolderRootName2 = baseFolderRootName ;
-//std::string FolderRootName2 = "" ;
 
-std::string extension = "pdf";
-std::string outputFileName = "VHcomparison.";
+std::string extension = ".pdf";
+std::string outputFileName = "VHcomparison" + skipEvent;
 
+//gROOT->SetBatch(false);
 
 void VHcomparison()
 {
+
   TCanvas* dummy = new TCanvas("dummy","",0,0,700,600);
   dummy -> Print((outputFileName+extension+"[").c_str(),extension.c_str());
 
@@ -38,11 +39,14 @@ void VHcomparison()
 void PlotComparisonClusters()
 {
   FolderRootName2 = baseFolderRootName + "Positions/";
-  PlotComparisonClustersPixelStrip("RVsZ", true);
-  PlotComparisonClustersPixelStrip("XVsY", true);
-
+  PlotComparisonClustersPixelStrip("RVsZ", false);
   FolderRootName2 = baseFolderRootName + "Directions/";
-  PlotComparisonClustersPixelStripVHArray("XVsY", true);
+  PlotComparisonClustersPixelStripVHArray("RVsZ", false);
+
+  FolderRootName2 = baseFolderRootName + "Positions/";
+  PlotComparisonClustersPixelStrip("YVsX", false);
+  FolderRootName2 = baseFolderRootName + "Directions/";
+  PlotComparisonClustersPixelStripVHArray("YVsX", false);
   return;
 }
 
