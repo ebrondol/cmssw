@@ -105,15 +105,17 @@ void SiPixelStubBuilderAlgorithmBase::printClusters(const edmNew::DetSetVector<P
       const PixelTopology& topol = theGeomDet->specificTopology();
 
       unsigned int layer = getLayerNumber(detId);
-      unsigned int sublayer = getSubLayerNumber(detId);
+      //unsigned int sublayer = getSubLayerNumber(detId);
       unsigned int module = getModuleNumber(detId);
       std::cout << "Layer:" << layer << std::endl;
-      std::cout << "SubLayer:" << sublayer << std::endl;
+      //std::cout << "SubLayer:" << sublayer << std::endl;
       if(topol.ncolumns() == 32) 
         std::cout << "Pixel cluster with detId:" << rawid << "(module:" << module << ") in DetSet#" << numberOfDSV << std::endl;
       else if(topol.ncolumns() == 2 ) 
         std::cout << "Strip cluster with detId " << rawid << "(module:" << module << ") in DetSet#" << numberOfDSV << std::endl;
       else std::cout << "no module?!" << std::endl;
+      std::cout << "with pitch:" << topol.pitch().first << " , " << topol.pitch().second << std::endl;
+      std::cout << " and width:" << theGeomDet->surface().bounds().width() << " , lenght:" << theGeomDet->surface().bounds().length() << std::endl;
 
       if (!geomDetUnit) break;
 
@@ -124,8 +126,9 @@ void SiPixelStubBuilderAlgorithmBase::printClusters(const edmNew::DetSetVector<P
       //MeasurementError meClu(1./12,0.0,1./12);
       //LocalError localErrClu = geomDetUnit->topology().localError(mpClu,meClu);
 
-      std::cout << "\t global pos " << globalPosClu ;
+      std::cout << "\t global pos " << globalPosClu << std::endl;
       //std::cout << "\t local  pos " << localPosClu << "with err " << localErrClu << std::endl;
+      std::cout << std::endl;
 
     }
   }
