@@ -193,7 +193,7 @@ VectorHit VectorHitBuilderAlgorithm::buildVectorHit(StackGeomDet stack, const Ph
       fit2Dzy(localPosCluInn, localPosCluOutINN, localErrCluInn,localErrCluOutINN, pos2Dzy, dir2Dzy, covMat2Dzy, chi22Dzy);
       VectorHit2D vh2Dzy = VectorHit2D(pos2Dzy, dir2Dzy, covMat2Dzy, chi22Dzy);
 
-      VectorHit vh = VectorHit(stack.innerDet()->geographicalId(), vh2Dzx, vh2Dzy);
+      VectorHit vh = VectorHit(stack.innerDet()->geographicalId(), vh2Dzx, vh2Dzy, &inner, &outer);
       return vh;
 
     }

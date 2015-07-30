@@ -27,6 +27,7 @@ process.maxEvents = cms.untracked.PSet(
 
 # Input file
 process.source = cms.Source('PoolSource',
+#    fileNames = cms.untracked.vstring('file:step3_newclusters_SLHC25_skip6.root')
     fileNames = cms.untracked.vstring('file:step3_newclusters_SLHC25.root')
 )
 

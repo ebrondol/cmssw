@@ -16,8 +16,8 @@
   <class name="RecSegment" ClassVersion="10">
    <version ClassVersion="10" checksum="1295706057"/>
   </class>
-  <class name="VectorHit" ClassVersion="14">
-   <version ClassVersion="14" checksum="3272438142"/>
+  <class name="VectorHit" ClassVersion="15">
+   <version ClassVersion="15" checksum="53482993"/>
   </class>
   <class name="VectorHit2D" ClassVersion="14">
    <version ClassVersion="14" checksum="333065919"/>

@@ -5,18 +5,25 @@ VectorHit::VectorHit(DetId id,
                      const LocalPoint& posInner,
                      const LocalVector& dir,
                      const AlgebraicSymMatrix44& covMatrix,
-		     const double& Chi2):
+		     const double& Chi2,
+                     const Phase2TrackerCluster1D* inner, 
+                     const Phase2TrackerCluster1D* outer):
   RecSegment(id),
   thePosition(posInner),
   theDirection(dir),
   theCovMatrix(covMatrix),
   theChi2(Chi2),
-  theDimension(4)
+  theDimension(4),
+  theInnerCluster(inner),
+  theOuterCluster(outer)
 {}
 
-VectorHit::VectorHit(DetId id,const VectorHit2D& vh2Dzx, const VectorHit2D& vh2Dzy):
+VectorHit::VectorHit(DetId id,const VectorHit2D& vh2Dzx, const VectorHit2D& vh2Dzy,
+                     const Phase2TrackerCluster1D* inner, const Phase2TrackerCluster1D* outer) :
   RecSegment(id),
-  theDimension(4)
+  theDimension(4),
+  theInnerCluster(inner),
+  theOuterCluster(outer)
 {
   thePosition = LocalPoint(vh2Dzx.localPosition().x(), vh2Dzy.localPosition().x(), 0.);
 
