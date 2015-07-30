@@ -29,9 +29,9 @@ class VectorHitBuilderAlgorithm : public SiPixelStubBuilderAlgorithmBase {
   bool checkClustersCompatibility(Local3DPoint& posinner, Local3DPoint& posouter, LocalError& errinner, LocalError& errouter);
   StackGeomDet createNewStack(DetId detId1, DetId detId2);
   std::vector<VectorHit> buildVectorHits(StackGeomDet stack,
-                                         std::vector<Phase2TrackerCluster1D> innerClus,
-                                         std::vector<Phase2TrackerCluster1D> outerClus);
-  VectorHit buildVectorHit(StackGeomDet stack, const Phase2TrackerCluster1D& inner, const Phase2TrackerCluster1D& outer);
+                                         std::vector<const Phase2TrackerCluster1D*> innerClus,
+                                         std::vector<const Phase2TrackerCluster1D*> outerClus);
+  VectorHit buildVectorHit(StackGeomDet stack, const Phase2TrackerCluster1D* inner, const Phase2TrackerCluster1D* outer);
 
   // Full I/O in DetSet
   //void buildDetUnit( const edm::DetSetVector<Phase2TrackerCluster1D> & input,

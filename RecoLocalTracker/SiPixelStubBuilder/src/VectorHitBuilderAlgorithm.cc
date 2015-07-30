@@ -33,16 +33,16 @@ void VectorHitBuilderAlgorithm::run(const edmNew::DetSetVector<Phase2TrackerClus
 
         StackGeomDet stack = createNewStack(detId1, detId2);
         LogDebug("VectorHitBuilderAlgorithm") << "  Stack created with DetIds: " << rawDetId1 << "," << rawDetId2;
-        std::vector<Phase2TrackerCluster1D> innerClustersInStack;
-        std::vector<Phase2TrackerCluster1D> outerClustersInStack;
+        std::vector<const Phase2TrackerCluster1D*> innerClustersInStack;
+        std::vector<const Phase2TrackerCluster1D*> outerClustersInStack;
 
         //run on both DSV to find all the clusters associated to the stack
         edmNew::DetSet< Phase2TrackerCluster1D >::const_iterator clustIt;
         for ( clustIt = DSViter->begin(); clustIt != DSViter->end(); ++clustIt) {
-          innerClustersInStack.push_back(*clustIt);
+          innerClustersInStack.push_back(&*clustIt);
         }
         for ( clustIt = DSViter2->begin(); clustIt != DSViter2->end(); ++clustIt) {
-          outerClustersInStack.push_back(*clustIt);
+          outerClustersInStack.push_back(&*clustIt);
         }
 
         LogTrace("VectorHitBuilderAlgorithm") << "\t with " << int(innerClustersInStack.size() + outerClustersInStack.size()) << " clusters associated.";
@@ -50,8 +50,8 @@ void VectorHitBuilderAlgorithm::run(const edmNew::DetSetVector<Phase2TrackerClus
         std::vector<VectorHit> vhsInStack = buildVectorHits(stack, innerClustersInStack, outerClustersInStack);
         temporary[rawDetId1] = vhsInStack;
 
-        innerClustersInStack.clear();
-        outerClustersInStack.clear();
+//        innerClustersInStack.clear();
+//        outerClustersInStack.clear();
         vhsInStack.clear();
 
       }
@@ -108,14 +108,14 @@ StackGeomDet VectorHitBuilderAlgorithm::createNewStack(DetId detId1, DetId detId
 
 //----------------------------------------------------------------------------
 //ERICA::in the DT code the global position is used to compute the alpha angle and put a cut on that.
-std::vector<VectorHit> VectorHitBuilderAlgorithm::buildVectorHits(StackGeomDet stack, std::vector<Phase2TrackerCluster1D> innerClus, std::vector<Phase2TrackerCluster1D> outerClus){
+std::vector<VectorHit> VectorHitBuilderAlgorithm::buildVectorHits(StackGeomDet stack, std::vector<const Phase2TrackerCluster1D*> innerClus, std::vector<const Phase2TrackerCluster1D*> outerClus){
 
   std::vector<VectorHit> result;
 
-  std::vector<Phase2TrackerCluster1D>::const_iterator innerClus_iter;
+  std::vector<const Phase2TrackerCluster1D*>::const_iterator innerClus_iter;
   for( innerClus_iter = innerClus.begin(); innerClus_iter != innerClus.end(); innerClus_iter++ ){
 
-    std::vector<Phase2TrackerCluster1D>::const_iterator outerClus_iter;
+    std::vector<const Phase2TrackerCluster1D*>::const_iterator outerClus_iter;
     for( outerClus_iter = outerClus.begin(); outerClus_iter != outerClus.end(); outerClus_iter++ ){
 
       VectorHit vh = buildVectorHit( stack, *innerClus_iter, *outerClus_iter);
@@ -127,7 +127,6 @@ std::vector<VectorHit> VectorHitBuilderAlgorithm::buildVectorHits(StackGeomDet s
       }
 
     }
-
   }
   //sorting vhs for best chi2
   std::sort(result.begin(), result.end());
@@ -140,7 +139,7 @@ std::vector<VectorHit> VectorHitBuilderAlgorithm::buildVectorHits(StackGeomDet s
 
 }
 
-VectorHit VectorHitBuilderAlgorithm::buildVectorHit(StackGeomDet stack, const Phase2TrackerCluster1D& inner, const Phase2TrackerCluster1D& outer){
+VectorHit VectorHitBuilderAlgorithm::buildVectorHit(StackGeomDet stack, const Phase2TrackerCluster1D* inner, const Phase2TrackerCluster1D* outer){
 
   const GeomDetUnit* gDUnitInn = stack.innerDet();
 //  const PixelGeomDetUnit* theGeomDet = dynamic_cast< const PixelGeomDetUnit* >(geomDetUnit);
@@ -148,14 +147,14 @@ VectorHit VectorHitBuilderAlgorithm::buildVectorHit(StackGeomDet stack, const Ph
 
   //FIXME::you should put the correct error when the StripCPE is ready
   //FIXME StripClusterParameterEstimator::LocalValues parameters = parameterestimator->localParameters(*innerClus_iter,*gDUnitInn);
-  MeasurementPoint mpCluInn(inner.center(), inner.column() + 0.5);
+  MeasurementPoint mpCluInn(inner->center(), inner->column() + 0.5);
   Local3DPoint localPosCluInn = gDUnitInn->topology().localPosition(mpCluInn);
   MeasurementError meCluInn(1./12,0.0,1./12);
   LocalError localErrCluInn  = gDUnitInn->topology().localError(mpCluInn,meCluInn);
 
   //FIXME::you should put the correct error when the StripCPE is ready
   //FIXME StripClusterParameterEstimator::LocalValues parameters =  parameterestimator->localParameters(*clustIt,geomDetUnit);
-  MeasurementPoint mpCluOut(outer.center(), outer.column() + 0.5);
+  MeasurementPoint mpCluOut(outer->center(), outer->column() + 0.5);
   Local3DPoint localPosCluOut = gDUnitOut->topology().localPosition(mpCluOut);
   Global3DPoint globalPosCluOut = gDUnitOut->surface().toGlobal(localPosCluOut);
   Local3DPoint localPosCluOutINN = gDUnitInn->surface().toLocal(globalPosCluOut);
@@ -193,7 +192,7 @@ VectorHit VectorHitBuilderAlgorithm::buildVectorHit(StackGeomDet stack, const Ph
       fit2Dzy(localPosCluInn, localPosCluOutINN, localErrCluInn,localErrCluOutINN, pos2Dzy, dir2Dzy, covMat2Dzy, chi22Dzy);
       VectorHit2D vh2Dzy = VectorHit2D(pos2Dzy, dir2Dzy, covMat2Dzy, chi22Dzy);
 
-      VectorHit vh = VectorHit(stack.innerDet()->geographicalId(), vh2Dzx, vh2Dzy, &inner, &outer);
+      VectorHit vh = VectorHit(stack.innerDet()->geographicalId(), vh2Dzx, vh2Dzy, inner, outer);
       return vh;
 
     }
