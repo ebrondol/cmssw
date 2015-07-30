@@ -39,7 +39,7 @@ void SiPixelStubBuilder::produce(edm::Event& event, const edm::EventSetup& es)
   else edm::LogError("SiPixelStubBuilder") << "Impossible initialization of builder!!";
 
   // check on the input clusters
-  stubsBuilder->printClusters(*clustersHandle);
+  //stubsBuilder->printClusters(*clustersHandle);
 
   // running the stub building algorithm
   //ERICA::output should be moved in the different algo classes?

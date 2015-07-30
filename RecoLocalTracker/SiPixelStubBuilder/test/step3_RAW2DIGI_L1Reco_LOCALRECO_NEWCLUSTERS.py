@@ -27,13 +27,14 @@ process.load('RecoLocalTracker.SiPixelStubBuilder.SiPixelStubBuilder_cfi')
 
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1)
+    input = cms.untracked.int32(-1)
 )
 
 # Input source
 process.source = cms.Source("PoolSource",
     secondaryFileNames = cms.untracked.vstring(),
-    fileNames = cms.untracked.vstring('file:step2_newclusters_SLHC25.root')
+    fileNames = cms.untracked.vstring('file:step2_newclusters_SLHC25.root'),
+#    skipEvents = cms.untracked.uint32(6)
 )
 
 process.options = cms.untracked.PSet(
@@ -59,6 +60,19 @@ process.FEVTDEBUGHLToutput = cms.OutputModule("PoolOutputModule",
         dataTier = cms.untracked.string('GEN-SIM-RECO')
     )
 )
+
+# debug
+process.MessageLogger = cms.Service("MessageLogger",
+                                    destinations = cms.untracked.vstring("debugVH"),
+                                    debugModules = cms.untracked.vstring("*"),
+                                    categories = cms.untracked.vstring("SiPixelStubBuilder","VectorHitBuilderAlgorithm"),
+                                    debugVH = cms.untracked.PSet(threshold = cms.untracked.string("DEBUG"),
+                                                                       DEBUG = cms.untracked.PSet(limit = cms.untracked.int32(0)),
+                                                                       default = cms.untracked.PSet(limit = cms.untracked.int32(0)),
+                                                                       SiPixelStubBuilder = cms.untracked.PSet(limit = cms.untracked.int32(-1)),
+                                                                       VectorHitBuilderAlgorithm = cms.untracked.PSet(limit = cms.untracked.int32(-1))
+                                                                       )
+                                    )
 
 # Additional output definition
 

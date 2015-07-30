@@ -1,105 +1,4 @@
-#include <map>
-#include <vector>
-#include <algorithm>
-
-#include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/EDAnalyzer.h"
-#include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
-#include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "FWCore/ServiceRegistry/interface/Service.h"
-#include "FWCore/Framework/interface/ESHandle.h"
-#include "FWCore/Utilities/interface/InputTag.h"
-#include "FWCore/ServiceRegistry/interface/Service.h"
-
-#include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
-#include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
-#include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
-#include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
-
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
-#include "DataFormats/Common/interface/DetSetVectorNew.h"
-#include "DataFormats/Common/interface/DetSetVector.h"
-#include "DataFormats/DetId/interface/DetId.h"
-#include "DataFormats/Common/interface/Handle.h"
-#include "DataFormats/Phase2TrackerCluster/interface/Phase2TrackerCluster1D.h"
-//#include "DataFormats/Phase2TrackerDigi/interface/Phase2TrackerDigi.h"
-//#include "DataFormats/SiPixelDigi/interface/PixelDigi.h"
-
-#include "SimDataFormats/TrackerDigiSimLink/interface/PixelDigiSimLink.h"
-#include "SimDataFormats/Track/interface/SimTrackContainer.h"
-#include "SimDataFormats/Vertex/interface/SimVertexContainer.h"
-#include "SimDataFormats/TrackingHit/interface/PSimHitContainer.h"
-
-#include "CommonTools/UtilAlgos/interface/TFileService.h"
-#include "CommonTools/Utils/interface/TFileDirectory.h"
-
-#include "DataFormats/TrackingRecHit/interface/VectorHit.h"
-
-#include <TH1F.h>
-#include <TGraph.h>
-#include <THStack.h>
-#include <TCanvas.h>
-#include <TArrow.h>
-
-
-
-struct ClusterHistos {
-    THStack* numberClustersMixed;
-    TH1F* numberClusterPixel;
-    TH1F* numberClusterStrip;
-
-    TGraph* globalPosXY[3];
-    TGraph* localPosXY[3];
-
-    TH1F* deltaXClusterSimHits[3];
-    TH1F* deltaYClusterSimHits[3];
-
-    TH1F* deltaXClusterSimHits_P[3];
-    TH1F* deltaYClusterSimHits_P[3];
-
-    TH1F* digiEfficiency[3];
-
-    TH1F* primarySimHits;
-    TH1F* otherSimHits;
-};
-
-class VectorHitsBuilderValidation : public edm::EDAnalyzer {
-
-    public:
-
-        typedef std::map< unsigned int, std::vector< PSimHit > > SimHitsMap;
-        typedef std::map< unsigned int, SimTrack > SimTracksMap;
-
-        explicit VectorHitsBuilderValidation(const edm::ParameterSet&);
-        ~VectorHitsBuilderValidation();
-        void beginJob();
-        void endJob();
-        void analyze(const edm::Event&, const edm::EventSetup&);
-
-    private:
-
-        std::map< unsigned int, ClusterHistos >::iterator createLayerHistograms(unsigned int);
-        void CreateVHsXYGraph( const std::vector<Global3DPoint>,const  std::vector<Global3DVector> );
-        void CreateVHsRZGraph( const std::vector<Global3DPoint>,const  std::vector<Global3DVector> );
-        unsigned int getLayerNumber(const DetId&, const TrackerTopology*);
-        unsigned int getSimTrackId(const edm::Handle< edm::DetSetVector< PixelDigiSimLink > >&, const DetId&, unsigned int);
-
-        edm::InputTag src_;
-        edm::InputTag src2_;
-        edm::InputTag links_;
-        TGraph* trackerLayoutRZ_[3];
-        TGraph* trackerLayoutXY_[3];
-        TGraph* trackerLayoutXYBar_;
-        TGraph* trackerLayoutXYEC_;
-        TCanvas* VHXY_;
-        TCanvas* VHRZ_;
-        //std::vector<TArrow*> arrowVHs;
-
-        std::map< unsigned int, ClusterHistos > histograms_;
-
-};
+#include "RecoLocalTracker/SiPixelStubBuilder/test/VectorHitsValidation.h"
 
 VectorHitsBuilderValidation::VectorHitsBuilderValidation(const edm::ParameterSet& conf) :
     src_(conf.getParameter< edm::InputTag >("src")),
@@ -114,24 +13,41 @@ void VectorHitsBuilderValidation::beginJob() {
   fs->file().cd("/");
   TFileDirectory td = fs->mkdir("Common");
 
+  //Create common ntuple
+  tree = td.make< TTree >("VectorHits","VectorHits");
+
   // Create common graphs
-  TFileDirectory tdPos = td.mkdir("Positions");
-  trackerLayoutRZ_[0] = tdPos.make< TGraph >();
+  TFileDirectory tdGloPos = td.mkdir("GlobalPositions");
+  trackerLayoutRZ_[0] = tdGloPos.make< TGraph >();
   trackerLayoutRZ_[0] -> SetName("RVsZ_Mixed");
-  trackerLayoutRZ_[1] = tdPos.make< TGraph >();
+  trackerLayoutRZ_[1] = tdGloPos.make< TGraph >();
   trackerLayoutRZ_[1] -> SetName("RVsZ_Pixel");
-  trackerLayoutRZ_[2] = tdPos.make< TGraph >();
+  trackerLayoutRZ_[2] = tdGloPos.make< TGraph >();
   trackerLayoutRZ_[2] -> SetName("RVsZ_Strip");
-  trackerLayoutXY_[0] = tdPos.make< TGraph >();
+  trackerLayoutXY_[0] = tdGloPos.make< TGraph >();
   trackerLayoutXY_[0] -> SetName("YVsX_Mixed");
-  trackerLayoutXY_[1] = tdPos.make< TGraph >();
+  trackerLayoutXY_[1] = tdGloPos.make< TGraph >();
   trackerLayoutXY_[1] -> SetName("YVsX_Pixel");
-  trackerLayoutXY_[2] = tdPos.make< TGraph >();
+  trackerLayoutXY_[2] = tdGloPos.make< TGraph >();
   trackerLayoutXY_[2] -> SetName("YVsX_Strip");
-  trackerLayoutXYBar_ = tdPos.make< TGraph >();
+  trackerLayoutXYBar_ = tdGloPos.make< TGraph >();
   trackerLayoutXYBar_ -> SetName("YVsXBar");
-  trackerLayoutXYEC_ = tdPos.make< TGraph >();
+  trackerLayoutXYEC_ = tdGloPos.make< TGraph >();
   trackerLayoutXYEC_ -> SetName("YVsXEC");
+
+  TFileDirectory tdLocPos = td.mkdir("LocalPositions");
+  localPosXvsDeltaX_[0] = tdLocPos.make< TGraph >();
+  localPosXvsDeltaX_[0] -> SetName("localPosXvsDeltaX_Mixed");
+  localPosXvsDeltaX_[1] = tdLocPos.make< TGraph >();
+  localPosXvsDeltaX_[1] -> SetName("localPosXvsDeltaX_Pixel");
+  localPosXvsDeltaX_[2] = tdLocPos.make< TGraph >();
+  localPosXvsDeltaX_[2] -> SetName("localPosXvsDeltaX_Strip");
+  localPosYvsDeltaY_[0] = tdLocPos.make< TGraph >();
+  localPosYvsDeltaY_[0] -> SetName("localPosYvsDeltaY_Mixed");
+  localPosYvsDeltaY_[1] = tdLocPos.make< TGraph >();
+  localPosYvsDeltaY_[1] -> SetName("localPosYvsDeltaY_Pixel");
+  localPosYvsDeltaY_[2] = tdLocPos.make< TGraph >();
+  localPosYvsDeltaY_[2] -> SetName("localPosYvsDeltaY_Strip");
 
   //drawing VHs arrows
   TFileDirectory tdArr = td.mkdir("Directions");
@@ -149,9 +65,7 @@ void VectorHitsBuilderValidation::endJob() {}
 
 void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::EventSetup& eventSetup) {
 
-
     // Get the needed objects
-
 
     // Get the clusters
     edm::Handle< Phase2TrackerCluster1DCollectionNew > clusters;
@@ -180,12 +94,31 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
     // Get the geometry
     edm::ESHandle< TrackerGeometry > geomHandle;
     eventSetup.get< TrackerDigiGeometryRecord >().get(geomHandle);
-    const TrackerGeometry* tkGeom = &(*geomHandle);
-
+    tkGeom = &(*geomHandle);
     edm::ESHandle< TrackerTopology > tTopoHandle;
     eventSetup.get< IdealGeometryRecord >().get(tTopoHandle);
-    const TrackerTopology* tTopo = tTopoHandle.product();
+    tkTopo = tTopoHandle.product();
 
+    //set up for tree
+    int layer;
+    //int track_id;
+    int module_id;
+    int module_number;
+    int module_type; //1: pixel, 2: strip
+    float x_global, y_global, z_global;
+    float x_local, y_local, z_local;
+
+    tree -> Branch("layer",&layer,"layer/I");
+    //tree -> Branch("track_id",&track_id,"track_id/I");
+    tree -> Branch("module_id",&module_id,"module_id/I");
+    tree -> Branch("module_type",&module_type,"module_type/I");
+    tree -> Branch("module_number",&module_number,"module_number/I");
+    tree -> Branch("x_global",&x_global,"x_global/F");
+    tree -> Branch("y_global",&y_global,"y_global/F");
+    tree -> Branch("z_global",&z_global,"z_global/F");
+    tree -> Branch("x_local",&x_local,"x_local/F");
+    tree -> Branch("y_local",&y_local,"y_local/F");
+    tree -> Branch("z_local",&z_local,"z_local/F");
 
     // Rearrange the simTracks
 
@@ -225,11 +158,14 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
 
     // Loop over modules
     for (VectorHitCollectionNew::const_iterator DSViter = vhs->begin(); DSViter != vhs->end(); ++DSViter) {
+      // Get the detector unit's id
+      unsigned int rawid(DSViter->detId());
+      module_id = rawid;
+      DetId detId(rawid);
 
-        // Get the detector unit's id
-        unsigned int rawid(DSViter->detId());
-	      DetId detId(rawid);
-        unsigned int layer(getLayerNumber(detId, tTopo));
+      module_number = getModuleNumber(detId);
+      layer = getLayerNumber(detId);
+
 
         // Get the geometry of the tracker
         const GeomDetUnit* geomDetUnit(tkGeom->idToDetUnit(detId));
@@ -239,7 +175,7 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
         if (!geomDetUnit) break;
 
         // Create histograms for the layer if they do not yet exist
-        std::map< unsigned int, ClusterHistos >::iterator histogramLayer(histograms_.find(layer));
+        std::map< unsigned int, VHHistos >::iterator histogramLayer(histograms_.find(layer));
         if (histogramLayer == histograms_.end()) histogramLayer = createLayerHistograms(layer);
 
         // Number of clusters
@@ -254,13 +190,19 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
              if( vhIt->isValid() ){
 
                Local3DPoint localPosVH = vhIt->localPosition();
+               x_local = localPosVH.x();
+               y_local = localPosVH.y();
+               z_local = localPosVH.z();
                //std::cout << localPosVH << std::endl;
 
                Global3DPoint globalPosVH = geomDetUnit->surface().toGlobal(localPosVH);
+               x_global = globalPosVH.x();
+               y_global = globalPosVH.y();
+               z_global = globalPosVH.z();
                glVHs.push_back(globalPosVH);
                //std::cout << globalPosVH << std::endl;
 
-               //Local3DVector localDirVH = vhIt->localDirection();
+               Local3DVector localDirVH = vhIt->localDirection();
                //std::cout << localDirVH << std::endl;
 
                VectorHit vh = *vhIt;
@@ -279,25 +221,35 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
                histogramLayer->second.localPosXY[0]->SetPoint(nVHsTot, localPosVH.x(), localPosVH.y());
                histogramLayer->second.globalPosXY[0]->SetPoint(nVHsTot, globalPosVH.x(), globalPosVH.y());
 
+               localPosXvsDeltaX_[0]->SetPoint(nVHsTot, localPosVH.x(), localDirVH.x());
+               localPosYvsDeltaY_[0]->SetPoint(nVHsTot, localPosVH.y(), localDirVH.y());
+
                // Pixel module
                if (topol.ncolumns() == 32) {
-
+                 module_type = 1;
                  trackerLayoutRZ_[1]->SetPoint(nVHsPixelTot, globalPosVH.z(), globalPosVH.perp());
                  trackerLayoutXY_[1]->SetPoint(nVHsPixelTot, globalPosVH.x(), globalPosVH.y());
 
                  histogramLayer->second.localPosXY[1]->SetPoint(nVHsPixelTot, localPosVH.x(), localPosVH.y());
                  histogramLayer->second.globalPosXY[1]->SetPoint(nVHsPixelTot, globalPosVH.x(), globalPosVH.y());
 
+                 localPosXvsDeltaX_[1]->SetPoint(nVHsPixelTot, localPosVH.x(), localDirVH.x());
+                 localPosYvsDeltaY_[1]->SetPoint(nVHsPixelTot, localPosVH.y(), localDirVH.y());
+
                  ++nVHsPixel;
                  ++nVHsPixelTot;
                }
                // Strip module
                else if (topol.ncolumns() == 2) {
+                 module_type = 2;
                  trackerLayoutRZ_[2]->SetPoint(nVHsStripTot, globalPosVH.z(), globalPosVH.perp());
                  trackerLayoutXY_[2]->SetPoint(nVHsStripTot, globalPosVH.x(), globalPosVH.y());
 
                  histogramLayer->second.localPosXY[2]->SetPoint(nVHsStripTot, localPosVH.x(), localPosVH.y());
                  histogramLayer->second.globalPosXY[2]->SetPoint(nVHsStripTot, globalPosVH.x(), globalPosVH.y());
+
+                 localPosXvsDeltaX_[2]->SetPoint(nVHsStripTot, localPosVH.x(), localDirVH.x());
+                 localPosYvsDeltaY_[2]->SetPoint(nVHsStripTot, localPosVH.y(), localDirVH.y());
 
                  ++nVHsStrip;
                  ++nVHsStripTot;
@@ -334,18 +286,18 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
                 if (rawid == hitIt->detUnitId() and std::find(clusterSimTrackIds.begin(), clusterSimTrackIds.end(), hitIt->trackId()) != clusterSimTrackIds.end()) {
                     Local3DPoint localPosHit(hitIt->localPosition());
 
-                    histogramLayer->second.deltaXClusterSimHits[0]->Fill(localPosVH.x() - localPosHit.x());
-                    histogramLayer->second.deltaYClusterSimHits[0]->Fill(localPosVH.y() - localPosHit.y());
+                    histogramLayer->second.deltaXVHSimHits[0]->Fill(localPosVH.x() - localPosHit.x());
+                    histogramLayer->second.deltaYVHSimHits[0]->Fill(localPosVH.y() - localPosHit.y());
 
                     // Pixel module
                     if (topol.ncolumns() == 32) {
-                        histogramLayer->second.deltaXClusterSimHits[1]->Fill(localPosVH.x() - localPosHit.x());
-                        histogramLayer->second.deltaYClusterSimHits[1]->Fill(localPosVH.y() - localPosHit.y());
+                        histogramLayer->second.deltaXVHSimHits[1]->Fill(localPosVH.x() - localPosHit.x());
+                        histogramLayer->second.deltaYVHSimHits[1]->Fill(localPosVH.y() - localPosHit.y());
                     }
                     // Strip module
                     else if (topol.ncolumns() == 2) {
-                        histogramLayer->second.deltaXClusterSimHits[2]->Fill(localPosVH.x() - localPosHit.x());
-                        histogramLayer->second.deltaYClusterSimHits[2]->Fill(localPosVH.y() - localPosHit.y());
+                        histogramLayer->second.deltaXVHSimHits[2]->Fill(localPosVH.x() - localPosHit.x());
+                        histogramLayer->second.deltaYVHSimHits[2]->Fill(localPosVH.y() - localPosHit.y());
                     }
 
                     ++otherSimHits;
@@ -356,18 +308,18 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
                     // Primary particles only
                     unsigned int processType(hitIt->processType());
                     if (simTrackIt->second.vertIndex() == 0 and (processType == 2 || processType == 7 || processType == 9 || processType == 11 || processType == 13 || processType == 15)) {
-                        histogramLayer->second.deltaXClusterSimHits_P[0]->Fill(localPosVH.x() - localPosHit.x());
-                        histogramLayer->second.deltaYClusterSimHits_P[0]->Fill(localPosVH.y() - localPosHit.y());
+                        histogramLayer->second.deltaXVHSimHits_P[0]->Fill(localPosVH.x() - localPosHit.x());
+                        histogramLayer->second.deltaYVHSimHits_P[0]->Fill(localPosVH.y() - localPosHit.y());
 
                         // Pixel module
                         if (topol.ncolumns() == 32) {
-                            histogramLayer->second.deltaXClusterSimHits_P[1]->Fill(localPosVH.x() - localPosHit.x());
-                            histogramLayer->second.deltaYClusterSimHits_P[1]->Fill(localPosVH.y() - localPosHit.y());
+                            histogramLayer->second.deltaXVHSimHits_P[1]->Fill(localPosVH.x() - localPosHit.x());
+                            histogramLayer->second.deltaYVHSimHits_P[1]->Fill(localPosVH.y() - localPosHit.y());
                         }
                         // Strip module
                         else if (topol.ncolumns() == 2) {
-                            histogramLayer->second.deltaXClusterSimHits_P[2]->Fill(localPosVH.x() - localPosHit.x());
-                            histogramLayer->second.deltaYClusterSimHits_P[2]->Fill(localPosVH.y() - localPosHit.y());
+                            histogramLayer->second.deltaXVHSimHits_P[2]->Fill(localPosVH.x() - localPosHit.x());
+                            histogramLayer->second.deltaYVHSimHits_P[2]->Fill(localPosVH.y() - localPosHit.y());
                         }
 
                         ++primarySimHits;
@@ -382,9 +334,10 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
 */
         }
 
-        if (nVHsPixel) histogramLayer->second.numberClusterPixel->Fill(nVHsPixel);
-        if (nVHsStrip) histogramLayer->second.numberClusterStrip->Fill(nVHsStrip);
+        if (nVHsPixel) histogramLayer->second.numberVHPixel->Fill(nVHsPixel);
+        if (nVHsStrip) histogramLayer->second.numberVHStrip->Fill(nVHsStrip);
         nVHsTot++;
+        tree->Fill();
 
     }
 
@@ -394,7 +347,7 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
 }
 
 // Create the histograms
-std::map< unsigned int, ClusterHistos >::iterator VectorHitsBuilderValidation::createLayerHistograms(unsigned int ival) {
+std::map< unsigned int, VHHistos >::iterator VectorHitsBuilderValidation::createLayerHistograms(unsigned int ival) {
     std::ostringstream fname1, fname2;
 
     edm::Service<TFileService> fs;
@@ -419,7 +372,7 @@ std::map< unsigned int, ClusterHistos >::iterator VectorHitsBuilderValidation::c
     TFileDirectory td1 = fs->mkdir(fname1.str().c_str());
     TFileDirectory td = td1.mkdir(fname2.str().c_str());
 
-    ClusterHistos local_histos;
+    VHHistos local_histos;
 
     std::ostringstream histoName;
 
@@ -427,18 +380,18 @@ std::map< unsigned int, ClusterHistos >::iterator VectorHitsBuilderValidation::c
      * Number of clusters
      */
 
-    histoName.str(""); histoName << "Number_Clusters_Pixel" << tag.c_str() <<  id;
-    local_histos.numberClusterPixel = td.make< TH1F >(histoName.str().c_str(), histoName.str().c_str(), 20, 0., 20.);
-    local_histos.numberClusterPixel->SetFillColor(kAzure + 7);
+    histoName.str(""); histoName << "Number_VHs_Pixel" << tag.c_str() <<  id;
+    local_histos.numberVHPixel = td.make< TH1F >(histoName.str().c_str(), histoName.str().c_str(), 20, 0., 20.);
+    local_histos.numberVHPixel->SetFillColor(kAzure + 7);
 
-    histoName.str(""); histoName << "Number_Clusters_Strip" << tag.c_str() <<  id;
-    local_histos.numberClusterStrip = td.make< TH1F >(histoName.str().c_str(), histoName.str().c_str(), 20, 0., 20.);
-    local_histos.numberClusterStrip->SetFillColor(kOrange - 3);
+    histoName.str(""); histoName << "Number_VHs_Strip" << tag.c_str() <<  id;
+    local_histos.numberVHStrip = td.make< TH1F >(histoName.str().c_str(), histoName.str().c_str(), 20, 0., 20.);
+    local_histos.numberVHStrip->SetFillColor(kOrange - 3);
 
-    histoName.str(""); histoName << "Number_Clusters_Mixed" << tag.c_str() <<  id;
-    local_histos.numberClustersMixed = td.make< THStack >(histoName.str().c_str(), histoName.str().c_str());
-    local_histos.numberClustersMixed->Add(local_histos.numberClusterPixel);
-    local_histos.numberClustersMixed->Add(local_histos.numberClusterStrip);
+    histoName.str(""); histoName << "Number_VHs_Mixed" << tag.c_str() <<  id;
+    local_histos.numberVHsMixed = td.make< THStack >(histoName.str().c_str(), histoName.str().c_str());
+    local_histos.numberVHsMixed->Add(local_histos.numberVHPixel);
+    local_histos.numberVHsMixed->Add(local_histos.numberVHStrip);
 
       /*
      * Local and Global positions
@@ -472,45 +425,45 @@ std::map< unsigned int, ClusterHistos >::iterator VectorHitsBuilderValidation::c
      * Delta positions with SimHits
      */
 
-    histoName.str(""); histoName << "Delta_X_Cluster_SimHits_Mixed" << tag.c_str() <<  id;
-    local_histos.deltaXClusterSimHits[0] = td.make< TH1F >(histoName.str().c_str(), histoName.str().c_str(), 100, 0., 0.);
+    histoName.str(""); histoName << "Delta_X_VH_SimHits_Mixed" << tag.c_str() <<  id;
+    local_histos.deltaXVHSimHits[0] = td.make< TH1F >(histoName.str().c_str(), histoName.str().c_str(), 100, 0., 0.);
 
-    histoName.str(""); histoName << "Delta_X_Cluster_SimHits_Pixel" << tag.c_str() <<  id;
-    local_histos.deltaXClusterSimHits[1] = td.make< TH1F >(histoName.str().c_str(), histoName.str().c_str(), 100, 0., 0.);
+    histoName.str(""); histoName << "Delta_X_VH_SimHits_Pixel" << tag.c_str() <<  id;
+    local_histos.deltaXVHSimHits[1] = td.make< TH1F >(histoName.str().c_str(), histoName.str().c_str(), 100, 0., 0.);
 
-    histoName.str(""); histoName << "Delta_X_Cluster_SimHits_Strip" << tag.c_str() <<  id;
-    local_histos.deltaXClusterSimHits[2] = td.make< TH1F >(histoName.str().c_str(), histoName.str().c_str(), 100, 0., 0.);
+    histoName.str(""); histoName << "Delta_X_VH_SimHits_Strip" << tag.c_str() <<  id;
+    local_histos.deltaXVHSimHits[2] = td.make< TH1F >(histoName.str().c_str(), histoName.str().c_str(), 100, 0., 0.);
 
-    histoName.str(""); histoName << "Delta_Y_Cluster_SimHits_Mixed" << tag.c_str() <<  id;
-    local_histos.deltaYClusterSimHits[0] = td.make< TH1F >(histoName.str().c_str(), histoName.str().c_str(), 100, 0., 0.);
+    histoName.str(""); histoName << "Delta_Y_VH_SimHits_Mixed" << tag.c_str() <<  id;
+    local_histos.deltaYVHSimHits[0] = td.make< TH1F >(histoName.str().c_str(), histoName.str().c_str(), 100, 0., 0.);
 
-    histoName.str(""); histoName << "Delta_Y_Cluster_SimHits_Pixel" << tag.c_str() <<  id;
-    local_histos.deltaYClusterSimHits[1] = td.make< TH1F >(histoName.str().c_str(), histoName.str().c_str(), 100, 0., 0.);
+    histoName.str(""); histoName << "Delta_Y_VH_SimHits_Pixel" << tag.c_str() <<  id;
+    local_histos.deltaYVHSimHits[1] = td.make< TH1F >(histoName.str().c_str(), histoName.str().c_str(), 100, 0., 0.);
 
-    histoName.str(""); histoName << "Delta_Y_Cluster_SimHits_Strip" << tag.c_str() <<  id;
-    local_histos.deltaYClusterSimHits[2] = td.make< TH1F >(histoName.str().c_str(), histoName.str().c_str(), 100, 0., 0.);
+    histoName.str(""); histoName << "Delta_Y_VH_SimHits_Strip" << tag.c_str() <<  id;
+    local_histos.deltaYVHSimHits[2] = td.make< TH1F >(histoName.str().c_str(), histoName.str().c_str(), 100, 0., 0.);
 
     /*
      * Delta position with simHits for primary tracks only
      */
 
-    histoName.str(""); histoName << "Delta_X_Cluster_SimHits_Mixed_P" << tag.c_str() <<  id;
-    local_histos.deltaXClusterSimHits_P[0] = td.make< TH1F >(histoName.str().c_str(), histoName.str().c_str(), 100, 0., 0.);
+    histoName.str(""); histoName << "Delta_X_VH_SimHits_Mixed_P" << tag.c_str() <<  id;
+    local_histos.deltaXVHSimHits_P[0] = td.make< TH1F >(histoName.str().c_str(), histoName.str().c_str(), 100, 0., 0.);
 
-    histoName.str(""); histoName << "Delta_X_Cluster_SimHits_Pixel_P" << tag.c_str() <<  id;
-    local_histos.deltaXClusterSimHits_P[1] = td.make< TH1F >(histoName.str().c_str(), histoName.str().c_str(), 100, 0., 0.);
+    histoName.str(""); histoName << "Delta_X_VH_SimHits_Pixel_P" << tag.c_str() <<  id;
+    local_histos.deltaXVHSimHits_P[1] = td.make< TH1F >(histoName.str().c_str(), histoName.str().c_str(), 100, 0., 0.);
 
-    histoName.str(""); histoName << "Delta_X_Cluster_SimHits_Strip_P" << tag.c_str() <<  id;
-    local_histos.deltaXClusterSimHits_P[2] = td.make< TH1F >(histoName.str().c_str(), histoName.str().c_str(), 100, 0., 0.);
+    histoName.str(""); histoName << "Delta_X_VH_SimHits_Strip_P" << tag.c_str() <<  id;
+    local_histos.deltaXVHSimHits_P[2] = td.make< TH1F >(histoName.str().c_str(), histoName.str().c_str(), 100, 0., 0.);
 
-    histoName.str(""); histoName << "Delta_Y_Cluster_SimHits_Mixed_P" << tag.c_str() <<  id;
-    local_histos.deltaYClusterSimHits_P[0] = td.make< TH1F >(histoName.str().c_str(), histoName.str().c_str(), 100, 0., 0.);
+    histoName.str(""); histoName << "Delta_Y_VH_SimHits_Mixed_P" << tag.c_str() <<  id;
+    local_histos.deltaYVHSimHits_P[0] = td.make< TH1F >(histoName.str().c_str(), histoName.str().c_str(), 100, 0., 0.);
 
-    histoName.str(""); histoName << "Delta_Y_Cluster_SimHits_Pixel_P" << tag.c_str() <<  id;
-    local_histos.deltaYClusterSimHits_P[1] = td.make< TH1F >(histoName.str().c_str(), histoName.str().c_str(), 100, 0., 0.);
+    histoName.str(""); histoName << "Delta_Y_VH_SimHits_Pixel_P" << tag.c_str() <<  id;
+    local_histos.deltaYVHSimHits_P[1] = td.make< TH1F >(histoName.str().c_str(), histoName.str().c_str(), 100, 0., 0.);
 
-    histoName.str(""); histoName << "Delta_Y_Cluster_SimHits_Strip_P" << tag.c_str() <<  id;
-    local_histos.deltaYClusterSimHits_P[2] = td.make< TH1F >(histoName.str().c_str(), histoName.str().c_str(), 100, 0., 0.);
+    histoName.str(""); histoName << "Delta_Y_VH_SimHits_Strip_P" << tag.c_str() <<  id;
+    local_histos.deltaYVHSimHits_P[2] = td.make< TH1F >(histoName.str().c_str(), histoName.str().c_str(), 100, 0., 0.);
 
     /*
      * Information on the Digis per cluster
@@ -523,7 +476,7 @@ std::map< unsigned int, ClusterHistos >::iterator VectorHitsBuilderValidation::c
     local_histos.otherSimHits= td.make< TH1F >(histoName.str().c_str(), histoName.str().c_str(), 10, 0., 10.);
 
 
-    std::pair< std::map< unsigned int, ClusterHistos >::iterator, bool > insertedIt(histograms_.insert(std::make_pair(ival, local_histos)));
+    std::pair< std::map< unsigned int, VHHistos >::iterator, bool > insertedIt(histograms_.insert(std::make_pair(ival, local_histos)));
     fs->file().cd("/");
 
     return insertedIt.first;
@@ -546,13 +499,14 @@ void VectorHitsBuilderValidation::CreateVHsXYGraph(const std::vector<Global3DPoi
 
     finalposX = glVHs.at(nVH).x() + dirVHs.at(nVH).x();
     finalposY = glVHs.at(nVH).y() + dirVHs.at(nVH).y();
-    std::cout << glVHs.at(nVH) << " " << " \tr: " << glVHs.at(nVH).perp() << std::endl;
-    std::cout << dirVHs.at(nVH).x() << "," << dirVHs.at(nVH).y() << std::endl;
+    //std::cout << glVHs.at(nVH) << " " << " \tr: " << glVHs.at(nVH).perp() << std::endl;
+    //std::cout << dirVHs.at(nVH).x() << "," << dirVHs.at(nVH).y() << std::endl;
 
     //same r
     if((fabs(dirVHs.at(nVH).x()) < 10e-5) && (fabs(dirVHs.at(nVH).y()) < 10e-5)){
 
-      std::cout << "same pos!";
+      //std::cout << "same pos!";
+      continue;
 
     } else {
 
@@ -601,13 +555,26 @@ void VectorHitsBuilderValidation::CreateVHsRZGraph(const std::vector<Global3DPoi
   return;
 }
 
-unsigned int VectorHitsBuilderValidation::getLayerNumber(const DetId& detid, const TrackerTopology* topo) {
+unsigned int VectorHitsBuilderValidation::getLayerNumber(const DetId& detid) {
     if (detid.det() == DetId::Tracker) {
-        if (detid.subdetId() == PixelSubdetector::PixelBarrel) return (topo->pxbLayer(detid));
-        else if (detid.subdetId() == PixelSubdetector::PixelEndcap) return (100 * topo->pxfSide(detid) + topo->pxfDisk(detid));
+        if (detid.subdetId() == PixelSubdetector::PixelBarrel) return (tkTopo->pxbLayer(detid));
+        else if (detid.subdetId() == PixelSubdetector::PixelEndcap) return (100 * tkTopo->pxfSide(detid) + tkTopo->pxfDisk(detid));
         else return 999;
     }
     return 999;
+}
+
+unsigned int VectorHitsBuilderValidation::getModuleNumber(const DetId& detid) {
+  if (detid.det() == DetId::Tracker) {
+      if (detid.subdetId() == PixelSubdetector::PixelBarrel) {
+        return ( tkTopo->pxbModule(detid) );
+      }
+      else if (detid.subdetId() == PixelSubdetector::PixelEndcap) {
+        return ( tkTopo->pxfModule(detid) );
+      }
+      else return 999;
+  }
+  return 999;
 }
 
 unsigned int VectorHitsBuilderValidation::getSimTrackId(const edm::Handle< edm::DetSetVector< PixelDigiSimLink > >& pixelSimLinks, const DetId& detId, unsigned int channel) {
