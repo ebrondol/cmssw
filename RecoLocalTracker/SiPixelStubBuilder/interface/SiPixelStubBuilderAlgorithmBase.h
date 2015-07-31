@@ -37,6 +37,7 @@ class SiPixelStubBuilderAlgorithmBase {
   unsigned int getSubLayerNumber(const DetId& detid);
   unsigned int getModuleNumber(const DetId& detid);
   void printClusters(const edmNew::DetSetVector<Phase2TrackerCluster1D>& clusters);
+  void printCluster(unsigned int rawId, const Phase2TrackerCluster1D* cluster);
   void loadDetSetVector( std::map< DetId,std::vector<VectorHit> >& theMap, edmNew::DetSetVector<VectorHit>& theCollection ) const ;
 
   const TrackerGeometry* theTkGeom;

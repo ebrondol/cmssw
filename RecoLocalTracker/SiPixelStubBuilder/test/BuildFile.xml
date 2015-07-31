@@ -22,6 +22,7 @@
 <use   name="DataFormats/Phase2TrackerCluster"/>
 <use   name="DataFormats/ParticleFlowCandidate"/>
 <use   name="DataFormats/ParticleFlowReco"/>
+<use   name="RecoLocalTracker/SiPixelStubBuilder"/>
 <library   file="ClustersValidationTGraph.cc" name="Phase2TrackerClusterizerValidationTGraph">
   <flags   EDM_PLUGIN="1"/>
   <flags CXXFLAGS="-g3"/>

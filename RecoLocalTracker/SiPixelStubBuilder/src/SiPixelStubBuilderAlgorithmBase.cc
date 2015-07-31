@@ -96,39 +96,9 @@ void SiPixelStubBuilderAlgorithmBase::printClusters(const edmNew::DetSetVector<P
 
       nCluster++;
       // get the detector unit's id
-      unsigned int rawid(DSViter->detId());
-      DetId detId(rawid);
+      unsigned int rawId(DSViter->detId());
 
-      // get the geom of the tracker
-      const GeomDetUnit* geomDetUnit(theTkGeom->idToDetUnit(detId));
-      const PixelGeomDetUnit* theGeomDet = dynamic_cast< const PixelGeomDetUnit* >(geomDetUnit);
-      const PixelTopology& topol = theGeomDet->specificTopology();
-
-      unsigned int layer = getLayerNumber(detId);
-      //unsigned int sublayer = getSubLayerNumber(detId);
-      unsigned int module = getModuleNumber(detId);
-      std::cout << "Layer:" << layer << std::endl;
-      //std::cout << "SubLayer:" << sublayer << std::endl;
-      if(topol.ncolumns() == 32) 
-        std::cout << "Pixel cluster with detId:" << rawid << "(module:" << module << ") in DetSet#" << numberOfDSV << std::endl;
-      else if(topol.ncolumns() == 2 ) 
-        std::cout << "Strip cluster with detId " << rawid << "(module:" << module << ") in DetSet#" << numberOfDSV << std::endl;
-      else std::cout << "no module?!" << std::endl;
-      std::cout << "with pitch:" << topol.pitch().first << " , " << topol.pitch().second << std::endl;
-      std::cout << " and width:" << theGeomDet->surface().bounds().width() << " , lenght:" << theGeomDet->surface().bounds().length() << std::endl;
-
-      if (!geomDetUnit) break;
-
-      //FIXME StripClusterParameterEstimator::LocalValues parameters =  parameterestimator->localParameters(*clustIt,geomDetUnit);
-      MeasurementPoint mpClu(clustIt->center(), clustIt->column() + 0.5);
-      Local3DPoint localPosClu = geomDetUnit->topology().localPosition(mpClu);
-      Global3DPoint globalPosClu = geomDetUnit->surface().toGlobal(localPosClu);
-      //MeasurementError meClu(1./12,0.0,1./12);
-      //LocalError localErrClu = geomDetUnit->topology().localError(mpClu,meClu);
-
-      std::cout << "\t global pos " << globalPosClu << std::endl;
-      //std::cout << "\t local  pos " << localPosClu << "with err " << localErrClu << std::endl;
-      std::cout << std::endl;
+      printCluster(rawId, clustIt);
 
     }
   }
@@ -136,6 +106,44 @@ void SiPixelStubBuilderAlgorithmBase::printClusters(const edmNew::DetSetVector<P
 
 }
 
+
+void SiPixelStubBuilderAlgorithmBase::printCluster(unsigned int rawId, const Phase2TrackerCluster1D* clustIt){
+
+  DetId detId(rawId);
+
+  // get the geom of the tracker
+  const GeomDetUnit* geomDetUnit(theTkGeom->idToDetUnit(detId));
+  const PixelGeomDetUnit* theGeomDet = dynamic_cast< const PixelGeomDetUnit* >(geomDetUnit);
+  const PixelTopology& topol = theGeomDet->specificTopology();
+
+  unsigned int layer = getLayerNumber(detId);
+  //unsigned int sublayer = getSubLayerNumber(detId);
+  unsigned int module = getModuleNumber(detId);
+  std::cout << "Layer:" << layer << std::endl;
+  //std::cout << "SubLayer:" << sublayer << std::endl;
+  if(topol.ncolumns() == 32) 
+    std::cout << "Pixel cluster with detId:" << rawId << "(module:" << module << ") " << std::endl;
+  else if(topol.ncolumns() == 2 ) 
+    std::cout << "Strip cluster with detId " << rawId << "(module:" << module << ") " << std::endl;
+  else std::cout << "no module?!" << std::endl;
+  std::cout << "with pitch:" << topol.pitch().first << " , " << topol.pitch().second << std::endl;
+  std::cout << " and width:" << theGeomDet->surface().bounds().width() << " , lenght:" << theGeomDet->surface().bounds().length() << std::endl;
+
+  if (!geomDetUnit) return;
+
+  //FIXME StripClusterParameterEstimator::LocalValues parameters =  parameterestimator->localParameters(*clustIt,geomDetUnit);
+  MeasurementPoint mpClu(clustIt->center(), clustIt->column() + 0.5);
+  Local3DPoint localPosClu = geomDetUnit->topology().localPosition(mpClu);
+  Global3DPoint globalPosClu = geomDetUnit->surface().toGlobal(localPosClu);
+  //MeasurementError meClu(1./12,0.0,1./12);
+  //LocalError localErrClu = geomDetUnit->topology().localError(mpClu,meClu);
+
+  std::cout << "\t global pos " << globalPosClu << std::endl;
+  //std::cout << "\t local  pos " << localPosClu << "with err " << localErrClu << std::endl;
+  std::cout << std::endl;
+
+  return;
+}
 
 void SiPixelStubBuilderAlgorithmBase::loadDetSetVector( std::map< DetId,std::vector<VectorHit> >& theMap, edmNew::DetSetVector<VectorHit>& theCollection ) const{
 

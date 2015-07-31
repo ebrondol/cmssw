@@ -36,6 +36,7 @@
 #include "CommonTools/Utils/interface/TFileDirectory.h"
 
 #include "DataFormats/TrackingRecHit/interface/VectorHit.h"
+//#include "RecoLocalTracker/SiPixelStubBuilder/interface/SiPixelStubBuilderAlgorithmBase.h"
 
 #include <TH1F.h>
 #include <TGraph.h>
@@ -60,6 +61,7 @@ struct VHHistos {
 
     TH1F* digiEfficiency[3];
 
+    TH1F* totalSimHits;
     TH1F* primarySimHits;
     TH1F* otherSimHits;
 };
@@ -84,11 +86,13 @@ class VectorHitsBuilderValidation : public edm::EDAnalyzer {
         void CreateVHsRZGraph( const std::vector<Global3DPoint>,const  std::vector<Global3DVector> );
         unsigned int getLayerNumber(const DetId&);
         unsigned int getModuleNumber(const DetId& detid);
+        void printCluster(unsigned int rawId, const Phase2TrackerCluster1D* cluster);
         unsigned int getSimTrackId(const edm::Handle< edm::DetSetVector< PixelDigiSimLink > >&, const DetId&, unsigned int);
 
         edm::InputTag src_;
         edm::InputTag src2_;
         edm::InputTag links_;
+        //SiPixelStubBuilderAlgorithmBase *algo;
         const TrackerGeometry* tkGeom;
         const TrackerTopology* tkTopo;
 
@@ -102,8 +106,7 @@ class VectorHitsBuilderValidation : public edm::EDAnalyzer {
         TCanvas* VHXY_;
         TCanvas* VHRZ_;
         std::vector<TArrow*> arrowVHs;
-      
+
         std::map< unsigned int, VHHistos > histograms_;
-     
+
 };
-       

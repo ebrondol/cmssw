@@ -4,26 +4,33 @@
 
 #include <iomanip>
 
-string skipEvent = "0";
+string skipEvent = "9";
 std::string folderName = "/afs/cern.ch/work/e/ebrondol/MatchingHitsInHLLHC/CMSSW_6_2_0_SLHC25_patch1/src/RecoLocalTracker/SiPixelStubBuilder/test/";
-std::string FileName1 = "cluster_validation_graph.root";//"clusVal" + skipEvent + ".root";
-std::string FileName2 = "vh_validation.root";//"vhVal" + skipEvent + ".root";
+//std::string FileName1 = "cluster_validation.root";
+//std::string FileName2 = "vh_validation.root";
+std::string FileName1 = "cluster_validation_skip" + skipEvent + ".root";
+std::string FileName2 = "vh_validation_skip" + skipEvent + ".root";
 
 
 std::string baseFolderRootName = "analysis/Common/";
 std::string FolderRootName1 = baseFolderRootName ;
 std::string FolderRootName2 = baseFolderRootName ;
 
-std::string extension = ".pdf";
+std::string extensionSinglePlot = ".png";
+std::string extensionCollection = ".pdf";
 std::string outputFileName = "VHcomparison" + skipEvent;
 
 //gROOT->SetBatch(false);
 
 void VHcomparison()
 {
+  gROOT->ProcessLine(".x /afs/cern.ch/user/e/ebrondol/public/rootPalette.C");
+  gROOT->ProcessLine(".x /afs/cern.ch/user/e/ebrondol/public/rootLogon.C");
+  gROOT->ProcessLine(".x /afs/cern.ch/user/e/ebrondol/public/setTDRStyle.C");
+  gStyle->SetOptStat(0);
 
   TCanvas* dummy = new TCanvas("dummy","",0,0,700,600);
-  dummy -> Print((outputFileName+extension+"[").c_str(),extension.c_str());
+  dummy -> Print((outputFileName+extensionCollection+"[").c_str(),extensionCollection.c_str());
 
   PlotComparisonClusters();
   //PlotComparisonMaker1D();
@@ -31,22 +38,22 @@ void VHcomparison()
   //PlotComparisonMaker2DandProfile();
   //PlotPulls();
 
-  dummy -> Print((outputFileName+extension+"]").c_str(),extension.c_str());
+  dummy -> Print((outputFileName+extensionCollection+"]").c_str(),extensionCollection.c_str());
 
   return;
 }
 
 void PlotComparisonClusters()
 {
-  FolderRootName2 = baseFolderRootName + "Positions/";
-  PlotComparisonClustersPixelStrip("RVsZ", false);
+  FolderRootName2 = baseFolderRootName + "GlobalPositions/";
+//  PlotComparisonClustersPixelStrip("RVsZ", true);
   FolderRootName2 = baseFolderRootName + "Directions/";
-  PlotComparisonClustersPixelStripVHArray("RVsZ", false);
+  PlotComparisonClustersPixelStripVHArray("RVsZ", true);
 
-  FolderRootName2 = baseFolderRootName + "Positions/";
-  PlotComparisonClustersPixelStrip("YVsX", false);
+  FolderRootName2 = baseFolderRootName + "GlobalPositions/";
+//  PlotComparisonClustersPixelStrip("YVsX", true);
   FolderRootName2 = baseFolderRootName + "Directions/";
-  PlotComparisonClustersPixelStripVHArray("YVsX", false);
+  PlotComparisonClustersPixelStripVHArray("YVsX", true);
   return;
 }
 
@@ -168,7 +175,7 @@ void PlotComparisonMaker1D(const char* HistoName, bool HistoDraw = false, bool d
 //  c1 -> Print(("Plots/"+string(HistoName)+"_"+Associator+".pdf").c_str(), "pdf");
 //  c1 -> Print(("Plots/"+string(HistoName)+"_"+Associator+".png").c_str(), "png");
 //  c1 -> SaveAs((string(HistoName)+"Comparison.C").c_str());
-  c1 -> Print((outputFileName+extension).c_str(),extension.c_str());
+  c1 -> Print((outputFileName+extensionCollection).c_str(),extensionCollection.c_str());
 
 }
 
@@ -247,7 +254,7 @@ void PlotComparisonMaker2D(const char* HistoName,  bool proj = false, bool debug
   //c1 -> Print((string(HistoName)+"_"+Associator+".png").c_str(), "png");
   //c1 -> SaveAs((string(HistoName)+"Comparison.C").c_str());
   }
-  c1 -> Print((outputFileName+extension).c_str(),extension.c_str());
+  c1 -> Print((outputFileName+extensionCollection).c_str(),extensionCollection.c_str());
 
 }
 void PlotComparisonClustersPixelStripVHArray(const char* HistoName, bool debug = false ){
@@ -290,8 +297,8 @@ void PlotComparisonClustersPixelStripVHArray(const char* HistoName, bool debug =
   //histo1pixel -> GetXaxis() -> SetTitle("Y [cm]");
   //histo1pixel -> GetYaxis() -> SetTitle("X [cm]");
 
-  histo1strip -> GetYaxis() -> SetTitleOffset(2);
-  histo1strip -> GetXaxis() -> SetTitleOffset(2);
+  histo1strip -> GetYaxis() -> SetTitleOffset(1.5);
+  histo1strip -> GetXaxis() -> SetTitleOffset(1.5);
 
   histo1strip -> GetXaxis() -> SetTitleSize(0.03);
   histo1strip -> GetYaxis() -> SetTitleSize(0.03);
@@ -299,10 +306,23 @@ void PlotComparisonClustersPixelStripVHArray(const char* HistoName, bool debug =
   histo1strip -> GetYaxis() -> SetLabelSize(0.03);
   //histo1pixel -> GetXaxis() -> SetRangeUser(-300.,300.);
 
+  if(HistoName=="RVsZ"){
+    histo1strip -> GetYaxis() -> SetRangeUser(0.0, 130);
+    histo1strip -> GetYaxis() -> SetTitle("z [cm]");
+    histo1strip -> GetXaxis() -> SetRangeUser(-300.0, 300);
+    histo1strip -> GetXaxis() -> SetTitle("r [cm]");
+  }
+  if(HistoName=="YVsX"){
+    histo1strip -> GetYaxis() -> SetRangeUser(-130, 130);
+    histo1strip -> GetYaxis() -> SetTitle("x [cm]");
+    histo1strip -> GetXaxis() -> SetRangeUser(-130, 130);
+    histo1strip -> GetXaxis() -> SetTitle("y [cm]");
+  }
   histo1strip -> Draw("AP");
   histo1pixel -> Draw("Psame");
 
   TObject *obj;
+  TArrow* vh_arrow;
   TIter next(canvasArray->GetListOfPrimitives());
   while ((obj=next())) {
     cout << "Reading: " << obj->GetName() << endl;
@@ -317,10 +337,18 @@ void PlotComparisonClustersPixelStripVHArray(const char* HistoName, bool debug =
         //cout << "graph: " << obj->GetName() << endl;
       }
       if (obj->InheritsFrom("TArrow")){
-        //cout << "array: " << obj->GetName() << endl;
         TArrow* arr = obj;
+
+        //draw 2times lenght 
+        //double l = sqrt(pow(arr->GetX2 - arr->GetX1,2)+pow(arr->GetY2 - arr->GetY1,2));
+        //arr->SetX2(2*arr->GetX2());
+        //arr->SetY2(2*arr->GetY2());
+        //vh_arrow = new TArrow(glVHs.at(nVH).x(), glVHs.at(nVH).y(), finalposX, finalposY, 0.05, ">");
+        //TArrow* arrDraw = new TArrow(arr->GetX1,arr->GetY1,arr->GetX2,arr->GetY2);
         arr->SetLineColor(7);
+        arr->SetArrowSize(0.03);
         arr->Draw(">same");
+        //cout << "size: " << arr->GetX2() << endl;
       }
  }
  if(debug)     std::cout << "graph*: " << gr << std::endl;
@@ -338,12 +366,12 @@ void PlotComparisonClustersPixelStripVHArray(const char* HistoName, bool debug =
   legend -> Draw("same");
 
   if(debug){
-    c1 -> Print((string(HistoName)+".pdf").c_str(), "pdf");
+    c1 -> Print((string(HistoName)+skipEvent+extensionSinglePlot).c_str(), extensionSinglePlot.c_str());
 
   //c1 -> Print((string(HistoName)+"_"+Associator+".png").c_str(), "png");
   //c1 -> SaveAs((string(HistoName)+"Comparison.C").c_str());
   }
-  c1 -> Print((outputFileName+extension).c_str(),extension.c_str());
+  c1 -> Print((outputFileName+extensionCollection).c_str(),extensionCollection.c_str());
 
 }
 
@@ -372,6 +400,7 @@ void PlotComparisonClustersPixelStrip(const char* HistoName, bool debug = false 
   histo2strip = (TGraph*)( f2->Get((FolderRootName2+HistoName+"_Strip").c_str()) );
 
   if(debug)     std::cout << "histo1*: " << histo1pixel << ", histo2*: " << histo2pixel << std::endl;
+  if(debug)     std::cout << "histo3*: " << histo1strip << ", histo4*: " << histo2strip << std::endl;
 
   TCanvas* c1 = new TCanvas();
   c1 -> cd();
@@ -429,7 +458,7 @@ void PlotComparisonClustersPixelStrip(const char* HistoName, bool debug = false 
 //  c1 -> Print((string(HistoName)+"_"+Associator+".png").c_str(), "png");
 //  c1 -> SaveAs((string(HistoName)+"Comparison.C").c_str());
   }
-  c1 -> Print((outputFileName+extension).c_str(),extension.c_str());
+  c1 -> Print((outputFileName+extensionCollection).c_str(),extensionCollection.c_str());
 
 }
 
@@ -505,7 +534,7 @@ void PlotComparisonMakerProfile(const char* HistoName,  bool proj = false, bool 
   }
 //  c1 -> Print((string(HistoName)+"_"+Associator+".png").c_str(), "png");
 //  c1 -> SaveAs((string(HistoName)+"Comparison.C").c_str());
-  c1 -> Print((outputFileName+extension).c_str(),extension.c_str());
+  c1 -> Print((outputFileName+extensionCollection).c_str(),extensionCollection.c_str());
 
 }
 
@@ -663,7 +692,7 @@ void PlotRatios(const char* HistoName, bool debug = false)
   }
   c1 -> Print(("Plots/"+string(HistoName)+"Ratio_"+Associator+".pdf").c_str(), "pdf");
   c1 -> Print(("Plots/"+string(HistoName)+"Ratio_"+Associator+".png").c_str(), "png");
-  c1 -> Print((outputFileName+extension).c_str(),extension.c_str());
+  c1 -> Print((outputFileName+extensionCollection).c_str(),extensionCollection.c_str());
 
 }
 

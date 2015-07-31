@@ -34,26 +34,8 @@ void VectorHitBuilderAlgorithm::run(const edmNew::DetSetVector<Phase2TrackerClus
         StackGeomDet stack = createNewStack(detId1, detId2);
         LogDebug("VectorHitBuilderAlgorithm") << "  Stack created with DetIds: " << rawDetId1 << "," << rawDetId2;
 
-//        std::vector<const Phase2TrackerCluster1D*> innerClustersInStack;
-//        std::vector<const Phase2TrackerCluster1D*> outerClustersInStack;
-
-        //run on both DSV to find all the clusters associated to the stack
-//        edmNew::DetSet< Phase2TrackerCluster1D >::const_iterator clustIt;
-//        for ( clustIt = DSViter->begin(); clustIt != DSViter->end(); ++clustIt) {
-//         innerClustersInStack.push_back(&*clustIt);
-//        }
-//        for ( clustIt = DSViter2->begin(); clustIt != DSViter2->end(); ++clustIt) {
-//          outerClustersInStack.push_back(&*clustIt);
-//        }
-
-//        LogTrace("VectorHitBuilderAlgorithm") << "\t with " << int(innerClustersInStack.size() + outerClustersInStack.size()) << " clusters associated.";
-
         std::vector<VectorHit> vhsInStack = buildVectorHits(stack, DSViter, DSViter2);
         temporary[rawDetId1] = vhsInStack;
-
-//        innerClustersInStack.clear();
-//        outerClustersInStack.clear();
-//        vhsInStack.clear();
 
       }
     }
