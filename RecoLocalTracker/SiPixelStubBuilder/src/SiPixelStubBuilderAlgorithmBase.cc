@@ -140,7 +140,7 @@ void SiPixelStubBuilderAlgorithmBase::printClusters(const edmNew::DetSetVector<P
 void SiPixelStubBuilderAlgorithmBase::loadDetSetVector( std::map< DetId,std::vector<VectorHit> >& theMap, edmNew::DetSetVector<VectorHit>& theCollection ) const{
 
   std::map<DetId,std::vector<VectorHit> >::const_iterator it = theMap.begin();
-  std::map<DetId,std::vector<VectorHit> >::const_iterator  lastDet = theMap.end();
+  std::map<DetId,std::vector<VectorHit> >::const_iterator lastDet = theMap.end();
   for( ; it != lastDet ; ++it ) {
     edmNew::DetSetVector<VectorHit>::FastFiller vh_col(theCollection, it->first);
     std::vector<VectorHit>::const_iterator vh_it = it->second.begin();

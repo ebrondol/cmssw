@@ -33,26 +33,27 @@ void VectorHitBuilderAlgorithm::run(const edmNew::DetSetVector<Phase2TrackerClus
 
         StackGeomDet stack = createNewStack(detId1, detId2);
         LogDebug("VectorHitBuilderAlgorithm") << "  Stack created with DetIds: " << rawDetId1 << "," << rawDetId2;
-        std::vector<const Phase2TrackerCluster1D*> innerClustersInStack;
-        std::vector<const Phase2TrackerCluster1D*> outerClustersInStack;
+
+//        std::vector<const Phase2TrackerCluster1D*> innerClustersInStack;
+//        std::vector<const Phase2TrackerCluster1D*> outerClustersInStack;
 
         //run on both DSV to find all the clusters associated to the stack
-        edmNew::DetSet< Phase2TrackerCluster1D >::const_iterator clustIt;
-        for ( clustIt = DSViter->begin(); clustIt != DSViter->end(); ++clustIt) {
-          innerClustersInStack.push_back(&*clustIt);
-        }
-        for ( clustIt = DSViter2->begin(); clustIt != DSViter2->end(); ++clustIt) {
-          outerClustersInStack.push_back(&*clustIt);
-        }
+//        edmNew::DetSet< Phase2TrackerCluster1D >::const_iterator clustIt;
+//        for ( clustIt = DSViter->begin(); clustIt != DSViter->end(); ++clustIt) {
+//         innerClustersInStack.push_back(&*clustIt);
+//        }
+//        for ( clustIt = DSViter2->begin(); clustIt != DSViter2->end(); ++clustIt) {
+//          outerClustersInStack.push_back(&*clustIt);
+//        }
 
-        LogTrace("VectorHitBuilderAlgorithm") << "\t with " << int(innerClustersInStack.size() + outerClustersInStack.size()) << " clusters associated.";
+//        LogTrace("VectorHitBuilderAlgorithm") << "\t with " << int(innerClustersInStack.size() + outerClustersInStack.size()) << " clusters associated.";
 
-        std::vector<VectorHit> vhsInStack = buildVectorHits(stack, innerClustersInStack, outerClustersInStack);
+        std::vector<VectorHit> vhsInStack = buildVectorHits(stack, DSViter, DSViter2);
         temporary[rawDetId1] = vhsInStack;
 
 //        innerClustersInStack.clear();
 //        outerClustersInStack.clear();
-        vhsInStack.clear();
+//        vhsInStack.clear();
 
       }
     }
@@ -108,17 +109,17 @@ StackGeomDet VectorHitBuilderAlgorithm::createNewStack(DetId detId1, DetId detId
 
 //----------------------------------------------------------------------------
 //ERICA::in the DT code the global position is used to compute the alpha angle and put a cut on that.
-std::vector<VectorHit> VectorHitBuilderAlgorithm::buildVectorHits(StackGeomDet stack, std::vector<const Phase2TrackerCluster1D*> innerClus, std::vector<const Phase2TrackerCluster1D*> outerClus){
+std::vector<VectorHit> VectorHitBuilderAlgorithm::buildVectorHits(StackGeomDet stack, edmNew::DetSetVector<Phase2TrackerCluster1D>::const_iterator DSVinner, edmNew::DetSetVector<Phase2TrackerCluster1D>::const_iterator DSVouter){
 
   std::vector<VectorHit> result;
 
-  std::vector<const Phase2TrackerCluster1D*>::const_iterator innerClus_iter;
-  for( innerClus_iter = innerClus.begin(); innerClus_iter != innerClus.end(); innerClus_iter++ ){
+  edmNew::DetSet< Phase2TrackerCluster1D >::const_iterator innerClus_iter;
+  for ( innerClus_iter = DSVinner->begin(); innerClus_iter != DSVinner->end(); ++innerClus_iter) {
 
-    std::vector<const Phase2TrackerCluster1D*>::const_iterator outerClus_iter;
-    for( outerClus_iter = outerClus.begin(); outerClus_iter != outerClus.end(); outerClus_iter++ ){
+    edmNew::DetSet< Phase2TrackerCluster1D >::const_iterator outerClus_iter;
+    for ( outerClus_iter = DSVouter->begin(); outerClus_iter != DSVouter->end(); ++outerClus_iter) {
 
-      VectorHit vh = buildVectorHit( stack, *innerClus_iter, *outerClus_iter);
+      VectorHit vh = buildVectorHit( stack, innerClus_iter, outerClus_iter);
       LogTrace("VectorHitBuilderAlgorithm") << "\t vectorhit " << vh;
 
       //protection: the VH can also be empty!!
