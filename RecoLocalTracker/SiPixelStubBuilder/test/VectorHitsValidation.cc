@@ -193,7 +193,7 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
                x_local = localPosVH.x();
                y_local = localPosVH.y();
                z_local = localPosVH.z();
-               //std::cout << localPosVH << std::endl;
+               std::cout << localPosVH << std::endl;
 
                Global3DPoint globalPosVH = geomDetUnit->surface().toGlobal(localPosVH);
                x_global = globalPosVH.x();
