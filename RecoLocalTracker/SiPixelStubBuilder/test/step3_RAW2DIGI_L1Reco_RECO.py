@@ -17,6 +17,9 @@ process.load('Configuration.Geometry.GeometryExtended2023MuondevReco_cff')
 process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
 process.load('Configuration.StandardSequences.RawToDigi_cff')
 process.load('Configuration.StandardSequences.L1Reco_cff')
+process.load('Configuration.StandardSequences.Reconstruction_cff')
+process.load('Configuration.StandardSequences.Validation_cff')
+process.load('DQMOffline.Configuration.DQMOfflineMC_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load('Configuration.StandardSequences.Reconstruction_cff')
 #adding only recolocalreco
@@ -34,7 +37,7 @@ process.maxEvents = cms.untracked.PSet(
 process.source = cms.Source("PoolSource",
     secondaryFileNames = cms.untracked.vstring(),
     fileNames = cms.untracked.vstring('file:step2_newclusters_SLHC25.root'),
-    skipEvents = cms.untracked.uint32(0)
+    #skipEvents = cms.untracked.uint32(9)
 )
 
 process.options = cms.untracked.PSet(
@@ -74,7 +77,18 @@ process.MessageLogger = cms.Service("MessageLogger",
                                                                        )
                                     )
 
-# Additional output definition
+# Analyzer
+process.analysis = cms.EDAnalyzer('VectorHitsBuilderValidation',
+    src = cms.InputTag("siPhase2Clusters"),
+    src2 = cms.InputTag("siPixelStubs", "vectorHitsAccepted"),
+    links = cms.InputTag("simSiPixelDigis")
+)
+
+# Output
+process.TFileService = cms.Service('TFileService',
+    fileName = cms.string('file:vh_validation.root')
+)
+
 
 # Other statements
 process.mix.playback = True
@@ -87,18 +101,13 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgradePLS3', '')
 # Path and EndPath definitions
 process.raw2digi_step = cms.Path(process.RawToDigi)
 process.L1Reco_step = cms.Path(process.L1Reco)
-#process.pixeltrackerlocalreco = cms.Sequence(process.siPixelClusters*processsiPixelRecHits)
-#process.striptrackerlocalreco = cms.Sequence(process.siStripZeroSuppression+process.siStripClusters+process.siPixelStubs)
-process.trackerlocalreco_step  = cms.Path(process.trackerlocalreco+process.siPixelStubs)
-#process.reconstruction_step = cms.Path(process.reconstruction)
-#process.prevalidation_step = cms.Path(process.prevalidation)
-#process.dqmoffline_step = cms.Path(process.DQMOffline)
-#process.validation_step = cms.EndPath(process.validation)
+process.trackerlocalreco.replace(process.striptrackerlocalreco, process.striptrackerlocalreco+process.siPixelStubs)
+process.reconstruction_step = cms.Path(process.reconstruction)
+process.analysis_step = cms.Path(process.analysis)
 process.FEVTDEBUGHLToutput_step = cms.EndPath(process.FEVTDEBUGHLToutput)
 
 # Schedule definition
-#process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.reconstruction_step,process.prevalidation_step,process.validation_step,process.dqmoffline_step,process.FEVTDEBUGHLToutput_step,process.DQMoutput_step)
-process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.trackerlocalreco_step,process.FEVTDEBUGHLToutput_step)
+process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.reconstruction_step,process.analysis_step,process.FEVTDEBUGHLToutput_step)
 #process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.reconstruction_step,process.FEVTDEBUGHLToutput_step)
 
 # customisation of the process.

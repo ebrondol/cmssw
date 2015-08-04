@@ -260,8 +260,8 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
              ++nVHsStripTot;
            }
 
-           printCluster(rawid,vhIt->innerCluster());
-           printCluster(rawid,vhIt->outerCluster());
+           //printCluster(rawid,vhIt->innerCluster());
+           //printCluster(rawid,vhIt->outerCluster());
 
            //comparison with SIM hits
            std::vector< unsigned int > clusterSimTrackIds;
