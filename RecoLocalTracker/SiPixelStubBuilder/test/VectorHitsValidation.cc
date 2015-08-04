@@ -80,7 +80,6 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
     event.getByLabel(links_, pixelSimLinks);
 
     // Get the SimHits
-    //FIXME::add endcap!
     edm::Handle< edm::PSimHitContainer > simHitsRawBarrel;
     event.getByLabel("g4SimHits", "TrackerHitsPixelBarrelLowTof", simHitsRawBarrel);
     edm::Handle< edm::PSimHitContainer > simHitsRawEndcap;
