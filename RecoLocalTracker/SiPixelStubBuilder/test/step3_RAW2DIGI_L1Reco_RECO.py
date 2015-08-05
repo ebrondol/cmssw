@@ -27,6 +27,7 @@ process.load('RecoLocalTracker.Configuration.RecoLocalTracker_cff')
 
 # import StubBuilder                                                                                                                                                      
 process.load('RecoLocalTracker.SiPixelStubBuilder.SiPixelStubBuilder_cfi')
+process.load('RecoTracker.IterativeTracking.VectorHitsStep_cff')
 
 
 process.maxEvents = cms.untracked.PSet(
@@ -89,7 +90,6 @@ process.TFileService = cms.Service('TFileService',
     fileName = cms.string('file:vh_validation.root')
 )
 
-
 # Other statements
 process.mix.playback = True
 process.mix.digitizers = cms.PSet()
@@ -102,6 +102,11 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgradePLS3', '')
 process.raw2digi_step = cms.Path(process.RawToDigi)
 process.L1Reco_step = cms.Path(process.L1Reco)
 process.trackerlocalreco.replace(process.striptrackerlocalreco, process.striptrackerlocalreco+process.siPixelStubs)
+
+# Adding VH step
+#from RecoTracker.IterativeTracking.VectorHitsStep_cff import *
+process.iterTracking.replace(process.InitialStep, process.InitialStep+process.VectorHitsStep)
+
 process.reconstruction_step = cms.Path(process.reconstruction)
 process.analysis_step = cms.Path(process.analysis)
 process.FEVTDEBUGHLToutput_step = cms.EndPath(process.FEVTDEBUGHLToutput)
