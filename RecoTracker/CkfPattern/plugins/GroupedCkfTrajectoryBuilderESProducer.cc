@@ -55,6 +55,8 @@ GroupedCkfTrajectoryBuilderESProducer::produce(const CkfComponentsRecord& iRecor
   edm::ESHandle<TrajectoryFilter> filterHandle;
   edm::ESHandle<TrajectoryFilter> inOutFilterHandle;
 
+  std::cout << "GroupedCkfTrajectoryBuilderESProducer::MeasurementTrackerName -> " << measurementTrackerName << std::endl;
+
   iRecord.getRecord<TrackingComponentsRecord>().get(updatorName,updatorHandle);
   iRecord.getRecord<TrackingComponentsRecord>().get(propagatorAlongName,propagatorAlongHandle);
   iRecord.getRecord<TrackingComponentsRecord>().get(propagatorOppositeName,propagatorOppositeHandle);

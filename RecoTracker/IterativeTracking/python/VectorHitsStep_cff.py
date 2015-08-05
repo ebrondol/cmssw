@@ -39,15 +39,14 @@ VectorHitsStepChi2Est = TrackingTools.KalmanUpdators.Chi2MeasurementEstimatorESP
     MaxChi2 = cms.double(30.0)
 )
 
-import RecoTracker.CkfPattern.GroupedCkfTrajectoryBuilderESProducer_cfi
-initialStepTrajectoryBuilder = RecoTracker.CkfPattern.GroupedCkfTrajectoryBuilderESProducer_cfi.GroupedCkfTrajectoryBuilder.clone(
-    ComponentName = 'initialStepTrajectoryBuilder',
+import RecoTracker.CkfPattern.CkfTrajectoryBuilderESProducer_cfi
+VectorHitsStepTrajectoryBuilder = RecoTracker.CkfPattern.CkfTrajectoryBuilderESProducer_cfi.CkfTrajectoryBuilder.clone(
+    ComponentName = 'VectorHitsStepTrajectoryBuilder',
     trajectoryFilterName = 'initialStepTrajectoryFilter',
     alwaysUseInvalidHits = True,
-    maxCand = 6,
     estimator = cms.string('VectorHitsStepChi2Est'),
-    maxDPhiForLooperReconstruction = cms.double(2.0),
-    maxPtForLooperReconstruction = cms.double(0.7) 
+    MeasurementTrackerName = cms.string('VHMeasurementTracker')
+
     )
 
 import RecoTracker.CkfPattern.CkfTrackCandidates_cfi
@@ -57,7 +56,7 @@ VectorHitsStepTrackCandidates = RecoTracker.CkfPattern.CkfTrackCandidates_cfi.ck
     numHitsForSeedCleaner = cms.int32(50),
     onlyPixelHitsForSeedCleaner = cms.bool(True),
 
-    TrajectoryBuilder = 'initialStepTrajectoryBuilder',
+    TrajectoryBuilder = 'VectorHitsStepTrajectoryBuilder',
     doSeedingRegionRebuilding = True,
     useHitsSplitting = True
     )
@@ -93,6 +92,6 @@ VectorHitsStepSelector = RecoTracker.FinalTrackSelectors.multiTrackSelector_cfi.
 
 # Final sequence
 VectorHitsStep = cms.Sequence(VectorHitsStepSeeds*
-                              VectorHitsStepTrackCandidates)
-#                              VectorHitsStepTracks*
+                              VectorHitsStepTrackCandidates*
+                              VectorHitsStepTracks)
 #                              VectorHitsStepSelector)

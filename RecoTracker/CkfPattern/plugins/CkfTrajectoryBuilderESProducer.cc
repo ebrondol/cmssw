@@ -60,6 +60,8 @@ CkfTrajectoryBuilderESProducer::produce(const CkfComponentsRecord& iRecord)
   iRecord.get(measurementTrackerName, measurementTrackerHandle);
   iRecord.get(filterName, filterHandle);
 
+  std::cout << "CkfTrajectoryBuilderESProducer::MeasurementTrackerName -> " << measurementTrackerName << std::endl;
+
   _trajectoryBuilder  = 
     boost::shared_ptr<TrajectoryBuilder>(new CkfTrajectoryBuilder(pset_,
 								  updatorHandle.product(),

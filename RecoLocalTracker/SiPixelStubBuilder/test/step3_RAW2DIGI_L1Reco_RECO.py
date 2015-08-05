@@ -28,6 +28,7 @@ process.load('RecoLocalTracker.Configuration.RecoLocalTracker_cff')
 process.load('RecoLocalTracker.SiPixelStubBuilder.SiPixelStubBuilder_cfi')
 process.load('RecoTracker.IterativeTracking.VectorHitsStep_cff')
 
+process.Tracer = cms.Service("Tracer")
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(1)
@@ -68,12 +69,13 @@ process.FEVTDEBUGHLToutput = cms.OutputModule("PoolOutputModule",
 process.MessageLogger = cms.Service("MessageLogger",
                                     destinations = cms.untracked.vstring("debugVH"),
                                     debugModules = cms.untracked.vstring("*"),
-                                    categories = cms.untracked.vstring("SiPixelStubBuilder","VectorHitBuilderAlgorithm"),
+                                    categories = cms.untracked.vstring("SiPixelStubBuilder","VectorHitBuilderAlgorithm", "CkfPattern"),
                                     debugVH = cms.untracked.PSet(threshold = cms.untracked.string("DEBUG"),
                                                                        DEBUG = cms.untracked.PSet(limit = cms.untracked.int32(0)),
                                                                        default = cms.untracked.PSet(limit = cms.untracked.int32(0)),
                                                                        SiPixelStubBuilder = cms.untracked.PSet(limit = cms.untracked.int32(-1)),
-                                                                       VectorHitBuilderAlgorithm = cms.untracked.PSet(limit = cms.untracked.int32(-1))
+                                                                       VectorHitBuilderAlgorithm = cms.untracked.PSet(limit = cms.untracked.int32(-1)),
+                                                                       CkfPattern = cms.untracked.PSet(limit = cms.untracked.int32(-1))
                                                                        )
                                     )
 

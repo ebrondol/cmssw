@@ -50,6 +50,7 @@ public:
 	  conf_.getParameter<bool>( "GeometricInnerState" ) : true);
 	if (conf_.exists("reMatchSplitHits"))
 	  reMatchSplitHits_=conf_.getParameter<bool>("reMatchSplitHits");
+        std::cout << algoName_ << std::endl;
       }
 
   /// Destructor
