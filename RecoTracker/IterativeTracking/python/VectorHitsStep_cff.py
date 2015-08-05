@@ -66,7 +66,7 @@ VectorHitsStepTrackCandidates = RecoTracker.CkfPattern.CkfTrackCandidates_cfi.ck
 import RecoTracker.TrackProducer.TrackProducer_cfi
 VectorHitsStepTracks = RecoTracker.TrackProducer.TrackProducer_cfi.TrackProducer.clone(
     src = 'VectorHitsStepTrackCandidates',
-    AlgorithmName = cms.string('iter0'),
+    AlgorithmName = cms.string('iterVH'),
     Fitter = cms.string('FlexibleKFFittingSmoother')
     )
 
@@ -93,6 +93,6 @@ VectorHitsStepSelector = RecoTracker.FinalTrackSelectors.multiTrackSelector_cfi.
 
 # Final sequence
 VectorHitsStep = cms.Sequence(VectorHitsStepSeeds*
-                              VectorHitsStepTrackCandidates*
-                              VectorHitsStepTracks*
-                              VectorHitsStepSelector)
+                              VectorHitsStepTrackCandidates)
+#                              VectorHitsStepTracks*
+#                              VectorHitsStepSelector)

@@ -21,11 +21,10 @@ process.load('Configuration.StandardSequences.Reconstruction_cff')
 process.load('Configuration.StandardSequences.Validation_cff')
 process.load('DQMOffline.Configuration.DQMOfflineMC_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-process.load('Configuration.StandardSequences.Reconstruction_cff')
 #adding only recolocalreco
 process.load('RecoLocalTracker.Configuration.RecoLocalTracker_cff')
 
-# import StubBuilder                                                                                                                                                      
+# import StubBuilder
 process.load('RecoLocalTracker.SiPixelStubBuilder.SiPixelStubBuilder_cfi')
 process.load('RecoTracker.IterativeTracking.VectorHitsStep_cff')
 
@@ -102,11 +101,6 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgradePLS3', '')
 process.raw2digi_step = cms.Path(process.RawToDigi)
 process.L1Reco_step = cms.Path(process.L1Reco)
 process.trackerlocalreco.replace(process.striptrackerlocalreco, process.striptrackerlocalreco+process.siPixelStubs)
-
-# Adding VH step
-#from RecoTracker.IterativeTracking.VectorHitsStep_cff import *
-process.iterTracking.replace(process.InitialStep, process.InitialStep+process.VectorHitsStep)
-
 process.reconstruction_step = cms.Path(process.reconstruction)
 process.analysis_step = cms.Path(process.analysis)
 process.FEVTDEBUGHLToutput_step = cms.EndPath(process.FEVTDEBUGHLToutput)
@@ -122,6 +116,9 @@ from SLHCUpgradeSimulations.Configuration.combinedCustoms import cust_2023Muonde
 
 #call to customisation function cust_2023Muondev imported from SLHCUpgradeSimulations.Configuration.combinedCustoms
 process = cust_2023Muondev(process)
+
+# Adding VH step
+process.iterTracking.replace(process.InitialStep, process.InitialStep+process.VectorHitsStep)
 
 # Automatic addition of the customisation function from SimGeneral.MixingModule.fullMixCustomize_cff
 from SimGeneral.MixingModule.fullMixCustomize_cff import setCrossingFrameOn 

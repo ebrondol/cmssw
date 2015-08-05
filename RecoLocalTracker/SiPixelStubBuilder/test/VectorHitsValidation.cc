@@ -3,9 +3,13 @@
 VectorHitsBuilderValidation::VectorHitsBuilderValidation(const edm::ParameterSet& conf) :
     src_(conf.getParameter< edm::InputTag >("src")),
     src2_(conf.getParameter< edm::InputTag >("src2")),
-    links_(conf.getParameter< edm::InputTag >("links")) { }
+    links_(conf.getParameter< edm::InputTag >("links")) { 
+  std::cout << "VectorHitsBuilderValidation starting" << std::endl;
+}
 
-VectorHitsBuilderValidation::~VectorHitsBuilderValidation() { }
+VectorHitsBuilderValidation::~VectorHitsBuilderValidation() { 
+  std::cout << "VectorHitsBuilderValidation ending" << std::endl;
+}
 
 void VectorHitsBuilderValidation::beginJob() {
 
@@ -275,10 +279,6 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
 
              unsigned int InnerSimTrackId(getSimTrackId(pixelSimLinks, detId, InnerChannel));
              clusterSimTrackIds.push_back(InnerSimTrackId);
-             std::cout << "inner channel:" << InnerChannel << std::endl;
-             std::cout << "innerSimTrackId: " << InnerSimTrackId << std::endl;
-
-             std::cout << std::endl;
            }
 
            // loop over all simHits
@@ -320,7 +320,6 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
 
                  // Primary particles only
                  processType = hitIt->processType();
-                 std::cout << "processType: " << processType << std::endl;
 
                  if (simTrackIt->second.vertIndex() == 0 and (processType == 2 || processType == 7 || processType == 9 || processType == 11 || processType == 13 || processType == 15)) {
                      histogramLayer->second.deltaXVHSimHits_P[0]->Fill(localPosVH.x() - localPosHit.x());

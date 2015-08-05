@@ -102,7 +102,7 @@ void SiPixelStubBuilderAlgorithmBase::printClusters(const edmNew::DetSetVector<P
 
     }
   }
-  std::cout << " Number of input clusters: " << nCluster << std::endl;
+  LogDebug("SiPixelStubBuilder") << " Number of input clusters: " << nCluster << std::endl;
 
 }
 
@@ -119,15 +119,15 @@ void SiPixelStubBuilderAlgorithmBase::printCluster(unsigned int rawId, const Pha
   unsigned int layer = getLayerNumber(detId);
   //unsigned int sublayer = getSubLayerNumber(detId);
   unsigned int module = getModuleNumber(detId);
-  std::cout << "Layer:" << layer << std::endl;
-  //std::cout << "SubLayer:" << sublayer << std::endl;
+  LogDebug("SiPixelStubBuilder") << "Layer:" << layer << std::endl;
+  //LogDebug("SiPixelStubBuilder") << "SubLayer:" << sublayer << std::endl;
   if(topol.ncolumns() == 32) 
-    std::cout << "Pixel cluster with detId:" << rawId << "(module:" << module << ") " << std::endl;
+    LogDebug("SiPixelStubBuilder") << "Pixel cluster with detId:" << rawId << "(module:" << module << ") " << std::endl;
   else if(topol.ncolumns() == 2 ) 
-    std::cout << "Strip cluster with detId " << rawId << "(module:" << module << ") " << std::endl;
-  else std::cout << "no module?!" << std::endl;
-  std::cout << "with pitch:" << topol.pitch().first << " , " << topol.pitch().second << std::endl;
-  std::cout << " and width:" << theGeomDet->surface().bounds().width() << " , lenght:" << theGeomDet->surface().bounds().length() << std::endl;
+    LogDebug("SiPixelStubBuilder") << "Strip cluster with detId " << rawId << "(module:" << module << ") " << std::endl;
+  else LogDebug("SiPixelStubBuilder") << "no module?!" << std::endl;
+  LogDebug("SiPixelStubBuilder") << "with pitch:" << topol.pitch().first << " , " << topol.pitch().second << std::endl;
+  LogDebug("SiPixelStubBuilder") << " and width:" << theGeomDet->surface().bounds().width() << " , lenght:" << theGeomDet->surface().bounds().length() << std::endl;
 
   if (!geomDetUnit) return;
 
@@ -138,9 +138,9 @@ void SiPixelStubBuilderAlgorithmBase::printCluster(unsigned int rawId, const Pha
   //MeasurementError meClu(1./12,0.0,1./12);
   //LocalError localErrClu = geomDetUnit->topology().localError(mpClu,meClu);
 
-  std::cout << "\t global pos " << globalPosClu << std::endl;
-  //std::cout << "\t local  pos " << localPosClu << "with err " << localErrClu << std::endl;
-  std::cout << std::endl;
+  LogDebug("SiPixelStubBuilder") << "\t global pos " << globalPosClu << std::endl;
+  //LogDebug("SiPixelStubBuilder") << "\t local  pos " << localPosClu << "with err " << localErrClu << std::endl;
+  LogDebug("SiPixelStubBuilder") << std::endl;
 
   return;
 }
