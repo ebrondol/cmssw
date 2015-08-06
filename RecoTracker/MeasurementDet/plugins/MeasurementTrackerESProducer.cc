@@ -27,6 +27,7 @@
 
 #include "CalibFormats/SiStripObjects/interface/SiStripRegionCabling.h"
 #include "OnDemandMeasurementTracker.h"
+#include "RecoTracker/MeasurementDet/interface/VHMeasurementTracker.h"
 
 #include <string>
 #include <memory>
@@ -35,7 +36,7 @@ using namespace edm;
 
 MeasurementTrackerESProducer::MeasurementTrackerESProducer(const edm::ParameterSet & p) 
 {  
-  std::string myname = p.getParameter<std::string>("ComponentName");
+  myname = p.getParameter<std::string>("ComponentName");
   pset_ = p;
   setWhatProduced(this,myname);
 }
@@ -127,9 +128,12 @@ MeasurementTrackerESProducer::produce(const CkfComponentsRecord& iRecord)
   iRecord.getRecord<TkStripCPERecord>().get(matcherName,hitMatcher);
   iRecord.getRecord<TrackerDigiGeometryRecord>().get(trackerGeom);
   iRecord.getRecord<TrackerRecoGeometryRecord>().get(geometricSearchTracker);
-  
+
+  if(myname == "VHMeasurementTracker"){
+    _measurementTracker  = boost::shared_ptr<MeasurementTracker>(new VHMeasurementTracker(trackerGeom.product(),geometricSearchTracker.product()));
+  }  
   if (!onDemand){
-  _measurementTracker  = boost::shared_ptr<MeasurementTracker>(new MeasurementTrackerImpl(pset_,
+    _measurementTracker  = boost::shared_ptr<MeasurementTracker>(new MeasurementTrackerImpl(pset_,
 										      pixelCPE.product(),
 										      stripCPE.product(),
 										      hitMatcher.product(),

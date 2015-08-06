@@ -14,6 +14,7 @@ class  MeasurementTrackerESProducer: public edm::ESProducer{
   boost::shared_ptr<MeasurementTracker> produce(const CkfComponentsRecord &);
  private:
   boost::shared_ptr<MeasurementTracker> _measurementTracker;
+  std::string myname;
   edm::ParameterSet pset_;
 };
 

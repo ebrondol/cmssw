@@ -39,6 +39,11 @@ VectorHitsStepChi2Est = TrackingTools.KalmanUpdators.Chi2MeasurementEstimatorESP
     MaxChi2 = cms.double(30.0)
 )
 
+import RecoTracker.MeasurementDet.MeasurementTrackerESProducer_cfi
+VHMeasurementTracker = RecoTracker.MeasurementDet.MeasurementTrackerESProducer_cfi.MeasurementTracker.clone(
+    ComponentName = cms.string('VHMeasurementTracker')
+)
+
 import RecoTracker.CkfPattern.CkfTrajectoryBuilderESProducer_cfi
 VectorHitsStepTrajectoryBuilder = RecoTracker.CkfPattern.CkfTrajectoryBuilderESProducer_cfi.CkfTrajectoryBuilder.clone(
     ComponentName = 'VectorHitsStepTrajectoryBuilder',
