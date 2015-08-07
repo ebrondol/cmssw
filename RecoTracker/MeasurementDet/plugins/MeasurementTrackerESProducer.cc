@@ -131,7 +131,9 @@ MeasurementTrackerESProducer::produce(const CkfComponentsRecord& iRecord)
 
   if(myname == "VHMeasurementTracker"){
     _measurementTracker  = boost::shared_ptr<MeasurementTracker>(new VHMeasurementTracker(trackerGeom.product(),geometricSearchTracker.product()));
+    return _measurementTracker;
   }  
+  //FIXME::ERICA: sobstitution of the onDemand bool with (myname == "OnDemandMeasurementTracker")?
   if (!onDemand){
     _measurementTracker  = boost::shared_ptr<MeasurementTracker>(new MeasurementTrackerImpl(pset_,
 										      pixelCPE.product(),
@@ -147,8 +149,7 @@ MeasurementTrackerESProducer::produce(const CkfComponentsRecord& iRecord)
                                                                                       pixelQualityFlags,
                                                                                       pixelQualityDebugFlags,
 										      regional) ); 
-  }
-  else{
+  } else {
     const SiStripRegionCabling * ptr_stripRegionCabling =0;
     //get regional cabling
     edm::ESHandle<SiStripRegionCabling> rcabling;

@@ -1,4 +1,5 @@
 #include "RecoTracker/MeasurementDet/interface/MeasurementTracker.h"
+#include "RecoTracker/MeasurementDet/interface/VHMeasurementTracker.h"
 
 MeasurementTracker::~MeasurementTracker(){}
 
@@ -10,3 +11,4 @@ MeasurementTracker::~MeasurementTracker(){}
 
 
 TYPELOOKUP_DATA_REG(MeasurementTracker);
+TYPELOOKUP_DATA_REG(VHMeasurementTracker);
