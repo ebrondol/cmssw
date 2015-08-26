@@ -27,7 +27,7 @@
 
 #include "CalibFormats/SiStripObjects/interface/SiStripRegionCabling.h"
 #include "OnDemandMeasurementTracker.h"
-#include "RecoTracker/MeasurementDet/interface/VHMeasurementTracker.h"
+#include "RecoTracker/MeasurementDet/plugins/Phase2MeasurementTracker.h"
 
 #include <string>
 #include <memory>
@@ -129,12 +129,16 @@ MeasurementTrackerESProducer::produce(const CkfComponentsRecord& iRecord)
   iRecord.getRecord<TrackerDigiGeometryRecord>().get(trackerGeom);
   iRecord.getRecord<TrackerRecoGeometryRecord>().get(geometricSearchTracker);
 
-  if(myname == "VHMeasurementTracker"){
-    _measurementTracker  = boost::shared_ptr<MeasurementTracker>(new VHMeasurementTracker(trackerGeom.product(),geometricSearchTracker.product()));
+  if(myname == "Phase2MeasurementTracker"){
+    _measurementTracker  = boost::shared_ptr<MeasurementTracker>(new Phase2MeasurementTracker(trackerGeom.product(),
+											      geometricSearchTracker.product(),
+                                                                                              pixelCPE.product()));
     return _measurementTracker;
   }  
   //FIXME::ERICA: sobstitution of the onDemand bool with (myname == "OnDemandMeasurementTracker")?
   if (!onDemand){
+    //NOTE::ERICA: MeasurementTrackerImpl should be called just MeasurementTracker? 
+    //And all the virtual function of MeasurementTracker should be inside MeasurementDetSystem or in another intermediate class?
     _measurementTracker  = boost::shared_ptr<MeasurementTracker>(new MeasurementTrackerImpl(pset_,
 										      pixelCPE.product(),
 										      stripCPE.product(),

@@ -40,8 +40,8 @@ VectorHitsStepChi2Est = TrackingTools.KalmanUpdators.Chi2MeasurementEstimatorESP
 )
 
 import RecoTracker.MeasurementDet.MeasurementTrackerESProducer_cfi
-VHMeasurementTracker = RecoTracker.MeasurementDet.MeasurementTrackerESProducer_cfi.MeasurementTracker.clone(
-    ComponentName = cms.string('VHMeasurementTracker')
+Phase2MeasurementTracker = RecoTracker.MeasurementDet.MeasurementTrackerESProducer_cfi.MeasurementTracker.clone(
+    ComponentName = cms.string('Phase2MeasurementTracker')
 )
 
 import RecoTracker.CkfPattern.CkfTrajectoryBuilderESProducer_cfi
@@ -50,7 +50,7 @@ VectorHitsStepTrajectoryBuilder = RecoTracker.CkfPattern.CkfTrajectoryBuilderESP
     trajectoryFilterName = 'initialStepTrajectoryFilter',
     alwaysUseInvalidHits = True,
     estimator = cms.string('VectorHitsStepChi2Est'),
-    MeasurementTrackerName = cms.string('VHMeasurementTracker')
+    MeasurementTrackerName = cms.string('Phase2MeasurementTracker')
 
     )
 
