@@ -1,7 +1,9 @@
 #include "RecoTracker/MeasurementDet/plugins/Phase2MeasurementTracker.h"
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
+#include "Geometry/TrackerGeometryBuilder/interface/StackGeomDet.h"
 
 #include "TkPixelMeasurementDet.h"
+#include "TkStackMeasurementDet.h"
 
 using namespace std;
 
@@ -47,18 +49,10 @@ void Phase2MeasurementTracker::initialize()
   addPixelDets(theTrackerGeom->detsPXF());
 
   sortTKD(thePixelDets);
+  sortTKD(theStackDets);
 
   return;
 }
-  //             // now the glued dets
-  //               sortTKD(theGluedDets);
-  //                 for (unsigned int i=0; i!=theGluedDets.size(); ++i)
-  //                     initGluedDet(theGluedDets[i]);
-  //
-  //                       sortTKD(thePixelDets);
-  //
-  //
-  //                       }
 
 void Phase2MeasurementTracker::addPixelDets( const TrackingGeometry::DetContainer& dets )
 {
@@ -72,8 +66,17 @@ void Phase2MeasurementTracker::addPixelDets( const TrackingGeometry::DetContaine
 //    } else if (pixelId.subdetId() == PixelSubdetector::PixelEndcap) {
 //      cout << (100 * theTkTopol.pxfSide(pixelId) + theTkTopol.pxfDisk(pixelId)) << endl;
 //    }
-
-    addPixelDet(*gd, thePixelCPE);
+    const GeomDetUnit* gdu = dynamic_cast<const GeomDetUnit*>(*gd);
+    if (gdu != 0) {
+std::cout << "GeomDetUnit" << std::endl;
+      addPixelDet(*gd, thePixelCPE);
+    } else {
+      const StackGeomDet* stackDet = dynamic_cast<const StackGeomDet*>(*gd);
+      if (stackDet != 0) {
+std::cout << "StackGeomDet" << std::endl;
+        addStackDet(stackDet, thePixelCPE);
+      }
+    }
 
   }
   return;
@@ -89,7 +92,31 @@ void Phase2MeasurementTracker::addPixelDet( const GeomDet* gd, const PixelCluste
   return;
 }
 
-const MeasurementDet* Phase2MeasurementTracker::idToDet(const DetId& id) const { 
+void Phase2MeasurementTracker::addStackDet( const StackGeomDet* gd, const PixelClusterParameterEstimator* cpe)
+{
+  TkStackMeasurementDet* det = new TkStackMeasurementDet( gd, cpe);
+  theStackDets.push_back(det);
+  initStackDet(*det);
+//  theDetMap[gd->geographicalId()] = det;
+  return;
+}
+
+void Phase2MeasurementTracker::initStackDet( TkStackMeasurementDet & det)
+{
+  /*
+ const StackGeomDet& gd = det.specificGeomDet();
+ const MeasurementDet* monoDet = findDet( gd.monoDet()->geographicalId());
+ const MeasurementDet* stereoDet = findDet( gd.stereoDet()->geographicalId());
+ if (monoDet == 0 || stereoDet == 0) {
+   edm::LogError("MeasurementDet") << "MeasurementTracker ERROR: StackDet components not found as MeasurementDets ";
+   throw MeasurementDetException("MeasurementTracker ERROR: StackDet components not found as MeasurementDets");
+ }
+ det.init(monoDet,stereoDet);
+ theDetMap[gd.geographicalId()] = &det;
+ */
+}
+
+const MeasurementDet* Phase2MeasurementTracker::idToDet(const DetId& id) const {
   std::cout << "Phase2MeasurementTracker::idToDet" << std::endl;
   auto it = theDetMap.find(id);
   if( it != theDetMap.end() ) {
@@ -97,5 +124,5 @@ const MeasurementDet* Phase2MeasurementTracker::idToDet(const DetId& id) const {
   } else {
       //throw exception;
   }
-  return 0; 
+  return 0;
 };

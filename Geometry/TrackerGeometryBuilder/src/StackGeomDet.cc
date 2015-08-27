@@ -2,8 +2,6 @@
 
 StackGeomDet::StackGeomDet( Plane* sp, const GeomDetUnit* innerDet, const GeomDetUnit* outerDet) : 
   GeomDet(sp),theInnerDet(innerDet),theOuterDet(outerDet){
-//  //ERICA::inner det surface or in the middle?
- // GeomDet(&*(theInnerDet->surface()));
   child.push_back(theInnerDet);
   child.push_back(theOuterDet);
   //Subdetector subdet(theInnerDet->geographicalId().rawId());

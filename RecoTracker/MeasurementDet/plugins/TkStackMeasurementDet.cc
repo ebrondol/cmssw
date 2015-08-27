@@ -1,23 +1,23 @@
 #include "TkStackMeasurementDet.h"
+#include "Geometry/TrackerGeometryBuilder/interface/StackGeomDet.h"
 #include "TrackingTools/MeasurementDet/interface/MeasurementDetException.h"
 
 using namespace std;
 
-TkStackMeasurementDet::TkStackMeasurementDet( const GluedGeomDet* gdet,
-                                              const SiStripRecHitMatcher* matcher,
-                                              const StripClusterParameterEstimator* cpe) :
+TkStackMeasurementDet::TkStackMeasurementDet( const StackGeomDet* gdet,
+                                              const PixelClusterParameterEstimator* cpe) :
   MeasurementDet(gdet),
-  theMatcher(matcher),  theCPE(cpe),
-  theMonoDet(nullptr), theStereoDet(nullptr)
+  theCPE(cpe),
+  theInnerDet(nullptr), theOuterDet(nullptr)
 {}
 
-void TkStackMeasurementDet::init(const MeasurementDet* monoDet,
-                                 const MeasurementDet* stereoDet) {
-  theMonoDet = dynamic_cast<const TkStripMeasurementDet *>(monoDet);
-  theStereoDet = dynamic_cast<const TkStripMeasurementDet *>(stereoDet);
+void TkStackMeasurementDet::init(const MeasurementDet* innerDet,
+                                 const MeasurementDet* outerDet) {
+  theInnerDet = dynamic_cast<const TkPixelMeasurementDet *>(innerDet);
+  theOuterDet = dynamic_cast<const TkPixelMeasurementDet *>(outerDet);
 
-  if ((theMonoDet == 0) || (theStereoDet == 0)) {
-    throw MeasurementDetException("TkStackMeasurementDet ERROR: Trying to glue a det which is not a TkStripMeasurementDet");
+  if ((theInnerDet == 0) || (theOuterDet == 0)) {
+    throw MeasurementDetException("TkStackMeasurementDet ERROR: Trying to glue a det which is not a TkPixelMeasurementDet");
   }
 }
 

@@ -2,12 +2,11 @@
 #define TkStackMeasurementDet_H
 
 #include "TrackingTools/MeasurementDet/interface/MeasurementDet.h"
-#include "TkStripMeasurementDet.h"
+#include "TkPixelMeasurementDet.h"
 
-class GluedGeomDet;
+class StackGeomDet;
 //class SiStripRecHitMatcher;
-#include "RecoLocalTracker/SiStripRecHitConverter/interface/SiStripRecHitMatcher.h"
-#include "RecoLocalTracker/ClusterParameterEstimator/interface/StripClusterParameterEstimator.h"
+#include "RecoLocalTracker/ClusterParameterEstimator/interface/PixelClusterParameterEstimator.h"
 #include "RecoTracker/TransientTrackingRecHit/interface/TSiStripMatchedRecHit.h"
 #include <TrackingTools/DetLayers/interface/MeasurementEstimator.h>
 #include <TrackingTools/PatternTools/interface/TrajectoryMeasurement.h>
@@ -20,33 +19,32 @@ class TkStackMeasurementDet GCC11_FINAL : public MeasurementDet {
 
  public:
 
-  TkStackMeasurementDet( const GluedGeomDet* gdet,const SiStripRecHitMatcher* matcher, const StripClusterParameterEstimator* cpe);
-  void init(const MeasurementDet* monoDet,
-	    const MeasurementDet* stereoDet);
+  TkStackMeasurementDet( const StackGeomDet* gdet, const PixelClusterParameterEstimator* cpe);
+  void init(const MeasurementDet* innerDet,
+	    const MeasurementDet* outerDet);
 
   virtual RecHitContainer recHits( const TrajectoryStateOnSurface&) const;
 
-  const GluedGeomDet& specificGeomDet() const {return static_cast<GluedGeomDet const&>(fastGeomDet());}
+  const StackGeomDet& specificGeomDet() const {return static_cast<StackGeomDet const&>(fastGeomDet());}
 
   virtual bool measurements( const TrajectoryStateOnSurface& stateOnThisDet,
 			     const MeasurementEstimator& est,
 			     TempMeasurements & result) const;
 
-  const TkStripMeasurementDet* monoDet() const{ return theMonoDet;} 
-  const TkStripMeasurementDet* stereoDet() const{ return theStereoDet;} 
+  const TkPixelMeasurementDet* innerDet() const{ return theInnerDet;}
+  const TkPixelMeasurementDet* outerDet() const{ return theOuterDet;}
 
-  /// return TRUE if both mono and stereo components are active
-  bool isActive() const {return monoDet()->isActive() && stereoDet()->isActive(); }
- 	  	 
-  /// return TRUE if at least one of the mono and stereo components has badChannels
+  /// return TRUE if both inner and outer components are active
+  bool isActive() const {return innerDet()->isActive() && outerDet()->isActive(); }
+
+  /// return TRUE if at least one of the inner and outer components has badChannels
   bool hasBadComponents( const TrajectoryStateOnSurface &tsos ) const {
-    return (monoDet()->hasBadComponents(tsos) || stereoDet()->hasBadComponents(tsos));}
+    return (innerDet()->hasBadComponents(tsos) || outerDet()->hasBadComponents(tsos));}
 
  private:
-  const SiStripRecHitMatcher*       theMatcher;
-  const StripClusterParameterEstimator* theCPE;
-  const TkStripMeasurementDet*       theMonoDet;
-  const TkStripMeasurementDet*       theStereoDet;
+  const PixelClusterParameterEstimator* theCPE;
+  const TkPixelMeasurementDet*       theInnerDet;
+  const TkPixelMeasurementDet*       theOuterDet;
 
 /*
   template<typename Collector>
@@ -58,33 +56,33 @@ class TkStackMeasurementDet GCC11_FINAL : public MeasurementDet {
   class dso_internal  HitCollectorForRecHits {
   public:
     typedef SiStripRecHitMatcher::Collector Collector;
-    HitCollectorForRecHits(const GeomDet * geomDet, 
+    HitCollectorForRecHits(const GeomDet * geomDet,
 			   const SiStripRecHitMatcher * matcher,
 			   const StripClusterParameterEstimator* cpe,
 			   RecHitContainer & target) ;
     void add(SiStripMatchedRecHit2D const& hit) {
       target_.push_back(
-			TSiStripMatchedRecHit::build( geomDet_, std::auto_ptr<TrackingRecHit>(hit.clone()), 
+			TSiStripMatchedRecHit::build( geomDet_, std::auto_ptr<TrackingRecHit>(hit.clone()),
 						      matcher_,cpe_)
 			);
-      hasNewHits_ = true; 
+      hasNewHits_ = true;
     }
     void addProjected(const TransientTrackingRecHit& hit,
 		      const GlobalVector & gdir) ;
     SiStripRecHitMatcher::Collector & collector() { return collector_; }
     bool hasNewMatchedHits() const { return hasNewHits_;  }
     void clearNewMatchedHitsFlag() { hasNewHits_ = false; }
-    static bool filter() { return false;}   /// always fast as no estimator available here! 
+    static bool filter() { return false;}   /// always fast as no estimator available here!
     size_t size() const { return target_.size();}
 
     static const MeasurementEstimator  & estimator() { static MeasurementEstimator * dummy=0; return *dummy;}
 
-  private: 
+  private:
     const GeomDet              * geomDet_;
     const SiStripRecHitMatcher * matcher_;
     const StripClusterParameterEstimator* cpe_;
     RecHitContainer       & target_;
-    SiStripRecHitMatcher::Collector collector_;       
+    SiStripRecHitMatcher::Collector collector_;
     bool hasNewHits_;
   };
 
@@ -93,8 +91,8 @@ class TkStackMeasurementDet GCC11_FINAL : public MeasurementDet {
   public:
     typedef TransientTrackingRecHit::RecHitPointer RecHitPointer;
     typedef SiStripRecHitMatcher::Collector Collector;
-    
-    HitCollectorForFastMeasurements(const GeomDet * geomDet, 
+
+    HitCollectorForFastMeasurements(const GeomDet * geomDet,
 				    const SiStripRecHitMatcher * matcher,
 				    const StripClusterParameterEstimator* cpe,
 				    const TrajectoryStateOnSurface& stateOnThisDet,
@@ -103,43 +101,43 @@ class TkStackMeasurementDet GCC11_FINAL : public MeasurementDet {
     void add(SiStripMatchedRecHit2D const& hit) ;
     void addProjected(const TransientTrackingRecHit& hit,
 		      const GlobalVector & gdir) ;
-    
+
     SiStripRecHitMatcher::Collector & collector() { return collector_; }
     bool hasNewMatchedHits() const { return hasNewHits_;  }
     void clearNewMatchedHitsFlag() { hasNewHits_ = false; }
-    static bool filter() { return false;}   // if true mono-colection will been filter using the estimator before matching  
+    static bool filter() { return false;}   // if true mono-colection will been filter using the estimator before matching
     size_t size() const { return target_.size();}
     const MeasurementEstimator  & estimator() { return est_;}
-  private: 
+  private:
     const GeomDet              * geomDet_;
     const SiStripRecHitMatcher * matcher_;
     const StripClusterParameterEstimator* cpe_;
     const TrajectoryStateOnSurface & stateOnThisDet_;
     const MeasurementEstimator     & est_;
     TempMeasurements & target_;
-    SiStripRecHitMatcher::Collector collector_;       
+    SiStripRecHitMatcher::Collector collector_;
     bool hasNewHits_;
   };
-  
-  
-  RecHitContainer 
+
+
+  RecHitContainer
   projectOnGluedDet( const RecHitContainer& hits,
 		     const TrajectoryStateOnSurface& ts) const dso_internal;
 
   template<typename HitCollector>
   void
-  projectOnGluedDet( HitCollector & collector, 
+  projectOnGluedDet( HitCollector & collector,
                      const RecHitContainer& hits,
                      const GlobalVector & gdir ) const  dso_internal;
 
-  void checkProjection(const TrajectoryStateOnSurface& ts, 
-		       const RecHitContainer& monoHits, 
+  void checkProjection(const TrajectoryStateOnSurface& ts,
+		       const RecHitContainer& monoHits,
 		       const RecHitContainer& stereoHits) const;
   void checkHitProjection(const TransientTrackingRecHit& hit,
-			  const TrajectoryStateOnSurface& ts, 
+			  const TrajectoryStateOnSurface& ts,
 			  const GeomDet& det) const dso_internal;
 
-  // brief Test the strips on one of the two dets with projection 
+  // brief Test the strips on one of the two dets with projection
   bool testStrips(const TrajectoryStateOnSurface& tsos,
                   const BoundPlane &gluedPlane,
                   const TkStripMeasurementDet &mdet) const  dso_internal;
