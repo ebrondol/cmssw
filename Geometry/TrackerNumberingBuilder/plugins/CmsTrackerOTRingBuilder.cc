@@ -2,7 +2,7 @@
 #include "DetectorDescription/Core/interface/DDFilteredView.h"
 #include "Geometry/TrackerNumberingBuilder/interface/GeometricDet.h"
 #include "Geometry/TrackerNumberingBuilder/plugins/ExtractStringFromDDD.h"
-#include "Geometry/TrackerNumberingBuilder/plugins/CmsDetConstruction.h"
+#include "Geometry/TrackerNumberingBuilder/plugins/CmsPhase2OTDetConstruction.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "DataFormats/DetId/interface/DetId.h"
 #include <vector>
@@ -11,10 +11,10 @@
 
 void CmsTrackerOTRingBuilder::buildComponent(DDFilteredView& fv, GeometricDet* g, std::string s){
 
-  CmsDetConstruction theCmsDetConstruction;
+  CmsPhase2OTDetConstruction theCmsPhase2OTDetConstruction;
   switch (theCmsTrackerStringToEnum.type(ExtractStringFromDDD::getString(s,&fv))){
   case GeometricDet::DetUnit:
-           theCmsDetConstruction.buildComponent(fv,g,s);
+           theCmsPhase2OTDetConstruction.buildComponent(fv,g,s);
     break;
   default:
     edm::LogError("CmsTrackerOTRingBuilder")<<" ERROR - I was expecting a Plaq, I got a "<<ExtractStringFromDDD::getString(s,&fv);

@@ -5,6 +5,7 @@
 #include "Geometry/TrackerNumberingBuilder/plugins/CmsTrackerStringBuilder.h"
 #include "Geometry/TrackerNumberingBuilder/plugins/CmsTrackerRodBuilder.h"
 #include "Geometry/TrackerNumberingBuilder/plugins/CmsTrackerLadderBuilder.h"
+#include "Geometry/TrackerNumberingBuilder/plugins/CmsTrackerPhase2OTRodBuilder.h"
 #include "Geometry/TrackerNumberingBuilder/plugins/TrackerStablePhiSort.h"
 #include "DataFormats/DetId/interface/DetId.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
@@ -17,6 +18,7 @@ void CmsTrackerLayerBuilder::buildComponent(DDFilteredView& fv, GeometricDet* g,
   CmsTrackerStringBuilder theCmsTrackerStringBuilder ;
   CmsTrackerRodBuilder theCmsTrackerRodBuilder;
   CmsTrackerLadderBuilder theCmsTrackerLadderBuilder;
+  CmsTrackerPhase2OTRodBuilder theCmsTrackerPhase2OTRodBuilder;
 
   GeometricDet * subdet = new GeometricDet(&fv,theCmsTrackerStringToEnum.type(ExtractStringFromDDD::getString(s,&fv)));
   switch (theCmsTrackerStringToEnum.type(ExtractStringFromDDD::getString(s,&fv))){
@@ -28,6 +30,9 @@ void CmsTrackerLayerBuilder::buildComponent(DDFilteredView& fv, GeometricDet* g,
     break;
   case GeometricDet::ladder:
     theCmsTrackerLadderBuilder.build(fv,subdet,s);      
+    break;
+  case GeometricDet::OTPhase2Rod:
+    theCmsTrackerPhase2OTRodBuilder.build(fv,subdet,s);      
     break;
   default:
     edm::LogError("CmsTrackerLayerBuilder")<<" ERROR - I was expecting a String, Rod or Ladder, I got a "<<ExtractStringFromDDD::getString(s,&fv);

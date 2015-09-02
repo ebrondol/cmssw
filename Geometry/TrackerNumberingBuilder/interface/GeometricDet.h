@@ -55,7 +55,7 @@ class GeometricDet {
 			   PixelPhase1Barrel=101,
 			   PixelPhase1EndCap=102, PixelPhase1Disk=117,
 			   OTPhase2EndCap=204, OTPhase2Barrel=205, OTPhase2Layer=208,
-			   PixelPhase2EndCap=202, OTPhase2Wheel=209, PixelPhase2FullDisk=217,
+			   PixelPhase2EndCap=202, OTPhase2Wheel=209, OTPhase2Rod=211, PixelPhase2FullDisk=217,
 			   PixelPhase2ReducedDisk=227 } GeometricEnumType;
   /**
    * Constructors to be used when looping over DDD
