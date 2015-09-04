@@ -1,5 +1,5 @@
-#ifndef Geometry_TrackerNumberingBuilder_CmsTrackerPhase2OTRodBuilder_H
-#define Geometry_TrackerNumberingBuilder_CmsTrackerPhase2OTRodBuilder_H
+#ifndef Geometry_TrackerNumberingBuilder_CmsTrackerOTRodBuilder_H
+#define Geometry_TrackerNumberingBuilder_CmsTrackerOTRodBuilder_H
 
 #include "Geometry/TrackerNumberingBuilder/plugins/CmsTrackerLevelBuilder.h"
 #include "FWCore/ParameterSet/interface/types.h"
@@ -7,7 +7,7 @@
 /**
  * Class which constructs TOB rods
  */
-class CmsTrackerPhase2OTRodBuilder : public CmsTrackerLevelBuilder {
+class CmsTrackerOTRodBuilder : public CmsTrackerLevelBuilder {
   
  private:
   virtual void sortNS(DDFilteredView& , GeometricDet*);
