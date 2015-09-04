@@ -134,7 +134,7 @@ void CmsTrackerLayerBuilder::sortNS(DDFilteredView& fv, GeometricDet* det){
     det->addComponents(intpos);
     det->addComponents(extpos);
     
-  }else if(det->components().front()->type()== GeometricDet::rod){
+  }else if(det->components().front()->type()== GeometricDet::rod||det->components().front()->type()== GeometricDet::OTPhase2Rod){
     GeometricDet::GeometricDetContainer neg;
     GeometricDet::GeometricDetContainer pos;
     neg.clear();
