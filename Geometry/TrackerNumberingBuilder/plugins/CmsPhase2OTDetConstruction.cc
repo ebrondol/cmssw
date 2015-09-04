@@ -11,10 +11,10 @@ void CmsPhase2OTDetConstruction::buildComponent(
   // at this level I check whether it is a merged detector or not
   //
 
-  LogTrace("DetConstruction") << " using CmsPhase2OTDetConstruction::buildComponent ";
+  LogTrace("DetConstruction") << " using CmsPhase2OTDetConstruction::buildComponent for " << ExtractStringFromDDD::getString(attribute,&fv);
   GeometricDet * det  = new GeometricDet(&fv,theCmsTrackerStringToEnum.type(ExtractStringFromDDD::getString(attribute,&fv)));
-  //everytime is a GeometricDet::mergedDet !!
-  //if (theCmsTrackerStringToEnum.type(ExtractStringFromDDD::getString(attribute,&fv)) ==  GeometricDet::mergedDet){
+  //FIXME::everytime is a GeometricDet::mergedDet !!
+  if (theCmsTrackerStringToEnum.type(ExtractStringFromDDD::getString(attribute,&fv)) ==  GeometricDet::mergedDet){
     //
     // I have to go one step lower ...
     //
@@ -27,7 +27,7 @@ void CmsPhase2OTDetConstruction::buildComponent(
 	*/
     }
     fv.parent();
-  //}
+  }
   
   mother->addComponent(det);
 }
@@ -37,7 +37,7 @@ void CmsPhase2OTDetConstruction::buildSmallDets(
 					GeometricDet *mother, 
 					std::string attribute){
 
-  LogTrace("DetConstruction") << " using CmsPhase2OTDetConstruction::buildSmallDets ";
+  LogTrace("DetConstruction") << " using CmsPhase2OTDetConstruction::buildSmallDets for " << ExtractStringFromDDD::getString(attribute,&fv);
   GeometricDet * det  = new GeometricDet(&fv, theCmsTrackerStringToEnum.type(ExtractStringFromDDD::getString(attribute,&fv)));
   //static const std::string stereo = "TrackerStereoDetectors";
   //if (ExtractStringFromDDD::getString(stereo,&fv) == "true"){

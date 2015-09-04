@@ -10,16 +10,8 @@
 #include "Geometry/TrackerNumberingBuilder/plugins/TrackerStablePhiSort.h"
 
 void CmsTrackerOTRingBuilder::buildComponent(DDFilteredView& fv, GeometricDet* g, std::string s){
-
   CmsPhase2OTDetConstruction theCmsPhase2OTDetConstruction;
-  switch (theCmsTrackerStringToEnum.type(ExtractStringFromDDD::getString(s,&fv))){
-  case GeometricDet::DetUnit:
-           theCmsPhase2OTDetConstruction.buildComponent(fv,g,s);
-    break;
-  default:
-    edm::LogError("CmsTrackerOTRingBuilder")<<" ERROR - I was expecting a Plaq, I got a "<<ExtractStringFromDDD::getString(s,&fv);
-    ;
-  }  
+  theCmsPhase2OTDetConstruction.buildComponent(fv,g,s);
 }
 
 void CmsTrackerOTRingBuilder::sortNS(DDFilteredView& fv, GeometricDet* det){

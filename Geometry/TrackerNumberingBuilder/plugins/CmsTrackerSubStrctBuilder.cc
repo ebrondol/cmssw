@@ -27,9 +27,6 @@ CmsTrackerSubStrctBuilder::buildComponent( DDFilteredView& fv, GeometricDet* g, 
   case GeometricDet::layer:
     theCmsTrackerLayerBuilder.build(fv,subdet,s);      
     break;
-  case GeometricDet::OTPhase2Layer:
-    theCmsTrackerLayerBuilder.build(fv,subdet,s);      
-    break;
   case GeometricDet::wheel:
     theCmsTrackerWheelBuilder.build(fv,subdet,s);      
     break;

@@ -322,7 +322,7 @@
 <PartSelector path="//Rod4"/>
 <PartSelector path="//Rod5"/>
 <PartSelector path="//Rod6"/>
-<Parameter name="TkDDDStructure" value="PixelBarrelLadder"/>
+<Parameter name="TkDDDStructure" value="Phase2OTBarrelRod"/>
 </SpecPar>
 
 <SpecPar name="Phase2OTEndcapSubDetPar">
@@ -3587,4 +3587,3 @@
 
 </SpecParSection>
 </DDDefinition>
-
