@@ -31,9 +31,6 @@ void CmsTrackerLayerBuilder::buildComponent(DDFilteredView& fv, GeometricDet* g,
   case GeometricDet::ladder:
     theCmsTrackerLadderBuilder.build(fv,subdet,s);      
     break;
-  case GeometricDet::OTPhase2Rod:
-    theCmsTrackerPhase2OTRodBuilder.build(fv,subdet,s);      
-    break;
   default:
     edm::LogError("CmsTrackerLayerBuilder")<<" ERROR - I was expecting a String, Rod or Ladder, I got a "<<ExtractStringFromDDD::getString(s,&fv);
 
@@ -134,7 +131,7 @@ void CmsTrackerLayerBuilder::sortNS(DDFilteredView& fv, GeometricDet* det){
     det->addComponents(intpos);
     det->addComponents(extpos);
     
-  }else if(det->components().front()->type()== GeometricDet::rod||det->components().front()->type()== GeometricDet::OTPhase2Rod){
+  }else if(det->components().front()->type()== GeometricDet::rod){
     GeometricDet::GeometricDetContainer neg;
     GeometricDet::GeometricDetContainer pos;
     neg.clear();

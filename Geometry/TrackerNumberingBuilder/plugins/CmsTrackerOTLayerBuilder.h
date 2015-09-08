@@ -1,13 +1,13 @@
-#ifndef Geometry_TrackerNumberingBuilder_CmsTrackerOTRodBuilder_H
-#define Geometry_TrackerNumberingBuilder_CmsTrackerOTRodBuilder_H
+#ifndef Geometry_TrackerNumberingBuilder_CmsTrackerOTLayerBuilder_H
+#define Geometry_TrackerNumberingBuilder_CmsTrackerOTLayerBuilder_H
 
 #include "Geometry/TrackerNumberingBuilder/plugins/CmsTrackerLevelBuilder.h"
 #include "FWCore/ParameterSet/interface/types.h"
 #include <string>
 /**
- * Class which constructs OT rods
+ * Class which contructs TIB/TOB layers
  */
-class CmsTrackerOTRodBuilder : public CmsTrackerLevelBuilder {
+class CmsTrackerOTLayerBuilder : public CmsTrackerLevelBuilder {
   
  private:
   virtual void sortNS(DDFilteredView& , GeometricDet*);
