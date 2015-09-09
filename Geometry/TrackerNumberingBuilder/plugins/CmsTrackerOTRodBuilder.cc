@@ -4,13 +4,13 @@
 #include "Geometry/TrackerNumberingBuilder/plugins/ExtractStringFromDDD.h"
 #include "DataFormats/DetId/interface/DetId.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
-#include "Geometry/TrackerNumberingBuilder/plugins/CmsDetConstruction.h"
+#include "Geometry/TrackerNumberingBuilder/plugins/CmsPhase2OTDetConstruction.h"
 #include <vector>
 
 void CmsTrackerOTRodBuilder::buildComponent(DDFilteredView& fv, GeometricDet* g, std::string s){
 
-  CmsDetConstruction theCmsDetConstruction;
-  theCmsDetConstruction.buildComponent(fv,g,s);  
+  CmsPhase2OTDetConstruction theCmsPhase2OTDetConstruction;
+  theCmsPhase2OTDetConstruction.buildComponent(fv,g,s);  
 }
 
 void CmsTrackerOTRodBuilder::sortNS(DDFilteredView& fv, GeometricDet* det){
