@@ -41,6 +41,8 @@ class PGeometricDet{
     
     int _geographicalID; // to be converted to DetId
     bool _stereo;
+    bool _inner;
+    bool _outer;
   };
 
   std::vector<Item> pgeomdets_;

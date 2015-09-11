@@ -42,7 +42,7 @@ void CmsPhase2OTDetConstruction::buildSmallDets(
 
   LogTrace("DetConstruction") << " using CmsPhase2OTDetConstruction::buildSmallDets for " << ExtractStringFromDDD::getString(attribute,&fv);
   GeometricDet * det  = new GeometricDet(&fv, theCmsTrackerStringToEnum.type(ExtractStringFromDDD::getString(attribute,&fv)));
-  static const std::string isInner = "TrackerStereoDetectors";
+  static const std::string isInner = "TrackerInnerDetectors";
   static const std::string isOuter = "TrackerOuterDetectors";
   if (ExtractStringFromDDD::getString(isInner,&fv) == "true"){
     LogTrace("DetConstruction") << " inner ";
@@ -53,7 +53,7 @@ void CmsPhase2OTDetConstruction::buildSmallDets(
     uint32_t temp = 2;
     det->setGeographicalID(DetId(temp));
   } else {
-    LogTrace("DetConstruction") << " no inner either outer but " << ExtractStringFromDDD::getString(isOuter,&fv);
+    edm::LogError("DetConstruction") << " module defined as a Stack but not inner either outer!? ";
    
   }
   
