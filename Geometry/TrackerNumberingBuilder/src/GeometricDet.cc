@@ -110,6 +110,8 @@ GeometricDet::GeometricDet(DDnav_type const & navtype, GeometricEnumType type) :
   _pixROCx = getDouble("PixelROC_X",ev);
   _pixROCy = getDouble("PixelROC_Y",ev);
   _stereo =  getString("TrackerStereoDetectors",ev)==strue;
+  _inner =  getString("TrackerInnerDetectors",ev)==strue;
+  _outer =  getString("TrackerOuterDetectors",ev)==strue;
   _siliconAPVNum = getDouble("SiliconAPVNumber",ev);
 
 }
@@ -142,6 +144,8 @@ GeometricDet::GeometricDet(DDExpandedView* fv, GeometricEnumType type) :  _type(
   _pixROCx = getDouble("PixelROC_X",*fv);
   _pixROCy = getDouble("PixelROC_Y",*fv);
   _stereo =  getString("TrackerStereoDetectors",*fv)=="true";
+  _inner =  getString("TrackerInnerDetectors",*fv)=="true";
+  _outer =  getString("TrackerOuterDetectors",*fv)=="true";
   _siliconAPVNum = getDouble("SiliconAPVNumber",*fv);
 
 }
@@ -176,6 +180,8 @@ GeometricDet::GeometricDet(DDFilteredView* fv, GeometricEnumType type) :
   _pixROCx(getDouble("PixelROC_X",*fv)),
   _pixROCy(getDouble("PixelROC_Y",*fv)),
   _stereo(getString("TrackerStereoDetectors",*fv)==strue),
+  _inner(getString("TrackerInnerDetectors",*fv)==strue),
+  _outer(getString("TrackerOuterDetectors",*fv)==strue),
   _siliconAPVNum(getDouble("SiliconAPVNumber",*fv))
 #ifdef GEOMTRICDETDEBUG
   ,
@@ -218,6 +224,8 @@ GeometricDet::GeometricDet ( const PGeometricDet::Item& onePGD, GeometricEnumTyp
   _pixROCx(onePGD._pixROCx),
   _pixROCy(onePGD._pixROCy),
   _stereo(onePGD._stereo),
+  _inner(onePGD._inner),
+  _outer(onePGD._outer),
   _siliconAPVNum(onePGD._siliconAPVNum)
 #ifdef GEOMTRICDETDEBUG
   , // mind the tricky comma is needed.

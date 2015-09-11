@@ -325,6 +325,20 @@
 <Parameter name="TkDDDStructure" value="Phase2OTBarrelRod"/>
 </SpecPar>
 
+<SpecPar name="OuterTrackerPixelBarrelStackPar">
+<PartSelector path="//BModule1Layer1"/>
+<Parameter name="TkDDDStructure" value="Phase2OTBarrelStack"/>
+</SpecPar>
+<SpecPar name="TrackerStereoDetectorsPar">
+<PartSelector path="//BModule1Layer1INNERactive" />
+<Parameter name="TrackerStereoDetectors" value="true"/>
+</SpecPar>
+<SpecPar name="TrackerOuterDetectorsPar">
+<PartSelector path="//BModule1Layer1OUTERwafer" />
+<Parameter name="TrackerOuterDetectors" value="true"/>
+</SpecPar>
+
+
 <SpecPar name="Phase2OTEndcapSubDetPar">
   <PartSelector path="//Phase2OTForward" />
   <Parameter name="TkDDDStructure" value="Phase2OTEndcap"/>

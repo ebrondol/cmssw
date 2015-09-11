@@ -14,12 +14,15 @@ void CmsPhase2OTDetConstruction::buildComponent(
   LogTrace("DetConstruction") << " using CmsPhase2OTDetConstruction::buildComponent for " << ExtractStringFromDDD::getString(attribute,&fv);
   GeometricDet * det  = new GeometricDet(&fv,theCmsTrackerStringToEnum.type(ExtractStringFromDDD::getString(attribute,&fv)));
   //FIXME::everytime is a GeometricDet::mergedDet !!
-  if (theCmsTrackerStringToEnum.type(ExtractStringFromDDD::getString(attribute,&fv)) ==  GeometricDet::mergedDet){
+  if (theCmsTrackerStringToEnum.type(ExtractStringFromDDD::getString(attribute,&fv)) ==  GeometricDet::OTPhase2Stack){
+
+  //if (theCmsTrackerStringToEnum.type(ExtractStringFromDDD::getString(attribute,&fv)) ==  GeometricDet::mergedDet){
     //
     // I have to go one step lower ...
     //
     bool dodets = fv.firstChild(); // descend to the first Layer
     while (dodets) {
+      LogTrace("DetConstruction") << " stack det with new child! ";
       buildSmallDets(fv,det,attribute);
       dodets = fv.nextSibling(); // go to next layer
 	/*
@@ -39,14 +42,20 @@ void CmsPhase2OTDetConstruction::buildSmallDets(
 
   LogTrace("DetConstruction") << " using CmsPhase2OTDetConstruction::buildSmallDets for " << ExtractStringFromDDD::getString(attribute,&fv);
   GeometricDet * det  = new GeometricDet(&fv, theCmsTrackerStringToEnum.type(ExtractStringFromDDD::getString(attribute,&fv)));
-  //static const std::string stereo = "TrackerStereoDetectors";
-  //if (ExtractStringFromDDD::getString(stereo,&fv) == "true"){
+  static const std::string isInner = "TrackerStereoDetectors";
+  static const std::string isOuter = "TrackerOuterDetectors";
+  if (ExtractStringFromDDD::getString(isInner,&fv) == "true"){
+    LogTrace("DetConstruction") << " inner ";
     uint32_t temp = 1;
     det->setGeographicalID(DetId(temp));
-  //}else{
-  //  uint32_t temp = 2;
-  //  det->setGeographicalID(DetId(temp));
-  //}
+  } else if (ExtractStringFromDDD::getString(isOuter,&fv) == "true"){
+    LogTrace("DetConstruction") << " outer ";
+    uint32_t temp = 2;
+    det->setGeographicalID(DetId(temp));
+  } else {
+    LogTrace("DetConstruction") << " no inner either outer but " << ExtractStringFromDDD::getString(isOuter,&fv);
+   
+  }
   
   mother->addComponent(det); 
 }

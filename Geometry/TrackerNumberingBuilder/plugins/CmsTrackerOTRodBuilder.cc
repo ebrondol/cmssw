@@ -16,16 +16,15 @@ void CmsTrackerOTRodBuilder::buildComponent(DDFilteredView& fv, GeometricDet* g,
 void CmsTrackerOTRodBuilder::sortNS(DDFilteredView& fv, GeometricDet* det){
   GeometricDet::GeometricDetContainer & comp = det->components();
 
-  if (comp.front()->type()==GeometricDet::DetUnit) 
-    std::sort(comp.begin(),comp.end(),LessZ());
-  else
-   edm::LogError("CmsTrackerOTRodBuilder")<<"ERROR - wrong SubDet to sort..... "<<det->components().front()->type(); 
-  
- 
+  std::stable_sort(comp.begin(),comp.end(),LessModZ());
+
   for(uint32_t i=0; i<comp.size();i++){
-    comp[i]->setGeographicalID(i+1);
-  } 
- 
+     comp[i]->setGeographicalID(i+1);
+  }
+
+  if (comp.empty() ){
+   edm::LogError("CmsTrackerOTRodBuilder")<<"Where are the Phase2  OT Rod's modules?";
+  }
 
 }
 

@@ -5,7 +5,6 @@
 #include "Geometry/TrackerNumberingBuilder/plugins/CmsTrackerStringBuilder.h"
 #include "Geometry/TrackerNumberingBuilder/plugins/CmsTrackerRodBuilder.h"
 #include "Geometry/TrackerNumberingBuilder/plugins/CmsTrackerLadderBuilder.h"
-#include "Geometry/TrackerNumberingBuilder/plugins/CmsTrackerOTRodBuilder.h"
 #include "Geometry/TrackerNumberingBuilder/plugins/TrackerStablePhiSort.h"
 #include "DataFormats/DetId/interface/DetId.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
@@ -18,7 +17,6 @@ void CmsTrackerLayerBuilder::buildComponent(DDFilteredView& fv, GeometricDet* g,
   CmsTrackerStringBuilder theCmsTrackerStringBuilder ;
   CmsTrackerRodBuilder theCmsTrackerRodBuilder;
   CmsTrackerLadderBuilder theCmsTrackerLadderBuilder;
-  CmsTrackerOTRodBuilder theCmsTrackerPhase2OTRodBuilder;
 
   GeometricDet * subdet = new GeometricDet(&fv,theCmsTrackerStringToEnum.type(ExtractStringFromDDD::getString(s,&fv)));
   switch (theCmsTrackerStringToEnum.type(ExtractStringFromDDD::getString(s,&fv))){
