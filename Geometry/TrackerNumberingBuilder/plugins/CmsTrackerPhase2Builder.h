@@ -1,5 +1,5 @@
-#ifndef Geometry_TrackerNumberingBuilder_CmsTrackerPixelPhase2EndcapBuilder_H
-# define Geometry_TrackerNumberingBuilder_CmsTrackerPixelPhase2EndcapBuilder_H
+#ifndef Geometry_TrackerNumberingBuilder_CmsTrackerPhase2Builder_H
+# define Geometry_TrackerNumberingBuilder_CmsTrackerPhase2Builder_H
 
 # include "Geometry/TrackerNumberingBuilder/plugins/CmsTrackerLevelBuilder.h"
 # include "FWCore/ParameterSet/interface/types.h"
@@ -8,10 +8,10 @@
 /**
  * Class which builds the pixel phase 1 endcap
  */
-class CmsTrackerPixelPhase2EndcapBuilder : public CmsTrackerLevelBuilder
+class CmsTrackerPhase2Builder : public CmsTrackerLevelBuilder
 {
 public:
-  CmsTrackerPixelPhase2EndcapBuilder();
+  CmsTrackerPhase2Builder();
   
 private:
   virtual void sortNS( DDFilteredView& , GeometricDet* );

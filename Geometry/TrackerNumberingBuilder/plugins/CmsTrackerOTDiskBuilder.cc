@@ -1,4 +1,4 @@
-#include "Geometry/TrackerNumberingBuilder/plugins/CmsTrackerOTDiscBuilder.h"
+#include "Geometry/TrackerNumberingBuilder/plugins/CmsTrackerOTDiskBuilder.h"
 #include "DetectorDescription/Core/interface/DDFilteredView.h"
 #include "Geometry/TrackerNumberingBuilder/interface/GeometricDet.h"
 #include "Geometry/TrackerNumberingBuilder/plugins/ExtractStringFromDDD.h"
@@ -12,7 +12,7 @@
 using namespace std;
 
 void
-CmsTrackerOTDiscBuilder::buildComponent( DDFilteredView& fv, GeometricDet* g, std::string s )
+CmsTrackerOTDiskBuilder::buildComponent( DDFilteredView& fv, GeometricDet* g, std::string s )
 {
   CmsTrackerOTRingBuilder theCmsTrackerOTRingBuilder;
   GeometricDet * subdet = new GeometricDet( &fv, theCmsTrackerStringToEnum.type( ExtractStringFromDDD::getString( s, &fv )));
@@ -23,13 +23,13 @@ CmsTrackerOTDiscBuilder::buildComponent( DDFilteredView& fv, GeometricDet* g, st
     theCmsTrackerOTRingBuilder.build( fv, subdet, s );
     break;
   default:
-    edm::LogError( "CmsTrackerOTDiscBuilder" ) << " ERROR - I was expecting a Panel, I got a " << ExtractStringFromDDD::getString( s, &fv );   
+    edm::LogError( "CmsTrackerOTDiskBuilder" ) << " ERROR - I was expecting a Panel, I got a " << ExtractStringFromDDD::getString( s, &fv );   
   }  
   g->addComponent( subdet );
 }
 
 void
-CmsTrackerOTDiscBuilder::sortNS( DDFilteredView& fv, GeometricDet* det )
+CmsTrackerOTDiskBuilder::sortNS( DDFilteredView& fv, GeometricDet* det )
 {
 
 
@@ -40,7 +40,7 @@ CmsTrackerOTDiscBuilder::sortNS( DDFilteredView& fv, GeometricDet* det )
     // nothing to be done because the rings (here named panels) are already sorted ??
     break;
   default:
-    edm::LogError("CmsTrackerOTDiscBuilder")<<"ERROR - wrong SubDet to sort..... "<<det->components().front()->type();
+    edm::LogError("CmsTrackerOTDiskBuilder")<<"ERROR - wrong SubDet to sort..... "<<det->components().front()->type();
   }
   
   GeometricDet::GeometricDetContainer rings;

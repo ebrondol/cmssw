@@ -1,14 +1,14 @@
-#ifndef Geometry_TrackerNumberingBuilder_CmsTrackerOTDiscBuilder_H
-# define Geometry_TrackerNumberingBuilder_CmsTrackerOTDiscBuilder_H
+#ifndef Geometry_TrackerNumberingBuilder_CmsTrackerOTDiskBuilder_H
+# define Geometry_TrackerNumberingBuilder_CmsTrackerOTDiskBuilder_H
 
 # include "Geometry/TrackerNumberingBuilder/plugins/CmsTrackerLevelBuilder.h"
 # include "FWCore/ParameterSet/interface/types.h"
 # include <string>
 
 /**
- * Class which contructs Phase2 Outer Tracker/Discs.
+ * Class which contructs Phase2 Outer Tracker/Disks.
  */
-class CmsTrackerOTDiscBuilder : public CmsTrackerLevelBuilder
+class CmsTrackerOTDiskBuilder : public CmsTrackerLevelBuilder
 {
   
 private:

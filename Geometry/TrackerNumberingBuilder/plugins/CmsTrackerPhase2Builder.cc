@@ -1,25 +1,25 @@
-#include "Geometry/TrackerNumberingBuilder/plugins/CmsTrackerPixelPhase2EndcapBuilder.h"
+#include "Geometry/TrackerNumberingBuilder/plugins/CmsTrackerPhase2Builder.h"
 #include "DetectorDescription/Core/interface/DDFilteredView.h"
 #include "Geometry/TrackerNumberingBuilder/interface/GeometricDet.h"
 #include "Geometry/TrackerNumberingBuilder/plugins/ExtractStringFromDDD.h"
 #include "DataFormats/DetId/interface/DetId.h"
 #include "Geometry/TrackerNumberingBuilder/plugins/CmsTrackerPhase1DiskBuilder.h"  
 #include "Geometry/TrackerNumberingBuilder/plugins/CmsTrackerOTLayerBuilder.h"
-#include "Geometry/TrackerNumberingBuilder/plugins/CmsTrackerOTDiscBuilder.h"  
+#include "Geometry/TrackerNumberingBuilder/plugins/CmsTrackerOTDiskBuilder.h"  
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include <vector>
 
 #include <bitset>
 
-CmsTrackerPixelPhase2EndcapBuilder::CmsTrackerPixelPhase2EndcapBuilder()
+CmsTrackerPhase2Builder::CmsTrackerPhase2Builder()
 {}
 
 void
-CmsTrackerPixelPhase2EndcapBuilder::buildComponent( DDFilteredView& fv, GeometricDet* g, std::string s )
+CmsTrackerPhase2Builder::buildComponent( DDFilteredView& fv, GeometricDet* g, std::string s )
 {
   CmsTrackerPhase1DiskBuilder  theCmsTrackerPhase1DiskBuilder;   
   CmsTrackerOTLayerBuilder       theCmsTrackerOTLayerBuilder;
-  CmsTrackerOTDiscBuilder      theCmsTrackerOTDiscBuilder;   
+  CmsTrackerOTDiskBuilder      theCmsTrackerOTDiskBuilder;   
 
   GeometricDet * subdet = new GeometricDet( &fv, theCmsTrackerStringToEnum.type( ExtractStringFromDDD::getString( s, &fv )));
   std::string subdet_name = subdet->name();
@@ -35,11 +35,11 @@ CmsTrackerPixelPhase2EndcapBuilder::buildComponent( DDFilteredView& fv, Geometri
     theCmsTrackerOTLayerBuilder.build(fv,subdet,s);      
     break;
   case GeometricDet::OTPhase2Wheel:    
-    theCmsTrackerOTDiscBuilder.build(fv,subdet,s);
+    theCmsTrackerOTDiskBuilder.build(fv,subdet,s);
     break;
 
   default:
-    edm::LogError("CmsTrackerPixelPhase2EndcapBuilder")<<" ERROR - I was expecting a Disk... I got a "<<ExtractStringFromDDD::getString(s,&fv);
+    edm::LogError("CmsTrackerPhase2Builder")<<" ERROR - I was expecting a Disk... I got a "<<ExtractStringFromDDD::getString(s,&fv);
   }  
   
   g->addComponent(subdet);
@@ -47,7 +47,7 @@ CmsTrackerPixelPhase2EndcapBuilder::buildComponent( DDFilteredView& fv, Geometri
 }
 
 void
-CmsTrackerPixelPhase2EndcapBuilder::sortNS( DDFilteredView& fv, GeometricDet* det )
+CmsTrackerPhase2Builder::sortNS( DDFilteredView& fv, GeometricDet* det )
 {
   GeometricDet::GeometricDetContainer & comp = det->components();
 
