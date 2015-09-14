@@ -306,7 +306,7 @@
        <PartSelector path="//Phase2OTBarrel" />
        <Parameter name="TkDDDStructure" value="Phase2OTBarrel"/>
      </SpecPar>
-<SpecPar name="OuterTrackerPixelBarrelLayerPar">
+<SpecPar name="OuterTrackerBarrelLayerPar">
 <PartSelector path="//Layer1"/>
 <PartSelector path="//Layer2"/>
 <PartSelector path="//Layer3"/>
@@ -315,7 +315,7 @@
 <PartSelector path="//Layer6"/>
 <Parameter name="TkDDDStructure" value="Phase2OTBarrelLayer"/>
 </SpecPar>
-<SpecPar name="OuterTrackerPixelBarrelLadderPar">
+<SpecPar name="OuterTrackerBarrelLadderPar">
 <PartSelector path="//Rod1"/>
 <PartSelector path="//Rod2"/>
 <PartSelector path="//Rod3"/>
@@ -325,7 +325,7 @@
 <Parameter name="TkDDDStructure" value="Phase2OTBarrelRod"/>
 </SpecPar>
 
-<SpecPar name="OuterTrackerPixelBarrelStackPar">
+<SpecPar name="OuterTrackerBarrelStackPar">
 <PartSelector path="//BModule1Layer1"/>
 <PartSelector path="//BModule2Layer1"/>
 <PartSelector path="//BModule3Layer1"/>
@@ -710,7 +710,7 @@
   <Parameter name="TkDDDStructure" value="Phase2OTEndcap"/>
 </SpecPar>
 
-<SpecPar name="OuterTrackerPixelEndcapDiskPar">
+<SpecPar name="OuterTrackerEndcapDiskPar">
 <PartSelector path="//Disc6"/>
 <PartSelector path="//Disc7"/>
 <PartSelector path="//Disc8"/>
@@ -718,7 +718,7 @@
 <PartSelector path="//Disc10"/>
 <Parameter name="TkDDDStructure" value="Phase2OTEndcapDisk"/>
 </SpecPar>
-<SpecPar name="OuterTrackerPixelEndcapPanelPar">
+<SpecPar name="OuterTrackerEndcapPanelPar">
 <PartSelector path="//Ring1Disc6"/>
 <PartSelector path="//Ring2Disc6"/>
 <PartSelector path="//Ring3Disc6"/>
