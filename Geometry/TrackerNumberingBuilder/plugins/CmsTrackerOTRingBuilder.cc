@@ -10,9 +10,9 @@
 #include "Geometry/TrackerNumberingBuilder/plugins/TrackerStablePhiSort.h"
 
 void CmsTrackerOTRingBuilder::buildComponent(DDFilteredView& fv, GeometricDet* g, std::string s){
-//  CmsPhase2OTDetConstruction theCmsPhase2OTDetConstruction;
-//  theCmsPhase2OTDetConstruction.buildComponent(fv,g,s);
-
+  CmsPhase2OTDetConstruction theCmsPhase2OTDetConstruction;
+  theCmsPhase2OTDetConstruction.buildComponent(fv,g,s);
+/*
   CmsPhase2OTDetConstruction theCmsPhase2OTDetConstruction;
   switch (theCmsTrackerStringToEnum.type(ExtractStringFromDDD::getString(s,&fv))){
   case GeometricDet::DetUnit:
@@ -22,22 +22,22 @@ void CmsTrackerOTRingBuilder::buildComponent(DDFilteredView& fv, GeometricDet* g
     edm::LogError("CmsTrackerOTRingBuilder")<<" ERROR - I was expecting a Plaq, I got a "<<ExtractStringFromDDD::getString(s,&fv);
     ;
   }
+*/
 }
 
 void CmsTrackerOTRingBuilder::sortNS(DDFilteredView& fv, GeometricDet* det){
  GeometricDet::GeometricDetContainer & comp = det->components();
 
- if (comp.front()->type()==GeometricDet::DetUnit){ 
-
-   TrackerStablePhiSort(comp.begin(), comp.end(), ExtractPhi());
-   stable_sort(comp.begin(), comp.end() ,PhiSortNP());
+ TrackerStablePhiSort(comp.begin(), comp.end(), ExtractPhi());
+ //in Glued:   TrackerStablePhiSort(comp.begin(), comp.end(), ExtractPhiGluedModuleMirror());
+ stable_sort(comp.begin(), comp.end() ,PhiSortNP());
    
- }
- else
-   edm::LogError("CmsTrackerOTRingBuilder")<<"ERROR - wrong SubDet to sort..... "<<det->components().front()->type(); 
-
   for(uint32_t i=0; i<comp.size();i++){
     comp[i]->setGeographicalID(i+1);
   } 
+
+  if (comp.empty() ){
+   edm::LogError("CmsTrackerOTRingBuilder")<<"Where are the Phase2 OT Ring's modules?";
+  }
  
 }
