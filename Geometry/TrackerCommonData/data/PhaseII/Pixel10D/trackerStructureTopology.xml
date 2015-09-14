@@ -451,7 +451,7 @@
 <PartSelector path="//BModule12Layer6"/>
 <Parameter name="TkDDDStructure" value="Phase2OTBarrelStack"/>
 </SpecPar>
-<SpecPar name="TrackerInnerDetectorsPar">
+<SpecPar name="OuterTrackerInnerDetectorsPar">
 <PartSelector path="//BModule1Layer1INNERactive" />
 <PartSelector path="//BModule2Layer1INNERactive" />
 <PartSelector path="//BModule3Layer1INNERactive" />
@@ -577,7 +577,7 @@
 <PartSelector path="//BModule12Layer6INNERactive" />
 <Parameter name="TrackerInnerDetectors" value="true"/>
 </SpecPar>
-<SpecPar name="TrackerOuterDetectorsPar">
+<SpecPar name="OuterTrackerOuterDetectorsPar">
 <PartSelector path="//BModule1Layer1OUTERactive" />
 <PartSelector path="//BModule2Layer1OUTERactive" />
 <PartSelector path="//BModule3Layer1OUTERactive" />
