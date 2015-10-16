@@ -5,6 +5,7 @@
 #include "Geometry/TrackerNumberingBuilder/plugins/CmsTrackerStringBuilder.h"
 #include "Geometry/TrackerNumberingBuilder/plugins/CmsTrackerRodBuilder.h"
 #include "Geometry/TrackerNumberingBuilder/plugins/CmsTrackerLadderBuilder.h"
+#include "Geometry/TrackerNumberingBuilder/plugins/CmsTrackerOTRingBuilder.h"
 #include "Geometry/TrackerNumberingBuilder/plugins/TrackerStablePhiSort.h"
 #include "DataFormats/DetId/interface/DetId.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
@@ -17,6 +18,7 @@ void CmsTrackerLayerBuilder::buildComponent(DDFilteredView& fv, GeometricDet* g,
   CmsTrackerStringBuilder theCmsTrackerStringBuilder ;
   CmsTrackerRodBuilder theCmsTrackerRodBuilder;
   CmsTrackerLadderBuilder theCmsTrackerLadderBuilder;
+  CmsTrackerOTRingBuilder theCmsTrackerOTRingBuilder;
 
   GeometricDet * subdet = new GeometricDet(&fv,theCmsTrackerStringToEnum.type(ExtractStringFromDDD::getString(s,&fv)));
   switch (theCmsTrackerStringToEnum.type(ExtractStringFromDDD::getString(s,&fv))){
@@ -28,6 +30,9 @@ void CmsTrackerLayerBuilder::buildComponent(DDFilteredView& fv, GeometricDet* g,
     break;
   case GeometricDet::ladder:
     theCmsTrackerLadderBuilder.build(fv,subdet,s);      
+    break;
+  case GeometricDet::panel: // case of tilted geometry for PhaseII
+    theCmsTrackerOTRingBuilder.build(fv,subdet,s);      
     break;
   default:
     edm::LogError("CmsTrackerLayerBuilder")<<" ERROR - I was expecting a String, Rod or Ladder, I got a "<<ExtractStringFromDDD::getString(s,&fv);
@@ -172,6 +177,26 @@ void CmsTrackerLayerBuilder::sortNS(DDFilteredView& fv, GeometricDet* det){
     
     det->clearComponents();
     det->addComponents(comp);
+
+  }else if(det->components().front()->type()== GeometricDet::panel){
+
+    //copy of the ordering already written in OTDiscBuilder
+    GeometricDet::GeometricDetContainer rings;
+    uint32_t  totalrings = comp.size();
+
+
+    for ( uint32_t rn=0; rn<totalrings; rn++) {
+      rings.push_back(comp[rn]);
+      uint32_t blade = rn+1;
+      uint32_t panel = 1;
+      uint32_t temp = (blade<<2) | panel;
+      rings[rn]->setGeographicalID(temp);
+    }
+
+    det->clearComponents();
+    det->addComponents(rings);
+
+
   }else{
     edm::LogError("CmsTrackerLayerBuilder")<<"ERROR - wrong SubDet to sort..... "<<det->components().front()->type();
   }

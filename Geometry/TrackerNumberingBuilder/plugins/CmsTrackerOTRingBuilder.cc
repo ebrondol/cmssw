@@ -11,6 +11,8 @@
 
 void CmsTrackerOTRingBuilder::buildComponent(DDFilteredView& fv, GeometricDet* g, std::string s){
 
+  LogTrace("DetConstruction") << "CmsTrackerOTRingBuilder::buildComponent" ;
+
   CmsDetConstruction theCmsDetConstruction;
   switch (theCmsTrackerStringToEnum.type(ExtractStringFromDDD::getString(s,&fv))){
   case GeometricDet::DetUnit:
