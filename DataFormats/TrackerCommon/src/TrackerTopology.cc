@@ -112,7 +112,7 @@ std::string TrackerTopology::print(DetId id) const {
     std::string typeUpgrade;
     typeUpgrade = (isLower(id)) ? "lower" : typeUpgrade;
     typeUpgrade = (isUpper(id)) ? "upper" : typeUpgrade;
-    typeUpgrade = (isStack(id)) ? "id stack" : typeUpgrade + " stack";
+    typeUpgrade = (isDoubleSide(id)) ? "id stack" : typeUpgrade + " stack";
     strstr << "TIB" << side
 	   << " Layer " << theLayer << " " << part
 	   << " String " << theString[2];
@@ -137,7 +137,7 @@ std::string TrackerTopology::print(DetId id) const {
     std::string typeUpgrade;
     typeUpgrade = (isLower(id)) ? "lower" : typeUpgrade;
     typeUpgrade = (isUpper(id)) ? "upper" : typeUpgrade;
-    typeUpgrade = (isStack(id)) ? "id stack" : typeUpgrade + " stack";
+    typeUpgrade = (isDoubleSide(id)) ? "id stack" : typeUpgrade + " stack";
     strstr << "TID" << side
 	   << " Disk " << theDisk
 	   << " Ring " << theRing << " " << part;
@@ -161,7 +161,7 @@ std::string TrackerTopology::print(DetId id) const {
     std::string typeUpgrade;
     typeUpgrade = (isLower(id)) ? "lower" : typeUpgrade;
     typeUpgrade = (isUpper(id)) ? "upper" : typeUpgrade;
-    typeUpgrade = (isStack(id)) ? "id stack" : typeUpgrade + " stack";
+    typeUpgrade = (isDoubleSide(id)) ? "id stack" : typeUpgrade + " stack";
     strstr << "TOB" << side
 	   << " Layer " << theLayer
 	   << " Rod " << theRod[1];
@@ -187,7 +187,7 @@ std::string TrackerTopology::print(DetId id) const {
     std::string typeUpgrade;
     typeUpgrade = (isLower(id)) ? "lower" : typeUpgrade;
     typeUpgrade = (isUpper(id)) ? "upper" : typeUpgrade;
-    typeUpgrade = (isStack(id)) ? "id stack" : typeUpgrade + " stack";
+    typeUpgrade = (isDoubleSide(id)) ? "id stack" : typeUpgrade + " stack";
     strstr << "TEC" << side
 	   << " Wheel " << theWheel
 	   << " Petal " << thePetal[1] << " " << petal

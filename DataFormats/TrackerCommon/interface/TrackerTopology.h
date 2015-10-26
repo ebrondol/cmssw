@@ -244,7 +244,6 @@ class TrackerTopology {
 
   bool isDoubleSide(const DetId &id) const { 
 
-    if(!upgrade_){
     uint32_t subdet=id.subdetId();
     if ( subdet == StripSubdetector::TIB )
       return tibIsDoubleSide(id);
@@ -254,19 +253,45 @@ class TrackerTopology {
       return tobIsDoubleSide(id);
     if ( subdet == StripSubdetector::TEC )
       return tecIsDoubleSide(id);
-    } else if( upgrade_ ){
-      return isStack(id);
-    }
+    
     throw cms::Exception("Invalid DetId") << "Unsupported DetId in TrackerTopology::DoubleSide";
     return 0;
   }
 
   bool isUpgrade() { return upgrade_; }
 
-  bool tobIsDoubleSide(const DetId &id) const { return SiStripDetId(id).glued()==0 && (tobLayer(id)==1 || tobLayer(id)==2);}
-  bool tecIsDoubleSide(const DetId &id) const { return SiStripDetId(id).glued()==0 && (tecRing(id)==1 || tecRing(id)==2 || tecRing(id)==5);}
-  bool tibIsDoubleSide(const DetId &id) const { return SiStripDetId(id).glued()==0 && (tibLayer(id)==1 || tibLayer(id)==2);}
-  bool tidIsDoubleSide(const DetId &id) const { return SiStripDetId(id).glued()==0 && (tidRing(id)==1 || tidRing(id)==2);}
+  bool tibIsDoubleSide(const DetId &id) const { 
+    if(!upgrade_){
+      return SiStripDetId(id).glued()==0 && (tibLayer(id)==1 || tibLayer(id)==2);
+    } else if( upgrade_ ) {
+      return isStack(id);
+    }
+    return 0;
+  }
+  bool tobIsDoubleSide(const DetId &id) const { 
+    if(!upgrade_){
+      return SiStripDetId(id).glued()==0 && (tobLayer(id)==1 || tobLayer(id)==2);
+    } else if( upgrade_ ){
+      return isStack(id);
+    }
+    return 0;
+  }
+  bool tecIsDoubleSide(const DetId &id) const { 
+    if(!upgrade_){
+      return SiStripDetId(id).glued()==0 && (tecRing(id)==1 || tecRing(id)==2 || tecRing(id)==5);
+    } else if( upgrade_ ){
+      return isStack(id);
+    }
+    return 0;
+  }
+  bool tidIsDoubleSide(const DetId &id) const { 
+    if(!upgrade_){
+      return SiStripDetId(id).glued()==0 && (tidRing(id)==1 || tidRing(id)==2);
+    } else if( upgrade_ ){
+      return isStack(id);
+    }
+    return 0;
+  }
 
   bool isStack(const DetId &id) const { return upgrade_ && SiStripDetId(id).stack()==0; }
   bool isLower(const DetId &id) const { return upgrade_ && SiStripDetId(id).lower()!=0; }
