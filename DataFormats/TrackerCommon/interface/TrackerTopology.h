@@ -5,6 +5,7 @@
 #include "DataFormats/SiStripDetId/interface/SiStripDetId.h"
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
+#include "FWCore/Utilities/interface/Exception.h"
 
 #include <vector>
 #include <string>
@@ -124,7 +125,8 @@ class TrackerTopology {
   };
 
   
-  TrackerTopology( const PixelBarrelValues& pxb, const PixelEndcapValues& pxf,
+  TrackerTopology( const bool upgrade,
+		   const PixelBarrelValues& pxb, const PixelEndcapValues& pxf,
 		   const TECValues& tecv, const TIBValues& tibv, 
 		   const TIDValues& tidv, const TOBValues& tobv);
 
@@ -240,10 +242,35 @@ class TrackerTopology {
     return num ;
   }
 
+  bool isDoubleSide(const DetId &id) const { 
+
+    if(!upgrade_){
+    uint32_t subdet=id.subdetId();
+    if ( subdet == StripSubdetector::TIB )
+      return tibIsDoubleSide(id);
+    if ( subdet == StripSubdetector::TID )
+      return tidIsDoubleSide(id);
+    if ( subdet == StripSubdetector::TOB )
+      return tobIsDoubleSide(id);
+    if ( subdet == StripSubdetector::TEC )
+      return tecIsDoubleSide(id);
+    } else if( upgrade_ ){
+      return isStack(id);
+    }
+    throw cms::Exception("Invalid DetId") << "Unsupported DetId in TrackerTopology::DoubleSide";
+    return 0;
+  }
+
+  bool isUpgrade() { return upgrade_; }
+
   bool tobIsDoubleSide(const DetId &id) const { return SiStripDetId(id).glued()==0 && (tobLayer(id)==1 || tobLayer(id)==2);}
   bool tecIsDoubleSide(const DetId &id) const { return SiStripDetId(id).glued()==0 && (tecRing(id)==1 || tecRing(id)==2 || tecRing(id)==5);}
   bool tibIsDoubleSide(const DetId &id) const { return SiStripDetId(id).glued()==0 && (tibLayer(id)==1 || tibLayer(id)==2);}
   bool tidIsDoubleSide(const DetId &id) const { return SiStripDetId(id).glued()==0 && (tidRing(id)==1 || tidRing(id)==2);}
+
+  bool isStack(const DetId &id) const { return upgrade_ && SiStripDetId(id).stack()==0; }
+  bool isLower(const DetId &id) const { return upgrade_ && SiStripDetId(id).lower()!=0; }
+  bool isUpper(const DetId &id) const { return upgrade_ && SiStripDetId(id).upper()!=0; }
 
   bool tobIsZPlusSide(const DetId &id) const {return !tobIsZMinusSide(id);}
   bool tobIsZMinusSide(const DetId &id) const { return tobSide(id)==1;}
@@ -508,6 +535,8 @@ class TrackerTopology {
   std::string print(DetId detid) const;
 
  private:
+
+  bool upgrade_;
 
   PixelBarrelValues pbVals_;
   PixelEndcapValues pfVals_;

@@ -4,9 +4,11 @@
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
 #include <sstream>
 
-TrackerTopology::TrackerTopology( const PixelBarrelValues& pxb, const PixelEndcapValues& pxf,
+TrackerTopology::TrackerTopology( const bool upgrade,
+				  const PixelBarrelValues& pxb, const PixelEndcapValues& pxf,
 				  const TECValues& tecv, const TIBValues& tibv, 
 				  const TIDValues& tidv, const TOBValues& tobv) {
+  upgrade_=upgrade;
   pbVals_=pxb;
   pfVals_=pxf;
   tecVals_=tecv;
@@ -106,12 +108,17 @@ std::string TrackerTopology::print(DetId id) const {
     std::string type;
     type = (tibStereo(id) == 0) ? "r-phi" : "stereo";
     type = (tibGlued(id) == 0) ? type : type+" glued";
-    type = (tibIsDoubleSide(id)) ? "double side" : type;
+    type = (isDoubleSide(id)) ? "double side" : type;
+    std::string typeUpgrade;
+    typeUpgrade = (isLower(id)) ? "lower" : typeUpgrade;
+    typeUpgrade = (isUpper(id)) ? "upper" : typeUpgrade;
+    typeUpgrade = (isStack(id)) ? "id stack" : typeUpgrade + " stack";
     strstr << "TIB" << side
 	   << " Layer " << theLayer << " " << part
-	   << " String " << theString[2]
-	   << " Module " << theModule << " " << type
-	   << " (" << id.rawId() << ")";
+	   << " String " << theString[2];
+    if( !upgrade_ )	   strstr << " Module " << theModule << " " << type;
+    if( upgrade_ )         strstr << " Module " << theModule << " " << typeUpgrade;
+    strstr << " (" << id.rawId() << ")";
     return strstr.str();
   }
 
@@ -126,12 +133,17 @@ std::string TrackerTopology::print(DetId id) const {
     std::string type;
     type = (tidStereo(id) == 0) ? "r-phi" : "stereo";
     type = (tidGlued(id) == 0) ? type : type+" glued";
-    type = (tidIsDoubleSide(id)) ? "double side" : type;
+    type = (isDoubleSide(id)) ? "double side" : type;
+    std::string typeUpgrade;
+    typeUpgrade = (isLower(id)) ? "lower" : typeUpgrade;
+    typeUpgrade = (isUpper(id)) ? "upper" : typeUpgrade;
+    typeUpgrade = (isStack(id)) ? "id stack" : typeUpgrade + " stack";
     strstr << "TID" << side
 	   << " Disk " << theDisk
-	   << " Ring " << theRing << " " << part
-	   << " Module " << theModule[1] << " " << type
-	   << " (" << id.rawId() << ")";
+	   << " Ring " << theRing << " " << part;
+    if( !upgrade_ )	   strstr << " Module " << theModule[1] << " " << type;
+    if( upgrade_ )         strstr << " Module " << theModule[1] << " " << typeUpgrade;
+    strstr << " (" << id.rawId() << ")";
     return strstr.str();
   }
 
@@ -145,12 +157,17 @@ std::string TrackerTopology::print(DetId id) const {
     std::string type;
     type = (tobStereo(id) == 0) ? "r-phi" : "stereo";
     type = (tobGlued(id) == 0) ? type : type+" glued";
-    type = (tobIsDoubleSide(id)) ? "double side" : type;
+    type = (isDoubleSide(id)) ? "double side" : type;
+    std::string typeUpgrade;
+    typeUpgrade = (isLower(id)) ? "lower" : typeUpgrade;
+    typeUpgrade = (isUpper(id)) ? "upper" : typeUpgrade;
+    typeUpgrade = (isStack(id)) ? "id stack" : typeUpgrade + " stack";
     strstr << "TOB" << side
 	   << " Layer " << theLayer
-	   << " Rod " << theRod[1]
-	   << " Module " << theModule << " " << type
-	   << " (" << id.rawId() << ")";
+	   << " Rod " << theRod[1];
+    if( !upgrade_ )	   strstr << " Module " << theModule << " " << type;
+    if( upgrade_ )         strstr << " Module " << theModule << " " << typeUpgrade;
+    strstr << " (" << id.rawId() << ")";
     return strstr.str();
   }
 
@@ -166,13 +183,18 @@ std::string TrackerTopology::print(DetId id) const {
     std::string type;
     type = (tecStereo(id) == 0) ? "r-phi" : "stereo";
     type = (tecGlued(id) == 0) ? type : type+" glued";
-    type = (tecIsDoubleSide(id)) ? "double side" : type;
+    type = (isDoubleSide(id)) ? "double side" : type;
+    std::string typeUpgrade;
+    typeUpgrade = (isLower(id)) ? "lower" : typeUpgrade;
+    typeUpgrade = (isUpper(id)) ? "upper" : typeUpgrade;
+    typeUpgrade = (isStack(id)) ? "id stack" : typeUpgrade + " stack";
     strstr << "TEC" << side
 	   << " Wheel " << theWheel
 	   << " Petal " << thePetal[1] << " " << petal
-	   << " Ring " << theRing
-	   << " Module " << theModule << " " << type
-	   << " (" << id.rawId() << ")";
+	   << " Ring " << theRing;
+    if( !upgrade_ )	   strstr << " Module " << theModule << " " << type;
+    if( upgrade_ )         strstr << " Module " << theModule << " " << typeUpgrade;
+    strstr << " (" << id.rawId() << ")";
 
     return strstr.str();
   }
