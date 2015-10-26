@@ -25,6 +25,8 @@ TrackerTopologyEP::TrackerTopologyEP(const edm::ParameterSet& conf)
 {
   edm::LogInfo("TRACKER") << "TrackerTopologyIdealEP::TrackerTopologyIdealEP";
 
+  upgrade_=conf.getParameter<bool>("upgradeGeometry"); 
+
   pxbVals_.layerStartBit_=conf.getParameter<unsigned int>("pxb_layerStartBit");
   pxbVals_.ladderStartBit_=conf.getParameter<unsigned int>("pxb_ladderStartBit");
   pxbVals_.moduleStartBit_=conf.getParameter<unsigned int>("pxb_moduleStartBit");
@@ -102,6 +104,7 @@ void
 TrackerTopologyEP::fillDescriptions( edm::ConfigurationDescriptions & descriptions ) 
 {
   edm::ParameterSetDescription ttc;
+  ttc.add<bool>("upgradeGeometry",false);
   ttc.add<unsigned int>("pxb_layerStartBit",16);
   ttc.add<unsigned int>("pxb_ladderStartBit",8);
   ttc.add<unsigned int>("pxb_moduleStartBit",2);
@@ -175,6 +178,7 @@ TrackerTopologyEP::fillDescriptions( edm::ConfigurationDescriptions & descriptio
   descriptions.add( "trackerTopologyConstants", ttc );
 
   edm::ParameterSetDescription ttcphase1;
+  ttcphase1.add<bool>("upgradeGeometry",false);
   ttcphase1.add<unsigned int>("pxb_layerStartBit",20);
   ttcphase1.add<unsigned int>("pxb_ladderStartBit",12);
   ttcphase1.add<unsigned int>("pxb_moduleStartBit",2);
@@ -248,6 +252,7 @@ TrackerTopologyEP::fillDescriptions( edm::ConfigurationDescriptions & descriptio
   descriptions.add( "trackerTopology2017Constants", ttcphase1 );
 
   edm::ParameterSetDescription ttcphase2;
+  ttcphase2.add<bool>("upgradeGeometry",true);
   ttcphase2.add<unsigned int>("pxb_layerStartBit",20);
   ttcphase2.add<unsigned int>("pxb_ladderStartBit",12);
   ttcphase2.add<unsigned int>("pxb_moduleStartBit",2);
@@ -331,7 +336,7 @@ TrackerTopologyEP::produce(const IdealGeometryRecord& iRecord)
 {
   edm::LogInfo("TrackerTopologyEP") <<  "TrackerTopologyIdealEP::produce(const IdealGeometryRecord& iRecord)";
     
-  ReturnType myTopo(new TrackerTopology(pxbVals_, pxfVals_, tecVals_, tibVals_, tidVals_, tobVals_));
+  ReturnType myTopo(new TrackerTopology(upgrade_, pxbVals_, pxfVals_, tecVals_, tibVals_, tidVals_, tobVals_));
 
   return myTopo ;
 }
