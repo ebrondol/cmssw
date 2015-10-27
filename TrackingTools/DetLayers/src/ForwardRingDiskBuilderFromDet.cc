@@ -10,10 +10,10 @@ ForwardRingDiskBuilderFromDet::operator()( const vector<const GeomDet*>& dets) c
 {
   auto bo = computeBounds( dets );
 
-//   LogDebug("DetLayers") << "Creating disk at Z: " << bo.second << "\n"
-//        << "Bounds are (rmin/rmax/thick) " << bo.first.innerRadius()
-//        << " / " <<  bo.first.outerRadius()
-//        << " / " <<  bo.first.thickness()  ;
+  LogDebug("DetLayers") << "Creating disk at Z: " << bo.second << "\n"
+        << "Bounds are (rmin/rmax/thick) " << bo.first->innerRadius()
+        << " / " <<  bo.first->outerRadius()
+        << " / " <<  bo.first->thickness();
 
 //   typedef Det::PositionType::BasicVectorType Vector; 
 //   Vector posSum(0,0,0);
