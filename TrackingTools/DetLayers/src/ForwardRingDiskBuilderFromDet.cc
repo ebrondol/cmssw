@@ -1,6 +1,7 @@
 #include "TrackingTools/DetLayers/interface/ForwardRingDiskBuilderFromDet.h"
 #include "DataFormats/GeometrySurface/interface/SimpleDiskBounds.h"
 #include "DataFormats/GeometrySurface/interface/BoundingBox.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 using namespace std;
 

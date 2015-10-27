@@ -1,36 +1,32 @@
-#ifndef TkDetLayers_Phase2OTBarrelRod_h
-#define TkDetLayers_Phase2OTBarrelRod_h
+#ifndef TkDetLayers_Phase2OTEndcapRing_h
+#define TkDetLayers_Phase2OTEndcapRing_h
 
 
 #include "TrackingTools/DetLayers/interface/GeometricSearchDet.h"
-#include "TrackingTools/DetLayers/interface/DetRod.h"
-#include "Utilities/BinningTools/interface/GenericBinFinderInZ.h"
+#include "Utilities/BinningTools/interface/PeriodicBinFinderInPhi.h"
 #include "SubLayerCrossings.h"
+#include "DataFormats/GeometrySurface/interface/BoundDisk.h"
 
-
-/** A concrete implementation for TOB Rod 
- *  
+/** A concrete implementation for TID rings 
  */
 
 #pragma GCC visibility push(hidden)
-class Phase2OTBarrelRod GCC11_FINAL : public DetRod, public GeometricSearchDetWithGroups{
+class Phase2OTEndcapRing GCC11_FINAL : public GeometricSearchDetWithGroups{
  public:
-  typedef GenericBinFinderInZ<float,GeomDet>   BinFinderType;
-
-  Phase2OTBarrelRod(std::vector<const GeomDet*>& innerDets,
-		    std::vector<const GeomDet*>& outerDets);
-  ~Phase2OTBarrelRod();
+  Phase2OTEndcapRing(std::vector<const GeomDet*>& frontDets,
+		     std::vector<const GeomDet*>& backDets);
+  ~Phase2OTEndcapRing();
   
   // GeometricSearchDet interface
+  virtual const BoundSurface& surface() const {return *theDisk;}
   
   virtual const std::vector<const GeomDet*>& basicComponents() const {return theDets;}
-
+  
   virtual const std::vector<const GeometricSearchDet*>& components() const;
 
-  
   virtual std::pair<bool, TrajectoryStateOnSurface>
-  compatible( const TrajectoryStateOnSurface& ts, const Propagator&, 
-	      const MeasurementEstimator&) const;
+  compatible( const TrajectoryStateOnSurface&, const Propagator&, 
+		       const MeasurementEstimator&) const;
 
   void groupedCompatibleDetsV( const TrajectoryStateOnSurface& tsos,
 			       const Propagator& prop,
@@ -38,6 +34,10 @@ class Phase2OTBarrelRod GCC11_FINAL : public DetRod, public GeometricSearchDetWi
 			       std::vector<DetGroup> & result) const;
   
  
+  //Extension of interface
+  virtual const BoundDisk& specificSurface() const {return *theDisk;}
+  
+
  private:
   // private methods for the implementation of groupedCompatibleDets()
 
@@ -50,11 +50,6 @@ class Phase2OTBarrelRod GCC11_FINAL : public DetRod, public GeometricSearchDetWi
 		   const SubLayerCrossing& crossing,
 		   std::vector<DetGroup>& result) const;
 
-  float computeWindowSize( const GeomDet* det, 
-			   const TrajectoryStateOnSurface& tsos, 
-			   const MeasurementEstimator& est) const;
-
-
   void searchNeighbors( const TrajectoryStateOnSurface& tsos,
 			const Propagator& prop,
 			const MeasurementEstimator& est,
@@ -63,25 +58,28 @@ class Phase2OTBarrelRod GCC11_FINAL : public DetRod, public GeometricSearchDetWi
 			std::vector<DetGroup>& result,
 			bool checkClosest) const;
 
-  bool overlap( const GlobalPoint& gpos, const GeomDet& rod, float phiWin) const;
-
-  const std::vector<const GeomDet*>& subRod( int ind) const {
-    return (ind==0 ? theInnerDets : theOuterDets);
+  const std::vector<const GeomDet*>& subLayer( int ind) const {
+    return (ind==0 ? theFrontDets : theBackDets);
   }
 
 
  private:
   std::vector<const GeomDet*> theDets;
-  std::vector<const GeomDet*> theInnerDets;
-  std::vector<const GeomDet*> theOuterDets;
+  std::vector<const GeomDet*> theFrontDets;
+  std::vector<const GeomDet*> theBackDets;
 
-  ReferenceCountingPointer<Plane> theInnerPlane;
-  ReferenceCountingPointer<Plane> theOuterPlane;
+  ReferenceCountingPointer<BoundDisk> theDisk;
+  ReferenceCountingPointer<BoundDisk> theFrontDisk;
+  ReferenceCountingPointer<BoundDisk> theBackDisk;
 
-  BinFinderType theInnerBinFinder;
-  BinFinderType theOuterBinFinder;
+  typedef PeriodicBinFinderInPhi<double>   BinFinderType;
 
-};
+  BinFinderType theFrontBinFinder;
+  BinFinderType theBackBinFinder;
+
+
+  
+  };
 
 
 #pragma GCC visibility pop
