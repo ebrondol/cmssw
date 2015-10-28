@@ -3,6 +3,7 @@
 #include "Geometry/TrackerGeometryBuilder/interface/PlaneBuilderForGluedDet.h"
 #include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
 #include "Geometry/TrackerGeometryBuilder/interface/GluedGeomDet.h"
+#include "Geometry/TrackerGeometryBuilder/interface/StackGeomDet.h"
 #include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetType.h"
 #include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
 #include "Geometry/TrackerGeometryBuilder/interface/StripGeomDetType.h"
@@ -10,6 +11,7 @@
 #include "Geometry/TrackerGeometryBuilder/interface/PixelTopologyBuilder.h"
 #include "Geometry/TrackerGeometryBuilder/interface/StripTopologyBuilder.h"
 #include "DataFormats/DetId/interface/DetId.h"
+#include "DataFormats/SiStripDetId/interface/SiStripDetId.h"
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
 #include "DataFormats/GeometrySurface/interface/MediumProperties.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
@@ -145,7 +147,7 @@ TrackerGeomBuilderFromGeometricDet::build( const GeometricDet* gd, const edm::Pa
       buildSilicon(dets[i],tracker,GeomDetEnumerators::tkDetEnum[i+1], "barrel"); // "barrel" is used but it is irrelevant
     }
   }
-  buildGeomDet(tracker);//"GeomDet"
+  buildGeomDet(tracker, upgradeGeometry);//"GeomDet"
 
   verifyDUinTG(*tracker, upgradeGeometry);
 
@@ -236,36 +238,72 @@ void TrackerGeomBuilderFromGeometricDet::buildSilicon(std::vector<const Geometri
 }
 
 
-void TrackerGeomBuilderFromGeometricDet::buildGeomDet(TrackerGeometry* tracker){
+void TrackerGeomBuilderFromGeometricDet::buildGeomDet(TrackerGeometry* tracker, bool upgradeGeometry){
+  
   PlaneBuilderForGluedDet gluedplaneBuilder;
   std::vector<GeomDetUnit*> const & gdu= tracker->detUnits();
   std::vector<DetId> const & gduId = tracker->detUnitIds();
 
   for(u_int32_t i=0;i<gdu.size();i++){
-    StripSubdetector sidet( gduId[i].rawId());
+
     tracker->addDet((GeomDet*) gdu[i]);
     tracker->addDetId(gduId[i]);      
-    if(sidet.glued()!=0&&sidet.stereo()==1){
-      int partner_pos=-1;
-      for(u_int32_t jj=0;jj<gduId.size();jj++){
-	if(sidet.partnerDetId()== gduId[jj]) {
-	  partner_pos=jj;
-	  break;
-	}
+
+    if(!upgradeGeometry) {
+
+      StripSubdetector sidet( gduId[i].rawId() );
+      if(sidet.glued()!=0 && sidet.stereo()==1){
+        int partner_pos=-1;
+        for(u_int32_t jj=0;jj<gduId.size();jj++){
+    	  if(sidet.partnerDetId()== gduId[jj]) {
+    	    partner_pos=jj;
+    	    break;
+    	  }
+        }
+        const GeomDetUnit* dus = gdu[i];
+        if(partner_pos==-1){
+  	  throw cms::Exception("Configuration") <<"No partner detector found \n"
+  					        <<"There is a problem on Tracker geometry configuration\n";
+        }
+        const GeomDetUnit* dum = gdu[partner_pos];
+        std::vector<const GeomDetUnit *> glued(2);
+        glued[0]=dum;
+        glued[1]=dus;
+        PlaneBuilderForGluedDet::ResultType plane = gluedplaneBuilder.plane(glued);
+        GluedGeomDet* gluedDet = new GluedGeomDet(&(*plane),dum,dus);
+        tracker->addDet((GeomDet*) gluedDet);
+        tracker->addDetId(DetId(sidet.glued()));
       }
-      const GeomDetUnit* dus = gdu[i];
-      if(partner_pos==-1){
-	throw cms::Exception("Configuration") <<"No partner detector found \n"
-					<<"There is a problem on Tracker geometry configuration\n";
+
+    } else {
+
+      SiStripDetId stripId(gduId[i]);
+      if(stripId.stack()!=0 && stripId.lower()==1){
+        int partner_pos=-1;
+        for(u_int32_t jj=0;jj<gduId.size();jj++){
+          if(stripId.partnerDetId()== gduId[jj]) {
+            partner_pos=jj;
+            break;
+          }
+        }
+
+        if(partner_pos==-1){
+          throw cms::Exception("Configuration") <<"No partner detector found \n"
+                                                <<"There is a problem on Tracker geometry configuration\n";
+        }
+
+        const GeomDetUnit* dus = gdu[i];
+        const GeomDetUnit* dum = gdu[partner_pos];
+        std::vector<const GeomDetUnit *> stack(2);
+        stack[0]=dum;
+        stack[1]=dus;
+        //FIXME::ERICA: the plane builder is still valid?
+        PlaneBuilderForGluedDet::ResultType plane = gluedplaneBuilder.plane(stack);
+        StackGeomDet* stackDet = new StackGeomDet(&(*plane),dum,dus);
+        tracker->addDet((GeomDet*) stackDet);
+        tracker->addDetId(DetId(stripId.stack()));
       }
-      const GeomDetUnit* dum = gdu[partner_pos];
-      std::vector<const GeomDetUnit *> glued(2);
-      glued[0]=dum;
-      glued[1]=dus;
-      PlaneBuilderForGluedDet::ResultType plane = gluedplaneBuilder.plane(glued);
-      GluedGeomDet* gluedDet = new GluedGeomDet(&(*plane),dum,dus);
-      tracker->addDet((GeomDet*) gluedDet);
-      tracker->addDetId(DetId(sidet.glued()));
+
     }
   }
 }

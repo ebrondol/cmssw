@@ -26,7 +26,7 @@ private:
 		  int BIG_PIX_PER_ROC_Y);
   void buildSilicon(std::vector<const GeometricDet*> const &,
 		    TrackerGeometry*,GeomDetType::SubDetector det, const std::string& part);
-  void buildGeomDet(TrackerGeometry*);
+  void buildGeomDet(TrackerGeometry*, bool upgradeGeometry);
 
   PlaneBuilderFromGeometricDet::ResultType
   buildPlaneWithMaterial(const GeometricDet* gd,double scaleFactor=1.) const;
