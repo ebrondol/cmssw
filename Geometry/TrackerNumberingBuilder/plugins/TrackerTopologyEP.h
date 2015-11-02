@@ -37,7 +37,6 @@ public:
 
 private:
   // ----------member data ---------------------------
-  bool upgrade_;
   TrackerTopology::PixelBarrelValues pxbVals_;
   TrackerTopology::PixelEndcapValues pxfVals_;
   TrackerTopology::TECValues tecVals_;
