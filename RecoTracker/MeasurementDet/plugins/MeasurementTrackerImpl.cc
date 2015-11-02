@@ -193,20 +193,20 @@ void MeasurementTrackerImpl::addDets( const TrackingGeometry::DetContainer& dets
     //Pixel or Strip GeomDetUnit
     if (isDetUnit) {
       if(subIsPixel) {
-        edm::LogDebug("MeasurementDet") << " Pixel GeomDetUnit " << (**gd).geographicalId().rawId() << std::endl;
+        LogDebug("MeasurementTracker") << " Pixel GeomDetUnit " << (**gd).geographicalId().rawId();
         addPixelDet(*gd);
       } else {
-        edm::LogDebug("MeasurementDet") << " Strip GeomDetUnit " << (**gd).geographicalId().rawId() << std::endl;
+        LogDebug("MeasurementTracker") << " Strip GeomDetUnit " << (**gd).geographicalId().rawId();
         addStripDet(*gd);
       }
     } else {
 
       //Glued or Stack GeomDet
-      edm::LogDebug("MeasurementDet") << " GluedGeomDet or StackGeomDet " << (**gd).geographicalId().rawId() << std::endl;
+      LogDebug("MeasurementTracker") << " GluedGeomDet or StackGeomDet " << (**gd).geographicalId().rawId();
       const GluedGeomDet* gluedDet = dynamic_cast<const GluedGeomDet*>(*gd);
       const StackGeomDet* stackDet = dynamic_cast<const StackGeomDet*>(*gd);
 
-      if (gluedDet == 0 && stackDet == 0) {
+      if ((gluedDet == 0 && stackDet == 0) || (gluedDet != 0 && stackDet != 0)) {
         throw MeasurementDetException("MeasurementTracker ERROR: GeomDet neither DetUnit nor GluedDet nor StackDet");
       }
       if(gluedDet != 0)
