@@ -133,9 +133,6 @@ class TrackerTopology {
   unsigned int layer(const DetId &id) const;
   unsigned int module(const DetId &id) const;
 
-  bool isStereo(const DetId &id) const;
-  bool isLower(const DetId &id) const;
-  bool isUpper(const DetId &id) const;
 
   // layer numbers
   unsigned int pxbLayer(const DetId &id) const {
@@ -276,6 +273,12 @@ class TrackerTopology {
   bool tidIsRPhi(const DetId &id) const { return SiStripDetId(id).stereo()==0 && !tidIsDoubleSide(id);}
 
   //these are clones of the old SiStripDetId: should be used now!!
+  uint32_t Glued(const DetId &id) const ;
+  uint32_t Stack(const DetId &id) const ;
+  bool isStereo(const DetId &id) const;
+  bool isLower(const DetId &id) const;
+  bool isUpper(const DetId &id) const;
+
   //phase0 stereo
   uint32_t tobStereo(const DetId &id) const {
     if ( ((id.rawId() >>tobVals_.sterStartBit_ ) & tobVals_.sterMask_ ) == 1 ) {
@@ -365,6 +368,40 @@ class TrackerTopology {
     } else { return 0; }
   }
 
+  //these are clones of the old SiStripDetId: should be used now!!
+  uint32_t PartnerDetId(const DetId &id) const;
+
+  uint32_t tibPartnerDetId(const DetId &id) const {
+    if ( ((id.rawId()>>tibVals_.sterStartBit_) & tibVals_.sterMask_ ) == 1 ) {
+      return ( id.rawId() + 1 );
+    } else if ( ((id.rawId()>>tibVals_.sterStartBit_) & tibVals_.sterMask_ ) == 2 ) {
+      return ( id.rawId() - 1 );
+    } else { return 0; }
+  }
+
+  uint32_t tobPartnerDetId(const DetId &id) const {
+    if ( ((id.rawId()>>tobVals_.sterStartBit_) & tobVals_.sterMask_ ) == 1 ) {
+      return ( id.rawId() + 1 );
+    } else if ( ((id.rawId()>>tobVals_.sterStartBit_) & tobVals_.sterMask_ ) == 2 ) {
+      return ( id.rawId() - 1 );
+    } else { return 0; }
+  }
+
+  uint32_t tidPartnerDetId(const DetId &id) const {
+    if ( ((id.rawId()>>tidVals_.sterStartBit_) & tidVals_.sterMask_ ) == 1 ) {
+      return ( id.rawId() + 1 );
+    } else if ( ((id.rawId()>>tidVals_.sterStartBit_) & tidVals_.sterMask_ ) == 2 ) {
+      return ( id.rawId() - 1 );
+    } else { return 0; }
+  }
+
+  uint32_t tecPartnerDetId(const DetId &id) const {
+    if ( ((id.rawId()>>tecVals_.sterStartBit_) & tecVals_.sterMask_ ) == 1 ) {
+      return ( id.rawId() + 1 );
+    } else if ( ((id.rawId()>>tecVals_.sterStartBit_) & tecVals_.sterMask_ ) == 2 ) {
+      return ( id.rawId() - 1 );
+    } else { return 0; }
+  }
 
 
   //misc tec
