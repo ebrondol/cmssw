@@ -1,4 +1,5 @@
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeomBuilderFromGeometricDet.h"
+#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "Geometry/TrackerGeometryBuilder/interface/PlaneBuilderForGluedDet.h"
 #include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
@@ -45,7 +46,7 @@ namespace {
 }
 
 TrackerGeometry*
-TrackerGeomBuilderFromGeometricDet::build( const GeometricDet* gd, const edm::ParameterSet& pSet )
+TrackerGeomBuilderFromGeometricDet::build( const GeometricDet* gd, const edm::ParameterSet& pSet, const TrackerTopology* tTopo )
 {
   bool upgradeGeometry = false;
   int BIG_PIX_PER_ROC_X = 1;
@@ -98,7 +99,8 @@ TrackerGeomBuilderFromGeometricDet::build( const GeometricDet* gd, const edm::Pa
   // now building the Pixel-like subdetectors
   for(unsigned int i=0;i<6;++i) {
     if(gdsubdetmap[i] == GeometricDet::PixelBarrel) 
-      buildPixel(dets[i],tracker,GeomDetEnumerators::SubDetector::PixelBarrel,
+      buildPixel(dets[i],tracker,
+		 GeomDetEnumerators::SubDetector::PixelBarrel,
 		 upgradeGeometry,
 		 BIG_PIX_PER_ROC_X,
 		 BIG_PIX_PER_ROC_Y); 
@@ -135,19 +137,19 @@ TrackerGeomBuilderFromGeometricDet::build( const GeometricDet* gd, const edm::Pa
   }
   //now building Strips
   for(unsigned int i=0;i<6;++i) {
-    if(gdsubdetmap[i] == GeometricDet::TIB)   buildSilicon(dets[i],tracker,GeomDetEnumerators::SubDetector::TIB, "barrel");
-    if(gdsubdetmap[i] == GeometricDet::TID)   buildSilicon(dets[i],tracker,GeomDetEnumerators::SubDetector::TID, "endcap");
-    if(gdsubdetmap[i] == GeometricDet::TOB)   buildSilicon(dets[i],tracker,GeomDetEnumerators::SubDetector::TOB, "barrel");
-    if(gdsubdetmap[i] == GeometricDet::TEC)   buildSilicon(dets[i],tracker,GeomDetEnumerators::SubDetector::TEC, "endcap");
+    if(gdsubdetmap[i] == GeometricDet::TIB)   buildSilicon(dets[i],tracker,tTopo,GeomDetEnumerators::SubDetector::TIB, "barrel");
+    if(gdsubdetmap[i] == GeometricDet::TID)   buildSilicon(dets[i],tracker,tTopo,GeomDetEnumerators::SubDetector::TID, "endcap");
+    if(gdsubdetmap[i] == GeometricDet::TOB)   buildSilicon(dets[i],tracker,tTopo,GeomDetEnumerators::SubDetector::TOB, "barrel");
+    if(gdsubdetmap[i] == GeometricDet::TEC)   buildSilicon(dets[i],tracker,tTopo,GeomDetEnumerators::SubDetector::TEC, "endcap");
   }  
   // and finally the "empty" subdetectors (maybe it is not needed)
   for(unsigned int i=0;i<6;++i) {
     if(gdsubdetmap[i] == GeometricDet::unknown) {
       if(dets[i].size()!=0) throw cms::Exception("NotEmptyUnknownSubDet") << "Subdetector " << i+1 << " is unknown but it is not empty: " << dets[i].size();
-      buildSilicon(dets[i],tracker,GeomDetEnumerators::tkDetEnum[i+1], "barrel"); // "barrel" is used but it is irrelevant
+      buildSilicon(dets[i],tracker,tTopo,GeomDetEnumerators::tkDetEnum[i+1], "barrel"); // "barrel" is used but it is irrelevant
     }
   }
-  buildGeomDet(tracker, upgradeGeometry);//"GeomDet"
+  buildGeomDet(tracker, upgradeGeometry, tTopo);//"GeomDet"
 
   verifyDUinTG(*tracker, upgradeGeometry);
 
@@ -200,6 +202,7 @@ void TrackerGeomBuilderFromGeometricDet::buildPixel(std::vector<const GeometricD
 
 void TrackerGeomBuilderFromGeometricDet::buildSilicon(std::vector<const GeometricDet*>  const & gdv, 
 						      TrackerGeometry* tracker,
+						      const TrackerTopology* tTopo,
 						      GeomDetType::SubDetector det,
 						      const std::string& part)
 { 
@@ -224,8 +227,7 @@ void TrackerGeomBuilderFromGeometricDet::buildSilicon(std::vector<const Geometri
       tracker->addType(theStripDetTypeMap[detName]);
     }
      
-    StripSubdetector sidet( gdv[i]->geographicalID());
-    double scale  = (sidet.partnerDetId()) ? 0.5 : 1.0 ;	
+    double scale  = (tTopo->PartnerDetId(gdv[i]->geographicalID())) ? 0.5 : 1.0 ;	
 
     PlaneBuilderFromGeometricDet::ResultType plane = buildPlaneWithMaterial(gdv[i],scale);  
     GeomDetUnit* temp = new StripGeomDetUnit(&(*plane), theStripDetTypeMap[detName],gdv[i]);
@@ -238,7 +240,7 @@ void TrackerGeomBuilderFromGeometricDet::buildSilicon(std::vector<const Geometri
 }
 
 
-void TrackerGeomBuilderFromGeometricDet::buildGeomDet(TrackerGeometry* tracker, bool upgradeGeometry){
+void TrackerGeomBuilderFromGeometricDet::buildGeomDet(TrackerGeometry* tracker, bool upgradeGeometry, const TrackerTopology* tTopo){
   
   PlaneBuilderForGluedDet gluedplaneBuilder;
   std::vector<GeomDetUnit*> const & gdu= tracker->detUnits();
@@ -247,15 +249,14 @@ void TrackerGeomBuilderFromGeometricDet::buildGeomDet(TrackerGeometry* tracker, 
   for(u_int32_t i=0;i<gdu.size();i++){
 
     tracker->addDet((GeomDet*) gdu[i]);
-    tracker->addDetId(gduId[i]);      
+    tracker->addDetId(gduId[i]);
 
     if(!upgradeGeometry) {
 
-      StripSubdetector sidet( gduId[i].rawId() );
-      if(sidet.glued()!=0 && sidet.stereo()==1){
+      if(tTopo->isStereo(gduId[i])){
         int partner_pos=-1;
         for(u_int32_t jj=0;jj<gduId.size();jj++){
-    	  if(sidet.partnerDetId()== gduId[jj]) {
+    	  if(tTopo->PartnerDetId(gduId[i]) == gduId[jj]) {
     	    partner_pos=jj;
     	    break;
     	  }
@@ -272,16 +273,16 @@ void TrackerGeomBuilderFromGeometricDet::buildGeomDet(TrackerGeometry* tracker, 
         PlaneBuilderForGluedDet::ResultType plane = gluedplaneBuilder.plane(glued);
         GluedGeomDet* gluedDet = new GluedGeomDet(&(*plane),dum,dus);
         tracker->addDet((GeomDet*) gluedDet);
-        tracker->addDetId(DetId(sidet.glued()));
+        tracker->addDetId(DetId(tTopo->Glued(gduId[i])));
       }
 
     } else {
 
       SiStripDetId stripId(gduId[i]);
-      if(stripId.stack()!=0 && stripId.lower()==1){
+      if(tTopo->isLower(gduId[i])){
         int partner_pos=-1;
         for(u_int32_t jj=0;jj<gduId.size();jj++){
-          if(stripId.partnerDetId()== gduId[jj]) {
+          if(tTopo->PartnerDetId(gduId[i]) == gduId[jj]) {
             partner_pos=jj;
             break;
           }
@@ -301,7 +302,7 @@ void TrackerGeomBuilderFromGeometricDet::buildGeomDet(TrackerGeometry* tracker, 
         PlaneBuilderForGluedDet::ResultType plane = gluedplaneBuilder.plane(stack);
         StackGeomDet* stackDet = new StackGeomDet(&(*plane),dum,dus);
         tracker->addDet((GeomDet*) stackDet);
-        tracker->addDetId(DetId(stripId.stack()));
+        tracker->addDetId(DetId(tTopo->Glued(gduId[i])));
       }
 
     }
