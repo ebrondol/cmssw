@@ -4,11 +4,9 @@
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
 #include <sstream>
 
-TrackerTopology::TrackerTopology( const bool upgrade,
-				  const PixelBarrelValues& pxb, const PixelEndcapValues& pxf,
+TrackerTopology::TrackerTopology( const PixelBarrelValues& pxb, const PixelEndcapValues& pxf,
 				  const TECValues& tecv, const TIBValues& tibv, 
 				  const TIDValues& tidv, const TOBValues& tobv) {
-  upgrade_=upgrade;
   pbVals_=pxb;
   pfVals_=pxf;
   tecVals_=tecv;
@@ -76,6 +74,67 @@ unsigned int TrackerTopology::module(const DetId &id) const {
   return 0;
 }
 
+bool TrackerTopology::isStereo(const DetId &id) const {
+
+    uint32_t subdet=id.subdetId();
+    if ( subdet == PixelSubdetector::PixelBarrel )
+      return false;
+    if ( subdet == PixelSubdetector::PixelEndcap )
+      return false;
+    if ( subdet == StripSubdetector::TIB )
+      return tibStereo(id)!=0;
+    if ( subdet == StripSubdetector::TID )
+      return tidStereo(id)!=0;
+    if ( subdet == StripSubdetector::TOB )
+      return tobStereo(id)!=0;
+    if ( subdet == StripSubdetector::TEC )
+      return tecStereo(id)!=0;
+
+    throw cms::Exception("Invalid DetId") << "Unsupported DetId in TrackerTopology::isStereo";
+    return 0;
+}
+
+bool TrackerTopology::isLower(const DetId &id) const {
+
+    uint32_t subdet=id.subdetId();
+    if ( subdet == PixelSubdetector::PixelBarrel ) 
+      return false;
+    if ( subdet == PixelSubdetector::PixelEndcap )
+      return false;
+    if ( subdet == StripSubdetector::TIB )
+      return tibLower(id)!=0;
+    if ( subdet == StripSubdetector::TID )
+      return tidLower(id)!=0;
+    if ( subdet == StripSubdetector::TOB )
+      return tobLower(id)!=0;
+    if ( subdet == StripSubdetector::TEC )
+      return tecLower(id)!=0;
+
+    throw cms::Exception("Invalid DetId") << "Unsupported DetId in TrackerTopology::isLower";
+    return 0;
+
+}
+
+bool TrackerTopology::isUpper(const DetId &id) const {
+
+    uint32_t subdet=id.subdetId();
+    if ( subdet == PixelSubdetector::PixelBarrel ) 
+      return false;
+    if ( subdet == PixelSubdetector::PixelEndcap )
+      return false;
+    if ( subdet == StripSubdetector::TIB )
+      return tibUpper(id)!=0;
+    if ( subdet == StripSubdetector::TID )
+      return tidUpper(id)!=0;
+    if ( subdet == StripSubdetector::TOB )
+      return tobUpper(id)!=0;
+    if ( subdet == StripSubdetector::TEC )
+      return tecUpper(id)!=0;
+
+    throw cms::Exception("Invalid DetId") << "Unsupported DetId in TrackerTopology::isUpper";
+    return 0;
+}
+
 std::string TrackerTopology::print(DetId id) const {
   uint32_t subdet=id.subdetId();
   std::stringstream strstr;
@@ -106,18 +165,15 @@ std::string TrackerTopology::print(DetId id) const {
     side = (theString[0] == 1 ) ? "-" : "+";
     part = (theString[1] == 1 ) ? "int" : "ext";
     std::string type;
-    type = (tibStereo(id) == 0) ? "r-phi" : "stereo";
-    type = (tibGlued(id) == 0) ? type : type+" glued";
-    type = (isDoubleSide(id)) ? "double side" : type;
+    type = (isStereo(id) == 0) ? "r-phi" : "stereo";
     std::string typeUpgrade;
     typeUpgrade = (isLower(id)) ? "lower" : typeUpgrade;
     typeUpgrade = (isUpper(id)) ? "upper" : typeUpgrade;
-    typeUpgrade = (isDoubleSide(id)) ? "id stack" : typeUpgrade + " stack";
     strstr << "TIB" << side
 	   << " Layer " << theLayer << " " << part
 	   << " String " << theString[2];
-    if( !upgrade_ )	   strstr << " Module " << theModule << " " << type;
-    if( upgrade_ )         strstr << " Module " << theModule << " " << typeUpgrade;
+    strstr << " Module for phase0 " << theModule << " " << type;
+    strstr << " Module for phase2 " << theModule << " " << typeUpgrade;
     strstr << " (" << id.rawId() << ")";
     return strstr.str();
   }
@@ -131,18 +187,15 @@ std::string TrackerTopology::print(DetId id) const {
     side = (tidSide(id) == 1 ) ? "-" : "+";
     part = (theModule[0] == 1 ) ? "back" : "front";
     std::string type;
-    type = (tidStereo(id) == 0) ? "r-phi" : "stereo";
-    type = (tidGlued(id) == 0) ? type : type+" glued";
-    type = (isDoubleSide(id)) ? "double side" : type;
+    type = (isStereo(id) == 0) ? "r-phi" : "stereo";
     std::string typeUpgrade;
     typeUpgrade = (isLower(id)) ? "lower" : typeUpgrade;
     typeUpgrade = (isUpper(id)) ? "upper" : typeUpgrade;
-    typeUpgrade = (isDoubleSide(id)) ? "id stack" : typeUpgrade + " stack";
     strstr << "TID" << side
 	   << " Disk " << theDisk
 	   << " Ring " << theRing << " " << part;
-    if( !upgrade_ )	   strstr << " Module " << theModule[1] << " " << type;
-    if( upgrade_ )         strstr << " Module " << theModule[1] << " " << typeUpgrade;
+    strstr << " Module for phase0 " << theModule[1] << " " << type;
+    strstr << " Module for phase2 " << theModule[1] << " " << typeUpgrade;
     strstr << " (" << id.rawId() << ")";
     return strstr.str();
   }
@@ -155,18 +208,15 @@ std::string TrackerTopology::print(DetId id) const {
     std::string part;
     side = (theRod[0] == 1 ) ? "-" : "+";
     std::string type;
-    type = (tobStereo(id) == 0) ? "r-phi" : "stereo";
-    type = (tobGlued(id) == 0) ? type : type+" glued";
-    type = (isDoubleSide(id)) ? "double side" : type;
+    type = (isStereo(id) == 0) ? "r-phi" : "stereo";
     std::string typeUpgrade;
     typeUpgrade = (isLower(id)) ? "lower" : typeUpgrade;
     typeUpgrade = (isUpper(id)) ? "upper" : typeUpgrade;
-    typeUpgrade = (isDoubleSide(id)) ? "id stack" : typeUpgrade + " stack";
     strstr << "TOB" << side
 	   << " Layer " << theLayer
 	   << " Rod " << theRod[1];
-    if( !upgrade_ )	   strstr << " Module " << theModule << " " << type;
-    if( upgrade_ )         strstr << " Module " << theModule << " " << typeUpgrade;
+    strstr << " Module for phase0 " << theModule << " " << type;
+    strstr << " Module for phase2 " << theModule << " " << typeUpgrade;
     strstr << " (" << id.rawId() << ")";
     return strstr.str();
   }
@@ -181,19 +231,16 @@ std::string TrackerTopology::print(DetId id) const {
     side  = (tecSide(id) == 1 ) ? "-" : "+";
     petal = (thePetal[0] == 1 ) ? "back" : "front";
     std::string type;
-    type = (tecStereo(id) == 0) ? "r-phi" : "stereo";
-    type = (tecGlued(id) == 0) ? type : type+" glued";
-    type = (isDoubleSide(id)) ? "double side" : type;
+    type = (isStereo(id) == 0) ? "r-phi" : "stereo";
     std::string typeUpgrade;
     typeUpgrade = (isLower(id)) ? "lower" : typeUpgrade;
     typeUpgrade = (isUpper(id)) ? "upper" : typeUpgrade;
-    typeUpgrade = (isDoubleSide(id)) ? "id stack" : typeUpgrade + " stack";
     strstr << "TEC" << side
 	   << " Wheel " << theWheel
 	   << " Petal " << thePetal[1] << " " << petal
 	   << " Ring " << theRing;
-    if( !upgrade_ )	   strstr << " Module " << theModule << " " << type;
-    if( upgrade_ )         strstr << " Module " << theModule << " " << typeUpgrade;
+    strstr << " Module for phase0 " << theModule << " " << type;
+    strstr << " Module for phase2 " << theModule << " " << typeUpgrade;
     strstr << " (" << id.rawId() << ")";
 
     return strstr.str();

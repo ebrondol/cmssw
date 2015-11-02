@@ -125,14 +125,17 @@ class TrackerTopology {
   };
 
   
-  TrackerTopology( const bool upgrade,
-		   const PixelBarrelValues& pxb, const PixelEndcapValues& pxf,
+  TrackerTopology( const PixelBarrelValues& pxb, const PixelEndcapValues& pxf,
 		   const TECValues& tecv, const TIBValues& tibv, 
 		   const TIDValues& tidv, const TOBValues& tobv);
 
   unsigned int side(const DetId &id) const;
   unsigned int layer(const DetId &id) const;
   unsigned int module(const DetId &id) const;
+
+  bool isStereo(const DetId &id) const;
+  bool isLower(const DetId &id) const;
+  bool isUpper(const DetId &id) const;
 
   // layer numbers
   unsigned int pxbLayer(const DetId &id) const {
@@ -242,60 +245,12 @@ class TrackerTopology {
     return num ;
   }
 
-  bool isDoubleSide(const DetId &id) const { 
 
-    uint32_t subdet=id.subdetId();
-    if ( subdet == StripSubdetector::TIB )
-      return tibIsDoubleSide(id);
-    if ( subdet == StripSubdetector::TID )
-      return tidIsDoubleSide(id);
-    if ( subdet == StripSubdetector::TOB )
-      return tobIsDoubleSide(id);
-    if ( subdet == StripSubdetector::TEC )
-      return tecIsDoubleSide(id);
-    
-    throw cms::Exception("Invalid DetId") << "Unsupported DetId in TrackerTopology::DoubleSide";
-    return 0;
-  }
-
-  bool isUpgrade() { return upgrade_; }
-
-  bool tibIsDoubleSide(const DetId &id) const { 
-    if(!upgrade_){
-      return SiStripDetId(id).glued()==0 && (tibLayer(id)==1 || tibLayer(id)==2);
-    } else if( upgrade_ ) {
-      return isStack(id);
-    }
-    return 0;
-  }
-  bool tobIsDoubleSide(const DetId &id) const { 
-    if(!upgrade_){
-      return SiStripDetId(id).glued()==0 && (tobLayer(id)==1 || tobLayer(id)==2);
-    } else if( upgrade_ ){
-      return isStack(id);
-    }
-    return 0;
-  }
-  bool tecIsDoubleSide(const DetId &id) const { 
-    if(!upgrade_){
-      return SiStripDetId(id).glued()==0 && (tecRing(id)==1 || tecRing(id)==2 || tecRing(id)==5);
-    } else if( upgrade_ ){
-      return isStack(id);
-    }
-    return 0;
-  }
-  bool tidIsDoubleSide(const DetId &id) const { 
-    if(!upgrade_){
-      return SiStripDetId(id).glued()==0 && (tidRing(id)==1 || tidRing(id)==2);
-    } else if( upgrade_ ){
-      return isStack(id);
-    }
-    return 0;
-  }
-
-  bool isStack(const DetId &id) const { return upgrade_ && SiStripDetId(id).stack()==0; }
-  bool isLower(const DetId &id) const { return upgrade_ && SiStripDetId(id).lower()!=0; }
-  bool isUpper(const DetId &id) const { return upgrade_ && SiStripDetId(id).upper()!=0; }
+  //these are from the old TOB/TEC/TID/TIB DetId
+  bool tibIsDoubleSide(const DetId &id) const { return SiStripDetId(id).glued()==0 && (tibLayer(id)==1 || tibLayer(id)==2);  }
+  bool tobIsDoubleSide(const DetId &id) const { return SiStripDetId(id).glued()==0 && (tobLayer(id)==1 || tobLayer(id)==2);  }
+  bool tecIsDoubleSide(const DetId &id) const { return SiStripDetId(id).glued()==0 && (tecRing(id)==1 || tecRing(id)==2 || tecRing(id)==5);  }
+  bool tidIsDoubleSide(const DetId &id) const { return SiStripDetId(id).glued()==0 && (tidRing(id)==1 || tidRing(id)==2);  }
 
   bool tobIsZPlusSide(const DetId &id) const {return !tobIsZMinusSide(id);}
   bool tobIsZMinusSide(const DetId &id) const { return tobSide(id)==1;}
@@ -309,13 +264,19 @@ class TrackerTopology {
   bool tecIsZPlusSide(const DetId &id) const {return !tecIsZMinusSide(id);}
   bool tecIsZMinusSide(const DetId &id) const { return tecSide(id)==1;}
 
-  //these are from the old TOB/TEC/TID/TIB DetId
+  //these are from the old TOB/TEC/TID/TIB DetId: should not be used anymore!!
   bool tobIsStereo(const DetId &id) const {return tobStereo(id)!=0 && !tobIsDoubleSide(id);}
   bool tecIsStereo(const DetId &id) const {return tecStereo(id)!=0 && !tecIsDoubleSide(id);}
   bool tibIsStereo(const DetId &id) const {return tibStereo(id)!=0 && !tibIsDoubleSide(id);}
   bool tidIsStereo(const DetId &id) const {return tidStereo(id)!=0 && !tidIsDoubleSide(id);}
 
-  //these are clones of the old SiStripDetId
+  bool tobIsRPhi(const DetId &id) const { return SiStripDetId(id).stereo()==0 && !tobIsDoubleSide(id);}
+  bool tecIsRPhi(const DetId &id) const { return SiStripDetId(id).stereo()==0 && !tecIsDoubleSide(id);}
+  bool tibIsRPhi(const DetId &id) const { return SiStripDetId(id).stereo()==0 && !tibIsDoubleSide(id);}
+  bool tidIsRPhi(const DetId &id) const { return SiStripDetId(id).stereo()==0 && !tidIsDoubleSide(id);}
+
+  //these are clones of the old SiStripDetId: should be used now!!
+  //phase0 stereo
   uint32_t tobStereo(const DetId &id) const {
     if ( ((id.rawId() >>tobVals_.sterStartBit_ ) & tobVals_.sterMask_ ) == 1 ) {
       return ( (id.rawId()>>tobVals_.sterStartBit_) & tobVals_.sterMask_ );
@@ -340,6 +301,38 @@ class TrackerTopology {
     } else { return 0; }
   }
 
+  //phase0 stereo == phase2 lower
+  uint32_t tibLower(const DetId &id) const { return tibStereo(id); }
+  uint32_t tidLower(const DetId &id) const { return tidStereo(id); }
+  uint32_t tobLower(const DetId &id) const { return tobStereo(id); }
+  uint32_t tecLower(const DetId &id) const { return tecStereo(id); }
+
+  //phase2 upper
+  uint32_t tobUpper(const DetId &id) const {
+    if ( ((id.rawId() >>tobVals_.sterStartBit_ ) & tobVals_.sterMask_ ) == 2 ) {
+      return ( (id.rawId()>>tobVals_.sterStartBit_) & tobVals_.sterMask_ );
+    } else { return 0; }
+  }
+
+  uint32_t tibUpper(const DetId &id) const {
+    if ( ((id.rawId() >>tibVals_.sterStartBit_ ) & tibVals_.sterMask_ ) == 2 ) {
+      return ( (id.rawId()>>tibVals_.sterStartBit_) & tibVals_.sterMask_ );
+    } else { return 0; }
+  }
+
+  uint32_t tidUpper(const DetId &id) const {
+    if ( ((id.rawId() >>tidVals_.sterStartBit_ ) & tidVals_.sterMask_ ) == 2 ) {
+      return ( (id.rawId()>>tidVals_.sterStartBit_) & tidVals_.sterMask_ );
+    } else { return 0; }
+  }
+
+  uint32_t tecUpper(const DetId &id) const {
+    if ( ((id.rawId() >>tecVals_.sterStartBit_ ) & tecVals_.sterMask_ ) == 2 ) {
+      return ( (id.rawId()>>tecVals_.sterStartBit_) & tecVals_.sterMask_ );
+    } else { return 0; }
+  }
+
+  //phase0 glued == phase2 stack
   uint32_t tibGlued(const DetId &id) const {
     if ( ((id.rawId()>>tibVals_.sterStartBit_) & tibVals_.sterMask_ ) == 1 ) {
       return ( id.rawId() - 1 );
@@ -372,10 +365,6 @@ class TrackerTopology {
     } else { return 0; }
   }
 
-  bool tobIsRPhi(const DetId &id) const { return SiStripDetId(id).stereo()==0 && !tobIsDoubleSide(id);}
-  bool tecIsRPhi(const DetId &id) const { return SiStripDetId(id).stereo()==0 && !tecIsDoubleSide(id);}
-  bool tibIsRPhi(const DetId &id) const { return SiStripDetId(id).stereo()==0 && !tibIsDoubleSide(id);}
-  bool tidIsRPhi(const DetId &id) const { return SiStripDetId(id).stereo()==0 && !tidIsDoubleSide(id);}
 
 
   //misc tec
@@ -560,8 +549,6 @@ class TrackerTopology {
   std::string print(DetId detid) const;
 
  private:
-
-  bool upgrade_;
 
   PixelBarrelValues pbVals_;
   PixelEndcapValues pfVals_;
