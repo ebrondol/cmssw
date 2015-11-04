@@ -12,7 +12,6 @@
 #include "Geometry/TrackerGeometryBuilder/interface/PixelTopologyBuilder.h"
 #include "Geometry/TrackerGeometryBuilder/interface/StripTopologyBuilder.h"
 #include "DataFormats/DetId/interface/DetId.h"
-#include "DataFormats/SiStripDetId/interface/SiStripDetId.h"
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
 #include "DataFormats/GeometrySurface/interface/MediumProperties.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
@@ -250,60 +249,48 @@ void TrackerGeomBuilderFromGeometricDet::buildGeomDet(TrackerGeometry* tracker, 
 
     tracker->addDet((GeomDet*) gdu[i]);
     tracker->addDetId(gduId[i]);
+    string ModName = gdu[i]->type().name();
 
-    if(!upgradeGeometry) {
+    if( ModName.find("Stereo")!=std::string::npos || 
+        ModName.find("Lower")!=std::string::npos) {
 
-      if(tTopo->isStereo(gduId[i])){
-        int partner_pos=-1;
-        for(u_int32_t jj=0;jj<gduId.size();jj++){
-    	  if(tTopo->PartnerDetId(gduId[i]) == gduId[jj]) {
-    	    partner_pos=jj;
-    	    break;
-    	  }
-        }
-        const GeomDetUnit* dus = gdu[i];
-        if(partner_pos==-1){
-  	  throw cms::Exception("Configuration") <<"No partner detector found \n"
-  					        <<"There is a problem on Tracker geometry configuration\n";
-        }
-        const GeomDetUnit* dum = gdu[partner_pos];
-        std::vector<const GeomDetUnit *> glued(2);
-        glued[0]=dum;
-        glued[1]=dus;
-        PlaneBuilderForGluedDet::ResultType plane = gluedplaneBuilder.plane(glued);
-        GluedGeomDet* gluedDet = new GluedGeomDet(&(*plane),dum,dus);
+      int partner_pos=-1;
+      for(u_int32_t jj=0;jj<gduId.size();jj++){
+  	  if(tTopo->PartnerDetId(gduId[i]) == gduId[jj]) {
+  	    partner_pos=jj;
+  	    break;
+  	  }
+      }
+
+      if(partner_pos==-1){
+	  throw cms::Exception("Configuration") <<"Module Type is Stereo or Lower but no partner detector found \n"
+					        <<"There is a problem on Tracker geometry configuration\n";
+      }
+
+      const GeomDetUnit* dus = gdu[i];
+      const GeomDetUnit* dum = gdu[partner_pos];
+      std::vector<const GeomDetUnit *> composed(2);
+      composed[0]=dum;
+      composed[1]=dus;
+      DetId composedDetId;
+      if(ModName.find("Stereo")!=std::string::npos){
+
+        PlaneBuilderForGluedDet::ResultType plane = gluedplaneBuilder.plane(composed);
+        composedDetId = tTopo->Glued(gduId[i]);
+        GluedGeomDet* gluedDet = new GluedGeomDet(&(*plane),dum,dus,composedDetId);
         tracker->addDet((GeomDet*) gluedDet);
-        tracker->addDetId(DetId(tTopo->Glued(gduId[i])));
-      }
+        tracker->addDetId(composedDetId);
 
-    } else {
+      } else if (ModName.find("Lower")!=std::string::npos){
 
-      SiStripDetId stripId(gduId[i]);
-      if(tTopo->isLower(gduId[i])){
-        int partner_pos=-1;
-        for(u_int32_t jj=0;jj<gduId.size();jj++){
-          if(tTopo->PartnerDetId(gduId[i]) == gduId[jj]) {
-            partner_pos=jj;
-            break;
-          }
-        }
-
-        if(partner_pos==-1){
-          throw cms::Exception("Configuration") <<"No partner detector found \n"
-                                                <<"There is a problem on Tracker geometry configuration\n";
-        }
-
-        const GeomDetUnit* dus = gdu[i];
-        const GeomDetUnit* dum = gdu[partner_pos];
-        std::vector<const GeomDetUnit *> stack(2);
-        stack[0]=dum;
-        stack[1]=dus;
         //FIXME::ERICA: the plane builder is still valid?
-        PlaneBuilderForGluedDet::ResultType plane = gluedplaneBuilder.plane(stack);
-        StackGeomDet* stackDet = new StackGeomDet(&(*plane),dum,dus);
+        PlaneBuilderForGluedDet::ResultType plane = gluedplaneBuilder.plane(composed);
+        composedDetId = tTopo->Stack(gduId[i]);
+        StackGeomDet* stackDet = new StackGeomDet(&(*plane),dum,dus,composedDetId);
         tracker->addDet((GeomDet*) stackDet);
-        tracker->addDetId(DetId(tTopo->Glued(gduId[i])));
-      }
+        tracker->addDetId(composedDetId);
+
+      } 
 
     }
   }

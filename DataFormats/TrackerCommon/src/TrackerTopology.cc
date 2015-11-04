@@ -90,13 +90,29 @@ uint32_t TrackerTopology::Glued(const DetId &id) const {
     if ( subdet == StripSubdetector::TEC )
       return tecGlued(id);
 
-    throw cms::Exception("Invalid DetId") << "Unsupported DetId in TrackerTopology::isUpper";
+    throw cms::Exception("Invalid DetId") << "Unsupported DetId in TrackerTopology::Glued";
     return 0;
 }
 
 uint32_t TrackerTopology::Stack(const DetId &id) const {
-  return Glued(id);
+
+    uint32_t subdet=id.subdetId();
+    if ( subdet == PixelSubdetector::PixelBarrel )
+      return 0;
+    if ( subdet == PixelSubdetector::PixelEndcap )
+      return 0;
+    if ( subdet == StripSubdetector::TIB )
+      return tibStack(id);
+    if ( subdet == StripSubdetector::TID )
+      return tidStack(id);
+    if ( subdet == StripSubdetector::TOB )
+      return tobStack(id);
+    if ( subdet == StripSubdetector::TEC )
+      return tecStack(id);
+
+    throw cms::Exception("Invalid DetId") << "Unsupported DetId in TrackerTopology::Stack";
 }
+
 bool TrackerTopology::isStereo(const DetId &id) const {
 
     uint32_t subdet=id.subdetId();
@@ -117,6 +133,25 @@ bool TrackerTopology::isStereo(const DetId &id) const {
     return 0;
 }
 
+bool TrackerTopology::isRPhi(const DetId &id) const {
+
+    uint32_t subdet=id.subdetId();
+    if ( subdet == PixelSubdetector::PixelBarrel )
+      return false;
+    if ( subdet == PixelSubdetector::PixelEndcap )
+      return false;
+    if ( subdet == StripSubdetector::TIB )
+      return tibRPhi(id)!=0;
+    if ( subdet == StripSubdetector::TID )
+      return tidRPhi(id)!=0;
+    if ( subdet == StripSubdetector::TOB )
+      return tobRPhi(id)!=0;
+    if ( subdet == StripSubdetector::TEC )
+      return tecRPhi(id)!=0;
+
+    throw cms::Exception("Invalid DetId") << "Unsupported DetId in TrackerTopology::isRPhi";
+    return 0;
+}
 bool TrackerTopology::isLower(const DetId &id) const {
 
     uint32_t subdet=id.subdetId();
@@ -174,7 +209,7 @@ uint32_t TrackerTopology::PartnerDetId(const DetId &id) const {
     if ( subdet == StripSubdetector::TEC )
       return tecPartnerDetId(id);
 
-    throw cms::Exception("Invalid DetId") << "Unsupported DetId in TrackerTopology::isUpper";
+    throw cms::Exception("Invalid DetId") << "Unsupported DetId in TrackerTopology::PartnerDetId";
     return 0;
 }
 
@@ -208,10 +243,13 @@ std::string TrackerTopology::print(DetId id) const {
     side = (theString[0] == 1 ) ? "-" : "+";
     part = (theString[1] == 1 ) ? "int" : "ext";
     std::string type;
-    type = (isStereo(id) == 0) ? "r-phi" : "stereo";
+    type = (isStereo(id)) ? "stereo" : type;
+    type = (isRPhi(id)) ? "r-phi" : type;
+    type = (isStereo(id) || isRPhi(id)) ? type+" glued": "module";
     std::string typeUpgrade;
     typeUpgrade = (isLower(id)) ? "lower" : typeUpgrade;
     typeUpgrade = (isUpper(id)) ? "upper" : typeUpgrade;
+    typeUpgrade = (isUpper(id) || isLower(id)) ? typeUpgrade+" stack": "module";
     strstr << "TIB" << side
 	   << " Layer " << theLayer << " " << part
 	   << " String " << theString[2];
@@ -230,10 +268,13 @@ std::string TrackerTopology::print(DetId id) const {
     side = (tidSide(id) == 1 ) ? "-" : "+";
     part = (theModule[0] == 1 ) ? "back" : "front";
     std::string type;
-    type = (isStereo(id) == 0) ? "r-phi" : "stereo";
+    type = (isStereo(id)) ? "stereo" : type;
+    type = (isRPhi(id)) ? "r-phi" : type;
+    type = (isStereo(id) || isRPhi(id)) ? type+" glued": "module";
     std::string typeUpgrade;
     typeUpgrade = (isLower(id)) ? "lower" : typeUpgrade;
     typeUpgrade = (isUpper(id)) ? "upper" : typeUpgrade;
+    typeUpgrade = (isUpper(id) || isLower(id)) ? typeUpgrade+" stack": "module";
     strstr << "TID" << side
 	   << " Disk " << theDisk
 	   << " Ring " << theRing << " " << part;
@@ -251,10 +292,13 @@ std::string TrackerTopology::print(DetId id) const {
     std::string part;
     side = (theRod[0] == 1 ) ? "-" : "+";
     std::string type;
-    type = (isStereo(id) == 0) ? "r-phi" : "stereo";
+    type = (isStereo(id)) ? "stereo" : type;
+    type = (isRPhi(id)) ? "r-phi" : type;
+    type = (isStereo(id) || isRPhi(id)) ? type+" glued": "module";
     std::string typeUpgrade;
     typeUpgrade = (isLower(id)) ? "lower" : typeUpgrade;
     typeUpgrade = (isUpper(id)) ? "upper" : typeUpgrade;
+    typeUpgrade = (isUpper(id) || isLower(id)) ? typeUpgrade+" stack": "module";
     strstr << "TOB" << side
 	   << " Layer " << theLayer
 	   << " Rod " << theRod[1];
@@ -274,10 +318,13 @@ std::string TrackerTopology::print(DetId id) const {
     side  = (tecSide(id) == 1 ) ? "-" : "+";
     petal = (thePetal[0] == 1 ) ? "back" : "front";
     std::string type;
-    type = (isStereo(id) == 0) ? "r-phi" : "stereo";
+    type = (isStereo(id)) ? "stereo" : type;
+    type = (isRPhi(id)) ? "r-phi" : type;
+    type = (isStereo(id) || isRPhi(id)) ? type+" glued": "module";
     std::string typeUpgrade;
     typeUpgrade = (isLower(id)) ? "lower" : typeUpgrade;
     typeUpgrade = (isUpper(id)) ? "upper" : typeUpgrade;
+    typeUpgrade = (isUpper(id) || isLower(id)) ? typeUpgrade+" stack": "module";
     strstr << "TEC" << side
 	   << " Wheel " << theWheel
 	   << " Petal " << thePetal[1] << " " << petal
