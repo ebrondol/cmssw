@@ -46,23 +46,11 @@ class SiStripDetId : public DetId {
   /** Returns enumerated type specifying sub-detector. */
   inline ModuleGeometry moduleGeometry() const;
 
-  /** A non-zero value means a module composed by two sub-modules, null means a single module. */
-  inline uint32_t composed() const;
-
   /** A non-zero value means a glued module, null means not glued. */
   inline uint32_t glued() const;
   
   /** A non-zero value means a stereo module, null means not stereo. */
   inline uint32_t stereo() const;
-
-  /** A non-zero value means a stack module, null means not stack. */
-  inline uint32_t stack() const;
-
-  /** A non-zero value means an lower module inside a stack. */
-  inline uint32_t lower() const;
-
-  /** A non-zero value means an upper module inside a stack. */
-  inline uint32_t upper() const;
 
   /** Returns DetId of the partner module if glued, otherwise null. */
   inline uint32_t partnerDetId() const;
@@ -163,7 +151,7 @@ SiStripDetId::ModuleGeometry SiStripDetId::moduleGeometry() const {
   }
 }
 
-uint32_t SiStripDetId::composed() const {
+uint32_t SiStripDetId::glued() const {
   if ( ((id_>>sterStartBit_) & sterMask_ ) == 1 ) {
     return ( id_ - 1 );
   } else if ( ((id_>>sterStartBit_) & sterMask_ ) == 2 ) {
@@ -171,32 +159,12 @@ uint32_t SiStripDetId::composed() const {
   } else { return 0; }
 }
  
-uint32_t SiStripDetId::glued() const {
-  return composed();
-}
-
 uint32_t SiStripDetId::stereo() const {
   if ( ((id_>>sterStartBit_ ) & sterMask_ ) == 1 ) {
     return ( (id_>>sterStartBit_) & sterMask_ );
   } else { return 0; }
 }
  
-uint32_t SiStripDetId::stack() const {
-  return composed();
-}
-
-uint32_t SiStripDetId::lower() const {
-  if ( ((id_>>sterStartBit_ ) & sterMask_ ) == 1 ) {
-    return ( (id_>>sterStartBit_) & sterMask_ );
-  } else { return 0; }
-}
-
-uint32_t SiStripDetId::upper() const {
-  if ( ((id_>>sterStartBit_ ) & sterMask_ ) == 2 ) {
-    return ( (id_>>sterStartBit_) & sterMask_ );
-  } else { return 0; }
-}
-
 uint32_t SiStripDetId::partnerDetId() const {
   if ( ((id_>>sterStartBit_) & sterMask_ ) == 1 ) {
     return ( id_ + 1 );
