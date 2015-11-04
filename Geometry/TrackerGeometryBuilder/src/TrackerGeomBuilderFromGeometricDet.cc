@@ -251,8 +251,9 @@ void TrackerGeomBuilderFromGeometricDet::buildGeomDet(TrackerGeometry* tracker, 
     tracker->addDetId(gduId[i]);
     string ModName = gdu[i]->type().name();
 
-    if( ModName.find("Stereo")!=std::string::npos || 
-        ModName.find("Lower")!=std::string::npos) {
+    if( (ModName.find("Ster")!=std::string::npos || 
+         ModName.find("Lower")!=std::string::npos) && 
+        (tTopo->Glued(gduId[i])!=0 || tTopo->Stack(gduId[i])!=0 )) {
 
       int partner_pos=-1;
       for(u_int32_t jj=0;jj<gduId.size();jj++){
@@ -273,7 +274,7 @@ void TrackerGeomBuilderFromGeometricDet::buildGeomDet(TrackerGeometry* tracker, 
       composed[0]=dum;
       composed[1]=dus;
       DetId composedDetId;
-      if(ModName.find("Stereo")!=std::string::npos){
+      if(ModName.find("Ster")!=std::string::npos){
 
         PlaneBuilderForGluedDet::ResultType plane = gluedplaneBuilder.plane(composed);
         composedDetId = tTopo->Glued(gduId[i]);
