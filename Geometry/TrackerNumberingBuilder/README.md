@@ -122,7 +122,7 @@ Subdetectors 3 to 6 are as for the Run 1 detector since the SiStrip Tracker is t
 The configuration names for this detid schema are `trackerNumbering2017Geometry_cfi` for `TrackerGeometricDetESModule` and `trackerTopology2017Constants_cfi` for `TrackerTopology`
 
 ### Phase 2 Upgrade Detector DetId schema
-The phase 2 detector DetId schema is identical to the one of the phase 1 detector for the inner pixel detector while for the outer tracker subdetector 5, for the barrel, and subdetector 4, for the endcap, are used. In some cases the name of the `TrackerTopology` methods is not so meaningful.
+The phase 2 detector DetId schema is identical to the one of the phase 1 detector for the inner pixel detector while for the outer tracker subdetector 5, for the barrel, and subdetector 4, for the endcap, are used. In some cases the name of the `TrackerTopology` methods is not so meaningful. In particular, for the Outer Tracker, the methods DoubleSided is not implemented, firstly because there is no need, secondly because it is not possible, just looking at the DetId and without something hardcoded, to understand if the module is single or double. This is also valid for Run I and Phase 1.
  
 * Subdetector 1: (`DetId::subDetId() == PixelSubdetector::PixelBarrel`): Phase1 Pixel Barrel
 
