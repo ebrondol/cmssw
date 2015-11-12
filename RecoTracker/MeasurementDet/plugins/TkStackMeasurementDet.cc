@@ -35,5 +35,23 @@ TkStackMeasurementDet::recHits( const TrajectoryStateOnSurface& ts) const
 bool TkStackMeasurementDet::measurements( const TrajectoryStateOnSurface& stateOnThisDet,
                                           const MeasurementEstimator& est,
                                           TempMeasurements & result) const {
+  std::cout << "\tTkStackMeasurementDet::measurements" << std::endl;
+
+  //here there is the possibility to add if(isActive)
+
+  auto oldSize = result.size();
+  MeasurementDet::RecHitContainer && allHits = recHits(stateOnThisDet);
+
+  for (auto && hit : allHits) {
+    std::cout << "\tTkStackMeasurementDet::newhit" << hit->globalPosition() << std::endl;
+/*
+    std::pair<bool,double> diffEst = est.estimate( stateOnThisDet, *hit);
+    if ( diffEst.first)
+      result.add(std::move(hit), diffEst.second);
+*/
+  }
+  if (result.size()>oldSize) return true;
+
+  //here there is the possibility to add hasBadComponents
   return true;
 }
