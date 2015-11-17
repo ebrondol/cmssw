@@ -218,19 +218,31 @@ std::string TrackerTopology::print(DetId id) const {
   std::stringstream strstr;
 
   if ( subdet == PixelSubdetector::PixelBarrel ) {
-    strstr  << "(PixelBarrel " 
-	    << pxbLayer(id) << ',' 
-	    << pxbLadder(id) << ',' 
-	    << pxbModule(id) << ')'; 
+    unsigned int theLayer  = pxbLayer(id);
+    unsigned int theLadder = pxbLadder(id);
+    unsigned int theModule = pxbModule(id);
+    strstr << "PixelBarrel" 
+	   << " Layer " << theLayer
+	   << " Ladder " << theLadder
+           << " Module " << theModule ;
+    strstr << " (" << id.rawId() << ")";
     return strstr.str();
   }
 
   if ( subdet == PixelSubdetector::PixelEndcap ) {
-    strstr << "(PixelEndcap " 
-	   << pxfDisk(id) << ',' 
-	   << pxfBlade(id)  << ',' 
-	   << pxfPanel(id)  << ',' 
-	   << pxfModule(id)   << ')'; 
+    unsigned int theSide   = pxfSide(id);
+    unsigned int theDisk   = pxfDisk(id);
+    unsigned int theBlade  = pxfBlade(id);
+    unsigned int thePanel  = pxfPanel(id);
+    unsigned int theModule = pxfModule(id);
+    std::string side  = (pxfSide(id) == 1 ) ? "-" : "+";
+    strstr << "PixelEndcap" 
+           << " Side   " << theSide << side
+	   << " Disk   " << theDisk
+	   << " Blade  " << theBlade
+	   << " Panel  " << thePanel
+           << " Module " << theModule ;
+    strstr << " (" << id.rawId() << ")";
     return strstr.str();
   }
 
