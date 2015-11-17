@@ -128,8 +128,8 @@ if options.triggerPath=="*":
 #--------------------------------------
 #from DPGAnalysis.SiStripTools.occupancyplotsselections_cff import *
 #from DPGAnalysis.SiStripTools.occupancyplotsselections_simplified_cff import *
-from DPGAnalysis.SiStripTools.occupancyplotsselections_phase2_cff import *
-#from DPGAnalysis.SiStripTools.occupancyplotsselections_phase2_newdetlabel_cff import *
+#from DPGAnalysis.SiStripTools.occupancyplotsselections_phase2_cff import *
+from DPGAnalysis.SiStripTools.occupancyplotsselections_phase2_newdetlabel_cff import *
 
 #process.ssclusmultprod = cms.EDProducer("SiStripClusterMultiplicityProducer",
 #                                        clusterdigiCollection = cms.InputTag("siStripClusters"),
