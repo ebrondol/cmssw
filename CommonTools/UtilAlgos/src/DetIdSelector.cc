@@ -275,7 +275,6 @@ bool DetIdSelector::isSelectedByWordsTIB(std::string label, const DetId& detid, 
   }
 
   pos = label.find("Layer");                            //LayerXX_
-  //LogTrace("OccupancyPlots") << "pos Layer:" << pos;
   if(pos>=0){
     //LogTrace("OccupancyPlots") << "the label contains layer!!";
     isSelected = isSame(label, "Layer", tTopo->tibLayer(detid.rawId()), 2);
@@ -283,7 +282,6 @@ bool DetIdSelector::isSelectedByWordsTIB(std::string label, const DetId& detid, 
   }
 
   pos = label.find("Side");                            //SideX_
-  //LogTrace("OccupancyPlots") << "pos Side:" << pos;
   if(pos>=0){
     //LogTrace("OccupancyPlots") << "the label contains Side!!";
     isSelected = isSame(label, "Side", tTopo->tibSide(detid.rawId()), 1);
@@ -291,7 +289,6 @@ bool DetIdSelector::isSelectedByWordsTIB(std::string label, const DetId& detid, 
   }
 
   pos = label.find("Order");                           //OrderX_
-  //LogTrace("Occupancidlots") << "pos Order:" << pos;
   if(pos>=0){
     //LogTrace("OccupancyPlots") << "the label contains Order!!";
     isSelected = isSame(label, "Order", tTopo->tibOrder(detid.rawId()), 1);
@@ -299,19 +296,53 @@ bool DetIdSelector::isSelectedByWordsTIB(std::string label, const DetId& detid, 
   }
 
   pos = label.find("Module");                           //ModuleXXX_
-  //LogTrace("OccupancyPlots") << "pos Module:" << pos;
   if(pos>=0){
     //LogTrace("OccupancyPlots") << "the label contains Module!!";
     isSelected = isSame(label, "Module", tTopo->tibModule(detid.rawId()), 3);
     if (!isSelected) return false;
   }
-
-  pos = label.find("Stereo");                           //StereoX_
-  //LogTrace("OccupancyPlots") << "pos Stereo:" << pos;
+  pos = label.find("Stereo");                           //Stereo
   if(pos>=0){
     //LogTrace("OccupancyPlots") << "the label contains Stereo!!";
-    isSelected = isSame(label, "Stereo", tTopo->tibStereo(detid.rawId()), 1);
-    if (!isSelected) return false;
+    if(tTopo->isStereo(detid)) {
+      //LogTrace("OccupancyPlots") << "the module is Stereo!!";
+      isSelected = true;
+    } else {
+      return false;
+    }
+  }
+
+  pos = label.find("RPhi");                           //RPhi
+  if(pos>=0){
+    //LogTrace("OccupancyPlots") << "the label contains RPhi!!";
+    if(tTopo->isRPhi(detid)) {
+      //LogTrace("OccupancyPlots") << "the module is RPhi!";
+      isSelected = true;
+    } else {
+      return false;
+    }
+  }
+
+  pos = label.find("Upper");                           //Upper
+  if(pos>=0){
+    //LogTrace("OccupancyPlots") << "the label contains Upper!!";
+    if(tTopo->isUpper(detid)){
+      //LogTrace("OccupancyPlots") << "the module is Upper!!";
+      isSelected = true;
+    } else {
+      return false;
+    }
+  }
+
+  pos = label.find("Lower");                           //Lower
+  if(pos>=0){
+    //LogTrace("OccupancyPlots") << "the label contains Lower!!";
+    if(tTopo->isLower(detid)){
+      //LogTrace("OccupancyPlots") << "the module is Lower!!";
+      isSelected = true;
+    } else {
+      return false;
+    }
   }
 
   return isSelected;
@@ -326,10 +357,12 @@ bool DetIdSelector::isSelectedByWordsTOB(std::string label, const DetId& detid, 
   if(subdet == StripSubdetector::TOB){          //TOB_
     //LogTrace("OccupancyPlots") << "the module is TOB!!";
     isSelected = true;
+  } else {
+    return false;
   }
 
+
   pos = label.find("Layer");                            //LayerXX_
-  //LogTrace("OccupancyPlots") << "pos Layer:" << pos;
   if(pos>=0){
     //LogTrace("OccupancyPlots") << "the label contains layer!!";
     isSelected = isSame(label, "Layer", tTopo->tobLayer(detid.rawId()), 2);
@@ -337,7 +370,6 @@ bool DetIdSelector::isSelectedByWordsTOB(std::string label, const DetId& detid, 
   }
 
   pos = label.find("Rod");                           //RodXX_
-  //LogTrace("OccupancyPlots") << "pos Rod:" << pos;
   if(pos>=0){
     //LogTrace("OccupancyPlots") << "the label contains ladder!!";
     isSelected = isSame(label, "Rod", tTopo->tobRod(detid.rawId()), 2);
@@ -345,19 +377,54 @@ bool DetIdSelector::isSelectedByWordsTOB(std::string label, const DetId& detid, 
   }
 
   pos = label.find("Module");                           //ModuleXXX_
-  //LogTrace("OccupancyPlots") << "pos Module:" << pos;
   if(pos>=0){
     //LogTrace("OccupancyPlots") << "the label contains Module!!";
     isSelected = isSame(label, "Module", tTopo->tobModule(detid.rawId()), 3);
     if (!isSelected) return false;
   }
 
-  pos = label.find("Stereo");                           //StereoX_
-  //LogTrace("OccupancyPlots") << "pos Stereo:" << pos;
+  pos = label.find("Stereo");                           //Stereo
   if(pos>=0){
     //LogTrace("OccupancyPlots") << "the label contains Stereo!!";
-    isSelected = isSame(label, "Stereo", tTopo->tobStereo(detid.rawId()), 1);
-    if (!isSelected) return false;
+    if(tTopo->isStereo(detid)) {
+      //LogTrace("OccupancyPlots") << "the module is Stereo!!";
+      isSelected = true;
+    } else {
+      return false;
+    }
+  }
+
+  pos = label.find("RPhi");                           //RPhi
+  if(pos>=0){
+    //LogTrace("OccupancyPlots") << "the label contains RPhi!!";
+    if(tTopo->isRPhi(detid)) {
+      //LogTrace("OccupancyPlots") << "the module is RPhi!";
+      isSelected = true;
+    } else { 
+      return false;
+    }
+  }
+
+  pos = label.find("Upper");                           //Upper
+  if(pos>=0){
+    //LogTrace("OccupancyPlots") << "the label contains Upper!!";
+    if(tTopo->isUpper(detid)){
+      //LogTrace("OccupancyPlots") << "the module is Upper!!";
+      isSelected = true;
+    } else {
+      return false;
+    }
+  }
+
+  pos = label.find("Lower");                           //Lower
+  if(pos>=0){
+    //LogTrace("OccupancyPlots") << "the label contains Lower!!";
+    if(tTopo->isLower(detid)){
+      //LogTrace("OccupancyPlots") << "the module is Lower!!";
+      isSelected = true;
+    } else {
+      return false;
+    }
   }
 
   return isSelected;
@@ -377,7 +444,6 @@ bool DetIdSelector::isSelectedByWordsTID(std::string label, const DetId& detid, 
   }
 
   pos = label.find("Side");                            //SideX_
-  //LogTrace("OccupancyPlots") << "pos Side:" << pos;
   if(pos>=0){
     //LogTrace("OccupancyPlots") << "the label contains Side!!";
     isSelected = isSame(label, "Side", tTopo->tidSide(detid.rawId()), 1);
@@ -385,7 +451,6 @@ bool DetIdSelector::isSelectedByWordsTID(std::string label, const DetId& detid, 
   }
 
   pos = label.find("Wheel");                            //WheelXX_
-  //LogTrace("OccupancyPlots") << "pos Wheel:" << pos;
   if(pos>=0){
     //LogTrace("OccupancyPlots") << "the label contains Wheel!!";
     isSelected = isSame(label, "Wheel", tTopo->tidWheel(detid.rawId()), 2);
@@ -393,7 +458,6 @@ bool DetIdSelector::isSelectedByWordsTID(std::string label, const DetId& detid, 
   }
 
   pos = label.find("Order");                            //OrderX_
-  //LogTrace("OccupancyPlots") << "pos Order:" << pos;
   if(pos>=0){
     //LogTrace("OccupancyPlots") << "the label contains Order!!";
     isSelected = isSame(label, "Side", tTopo->tidOrder(detid.rawId()), 1);
@@ -401,7 +465,6 @@ bool DetIdSelector::isSelectedByWordsTID(std::string label, const DetId& detid, 
   }
 
   pos = label.find("Ring");                           //RingXX_
-  //LogTrace("OccupancyPlots") << "pos Ring:" << pos;
   if(pos>=0){
     //LogTrace("OccupancyPlots") << "the label contains Ring!!";
     isSelected = isSame(label, "Ring", tTopo->tidRing(detid.rawId()), 2);
@@ -409,19 +472,54 @@ bool DetIdSelector::isSelectedByWordsTID(std::string label, const DetId& detid, 
   }
 
   pos = label.find("Module");                           //ModuleXXX_
-  //LogTrace("OccupancyPlots") << "pos Module:" << pos;
   if(pos>=0){
     //LogTrace("OccupancyPlots") << "the label contains Module!!";
     isSelected = isSame(label, "Module", tTopo->tidModule(detid.rawId()), 3);
     if (!isSelected) return false;
   }
 
-  pos = label.find("Stereo");                           //StereoX_
-  //LogTrace("OccupancyPlots") << "pos Stereo:" << pos;
+  pos = label.find("Stereo");                           //Stereo
   if(pos>=0){
     //LogTrace("OccupancyPlots") << "the label contains Stereo!!";
-    isSelected = isSame(label, "Stereo", tTopo->tidStereo(detid.rawId()), 1);
-    if (!isSelected) return false;
+    if(tTopo->isStereo(detid)) {
+      //LogTrace("OccupancyPlots") << "the module is Stereo!!";
+      isSelected = true;
+    } else {
+      return false;
+    }
+  }
+
+  pos = label.find("RPhi");                           //RPhi
+  if(pos>=0){
+    //LogTrace("OccupancyPlots") << "the label contains RPhi!!";
+    if(tTopo->isRPhi(detid)) {
+      //LogTrace("OccupancyPlots") << "the module is RPhi!";
+      isSelected = true;
+    } else {
+      return false;
+    }
+  }
+
+  pos = label.find("Upper");                           //Upper
+  if(pos>=0){
+    //LogTrace("OccupancyPlots") << "the label contains Upper!!";
+    if(tTopo->isUpper(detid)){
+      //LogTrace("OccupancyPlots") << "the module is Upper!!";
+      isSelected = true;
+    } else {
+      return false;
+    }
+  }
+
+  pos = label.find("Lower");                           //Lower
+  if(pos>=0){
+    //LogTrace("OccupancyPlots") << "the label contains Lower!!";
+    if(tTopo->isLower(detid)){
+      //LogTrace("OccupancyPlots") << "the module is Lower!!";
+      isSelected = true;
+    } else {
+      return false;
+    }
   }
 
   return isSelected;
@@ -441,7 +539,6 @@ bool DetIdSelector::isSelectedByWordsTEC(std::string label, const DetId& detid, 
   }
 
   pos = label.find("Side");                            //SideX_
-  //LogTrace("OccupancyPlots") << "pos Side:" << pos;
   if(pos>=0){
     //LogTrace("OccupancyPlots") << "the label contains Side!!";
     isSelected = isSame(label, "Side", tTopo->tecSide(detid.rawId()), 1);
@@ -449,7 +546,6 @@ bool DetIdSelector::isSelectedByWordsTEC(std::string label, const DetId& detid, 
   }
 
   pos = label.find("Wheel");                            //WheelXX_
-  //LogTrace("OccupancyPlots") << "pos Wheel:" << pos;
   if(pos>=0){
     //LogTrace("OccupancyPlots") << "the label contains Wheel!!";
     isSelected = isSame(label, "Wheel", tTopo->tecWheel(detid.rawId()), 2);
@@ -457,7 +553,6 @@ bool DetIdSelector::isSelectedByWordsTEC(std::string label, const DetId& detid, 
   }
 
   pos = label.find("Order");                            //OrderX_
-  //LogTrace("OccupancyPlots") << "pos Order:" << pos;
   if(pos>=0){
     //LogTrace("OccupancyPlots") << "the label contains Order!!";
     isSelected = isSame(label, "Side", tTopo->tecOrder(detid.rawId()), 1);
@@ -466,7 +561,6 @@ bool DetIdSelector::isSelectedByWordsTEC(std::string label, const DetId& detid, 
 
 
   pos = label.find("Ring");                            //RingXX_
-  //LogTrace("OccupancyPlots") << "pos Ring:" << pos;
   if(pos>=0){
     //LogTrace("OccupancyPlots") << "the label contains layer!!";
     isSelected = isSame(label, "Ring", tTopo->tecRing(detid.rawId()), 2);
@@ -474,7 +568,6 @@ bool DetIdSelector::isSelectedByWordsTEC(std::string label, const DetId& detid, 
   }
 
   pos = label.find("Petal");                           //PetalXX_
-  //LogTrace("OccupancyPlots") << "pos Petal:" << pos;
   if(pos>=0){
     //LogTrace("OccupancyPlots") << "the label contains ladder!!";
     isSelected = isSame(label, "Petal", tTopo->tecPetalNumber(detid.rawId()), 2);
@@ -482,19 +575,54 @@ bool DetIdSelector::isSelectedByWordsTEC(std::string label, const DetId& detid, 
   }
 
   pos = label.find("Module");                           //ModuleXXX_
-  //LogTrace("OccupancyPlots") << "pos Module:" << pos;
   if(pos>=0){
     //LogTrace("OccupancyPlots") << "the label contains Module!!";
     isSelected = isSame(label, "Module", tTopo->tecModule(detid.rawId()), 3);
     if (!isSelected) return false;
   }
 
-  pos = label.find("Stereo");                           //StereoX_
-  //LogTrace("OccupancyPlots") << "pos Stereo:" << pos;
+  pos = label.find("Stereo");                           //Stereo
   if(pos>=0){
     //LogTrace("OccupancyPlots") << "the label contains Stereo!!";
-    isSelected = isSame(label, "Stereo", tTopo->tecStereo(detid.rawId()), 1);
-    if (!isSelected) return false;
+    if(tTopo->isStereo(detid)) {
+      //LogTrace("OccupancyPlots") << "the module is Stereo!!";
+      isSelected = true;
+    } else {
+      return false;
+    }
+  }
+
+  pos = label.find("RPhi");                           //RPhi
+  if(pos>=0){
+    //LogTrace("OccupancyPlots") << "the label contains RPhi!!";
+    if(tTopo->isRPhi(detid)) {
+      //LogTrace("OccupancyPlots") << "the module is RPhi!";
+      isSelected = true;
+    } else {
+      return false;
+    }
+  }
+
+  pos = label.find("Upper");                           //Upper
+  if(pos>=0){
+    //LogTrace("OccupancyPlots") << "the label contains Upper!!";
+    if(tTopo->isUpper(detid)){
+      //LogTrace("OccupancyPlots") << "the module is Upper!!";
+      isSelected = true;
+    } else {
+      return false;
+    }
+  }
+
+  pos = label.find("Lower");                           //Lower
+  if(pos>=0){
+    //LogTrace("OccupancyPlots") << "the label contains Lower!!";
+    if(tTopo->isLower(detid)){
+      //LogTrace("OccupancyPlots") << "the module is Lower!!";
+      isSelected = true;
+    } else {
+      return false;
+    }
   }
 
   return isSelected;

@@ -301,7 +301,7 @@ OccupancyPlots::endRun(const edm::Run& iRun, const edm::EventSetup& iSetup) {
     if(det->det()!=DetId::Tracker) continue;
 
     edm::LogInfo("DetIdFromGeometry") << det->rawId();
-    edm::LogInfo("OccupancyPlots") << tTopo->print(det->rawId());
+    edm::LogInfo("OccupancyPlots") << ">>>>>" << tTopo->print(det->rawId());
 
     GlobalPoint position = trkgeo->idToDet(*det)->toGlobal(center);
     GlobalPoint zpos = trkgeo->idToDet(*det)->toGlobal(locz);
@@ -323,7 +323,7 @@ OccupancyPlots::endRun(const edm::Run& iRun, const edm::EventSetup& iSetup) {
      for(std::map<unsigned int,DetIdSelector>::const_iterator sel=m_wantedsubdets.begin();sel!=m_wantedsubdets.end();++sel) {
 
        if(sel->second.isSelected(*det)) {
-         edm::LogInfo("OccupancyPlots") << sel->first << " is selected with bits";
+         LogTrace("OccupancyPlots") << sel->first << " is selected with bits";  
 	 // average positions
 	 if(m_averadius && *m_averadius) (*m_averadius)->Fill(sel->first,position.perp());
 	 if(m_avez && *m_avez) (*m_avez)->Fill(sel->first,position.z());
@@ -338,6 +338,9 @@ OccupancyPlots::endRun(const edm::Run& iRun, const edm::EventSetup& iSetup) {
 	 if(m_yavedr && *m_yavedr) (*m_yavedr)->Fill(sel->first,dydr);
 	 if(m_yavedz && *m_yavedz) (*m_yavedz)->Fill(sel->first,dy.z());
 	 if(m_yavedrphi && *m_yavedrphi) (*m_yavedrphi)->Fill(sel->first,dydrphi);
+       
+       } else {
+         LogTrace("OccupancyPlots") << sel->first << " is NOT selected with bits";
        }
      }
 
@@ -345,7 +348,7 @@ OccupancyPlots::endRun(const edm::Run& iRun, const edm::EventSetup& iSetup) {
      for(std::map<unsigned int,DetIdSelector>::const_iterator sel=m_wantedsubdetslbl.begin();sel!=m_wantedsubdetslbl.end();++sel) {
 
        if(sel->second.isSelectedByWords(*det, tTopo)) {
-         edm::LogInfo("OccupancyPlots") << sel->first << "is selected with labels";
+         LogTrace("OccupancyPlots") << sel->first << " is selected with labels";
          // average positions
          if(m2_averadius && *m2_averadius) (*m2_averadius)->Fill(sel->first,position.perp());
          if(m2_avez && *m2_avez) (*m2_avez)->Fill(sel->first,position.z());
@@ -362,7 +365,7 @@ OccupancyPlots::endRun(const edm::Run& iRun, const edm::EventSetup& iSetup) {
          if(m2_yavedrphi && *m2_yavedrphi) (*m2_yavedrphi)->Fill(sel->first,dydrphi); 
  
        } else {
-         edm::LogInfo("OccupancyPlots") << "is NOT selected";
+         LogTrace("OccupancyPlots") << sel->first << " is NOT selected with labels";
        }
          
      }
@@ -371,6 +374,7 @@ OccupancyPlots::endRun(const edm::Run& iRun, const edm::EventSetup& iSetup) {
       edm::LogError("OccupancyPlots") << "qui abbiamo fatto merda!\n"  
                       << (*m_averadius)->Integral() << " dets selected with bits"
                       << (*m2_averadius)->Integral() << " dets selected with label";
+      return;
     }
 
   }
