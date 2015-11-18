@@ -272,7 +272,8 @@ std::string TrackerTopology::print(DetId id) const {
   }
 
   if ( subdet == StripSubdetector::TID ) {
-    unsigned int         theDisk   = tidWheel(id);
+    unsigned int 	 theSide   = tidSide(id);
+    unsigned int         theWheel  = tidWheel(id);
     unsigned int         theRing   = tidRing(id);
     std::vector<unsigned int> theModule = tidModuleInfo(id);
     std::string side;
@@ -287,8 +288,9 @@ std::string TrackerTopology::print(DetId id) const {
     typeUpgrade = (isLower(id)) ? "lower" : typeUpgrade;
     typeUpgrade = (isUpper(id)) ? "upper" : typeUpgrade;
     typeUpgrade = (isUpper(id) || isLower(id)) ? typeUpgrade+" stack": "module";
-    strstr << "TID" << side
-	   << " Disk " << theDisk
+    strstr << "TID" 
+           << " Side   " << theSide << side
+	   << " Wheel " << theWheel
 	   << " Ring " << theRing << " " << part;
     strstr << " Module for phase0 " << theModule[1] << " " << type;
     strstr << " Module for phase2 " << theModule[1] << " " << typeUpgrade;
@@ -321,6 +323,7 @@ std::string TrackerTopology::print(DetId id) const {
   }
 
   if ( subdet == StripSubdetector::TEC ) {
+    unsigned int 	      theSide   = tecSide(id);
     unsigned int              theWheel  = tecWheel(id);
     unsigned int              theModule = tecModule(id);
     std::vector<unsigned int> thePetal  = tecPetalInfo(id);
@@ -337,7 +340,8 @@ std::string TrackerTopology::print(DetId id) const {
     typeUpgrade = (isLower(id)) ? "lower" : typeUpgrade;
     typeUpgrade = (isUpper(id)) ? "upper" : typeUpgrade;
     typeUpgrade = (isUpper(id) || isLower(id)) ? typeUpgrade+" stack": "module";
-    strstr << "TEC" << side
+    strstr << "TEC" 
+           << " Side   " << theSide << side
 	   << " Wheel " << theWheel
 	   << " Petal " << thePetal[1] << " " << petal
 	   << " Ring " << theRing;

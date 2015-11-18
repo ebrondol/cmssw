@@ -314,7 +314,7 @@ bool DetIdSelector::isSelectedByWordsTIB(std::string label, const DetId& detid, 
   LogTrace("Occupancidlots") << "pos Order:" << pos;
   if(pos>=0){
     LogTrace("OccupancyPlots") << "the label contains Order!!";
-    isSelected = isSame(label, "Side", tTopo->tibOrder(detid.rawId()), 1);
+    isSelected = isSame(label, "Order", tTopo->tibOrder(detid.rawId()), 1);
     if (!isSelected) return false;
   } else {
       LogTrace("OccupancyPlots") << "the label does NOT contain Order -> Gotta Catch 'Em All!!";
@@ -417,6 +417,7 @@ bool DetIdSelector::isSelectedByWordsTID(std::string label, const DetId& detid, 
   if(pos>=0){
     LogTrace("OccupancyPlots") << "the label contains Side!!";
     isSelected = isSame(label, "Side", tTopo->tidSide(detid.rawId()), 1);
+    if (isSelected) LogTrace("OccupancyPlots") << "the module is same Side!!";
     if (!isSelected) return false;
   } else {
       LogTrace("OccupancyPlots") << "the label does NOT contain Side -> Gotta Catch 'Em All!!";
