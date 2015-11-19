@@ -69,6 +69,7 @@ public:
   virtual  void update( const edm::Event&) const;
   void updatePixels( const edm::Event&) const;
   void updateStrips( const edm::Event&) const;
+  void updateStacks( const edm::Event& event) const;
 
   const TrackingGeometry* geomTracker() const { return theTrackerGeom;}
 

@@ -18,6 +18,7 @@
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
 #include "DataFormats/SiStripCluster/interface/SiStripClusterCollection.h"
+#include "DataFormats/Phase2TrackerCluster/interface/Phase2TrackerCluster1D.h"
 #include "DataFormats/Common/interface/ContainerMask.h"
 
 #include "TrackingTools/MeasurementDet/interface/MeasurementDetException.h"
@@ -283,6 +284,7 @@ void MeasurementTrackerImpl::update( const edm::Event& event) const
 {
   updatePixels(event);
   updateStrips(event);
+  updateStacks(event);
   
   
 /*
@@ -568,6 +570,26 @@ void MeasurementTrackerImpl::updateStrips( const edm::Event& event) const
   }//end of block for updating with regional clusters 
 }
 
+void MeasurementTrackerImpl::updateStacks( const edm::Event& event) const
+{
+
+  std::string Phase2TrackerCluster1DProducer = pset_.getParameter<std::string>("Phase2TrackerCluster1DProducer");
+  edm::Handle< edmNew::DetSetVector<Phase2TrackerCluster1D> >  ClustersPhase2Handle;
+  event.getByLabel( Phase2TrackerCluster1DProducer, ClustersPhase2Handle);
+  const  edmNew::DetSetVector<Phase2TrackerCluster1D>* ClustersPhase2Collection = ClustersPhase2Handle.product();
+
+  if(ClustersPhase2Collection->empty()) {
+    std::cout << "MeasurementTrackerImpl::updateStacks: ClustersPhase2Collection empty! " << std::endl;
+    for (std::vector<TkStackMeasurementDet>::const_iterator i=theStackDets.begin();i!=theStackDets.end(); i++) {
+//      (*i).setActiveThisEvent(false);
+    }
+  } else {
+    std::cout << "MeasurementTrackerImpl::updateStacks: ClustersPhase2Collection size: " << ClustersPhase2Collection->dataSize() << std::endl;
+  }
+
+
+
+}
 
 TkStripMeasurementDet * MeasurementTrackerImpl::concreteDetUpdatable(DetId id) const {
 #ifdef EDM_DEBUG //or similar

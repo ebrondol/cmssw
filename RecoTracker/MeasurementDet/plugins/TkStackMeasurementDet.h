@@ -7,13 +7,19 @@
 #include "Geometry/TrackerGeometryBuilder/interface/StackGeomDet.h"
 #include "RecoLocalTracker/ClusterParameterEstimator/interface/PixelClusterParameterEstimator.h"
 
-#include "FWCore/Utilities/interface/Visibility.h"
+#include "DataFormats/Common/interface/DetSetVector.h"
+#include "DataFormats/Phase2TrackerCluster/interface/Phase2TrackerCluster1D.h"
 
 // FIXME::TkStackMeasurementDet in this moment is just a prototype: to be fixed soon!
 
 class TkStackMeasurementDet GCC11_FINAL : public MeasurementDet {
 
  public:
+
+  typedef edm::Ref<edmNew::DetSetVector<Phase2TrackerCluster1D>, Phase2TrackerCluster1D> Phase2TrackerCluster1DRef;
+  typedef edmNew::DetSet<Phase2TrackerCluster1D> detset;
+  typedef detset::const_iterator const_iterator;
+
 
   TkStackMeasurementDet( const StackGeomDet* gdet, const PixelClusterParameterEstimator* cpe);
   void init(const MeasurementDet* lowerDet,
@@ -29,9 +35,11 @@ class TkStackMeasurementDet GCC11_FINAL : public MeasurementDet {
 
   const TkPixelMeasurementDet* lowerDet() const{ return theInnerDet;}
   const TkPixelMeasurementDet* upperDet() const{ return theOuterDet;}
-
-  /// return TRUE if both lower and upper components are active
-  bool isActive() const {return lowerDet()->isActive() && upperDet()->isActive(); }
+  
+  // set if the event is active
+  void setActiveThisEvent(bool active) { Active = active; return; }
+  //bool isActive() const {return lowerDet()->isActive() && upperDet()->isActive() && Active; }
+  bool isActive() const {return Active; }
 
   /// return TRUE if at least one of the lower and upper components has badChannels
   bool hasBadComponents( const TrajectoryStateOnSurface &tsos ) const {
@@ -41,6 +49,8 @@ class TkStackMeasurementDet GCC11_FINAL : public MeasurementDet {
   const PixelClusterParameterEstimator* thePixelCPE;
   const TkPixelMeasurementDet*       theInnerDet;
   const TkPixelMeasurementDet*       theOuterDet;
+  detset theDetSet;
+  bool Active;
 
 };
 
