@@ -25,6 +25,14 @@ class TkStackMeasurementDet GCC11_FINAL : public MeasurementDet {
   void init(const MeasurementDet* lowerDet,
 	    const MeasurementDet* upperDet);
 
+  void update( const detset & detSet,
+               const edm::Handle<edmNew::DetSetVector<Phase2TrackerCluster1D> > & h) {
+    theDetSet = detSet;
+    theHandle = h;
+    Empty = false;
+    Active = true;
+  }
+
   virtual RecHitContainer recHits( const TrajectoryStateOnSurface&) const;
 
   const StackGeomDet& specificGeomDet() const {return static_cast<StackGeomDet const&>(fastGeomDet());}
@@ -38,19 +46,21 @@ class TkStackMeasurementDet GCC11_FINAL : public MeasurementDet {
   
   // set if the event is active
   void setActiveThisEvent(bool active) { Active = active; return; }
-  //bool isActive() const {return lowerDet()->isActive() && upperDet()->isActive() && Active; }
+  void setEmpty() { Empty = true; Active = true; }
   bool isActive() const {return Active; }
 
   /// return TRUE if at least one of the lower and upper components has badChannels
   bool hasBadComponents( const TrajectoryStateOnSurface &tsos ) const {
     return (lowerDet()->hasBadComponents(tsos) || upperDet()->hasBadComponents(tsos));}
+  //bool isActive() const {return lowerDet()->isActive() && upperDet()->isActive() && Active; }
 
  private:
   const PixelClusterParameterEstimator* thePixelCPE;
   const TkPixelMeasurementDet*       theInnerDet;
   const TkPixelMeasurementDet*       theOuterDet;
   detset theDetSet;
-  bool Active;
+  edm::Handle<edmNew::DetSetVector<Phase2TrackerCluster1D> > theHandle;
+  bool Active, Empty;
 
 };
 
