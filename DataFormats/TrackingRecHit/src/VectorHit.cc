@@ -1,4 +1,4 @@
-#include "TrackingTools/TransientTrackingRecHit/interface/VectorHit.h"
+#include "DataFormats/TrackingRecHit/interface/VectorHit.h"
 //#include "FWCore/Utilities/interface/Exception.h"
 
 VectorHit::VectorHit(DetId id,
@@ -6,8 +6,8 @@ VectorHit::VectorHit(DetId id,
                      const LocalVector& dir,
                      const AlgebraicSymMatrix44& covMatrix,
 		     const double& Chi2,
-                     const Phase2TrackerCluster1D* inner, 
-                     const Phase2TrackerCluster1D* outer):
+                     const Phase2TrackerCluster1DRef inner, 
+                     const Phase2TrackerCluster1DRef outer):
   RecSegment(id),
   thePosition(posInner),
   theDirection(dir),
@@ -19,7 +19,7 @@ VectorHit::VectorHit(DetId id,
 {}
 
 VectorHit::VectorHit(DetId id,const VectorHit2D& vh2Dzx, const VectorHit2D& vh2Dzy,
-                     const Phase2TrackerCluster1D* inner, const Phase2TrackerCluster1D* outer) :
+                     const Phase2TrackerCluster1DRef inner, const Phase2TrackerCluster1DRef outer) :
   RecSegment(id),
   theDimension(4),
   theInnerCluster(inner),

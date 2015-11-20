@@ -601,15 +601,18 @@ void MeasurementTrackerImpl::updateStacks( const edm::Event& event) const
     }
 
     for (std::vector<TkStackMeasurementDet*>::const_iterator i=theStackDets.begin();i!=theStackDets.end(); i++) {
-      unsigned int id = (**i).geomDet().geographicalId().rawId();
-      std::cout << "MeasurementTrackerImpl::updateStacks: ClustersPhase2Collection stack id: " << id << std::endl;
-      edmNew::DetSetVector<Phase2TrackerCluster1D>::const_iterator it = ClustersPhase2Collection->find( id );
-      if ( it != ClustersPhase2Collection->end() ){
-        std::cout << "MeasurementTrackerImpl::updateStacks: found cluster! " << id << std::endl;
+      unsigned int id_lower = (**i).lowerDet()->geomDet().geographicalId().rawId();
+      unsigned int id_upper = (**i).upperDet()->geomDet().geographicalId().rawId();
+      //std::cout << "MeasurementTrackerImpl::updateStacks: ClustersPhase2Collection lower id: " << id_lower << std::endl;
+      //std::cout << "                                      ClustersPhase2Collection upper id: " << id_upper << std::endl;
+      edmNew::DetSetVector<Phase2TrackerCluster1D>::const_iterator it_lower = ClustersPhase2Collection->find( id_lower );
+      edmNew::DetSetVector<Phase2TrackerCluster1D>::const_iterator it_upper = ClustersPhase2Collection->find( id_upper );
+      if ( it_lower != ClustersPhase2Collection->end()  || it_upper != ClustersPhase2Collection->end() ){
+        //std::cout << "MeasurementTrackerImpl::updateStacks: found clusters >> " << id_lower << " , " << id_upper << std::endl;
         //push cluster range in det
-        (**i).update( *it, phase2clusters );
-      } else{
-        std::cout << "MeasurementTrackerImpl::updateStacks: NO found cluster! " << id << std::endl;
+        (**i).update( *it_lower, *it_upper, phase2clusters );
+      } else {
+        //std::cout << "MeasurementTrackerImpl::updateStacks: NO found cluster! " << id << std::endl;
         (**i).setEmpty();
       }
     }

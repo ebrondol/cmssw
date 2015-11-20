@@ -10,9 +10,7 @@
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include "DataFormats/Phase2TrackerCluster/interface/Phase2TrackerCluster1D.h"
 
-// FIXME::TkStackMeasurementDet in this moment is just a prototype: to be fixed soon!
-
-class TkStackMeasurementDet GCC11_FINAL : public MeasurementDet {
+class TkStackMeasurementDet : public MeasurementDet {
 
  public:
 
@@ -20,14 +18,19 @@ class TkStackMeasurementDet GCC11_FINAL : public MeasurementDet {
   typedef edmNew::DetSet<Phase2TrackerCluster1D> detset;
   typedef detset::const_iterator const_iterator;
 
+  typedef PixelClusterParameterEstimator::LocalValues    LocalValues;
 
   TkStackMeasurementDet( const StackGeomDet* gdet, const PixelClusterParameterEstimator* cpe);
   void init(const MeasurementDet* lowerDet,
 	    const MeasurementDet* upperDet);
 
-  void update( const detset & detSet,
+  virtual ~TkStackMeasurementDet() {};
+
+  void update( const detset & lowerDetSet,
+               const detset & upperDetSet,
                const edm::Handle<edmNew::DetSetVector<Phase2TrackerCluster1D> > & h) {
-    theDetSet = detSet;
+    theLowerDetSet = lowerDetSet;
+    theUpperDetSet = upperDetSet;
     theHandle = h;
     Empty = false;
     Active = true;
@@ -40,9 +43,12 @@ class TkStackMeasurementDet GCC11_FINAL : public MeasurementDet {
   virtual bool measurements( const TrajectoryStateOnSurface& stateOnThisDet,
 			     const MeasurementEstimator& est,
 			     TempMeasurements & result) const;
+  TransientTrackingRecHit::RecHitPointer buildVectorHit( const Phase2TrackerCluster1DRef & clusterLower,
+                                                         const Phase2TrackerCluster1DRef & clusterUpper,
+                                                         const LocalTrajectoryParameters & ltp) const;
 
-  const TkPixelMeasurementDet* lowerDet() const{ return theInnerDet;}
-  const TkPixelMeasurementDet* upperDet() const{ return theOuterDet;}
+  const TkPixelMeasurementDet* lowerDet() const{ return theLowerDet;}
+  const TkPixelMeasurementDet* upperDet() const{ return theUpperDet;}
   
   // set if the event is active
   void setActiveThisEvent(bool active) { Active = active; return; }
@@ -52,13 +58,14 @@ class TkStackMeasurementDet GCC11_FINAL : public MeasurementDet {
   /// return TRUE if at least one of the lower and upper components has badChannels
   bool hasBadComponents( const TrajectoryStateOnSurface &tsos ) const {
     return (lowerDet()->hasBadComponents(tsos) || upperDet()->hasBadComponents(tsos));}
-  //bool isActive() const {return lowerDet()->isActive() && upperDet()->isActive() && Active; }
+
+  //bool checkClustersCompatibility(Local3DPoint& posLower, Local3DPoint& posUpper, LocalError& errLower, LocalError& errUpper);
 
  private:
   const PixelClusterParameterEstimator* thePixelCPE;
-  const TkPixelMeasurementDet*       theInnerDet;
-  const TkPixelMeasurementDet*       theOuterDet;
-  detset theDetSet;
+  const TkPixelMeasurementDet*       theLowerDet;
+  const TkPixelMeasurementDet*       theUpperDet;
+  detset theLowerDetSet, theUpperDetSet;
   edm::Handle<edmNew::DetSetVector<Phase2TrackerCluster1D> > theHandle;
   bool Active, Empty;
 

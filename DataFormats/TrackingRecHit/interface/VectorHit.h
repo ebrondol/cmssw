@@ -11,7 +11,7 @@
  */
 
 #include "DataFormats/TrackingRecHit/interface/RecSegment.h"
-#include "VectorHit2D.h"
+#include "DataFormats/TrackingRecHit/interface/VectorHit2D.h"
 
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include "DataFormats/Common/interface/DetSetVectorNew.h"
@@ -21,16 +21,19 @@
 #include "DataFormats/GeometrySurface/interface/Surface.h"
 
 
-class VectorHit : public RecSegment {
+class VectorHit GCC11_FINAL : public RecSegment {
 
   public:
 
+  typedef edm::Ref<edmNew::DetSetVector<Phase2TrackerCluster1D>, Phase2TrackerCluster1D > Phase2TrackerCluster1DRef;
+
   VectorHit() : thePosition(), theDirection(), theCovMatrix(), theDimension(0) { setType(bad); }
+  VectorHit(const VectorHit* vh) : thePosition(vh->localPosition()), theDirection(vh->localDirection()), theCovMatrix(), theDimension(4) { setType(bad); }
   VectorHit(DetId id, const LocalPoint& posInner, const LocalVector& dir,
             const AlgebraicSymMatrix44& covMatrix, const double& Chi2,
-            const Phase2TrackerCluster1D* inner, const Phase2TrackerCluster1D* outer) ;
+            const Phase2TrackerCluster1DRef inner, const Phase2TrackerCluster1DRef outer) ;
   VectorHit(DetId id, const VectorHit2D& vh2Dzx, const VectorHit2D& vh2Dzy,
-            const Phase2TrackerCluster1D* inner, const Phase2TrackerCluster1D* outer) ;
+            const Phase2TrackerCluster1DRef inner, const Phase2TrackerCluster1DRef outer) ;
 
   ~VectorHit() ;
   virtual VectorHit* clone() const { return new VectorHit(*this);}
@@ -60,8 +63,8 @@ class VectorHit : public RecSegment {
   AlgebraicSymMatrix parametersError() const ;
   virtual double chi2() const { return theChi2; }
   virtual int dimension() const { return theDimension; }
-  Phase2TrackerCluster1D const * innerCluster() const { return theInnerCluster; }
-  Phase2TrackerCluster1D const * outerCluster() const { return theOuterCluster; }
+  Phase2TrackerCluster1DRef const innerCluster() const { return theInnerCluster; }
+  Phase2TrackerCluster1DRef const outerCluster() const { return theOuterCluster; }
 
   //ERICA:change name! This method returns the delta (not the direction) in global coordinates
   Global3DVector globalDirection( const Surface& surf );
@@ -137,8 +140,8 @@ class VectorHit : public RecSegment {
   AlgebraicSymMatrix44 theCovMatrix;
   double theChi2;
   int theDimension;
-  const Phase2TrackerCluster1D* theInnerCluster;
-  const Phase2TrackerCluster1D* theOuterCluster;
+  const Phase2TrackerCluster1DRef theInnerCluster;
+  const Phase2TrackerCluster1DRef theOuterCluster;
   //VectorHit2D theVh2Dzx;
   //VectorHit2D theVh2Dzy;
 
