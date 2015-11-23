@@ -4,6 +4,8 @@ process = cms.Process("NavigationSchoolAnalyze")
 
 #process.load("Configuration.StandardSequences.Geometry_cff")
 process.load('Configuration.Geometry.GeometryExtendedPhase2TkBE5DPixel10DReco_cff')
+#process.load('Configuration.Geometry.GeometryExtendedPhase2TkBTiltedE5DPixel10DReco_cff')
+#process.load('Configuration.Geometry.GeometryExtendedPhase2TkBTiltedE5DPixel10D_cff')
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 #process.GlobalTag.globaltag = 'STARTUP_V4::All'
 from Configuration.AlCa.GlobalTag import GlobalTag
@@ -25,19 +27,24 @@ process.navigationSchoolAnalyzer = cms.EDAnalyzer("NavigationSchoolAnalyzer",
     navigationSchoolName = cms.string('SimpleNavigationSchool')
 )
 
+
+process.load("Geometry.TrackerNumberingBuilder.trackerTopologyConstants_cfi")
+
+process.es_prefer_trackerTopology = cms.ESPrefer("TrackerTopologyEP","trackerTopology2023Constants")
+
 process.p = cms.Path(process.navigationSchoolAnalyzer)
 
-process.trackerNumberingSLHCGeometry.layerNumberPXB = cms.uint32(20)
-process.trackerTopologyConstants.pxb_layerStartBit = cms.uint32(20)
-process.trackerTopologyConstants.pxb_ladderStartBit = cms.uint32(12)
-process.trackerTopologyConstants.pxb_moduleStartBit = cms.uint32(2)
-process.trackerTopologyConstants.pxb_layerMask = cms.uint32(15)
-process.trackerTopologyConstants.pxb_ladderMask = cms.uint32(255)
-process.trackerTopologyConstants.pxb_moduleMask = cms.uint32(1023)
-process.trackerTopologyConstants.pxf_diskStartBit = cms.uint32(18)
-process.trackerTopologyConstants.pxf_bladeStartBit = cms.uint32(12)
-process.trackerTopologyConstants.pxf_panelStartBit = cms.uint32(10)
-process.trackerTopologyConstants.pxf_moduleMask = cms.uint32(255)
+#process.trackerNumberingSLHCGeometry.layerNumberPXB = cms.uint32(20)
+#process.trackerTopologyConstants.pxb_layerStartBit = cms.uint32(20)
+#process.trackerTopologyConstants.pxb_ladderStartBit = cms.uint32(12)
+#process.trackerTopologyConstants.pxb_moduleStartBit = cms.uint32(2)
+#process.trackerTopologyConstants.pxb_layerMask = cms.uint32(15)
+#process.trackerTopologyConstants.pxb_ladderMask = cms.uint32(255)
+#process.trackerTopologyConstants.pxb_moduleMask = cms.uint32(1023)
+#process.trackerTopologyConstants.pxf_diskStartBit = cms.uint32(18)
+#process.trackerTopologyConstants.pxf_bladeStartBit = cms.uint32(12)
+#process.trackerTopologyConstants.pxf_panelStartBit = cms.uint32(10)
+#process.trackerTopologyConstants.pxf_moduleMask = cms.uint32(255)
 
 #in case you want to distinguish between inner and outer tracker
 #perl -p -i -e "s/PixelBarrel_5/OuterBarrel_1/g" detailedInfo.log

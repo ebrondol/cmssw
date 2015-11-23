@@ -4,6 +4,7 @@
 #include "Geometry/TrackerNumberingBuilder/plugins/ExtractStringFromDDD.h"
 #include "DataFormats/DetId/interface/DetId.h"
 #include "Geometry/TrackerNumberingBuilder/plugins/CmsTrackerLayerBuilder.h"
+#include "Geometry/TrackerNumberingBuilder/plugins/CmsTrackerTiltedLayerBuilder.h"
 #include "Geometry/TrackerNumberingBuilder/plugins/CmsTrackerWheelBuilder.h"
 #include "Geometry/TrackerNumberingBuilder/plugins/CmsTrackerDiskBuilder.h"  
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
@@ -18,6 +19,7 @@ void
 CmsTrackerSubStrctBuilder::buildComponent( DDFilteredView& fv, GeometricDet* g, std::string s )
 {
   CmsTrackerLayerBuilder theCmsTrackerLayerBuilder;
+  CmsTrackerTiltedLayerBuilder theCmsTrackerTiltedLayerBuilder;
   CmsTrackerWheelBuilder theCmsTrackerWheelBuilder;
   CmsTrackerDiskBuilder  theCmsTrackerDiskBuilder;   
 
@@ -29,6 +31,9 @@ CmsTrackerSubStrctBuilder::buildComponent( DDFilteredView& fv, GeometricDet* g, 
     break;
   case GeometricDet::OTPhase2Layer:
     theCmsTrackerLayerBuilder.build(fv,subdet,s);      
+    break;
+  case GeometricDet::OTPhase2TiltedLayer:
+    theCmsTrackerTiltedLayerBuilder.build(fv,subdet,s);
     break;
   case GeometricDet::wheel:
     theCmsTrackerWheelBuilder.build(fv,subdet,s);      
@@ -56,6 +61,9 @@ CmsTrackerSubStrctBuilder::sortNS( DDFilteredView& fv, GeometricDet* det )
     std::sort( comp.begin(), comp.end(), LessR());
     break;	
   case GeometricDet::OTPhase2Layer:
+    std::sort( comp.begin(), comp.end(), LessR());
+    break;	
+  case GeometricDet::OTPhase2TiltedLayer:
     std::sort( comp.begin(), comp.end(), LessR());
     break;	
   case GeometricDet::wheel:
