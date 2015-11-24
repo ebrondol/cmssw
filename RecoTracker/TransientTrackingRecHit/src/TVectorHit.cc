@@ -1,5 +1,4 @@
 #include "RecoTracker/TransientTrackingRecHit/interface/TVectorHit.h"
-#include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
 #include "RecoLocalTracker/ClusterParameterEstimator/interface/PixelClusterParameterEstimator.h"
 #include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
 #include<typeinfo>
@@ -50,7 +49,6 @@ TVectorHit::TVectorHit(const GeomDet * geom, const VectorHit* rh,
 }
 */
 
-
 TVectorHit::TVectorHit(const GeomDet* geom,
               const VectorHit* vh,
               const PixelClusterParameterEstimator* cpe):
@@ -63,5 +61,5 @@ TVectorHit::TVectorHit( const Phase2TrackerCluster1DRef & clusterLower,
               const VectorHit2D vzy,
               const GeomDet* geom, 
               const PixelClusterParameterEstimator* cpe) :
-  TValidTrackingRecHit(geom), theCPE(cpe), theHitData( VectorHit(geom->geographicalId(), vzx, vzy, clusterLower, clusterUpper))
+  TValidTrackingRecHit(geom), theCPE(cpe), theHitData(geom->geographicalId(), vzx, vzy, clusterLower, clusterUpper)
 {};

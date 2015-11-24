@@ -68,8 +68,7 @@ public:
                               const VectorHit2D vzy,
                               const GeomDet* geom, 
 			      const PixelClusterParameterEstimator* cpe) {
-    const VectorHit* vh = new VectorHit(geom->geographicalId(), vzx, vzy, clusterLower, clusterUpper);
-    return RecHitPointer( new TVectorHit( geom, vh, cpe ));
+    return RecHitPointer( new TVectorHit( clusterLower, clusterUpper, vzx, vzy, geom, cpe ));
   }
 
 
@@ -95,6 +94,7 @@ private:
   TVectorHit(const GeomDet* geom,
              const VectorHit* vh,
              const PixelClusterParameterEstimator* cpe);
+
 
   TVectorHit( const Phase2TrackerCluster1DRef & clusterLower,
               const Phase2TrackerCluster1DRef & clusterUpper,
