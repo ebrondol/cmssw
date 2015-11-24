@@ -28,14 +28,18 @@ class VectorHit GCC11_FINAL : public RecSegment {
   typedef edm::Ref<edmNew::DetSetVector<Phase2TrackerCluster1D>, Phase2TrackerCluster1D > Phase2TrackerCluster1DRef;
 
   VectorHit() : thePosition(), theDirection(), theCovMatrix(), theDimension(0) { setType(bad); }
-  VectorHit(const VectorHit* vh) : thePosition(vh->localPosition()), theDirection(vh->localDirection()), theCovMatrix(), theDimension(4) { setType(bad); }
+
+  VectorHit(const VectorHit* vh) ;
+
   VectorHit(DetId id, const LocalPoint& posInner, const LocalVector& dir,
-            const AlgebraicSymMatrix44& covMatrix, const double& Chi2,
+            const AlgebraicSymMatrix& covMatrix, const double& Chi2,
             const Phase2TrackerCluster1DRef inner, const Phase2TrackerCluster1DRef outer) ;
+
   VectorHit(DetId id, const VectorHit2D& vh2Dzx, const VectorHit2D& vh2Dzy,
             const Phase2TrackerCluster1DRef inner, const Phase2TrackerCluster1DRef outer) ;
 
   ~VectorHit() ;
+
   virtual VectorHit* clone() const { return new VectorHit(*this);}
 
   // Parameters of the segment, for the track fit
@@ -90,7 +94,7 @@ class VectorHit GCC11_FINAL : public RecSegment {
   // setting methods
   void setPosition(LocalPoint pos) { thePosition = pos; }
   void setDirection(LocalVector dir) { theDirection = dir; }
-  void setCovMatrix(AlgebraicSymMatrix44 mat) { theCovMatrix = mat; }
+  void setCovMatrix(AlgebraicSymMatrix mat) { theCovMatrix = mat; }
 
 /*
 
@@ -137,7 +141,7 @@ class VectorHit GCC11_FINAL : public RecSegment {
   // mat[3][3]=sigma (y)
   // mat[0][2]=cov(dx/dz,x)
   // mat[1][3]=cov(dy/dz,y)
-  AlgebraicSymMatrix44 theCovMatrix;
+  AlgebraicSymMatrix theCovMatrix;
   double theChi2;
   int theDimension;
   const Phase2TrackerCluster1DRef theInnerCluster;

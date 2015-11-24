@@ -1,10 +1,21 @@
 #include "DataFormats/TrackingRecHit/interface/VectorHit.h"
 //#include "FWCore/Utilities/interface/Exception.h"
 
+VectorHit::VectorHit(const VectorHit* vh):
+  RecSegment(vh->geographicalId()),
+  thePosition(vh->localPosition()),
+  theDirection(vh->localDirection()),
+  theCovMatrix(vh->parametersError()),
+  theChi2(vh->chi2()),
+  theDimension(vh->dimension()),
+  theInnerCluster(vh->innerCluster()),
+  theOuterCluster(vh->outerCluster())
+{}
+
 VectorHit::VectorHit(DetId id,
                      const LocalPoint& posInner,
                      const LocalVector& dir,
-                     const AlgebraicSymMatrix44& covMatrix,
+                     const AlgebraicSymMatrix& covMatrix,
 		     const double& Chi2,
                      const Phase2TrackerCluster1DRef inner, 
                      const Phase2TrackerCluster1DRef outer):
@@ -34,6 +45,7 @@ VectorHit::VectorHit(DetId id,const VectorHit2D& vh2Dzx, const VectorHit2D& vh2D
   AlgebraicSymMatrix22 covMatZX = vh2Dzx.covMatrix();
   AlgebraicSymMatrix22 covMatZY = vh2Dzy.covMatrix();
 
+  theCovMatrix=AlgebraicSymMatrix(4);
   theCovMatrix[0][0] = covMatZX[0][0];   // sigma (dx/dz)
   theCovMatrix[1][1] = covMatZY[0][0];   // sigma (dy/dz)
   theCovMatrix[2][2] = covMatZX[1][1];   // sigma (x)
