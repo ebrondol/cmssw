@@ -10,6 +10,8 @@
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include "DataFormats/Phase2TrackerCluster/interface/Phase2TrackerCluster1D.h"
 
+#include "CommonTools/Statistics/interface/LinearFit.h"
+ 
 class TkStackMeasurementDet : public MeasurementDet {
 
  public:
@@ -20,11 +22,11 @@ class TkStackMeasurementDet : public MeasurementDet {
 
   typedef PixelClusterParameterEstimator::LocalValues    LocalValues;
 
-  TkStackMeasurementDet( const StackGeomDet* gdet, const PixelClusterParameterEstimator* cpe);
+  TkStackMeasurementDet( const StackGeomDet* gdet, const PixelClusterParameterEstimator* cpe) ;
   void init(const MeasurementDet* lowerDet,
 	    const MeasurementDet* upperDet);
 
-  virtual ~TkStackMeasurementDet() {};
+  virtual ~TkStackMeasurementDet() { delete theFitter; };
 
   void update( const detset & lowerDetSet,
                const detset & upperDetSet,
@@ -59,7 +61,22 @@ class TkStackMeasurementDet : public MeasurementDet {
   bool hasBadComponents( const TrajectoryStateOnSurface &tsos ) const {
     return (lowerDet()->hasBadComponents(tsos) || upperDet()->hasBadComponents(tsos));}
 
-  //bool checkClustersCompatibility(Local3DPoint& posLower, Local3DPoint& posUpper, LocalError& errLower, LocalError& errUpper);
+  bool checkClustersCompatibility (Local3DPoint& posLower, Local3DPoint& posUpper, LocalError& errLower, LocalError& errUpper) const;
+  void fit2Dzx(const Local3DPoint lpCI, const Local3DPoint lpCO,
+               const LocalError leCI, const LocalError leCO,
+               Local3DPoint& pos, Local3DVector& dir,
+               AlgebraicSymMatrix22& covMatrix, double& chi2) const;
+  void fit2Dzy(const Local3DPoint lpCI, const Local3DPoint lpCO,
+               const LocalError leCI, const LocalError leCO,
+               Local3DPoint& pos, Local3DVector& dir,
+               AlgebraicSymMatrix22& covMatrix, double& chi2) const;
+
+  void fit(const std::vector<float>& x,
+           const std::vector<float>& y,
+           const std::vector<float>& sigy,
+           Local3DPoint& pos, Local3DVector& dir,
+           AlgebraicSymMatrix22& covMatrix, double& chi2) const;
+
 
  private:
   const PixelClusterParameterEstimator* thePixelCPE;
@@ -68,6 +85,7 @@ class TkStackMeasurementDet : public MeasurementDet {
   detset theLowerDetSet, theUpperDetSet;
   edm::Handle<edmNew::DetSetVector<Phase2TrackerCluster1D> > theHandle;
   bool Active, Empty;
+  LinearFit* theFitter;
 
 };
 

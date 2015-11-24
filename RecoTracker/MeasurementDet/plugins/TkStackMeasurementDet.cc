@@ -10,7 +10,8 @@ TkStackMeasurementDet::TkStackMeasurementDet( const StackGeomDet* gdet,
                                               const PixelClusterParameterEstimator* cpe) :
   MeasurementDet(gdet),
   thePixelCPE(cpe),
-  theLowerDet(nullptr), theUpperDet(nullptr)
+  theLowerDet(nullptr), theUpperDet(nullptr),
+  theFitter(new LinearFit())
 {}
 
 void TkStackMeasurementDet::init(const MeasurementDet* lowerDet,
@@ -118,8 +119,8 @@ TkStackMeasurementDet::buildVectorHit( const Phase2TrackerCluster1DRef & cluster
   std::cout << "\t clusterLower local pos " << localPosCluLow << " with error: " << localErrCluLow;
   std::cout << "\t clusterUpper local pos in the clusterLower sof " << localPosCluUppLOW << " with error: " << localErrCluUppLOW;
 
-  //bool ok = checkClustersCompatibility(localPosCluLow, localPosCluUppLOW, localErrCluLow, localErrCluUppLOW);
-  //if(ok){
+  bool ok = checkClustersCompatibility(localPosCluLow, localPosCluUppLOW, localErrCluLow, localErrCluUppLOW);
+  if(ok){
 
     //in the clusterLower reference of frame
     Local3DVector localVecLOW = localPosCluUppLOW - localPosCluLow;
@@ -129,26 +130,102 @@ TkStackMeasurementDet::buildVectorHit( const Phase2TrackerCluster1DRef & cluster
     double chi22Dzx = 0.0;
     Local3DPoint pos2Dzx;
     Local3DVector dir2Dzx;
-//    fit2Dzx(localPosCluLow, localPosCluUppLOW, localErrCluLow,localErrCluUppLOW, pos2Dzx, dir2Dzx, covMat2Dzx, chi22Dzx);
+    fit2Dzx(localPosCluLow, localPosCluUppLOW, localErrCluLow,localErrCluUppLOW, pos2Dzx, dir2Dzx, covMat2Dzx, chi22Dzx);
     VectorHit2D vh2Dzx = VectorHit2D(pos2Dzx, dir2Dzx, covMat2Dzx, chi22Dzx);
 
     AlgebraicSymMatrix22 covMat2Dzy;
     double chi22Dzy = 0.0;
     Local3DPoint pos2Dzy;
     Local3DVector dir2Dzy;
-//    fit2Dzy(localPosCluLow, localPosCluUppLOW, localErrCluLow,localErrCluUppLOW, pos2Dzy, dir2Dzy, covMat2Dzy, chi22Dzy);
+    fit2Dzy(localPosCluLow, localPosCluUppLOW, localErrCluLow,localErrCluUppLOW, pos2Dzy, dir2Dzy, covMat2Dzy, chi22Dzy);
     VectorHit2D vh2Dzy = VectorHit2D(pos2Dzy, dir2Dzy, covMat2Dzy, chi22Dzy);
 
 //    const VectorHit* vh = new VectorHit(fastGeomDet().geographicalId(), vh2Dzx, vh2Dzy, clusterLower, clusterUpper);
     return TVectorHit::build( clusterLower, clusterUpper, vh2Dzx, vh2Dzy, &fastGeomDet(), thePixelCPE);
-  //}
+  }
 
-  //return InvalidTransientRecHit::build(&geomDet(), TrackingRecHit::inactive);
+  return InvalidTransientRecHit::build(&geomDet(), TrackingRecHit::inactive);
 
 }
 
-//bool TkStackMeasurementDet::checkClustersCompatibility(Local3DPoint& posLower, Local3DPoint& posUpper, LocalError& errLower, LocalError& errUpper){
+bool TkStackMeasurementDet::checkClustersCompatibility (Local3DPoint& posLower, Local3DPoint& posUpper, LocalError& errLower, LocalError& errUpper) const{
 
-//  return true;
+  return true;
 
-//}
+}
+
+void TkStackMeasurementDet::fit2Dzx(const Local3DPoint lpCI, const Local3DPoint lpCO,
+                           const LocalError leCI, const LocalError leCO,
+                           Local3DPoint& pos, Local3DVector& dir,
+                           AlgebraicSymMatrix22& covMatrix,
+                           double& chi2) const {
+  std::vector<float> x = {lpCI.z(), lpCO.z()};
+  std::vector<float> y = {lpCI.x(), lpCO.x()};
+  float sqCI = sqrt(leCI.xx());
+  float sqCO = sqrt(leCO.xx());
+  std::vector<float> sigy = {sqCI, sqCO};
+
+  fit(x,y,sigy,pos,dir,covMatrix,chi2);
+
+  return;
+
+}
+
+void TkStackMeasurementDet::fit2Dzy(const Local3DPoint lpCI, const Local3DPoint lpCO,
+                           const LocalError leCI, const LocalError leCO,
+                           Local3DPoint& pos, Local3DVector& dir,
+                           AlgebraicSymMatrix22& covMatrix,
+                           double& chi2) const {
+  std::vector<float> x = {lpCI.z(), lpCO.z()};
+  std::vector<float> y = {lpCI.y(), lpCO.y()};
+  float sqCI = sqrt(leCI.yy());
+  float sqCO = sqrt(leCO.yy());
+  std::vector<float> sigy = {sqCI, sqCO};
+
+  fit(x,y,sigy,pos,dir,covMatrix,chi2);
+
+  return;
+
+}
+
+void TkStackMeasurementDet::fit(const std::vector<float>& x,
+                          const std::vector<float>& y,
+                          const std::vector<float>& sigy,
+                          Local3DPoint& pos, Local3DVector& dir,
+                          AlgebraicSymMatrix22& covMatrix,
+                          double& chi2) const {
+
+  if(x.size() != y.size() || x.size() != sigy.size()){
+    edm::LogError("TkStackMeasurementDet") << "Different size for x,z !! No fit possible.";
+    return;
+  }
+
+  float slope     = 0.;
+  float intercept = 0.;
+  float covss     = 0.;
+  float covii     = 0.;
+  float covsi     = 0.;
+
+  theFitter->fit(x,y,x.size(),sigy,slope,intercept,covss,covii,covsi);
+
+  covMatrix[0][0] = covss; // this is var(dy/dz)
+  covMatrix[1][1] = covii; // this is var(y)
+  covMatrix[1][0] = covsi; // this is cov(dy/dz,y)
+
+  for (unsigned int j=0; j < x.size(); j++){
+    const double ypred = intercept + slope*x[j];
+    const double dy = (y[j] - ypred)/sigy[j];
+    chi2 += dy*dy;
+ }
+
+  pos = Local3DPoint(intercept,0.,0.);
+  if(x.size()==2){
+    //difference in z is the difference of the innermost and the outermost cluster z pos
+    float slopeZ = x.at(1) - x.at(0);
+    dir = LocalVector(slope,0.,slopeZ);
+  } else {
+    dir = LocalVector(slope,0.,-1.);
+  }
+
+}
+
