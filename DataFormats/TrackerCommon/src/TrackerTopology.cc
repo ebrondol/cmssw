@@ -113,6 +113,45 @@ uint32_t TrackerTopology::Stack(const DetId &id) const {
     throw cms::Exception("Invalid DetId") << "Unsupported DetId in TrackerTopology::Stack";
 }
 
+uint32_t TrackerTopology::Lower(const DetId &id) const {
+
+    uint32_t subdet=id.subdetId();
+    if ( subdet == PixelSubdetector::PixelBarrel )
+      return 0;
+    if ( subdet == PixelSubdetector::PixelEndcap )
+      return 0;
+    if ( subdet == StripSubdetector::TIB )
+      return tibLower(id);
+    if ( subdet == StripSubdetector::TID )
+      return tidLower(id);
+    if ( subdet == StripSubdetector::TOB )
+      return tobLower(id);
+    if ( subdet == StripSubdetector::TEC )
+      return tecLower(id);
+
+    throw cms::Exception("Invalid DetId") << "Unsupported DetId in TrackerTopology::Lower";
+}
+
+uint32_t TrackerTopology::Upper(const DetId &id) const {
+
+    uint32_t subdet=id.subdetId();
+    if ( subdet == PixelSubdetector::PixelBarrel )
+      return 0;
+    if ( subdet == PixelSubdetector::PixelEndcap )
+      return 0;
+    if ( subdet == StripSubdetector::TIB )
+      return tibUpper(id);
+    if ( subdet == StripSubdetector::TID )
+      return tidUpper(id);
+    if ( subdet == StripSubdetector::TOB )
+      return tobUpper(id);
+    if ( subdet == StripSubdetector::TEC )
+      return tecUpper(id);
+
+    throw cms::Exception("Invalid DetId") << "Unsupported DetId in TrackerTopology::Upper";
+}
+
+
 bool TrackerTopology::isStereo(const DetId &id) const {
 
     uint32_t subdet=id.subdetId();
