@@ -29,7 +29,7 @@ class VectorHit GCC11_FINAL : public RecSegment {
 
   VectorHit() : thePosition(), theDirection(), theCovMatrix(), theDimension(0) { setType(bad); }
 
-  VectorHit(const VectorHit* vh) ;
+  VectorHit(const VectorHit& vh) ;
 
   VectorHit(DetId id, const LocalPoint& posInner, const LocalVector& dir,
             const AlgebraicSymMatrix& covMatrix, const double& Chi2,
@@ -144,8 +144,8 @@ class VectorHit GCC11_FINAL : public RecSegment {
   AlgebraicSymMatrix theCovMatrix;
   double theChi2;
   int theDimension;
-  const Phase2TrackerCluster1DRef theInnerCluster;
-  const Phase2TrackerCluster1DRef theOuterCluster;
+  Phase2TrackerCluster1DRef theInnerCluster;
+  Phase2TrackerCluster1DRef theOuterCluster;
   //VectorHit2D theVh2Dzx;
   //VectorHit2D theVh2Dzy;
 

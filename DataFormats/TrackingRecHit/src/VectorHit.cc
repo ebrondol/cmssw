@@ -1,15 +1,15 @@
 #include "DataFormats/TrackingRecHit/interface/VectorHit.h"
 //#include "FWCore/Utilities/interface/Exception.h"
 
-VectorHit::VectorHit(const VectorHit* vh):
-  RecSegment(vh->geographicalId()),
-  thePosition(vh->localPosition()),
-  theDirection(vh->localDirection()),
-  theCovMatrix(vh->parametersError()),
-  theChi2(vh->chi2()),
-  theDimension(vh->dimension()),
-  theInnerCluster(vh->innerCluster()),
-  theOuterCluster(vh->outerCluster())
+VectorHit::VectorHit(const VectorHit& vh):
+  RecSegment(vh.geographicalId()),
+  thePosition(vh.localPosition()),
+  theDirection(vh.localDirection()),
+  theCovMatrix(vh.parametersError()),
+  theChi2(vh.chi2()),
+  theDimension(vh.dimension()),
+  theInnerCluster(vh.innerCluster()),
+  theOuterCluster(vh.outerCluster())
 {}
 
 VectorHit::VectorHit(DetId id,

@@ -52,7 +52,7 @@ TVectorHit::TVectorHit(const GeomDet * geom, const VectorHit* rh,
 TVectorHit::TVectorHit(const GeomDet* geom,
               const VectorHit* vh,
               const PixelClusterParameterEstimator* cpe):
-  TValidTrackingRecHit(geom), theCPE(cpe), theHitData(vh)
+  TValidTrackingRecHit(geom), theCPE(cpe), theHitData(*vh)
 {};
 
 TVectorHit::TVectorHit( const Phase2TrackerCluster1DRef & clusterLower,
