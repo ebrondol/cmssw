@@ -50,7 +50,6 @@ TkStackMeasurementDet::recHits( const TrajectoryStateOnSurface& ts) const
     for ( const_iterator ciu = theUpperDetSet.begin(); ciu != theUpperDetSet.end(); ++ ciu ) {
 
       Phase2TrackerCluster1DRef clusterUpper = edmNew::makeRefTo( theHandle, ciu );
-      //unsigned int rawid(cluster->detId());
       std::cout << "\tTkStackMeasurementDet::rechits adding VectorHits!" << std::endl;
       result.push_back( buildVectorHit( clusterLower, clusterUpper, ts.localParameters() ) );
 
