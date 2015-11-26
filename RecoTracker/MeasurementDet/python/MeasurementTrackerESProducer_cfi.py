@@ -5,6 +5,7 @@ MeasurementTracker = cms.ESProducer("MeasurementTrackerESProducer",
     ComponentName = cms.string(''),
     OnDemand = cms.bool(False),
     Regional = cms.bool(False),
+    UsingVectorHits = cms.bool(False),
 
     pixelClusterProducer = cms.string('siPixelClusters'),
     stripClusterProducer = cms.string('siStripClusters'),

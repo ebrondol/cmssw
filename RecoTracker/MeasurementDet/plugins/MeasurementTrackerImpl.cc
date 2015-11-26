@@ -93,7 +93,8 @@ MeasurementTrackerImpl::MeasurementTrackerImpl(const edm::ParameterSet&         
   theStDets(hitMatcher,stripCPE,isRegional),
   thePixelCPE(pixelCPE),
   theInactivePixelDetectorLabels(conf.getParameter<std::vector<edm::InputTag> >("inactivePixelDetectorLabels")),
-  theInactiveStripDetectorLabels(conf.getParameter<std::vector<edm::InputTag> >("inactiveStripDetectorLabels"))
+  theInactiveStripDetectorLabels(conf.getParameter<std::vector<edm::InputTag> >("inactiveStripDetectorLabels")),
+  usingVHs(conf.getParameter<bool>("UsingVectorHits"))
 {
   this->initialize();
   this->initializeStripStatus(stripQuality, stripQualityFlags, stripQualityDebugFlags);
@@ -173,7 +174,7 @@ void MeasurementTrackerImpl::initialize()
 
   sortTKD(thePixelDets);
 
-  if(!checkDets())
+  if(!checkDets() && usingVHs)
     throw MeasurementDetException("Number of dets in MeasurementTracker not consistent with TrackerGeometry!");
 
 }
@@ -235,6 +236,7 @@ void MeasurementTrackerImpl::addStripDet( const GeomDet* gd)
 
 void MeasurementTrackerImpl::addPixelDet( const GeomDet* gd)
 {
+  LogDebug("MeasurementTracker") << " >>> addPixelDet " << gd->geographicalId().rawId();
   TkPixelMeasurementDet* det = new TkPixelMeasurementDet( gd, thePixelCPE);
   thePixelDets.push_back(det);
   det->setClusterToSkip(&thePixelsToSkip);
@@ -250,7 +252,13 @@ void MeasurementTrackerImpl::addStackDet( const StackGeomDet* gd)
 {
   //since the Stack will be composed by PS or 2S, 
   //both cluster parameter estimators are needed? - right now just the thePixelCPE is used.
-  theStackDets.push_back(TkStackMeasurementDet( gd, thePixelCPE));
+  if (usingVHs) {
+    LogDebug("MeasurementTracker") << " >>> addStackDet " << gd->geographicalId().rawId();
+    theStackDets.push_back(TkStackMeasurementDet( gd, thePixelCPE));
+  } else {
+    return;
+  }
+       
 }
 
 void MeasurementTrackerImpl::initGluedDet( TkGluedMeasurementDet & det)
@@ -381,7 +389,7 @@ void MeasurementTrackerImpl::updatePixels( const edm::Event& event) const
     edm::Handle<edmNew::DetSetVector<SiPixelCluster> > pixelClusters;
     event.getByLabel(pixelClusterProducer, pixelClusters);
     const  edmNew::DetSetVector<SiPixelCluster>* pixelCollection = pixelClusters.product();
-   
+
     if (switchOffPixelsIfEmpty && pixelCollection->empty()) {
         for (std::vector<TkPixelMeasurementDet*>::const_iterator i=thePixelDets.begin();
              i!=thePixelDets.end(); i++) {

@@ -131,6 +131,7 @@ public:
   const std::vector<edm::InputTag>      theInactiveStripDetectorLabels;
 
   bool selfUpdateSkipClusters_;
+  bool usingVHs;
 
   void initialize();
 
