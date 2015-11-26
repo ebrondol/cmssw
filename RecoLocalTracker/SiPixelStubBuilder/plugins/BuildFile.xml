@@ -1,0 +1,5 @@
+<use   name="RecoLocalTracker/SiPixelStubBuilder"/>
+<use   name="CalibTracker/SiPixelESProducers"/>
+<library   file="*.cc" name="RecoLocalTrackerSiPixelStubBuilderPlugins">
+  <flags   EDM_PLUGIN="1"/>
+</library>
