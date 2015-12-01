@@ -9,6 +9,7 @@ MeasurementTracker = cms.ESProducer("MeasurementTrackerESProducer",
 
     pixelClusterProducer = cms.string('siPixelClusters'),
     stripClusterProducer = cms.string('siStripClusters'),
+    Phase2TrackerCluster1DProducer = cms.string('siPhase2Clusters'),
     #stripLazyGetterProducer label only matters if Regional=true
     stripLazyGetterProducer = cms.string(''),
 
