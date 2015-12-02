@@ -586,50 +586,56 @@ void MeasurementTrackerImpl::updateStrips( const edm::Event& event) const
 
 void MeasurementTrackerImpl::updateStacks( const edm::Event& event) const
 {
-
+  // Phase 2 Pixel Clusters
   std::string Phase2TrackerCluster1DProducer = pset_.getParameter<std::string>("Phase2TrackerCluster1DProducer");
-  edm::Handle< edmNew::DetSetVector<Phase2TrackerCluster1D> >  phase2clusters;
-  event.getByLabel( Phase2TrackerCluster1DProducer, phase2clusters);
-  const  edmNew::DetSetVector<Phase2TrackerCluster1D>* ClustersPhase2Collection = phase2clusters.product();
-
-  if(ClustersPhase2Collection->empty() || !usingVHs) {
-    LogDebug("MeasurementTracker") << "MeasurementTrackerImpl::updateStacks: ClustersPhase2Collection empty! " << std::endl;
-
+  if( Phase2TrackerCluster1DProducer.empty() ) { //clusters have not been produced
+    LogDebug("MeasurementTracker") << "MeasurementTrackerImpl::updateStacks: ClustersPhase2Producer empty! " << std::endl;
     for (std::vector<TkStackMeasurementDet*>::const_iterator i=theStackDets.begin();i!=theStackDets.end(); i++) {
-      (**i).setActiveThisEvent(false);
-    }
+        (**i).setActiveThisEvent(false);
+      }
   } else {
 
-    LogDebug("MeasurementTracker") << "MeasurementTrackerImpl::updateStacks: ClustersPhase2Collection size: " << ClustersPhase2Collection->dataSize() << std::endl;
-
-    for (edmNew::DetSetVector< Phase2TrackerCluster1D >::const_iterator DSViter = ClustersPhase2Collection->begin(); DSViter != ClustersPhase2Collection->end(); ++DSViter) {
-      
-      unsigned int rawid(DSViter->detId());
-      //std::cout << "\t cluster in detId: " << rawid << std::endl;
-      DetId detId(rawid);
-
-    }
-
-    for (std::vector<TkStackMeasurementDet*>::const_iterator i=theStackDets.begin();i!=theStackDets.end(); i++) {
-      unsigned int id_lower = (**i).lowerDet()->geomDet().geographicalId().rawId();
-      unsigned int id_upper = (**i).upperDet()->geomDet().geographicalId().rawId();
-      //std::cout << "MeasurementTrackerImpl::updateStacks: ClustersPhase2Collection lower id: " << id_lower << std::endl;
-      //std::cout << "                                      ClustersPhase2Collection upper id: " << id_upper << std::endl;
-      edmNew::DetSetVector<Phase2TrackerCluster1D>::const_iterator it_lower = ClustersPhase2Collection->find( id_lower );
-      edmNew::DetSetVector<Phase2TrackerCluster1D>::const_iterator it_upper = ClustersPhase2Collection->find( id_upper );
-      if ( it_lower != ClustersPhase2Collection->end()  || it_upper != ClustersPhase2Collection->end() ){
-        //std::cout << "MeasurementTrackerImpl::updateStacks: found clusters >> " << id_lower << " , " << id_upper << std::endl;
-        //push cluster range in det
-        (**i).update( *it_lower, *it_upper, phase2clusters );
-      } else {
-        //std::cout << "MeasurementTrackerImpl::updateStacks: NO found cluster! " << id << std::endl;
-        (**i).setEmpty();
+    edm::Handle< edmNew::DetSetVector<Phase2TrackerCluster1D> >  phase2clusters;
+    event.getByLabel( Phase2TrackerCluster1DProducer, phase2clusters);
+    const  edmNew::DetSetVector<Phase2TrackerCluster1D>* ClustersPhase2Collection = phase2clusters.product();
+  
+    if(ClustersPhase2Collection->empty() || !usingVHs) {
+      LogDebug("MeasurementTracker") << "MeasurementTrackerImpl::updateStacks: ClustersPhase2Collection empty! " << std::endl;
+      for (std::vector<TkStackMeasurementDet*>::const_iterator i=theStackDets.begin();i!=theStackDets.end(); i++) {
+        (**i).setActiveThisEvent(false);
       }
+    } else {
+  
+      LogDebug("MeasurementTracker") << "MeasurementTrackerImpl::updateStacks: ClustersPhase2Collection size: " << ClustersPhase2Collection->dataSize() << std::endl;
+  
+      for (edmNew::DetSetVector< Phase2TrackerCluster1D >::const_iterator DSViter = ClustersPhase2Collection->begin(); DSViter != ClustersPhase2Collection->end(); ++DSViter) {
+        
+        unsigned int rawid(DSViter->detId());
+        //std::cout << "\t cluster in detId: " << rawid << std::endl;
+        DetId detId(rawid);
+  
+      }
+  
+      for (std::vector<TkStackMeasurementDet*>::const_iterator i=theStackDets.begin();i!=theStackDets.end(); i++) {
+        unsigned int id_lower = (**i).lowerDet()->geomDet().geographicalId().rawId();
+        unsigned int id_upper = (**i).upperDet()->geomDet().geographicalId().rawId();
+        //std::cout << "MeasurementTrackerImpl::updateStacks: ClustersPhase2Collection lower id: " << id_lower << std::endl;
+        //std::cout << "                                      ClustersPhase2Collection upper id: " << id_upper << std::endl;
+        edmNew::DetSetVector<Phase2TrackerCluster1D>::const_iterator it_lower = ClustersPhase2Collection->find( id_lower );
+        edmNew::DetSetVector<Phase2TrackerCluster1D>::const_iterator it_upper = ClustersPhase2Collection->find( id_upper );
+        if ( it_lower != ClustersPhase2Collection->end()  || it_upper != ClustersPhase2Collection->end() ){
+          //std::cout << "MeasurementTrackerImpl::updateStacks: found clusters >> " << id_lower << " , " << id_upper << std::endl;
+          //push cluster range in det
+          (**i).update( *it_lower, *it_upper, phase2clusters );
+        } else {
+          //std::cout << "MeasurementTrackerImpl::updateStacks: NO found cluster! " << id << std::endl;
+          (**i).setEmpty();
+        }
+      }
+  
+  
     }
-
-
   }
-
 }
 
 TkStripMeasurementDet * MeasurementTrackerImpl::concreteDetUpdatable(DetId id) const {
