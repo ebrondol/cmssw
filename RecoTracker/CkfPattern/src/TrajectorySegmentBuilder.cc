@@ -17,6 +17,7 @@
 #include "TrackingTools/PatternTools/interface/TrajectoryStateUpdator.h"
 #include "TrackingTools/DetLayers/interface/GeomDetCompatibilityChecker.h"
 #include "TrackingTools/MeasurementDet/interface/MeasurementDet.h"
+#include "Geometry/TrackerGeometryBuilder/interface/StackGeomDet.h"
 
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
@@ -182,6 +183,7 @@ TrajectorySegmentBuilder::segments (const TSOS startingState)
     addGroup(startingTrajectory,measGroups.begin(),measGroups.end());
 
   if unlikely(theDbgFlg) cout << "TSB: back with " << candidates.size() << " candidates" << endl;
+  LogDebug("CkfPattern") << " TSB: back with " << candidates.size() << " candidates";
 
   //
   // add invalid hit - try to get first detector hit by the extrapolation
@@ -233,6 +235,7 @@ TrajectorySegmentBuilder::addGroup (TempTrajectory const & traj,
 				    vector<TMG>::const_iterator begin,
 				    vector<TMG>::const_iterator end)
 {
+  LogDebug("CkfPattern") << " TrajectorySegmentBuilder::addGroup ";
   vector<TempTrajectory> ret;
   if ( begin==end ) {
     //std::cout << "TrajectorySegmentBuilder::addGroup" << " traj.empty()=" << traj.empty() << "EMPTY" << std::endl;
@@ -250,6 +253,7 @@ TrajectorySegmentBuilder::addGroup (TempTrajectory const & traj,
   
   TempTrajectoryContainer updatedTrajectories; updatedTrajectories.reserve(2);
   if ( traj.measurements().empty() ) {
+    LogDebug("CkfPattern") << " TrajectorySegmentBuilder::addGroup >>>>>> traj.measurements().empty() ";
     vector<TM> const & firstMeasurements = unlockedMeasurements(begin->measurements());
     if ( theBestHitOnly )
       updateCandidatesWithBestHit(traj,firstMeasurements,updatedTrajectories);
@@ -259,6 +263,7 @@ TrajectorySegmentBuilder::addGroup (TempTrajectory const & traj,
 				<< updatedTrajectories.size() << " trajectories" << endl;
   }
   else {
+    LogDebug("CkfPattern") << " TrajectorySegmentBuilder::addGroup >>>>>> traj.measurements() NOT empty() ";
     if ( theBestHitOnly )
       updateCandidatesWithBestHit(traj,redoMeasurements(traj,begin->detGroup()),
 				  updatedTrajectories);
@@ -299,11 +304,11 @@ TrajectorySegmentBuilder::addGroup (TempTrajectory const & traj,
       if (!t.empty()) ret.push_back(std::move(t));
   }
   
-  //std::cout << "TrajectorySegmentBuilder::addGroup" << 
-  //             " traj.empty()=" << traj.empty() << 
-  //             " end-begin=" << (end-begin)  <<
-  //             " #updated=" << updatedTrajectories.size() << 
-  //             " #result=" << ret.size() << std::endl;
+  LogDebug("CkfPattern") << "TrajectorySegmentBuilder::addGroup" <<
+               " traj.empty()=" << traj.empty() << 
+               " end-begin=" << (end-begin)  <<
+               " #updated=" << updatedTrajectories.size() << 
+               " #result=" << ret.size();
   return ret;
 }
 
@@ -375,6 +380,7 @@ vector<TrajectoryMeasurement>
 TrajectorySegmentBuilder::redoMeasurements (const TempTrajectory& traj,
 					    const DetGroup& detGroup) const
 {
+  LogDebug("CkfPattern") << " TrajectorySegmentBuilder::redoMeasurements ";
   vector<TM> result;
   //
   // loop over all dets
@@ -395,20 +401,55 @@ TrajectorySegmentBuilder::redoMeasurements (const TempTrajectory& traj,
     if(!compat.first) continue;
 
     const MeasurementDet* mdet = theMeasurementTracker->idToDet(det.det()->geographicalId());
-    // verify also that first (and only!) not be inactive..
-    if (mdet->measurements(compat.second, theEstimator,tmps) && tmps.hits[0]->isValid() )
-      for (std::size_t i=0; i!=tmps.size(); ++i)
-	result.emplace_back(compat.second,std::move(tmps.hits[i]),tmps.distances[i],&theLayer);
+    LogTrace("CkfPattern")<<"TrajectorySegmentBuilder::redoMeasurements >> MeasurementDet for ... "<<det.det()->geographicalId().rawId();
 
-    if unlikely(theDbgFlg) std::cout << " " << tmps.size();
-    tmps.clear();
-    
+    if (mdet == 0) {
+      LogTrace("CkfPattern")<<"MeasurementDet not found!! ";
+    }
+
+    LogTrace("CkfPattern")<<"MeasurementDet is valid";
+
+    //check if maybe it is a stack and the bool in MeasDet for using VHs was set false
+    const StackGeomDet* stackDet = dynamic_cast<const StackGeomDet*>(det.det());
+ 
+    if(stackDet && !mdet->isActive()){
+      LogTrace("CkfPattern")<<"This is a stack with det id "<<det.det()->geographicalId().rawId(); 
+      LogTrace("CkfPattern")<<"and it is not active, so I search for the lower/upper. "; 
+
+      const MeasurementDet* mdetLower = theMeasurementTracker->idToDet(stackDet->lowerDet()->geographicalId());
+      const MeasurementDet* mdetUpper = theMeasurementTracker->idToDet(stackDet->upperDet()->geographicalId());
+
+      // verify also that first (and only!) not be inactive..
+      if (mdetLower->measurements(compat.second, theEstimator,tmps) && tmps.hits[0]->isValid() ){
+        LogTrace("CkfPattern")<<"Size measurements in lower det:" << tmps.size();
+        for (std::size_t i=0; i!=tmps.size(); ++i)
+  	  result.emplace_back(compat.second,std::move(tmps.hits[i]),tmps.distances[i],&theLayer);
+      }
+      tmps.clear();
+
+      // verify also that first (and only!) not be inactive..
+      if (mdetUpper->measurements(compat.second, theEstimator,tmps) && tmps.hits[0]->isValid() ){
+        LogTrace("CkfPattern")<<"Size measurements in upper det:" << tmps.size();
+        for (std::size_t i=0; i!=tmps.size(); ++i)
+  	  result.emplace_back(compat.second,std::move(tmps.hits[i]),tmps.distances[i],&theLayer);
+      }
+      tmps.clear();
+
+    } else {
+      LogTrace("CkfPattern")<<"This is NOT a stack and we will going with the normal sequence!yey! "; 
+      if (mdet->measurements(compat.second, theEstimator,tmps) && tmps.hits[0]->isValid() ){
+        LogTrace("CkfPattern")<<" tmps size << " << tmps.size(); 
+        for (std::size_t i=0; i!=tmps.size(); ++i)
+  	  result.emplace_back(compat.second,std::move(tmps.hits[i]),tmps.distances[i],&theLayer);
+      }
+      tmps.clear();
+    }
+  
   }
-
-  if unlikely(theDbgFlg) cout << endl;  
 
   std::sort( result.begin(), result.end(), TrajMeasLessEstim());
 
+  LogTrace("CkfPattern")<<" final result size << " << result.size(); 
   return result;
 }
 
