@@ -5,6 +5,10 @@
 #include "DataFormats/GeometryVector/interface/LocalPoint.h" 
 #include "DataFormats/TrackingRecHit/interface/InvalidTrackingRecHit.h"
 #include "DataFormats/TrackingRecHit/interface/RecSegment.h"
+#include "DataFormats/TrackingRecHit/interface/VectorHit.h"
+#include "DataFormats/TrackingRecHit/interface/VectorHit2D.h"
+#include "DataFormats/Common/interface/DetSetVector.h"
+#include "DataFormats/Common/interface/DetSetVectorNew.h"
 #include "DataFormats/Common/interface/Wrapper.h"
 
 namespace {
@@ -24,5 +28,16 @@ namespace {
                              edm::ClonePolicy<TrackingRecHit> >::const_iterator> pr1;    
     std::auto_ptr<TrackingRecHitRef> ap1;
     edm::Wrapper<TrackingRecHitCollection> w1;
+
+     edm::Ref<edmNew::DetSetVector<Phase2TrackerCluster1D>,Phase2TrackerCluster1D,edmNew::DetSetVector<Phase2TrackerCluster1D>::FindForDetSetVector> ph2c_f;
+     edmNew::DetSetVector<edm::Ref<edmNew::DetSetVector<Phase2TrackerCluster1D>,Phase2TrackerCluster1D,edmNew::DetSetVector<Phase2TrackerCluster1D>::FindForDetSetVector> > ph2c_fv;
+     edm::Wrapper<edmNew::DetSetVector<edm::Ref<edmNew::DetSetVector<Phase2TrackerCluster1D>,Phase2TrackerCluster1D,edmNew::DetSetVector<Phase2TrackerCluster1D>::FindForDetSetVector> > > ph2c_w;
+//    Phase2TrackerCluster1DRef ph2c;
+    
+    //std::vector<VectorHit> vh1;
+    //VectorHitCollection vhc1;
+    VectorHitCollectionNew vhc1_new;
+    //edm::Wrapper<VectorHitCollection> wh1;
+    edm::Wrapper<VectorHitCollectionNew> wh1_new;    
   };
 }

@@ -16,6 +16,12 @@
   <class name="RecSegment" ClassVersion="10">
    <version ClassVersion="10" checksum="1295706057"/>
   </class>
+  <class name="VectorHit" ClassVersion="16">
+   <version ClassVersion="16" checksum="3398288772"/>
+  </class>
+  <class name="VectorHit2D" ClassVersion="10">
+   <version ClassVersion="10" checksum="333065919"/>
+  </class>
   <class name="std::vector<TrackingRecHit*>"/>
   <class name="edm::OwnVector<TrackingRecHit, edm::ClonePolicy<TrackingRecHit> >"/>
   <class name="edm::Ref<edm::OwnVector<TrackingRecHit,edm::ClonePolicy<TrackingRecHit> >,TrackingRecHit,edm::refhelper::FindUsingAdvance<edm::OwnVector<TrackingRecHit,edm::ClonePolicy<TrackingRecHit> >,TrackingRecHit> >"/>
@@ -26,6 +32,11 @@
   <class name="edm::RefProd<edm::OwnVector<TrackingRecHit, edm::ClonePolicy<TrackingRecHit> > >"/>
   <class name="edm::RefVector<edm::OwnVector<TrackingRecHit,edm::ClonePolicy<TrackingRecHit> >,TrackingRecHit,edm::refhelper::FindUsingAdvance<edm::OwnVector<TrackingRecHit,edm::ClonePolicy<TrackingRecHit> >,TrackingRecHit> >"/>
   <class name="edm::Wrapper<edm::OwnVector<TrackingRecHit, edm::ClonePolicy<TrackingRecHit> > >"/>
+  <class name="edm::Ref<edmNew::DetSetVector<Phase2TrackerCluster1D>,Phase2TrackerCluster1D,edmNew::DetSetVector<Phase2TrackerCluster1D>::FindForDetSetVector>"/>
+  <class name="edmNew::DetSetVector<edm::Ref<edmNew::DetSetVector<Phase2TrackerCluster1D>,Phase2TrackerCluster1D,edmNew::DetSetVector<Phase2TrackerCluster1D>::FindForDetSetVector> >"/>
+  <class name="edm::Wrapper<edmNew::DetSetVector<edm::Ref<edmNew::DetSetVector<Phase2TrackerCluster1D>,Phase2TrackerCluster1D,edmNew::DetSetVector<Phase2TrackerCluster1D>::FindForDetSetVector> > >"/>
+  <class name="edmNew::DetSetVector<VectorHit> "/>
+  <class name="edm::Wrapper< edmNew::DetSetVector<VectorHit> >"/>
 </selection>
 <exclusion>
   <class name="edm::OwnVector<TrackingRecHit, edm::ClonePolicy<TrackingRecHit> >">
