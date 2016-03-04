@@ -176,7 +176,21 @@ process.spclusoccuprodxy = process.spclusoccuprod.clone()
 process.spclusoccuprodxy.wantedSubDets = OccupancyPlotsPXFDetailedWantedSubDets
 process.spclusoccuprodxyontrack=process.spclusoccuprodxy.clone(clusterdigiCollection = cms.InputTag("AlignmentTrackSelector"))
 
+process.p2clusmultprod = cms.EDProducer("SiPhase2TrackerCluster1DMultiplicityProducer",
+                                        clusterdigiCollection = cms.InputTag("siPhase2Clusters"),
+                                        wantedSubDets = cms.VPSet()
+                                        )
+process.p2clusmultprod.wantedSubDets.extend(OccupancyPlotsPixelWantedSubDets)
+
+process.p2clusoccuprod = cms.EDProducer("SiPhase2TrackerCluster1DMultiplicityProducer",
+                                        clusterdigiCollection = cms.InputTag("siPhase2Clusters"),
+                                        withClusterSize = cms.untracked.bool(True),
+                                        wantedSubDets = cms.VPSet()
+                                        )
+process.p2clusoccuprod.wantedSubDets.extend(OccupancyPlotsPixelWantedSubDets)
+
 process.seqMultProd = cms.Sequence(#process.ssclusmultprod + process.ssclusoccuprod +
+                                   process.p2clusmultprod + process.p2clusoccuprod +
                                    process.spclusmultprod + process.spclusoccuprod +
                                    process.spclusmultprodontrack + process.spclusoccuprodontrack +
                                    process.spclusmultprodxy + process.spclusoccuprodxy +
@@ -211,6 +225,11 @@ process.pixeloccupancyxyplotsontrack.wantedSubDets = process.spclusmultprodxyont
 process.pixeloccupancyxyplotsontrack.multiplicityMaps = cms.VInputTag(cms.InputTag("spclusmultprodxyontrack"))
 process.pixeloccupancyxyplotsontrack.occupancyMaps = cms.VInputTag(cms.InputTag("spclusoccuprodxyontrack"))
 
+process.phase2occupancyplots = process.occupancyplots.clone()
+process.phase2occupancyplots.wantedSubDets = process.spclusmultprod.wantedSubDets
+process.phase2occupancyplots.multiplicityMaps = cms.VInputTag(cms.InputTag("p2clusmultprod"))
+process.phase2occupancyplots.occupancyMaps = cms.VInputTag(cms.InputTag("p2clusoccuprod"))
+
 #right now in phase2 all the modules are pixels: comment strips
 process.alloccupancyplots = process.occupancyplots.clone()
 process.alloccupancyplots.wantedSubDets = cms.VPSet()
@@ -243,7 +262,8 @@ process.seqAnalyzers = cms.Sequence(
     process.goodVertices + process.primaryvertexanalyzer +
 #    process.alloccupancyplots
     process.pixeloccupancyplots + process.pixeloccupancyplotsontrack +
-    process.pixeloccupancyxyplots + process.pixeloccupancyxyplotsontrack
+    process.pixeloccupancyxyplots + process.pixeloccupancyxyplotsontrack +
+    process.phase2occupancyplots
 )
 
 #-------------------------------------------------------------------------------------------
@@ -308,10 +328,8 @@ process.TFileService = cms.Service('TFileService',
 process = customise_Reco(process,0)
 process = customise_condOverRides(process)
 
-# Need this line because Phase2Clusters are not produced with old clusterizer
-process.MeasurementTracker.Phase2TrackerCluster1DProducer = cms.string('')
 process.myrereco = cms.Sequence(
-    process.siPixelRecHits + #process.siPixelVectorHits +
+    process.siPixelRecHits + 
     process.trackingGlobalReco)
 
 process.p0 = cms.Path(

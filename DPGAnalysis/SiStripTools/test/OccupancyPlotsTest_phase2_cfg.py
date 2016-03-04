@@ -306,7 +306,7 @@ process = customise_Reco(process,0)
 process = customise_condOverRides(process)
 
 # Need this line because Phase2Clusters are not produced with old clusterizer
-process.MeasurementTracker.Phase2TrackerCluster1DProducer = cms.string('')
+#process.MeasurementTracker.Phase2TrackerCluster1DProducer = cms.string('')
 process.myrereco = cms.Sequence(
     process.siPixelRecHits + 
     process.trackingGlobalReco)
