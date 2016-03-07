@@ -74,7 +74,7 @@ unsigned int TrackerTopology::module(const DetId &id) const {
   return 0;
 }
 
-uint32_t TrackerTopology::glued(const DetId &id) const {
+uint32_t TrackerTopology::Glued(const DetId &id) const {
 
     uint32_t subdet=id.subdetId();
     if ( subdet == PixelSubdetector::PixelBarrel )
@@ -90,11 +90,11 @@ uint32_t TrackerTopology::glued(const DetId &id) const {
     if ( subdet == StripSubdetector::TEC )
       return tecGlued(id);
 
-    throw cms::Exception("Invalid DetId") << "Unsupported DetId in TrackerTopology::glued";
+    throw cms::Exception("Invalid DetId") << "Unsupported DetId in TrackerTopology::Glued";
     return 0;
 }
 
-uint32_t TrackerTopology::stack(const DetId &id) const {
+uint32_t TrackerTopology::Stack(const DetId &id) const {
 
     uint32_t subdet=id.subdetId();
     if ( subdet == PixelSubdetector::PixelBarrel )
@@ -110,10 +110,10 @@ uint32_t TrackerTopology::stack(const DetId &id) const {
     if ( subdet == StripSubdetector::TEC )
       return tecStack(id);
 
-    throw cms::Exception("Invalid DetId") << "Unsupported DetId in TrackerTopology::stack";
+    throw cms::Exception("Invalid DetId") << "Unsupported DetId in TrackerTopology::Stack";
 }
 
-uint32_t TrackerTopology::lower(const DetId &id) const {
+uint32_t TrackerTopology::Lower(const DetId &id) const {
 
     uint32_t subdet=id.subdetId();
     if ( subdet == PixelSubdetector::PixelBarrel )
@@ -129,10 +129,10 @@ uint32_t TrackerTopology::lower(const DetId &id) const {
     if ( subdet == StripSubdetector::TEC )
       return tecLower(id);
 
-    throw cms::Exception("Invalid DetId") << "Unsupported DetId in TrackerTopology::lower";
+    throw cms::Exception("Invalid DetId") << "Unsupported DetId in TrackerTopology::Lower";
 }
 
-uint32_t TrackerTopology::upper(const DetId &id) const {
+uint32_t TrackerTopology::Upper(const DetId &id) const {
 
     uint32_t subdet=id.subdetId();
     if ( subdet == PixelSubdetector::PixelBarrel )
@@ -148,7 +148,7 @@ uint32_t TrackerTopology::upper(const DetId &id) const {
     if ( subdet == StripSubdetector::TEC )
       return tecUpper(id);
 
-    throw cms::Exception("Invalid DetId") << "Unsupported DetId in TrackerTopology::upper";
+    throw cms::Exception("Invalid DetId") << "Unsupported DetId in TrackerTopology::Upper";
 }
 
 
@@ -160,13 +160,13 @@ bool TrackerTopology::isStereo(const DetId &id) const {
     if ( subdet == PixelSubdetector::PixelEndcap )
       return false;
     if ( subdet == StripSubdetector::TIB )
-      return tibIsStereo(id);
+      return tibStereo(id)!=0;
     if ( subdet == StripSubdetector::TID )
-      return tidIsStereo(id);
+      return tidStereo(id)!=0;
     if ( subdet == StripSubdetector::TOB )
-      return tobIsStereo(id);
+      return tobStereo(id)!=0;
     if ( subdet == StripSubdetector::TEC )
-      return tecIsStereo(id);
+      return tecStereo(id)!=0;
 
     throw cms::Exception("Invalid DetId") << "Unsupported DetId in TrackerTopology::isStereo";
     return 0;
@@ -180,13 +180,13 @@ bool TrackerTopology::isRPhi(const DetId &id) const {
     if ( subdet == PixelSubdetector::PixelEndcap )
       return false;
     if ( subdet == StripSubdetector::TIB )
-      return tibIsRPhi(id);
+      return tibRPhi(id)!=0;
     if ( subdet == StripSubdetector::TID )
-      return tidIsRPhi(id);
+      return tidRPhi(id)!=0;
     if ( subdet == StripSubdetector::TOB )
-      return tobIsRPhi(id);
+      return tobRPhi(id)!=0;
     if ( subdet == StripSubdetector::TEC )
-      return tecIsRPhi(id);
+      return tecRPhi(id)!=0;
 
     throw cms::Exception("Invalid DetId") << "Unsupported DetId in TrackerTopology::isRPhi";
     return 0;
@@ -232,7 +232,7 @@ bool TrackerTopology::isUpper(const DetId &id) const {
     return 0;
 }
 
-DetId TrackerTopology::partnerDetId(const DetId &id) const {
+uint32_t TrackerTopology::PartnerDetId(const DetId &id) const {
 
     uint32_t subdet=id.subdetId();
     if ( subdet == PixelSubdetector::PixelBarrel )
@@ -248,7 +248,7 @@ DetId TrackerTopology::partnerDetId(const DetId &id) const {
     if ( subdet == StripSubdetector::TEC )
       return tecPartnerDetId(id);
 
-    throw cms::Exception("Invalid DetId") << "Unsupported DetId in TrackerTopology::partnerDetId";
+    throw cms::Exception("Invalid DetId") << "Unsupported DetId in TrackerTopology::PartnerDetId";
     return 0;
 }
 
@@ -343,7 +343,9 @@ std::string TrackerTopology::print(DetId id) const {
     unsigned int              theModule = tobModule(id);
     std::string side;
     std::string part;
-    side = (theRod[0] == 1 ) ? "-" : "+";
+    side = (((theRod[0] == 1 ) ? "-" : ((theRod[0] == 2 ) ? "+" : (theRod[0] == 3 ) ? "0" : "")));
+//    side = (theRod[0] == 2 ) ? "+" : "";
+//    side = (theRod[0] == 3 ) ? "0" : "";
     std::string type;
     type = (isStereo(id)) ? "stereo" : type;
     type = (isRPhi(id)) ? "r-phi" : type;
@@ -396,26 +398,3 @@ std::string TrackerTopology::print(DetId id) const {
   return strstr.str();
 }
 
-
-SiStripDetId::ModuleGeometry TrackerTopology::moduleGeometry(const DetId &id) const {
-  switch(id.subdetId()) {
-  case StripSubdetector::TIB: return tibLayer(id)<3? SiStripDetId::IB1 : SiStripDetId::IB2;
-  case StripSubdetector::TOB: return tobLayer(id)<5? SiStripDetId::OB2 : SiStripDetId::OB1;
-  case StripSubdetector::TID: switch (tidRing(id)) {
-    case 1: return SiStripDetId::W1A;
-    case 2: return SiStripDetId::W2A;
-    case 3: return SiStripDetId::W3A;
-    }
-  case StripSubdetector::TEC: switch (tecRing(id)) {
-    case 1: return SiStripDetId::W1B;
-    case 2: return SiStripDetId::W2B;
-    case 3: return SiStripDetId::W3B;
-    case 4: return SiStripDetId::W4;
-  //generic function to return DetIds and boolean factors
-    case 5: return SiStripDetId::W5;
-    case 6: return SiStripDetId::W6;
-    case 7: return SiStripDetId::W7;
-    }
-  }
-  return SiStripDetId::UNKNOWNGEOMETRY;
-}
