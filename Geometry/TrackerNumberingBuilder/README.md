@@ -1,4 +1,5 @@
-In this package the `GeometricDet` tree of the `TrackerGeometry` object in the `TrackerDigiGeometryRecord` is created, the DetIds are assigned to the different components in the tree according to the schema which is defined in the xml description of trackerParameters.xml for the `TrackerGeometricDetESModule`, and the configuration of the `TrackerTopology` object is configured to be able to decode the DetIds using
+In this package the `GeometricDet` tree of the `TrackerGeometry` object in the `TrackerDigiGeometryRecord` is created, the DetIds are assigned to the different components in the tree according to the schema which is defined in the configuration
+of `TrackerGeometricDetESModule`, and the `TrackerTopology` object is configured to be able to decode the DetIds using
 the same schema.
 
 The graph of the `GeometricDet` tree can be found in [this file](doc/GeometricDetBuilder.png)
@@ -88,8 +89,7 @@ The Run 1 detector DetId schema profits of all the six available subdetectors (f
 
 A more detailed description of the SiStrip Tracker DetId schema can be found in this CMS Internal Note: [http://cms.cern.ch/iCMS/jsp/openfile.jsp?type=IN&year=2007&files=IN2007_020.pdf]
 
-The configuration names for this detid schema are `trackerNumberingGeometry_cfi` (to run on geometry built from xml files) or `trackerNumberingGeometryDB_cfi` (to run on geometry from DB) for `TrackerGeometricDetESModule` and `trackerTopologyConstants_cfi` for `TrackerTopology`
-The xml description of tracker parameters for this detid schema is in [Geometry/TrackerCommonData/data/trackerParameters.xml](../TrackerCommonData/data/trackerParameters.xml)
+The configuration names for this detid schema are `trackerNumberingGeometry_cfi` for `TrackerGeometricDetESModule` and `trackerTopologyConstants_cfi` for `TrackerTopology`
 
 ### Phase 1 Upgrade Detector DetId schema
 The phase 1 detector DetId schema differs from that of the Run 1 detector only in the first two subdetectors which
@@ -119,11 +119,12 @@ corresponds to the Pixel Barrel and Forward detector. Therefore only them will b
 
 Subdetectors 3 to 6 are as for the Run 1 detector since the SiStrip Tracker is the same in phase1.
 
-The configuration names for this detid schema are `trackerNumberingGeometry_cfi` (to run on geometry built from xml files) or `trackerNumberingGeometryDB_cfi` (to run on geometry from DB) for `TrackerGeometricDetESModule` and `trackerTopology2017Constants_cfi` for `TrackerTopology`
-The xml description of tracker parameters for this detid schema is in [Geometry/TrackerCommonData/data/PhaseI/trackerParameters.xml](../TrackerCommonData/data/PhaseI/trackerParameters.xml)
+The configuration names for this detid schema are `trackerNumbering2017Geometry_cfi` for `TrackerGeometricDetESModule` and `trackerTopology2017Constants_cfi` for `TrackerTopology`
 
 ### Phase 2 Upgrade Detector DetId schema
-The phase 2 detector DetId schema is identical to the one of the phase 1 detector for the inner pixel detector while for the outer tracker subdetector 5, for the barrel, and subdetector 4, for the endcap, are used. In some cases the name of the `TrackerTopology` methods is not so meaningful. In particular, for the Outer Tracker, the methods DoubleSided is not implemented, firstly because there is no need, secondly because it is not possible, just looking at the DetId and without something hardcoded, to understand if the module is single or double. This is also valid for Run I and Phase I.
+The phase 2 detector DetId schema is identical to the one of the phase 1 detector for the inner pixel detector while for the outer tracker subdetector 5, for the barrel, and subdetector 4, for the endcap, are used. In some cases the name of the `TrackerTopology` methods is not so meaningful. In particular, for the Outer Tracker, the methods DoubleSided is not implemented, firstly because there is no need, secondly because it is not possible, just looking at the DetId and without something hardcoded, to understand if the module is single or double. This is also valid for Run I and Phase 1.
+The OT tilted option has been introduced in the subdetector 5 with two bits (in the table referred with _subdetector part_ ) that correspond to the rings in the negative and positive part and the central barrel part. The order is thus changed respectevely for the three different subparts: ladders by increasing phi and rings by increasing |z|, same consistency for the modules order.
+With this subdetector, the flat geometry is compatible using just the central barrel part of the subdetector 5.
  
 * Subdetector 1: (`DetId::subDetId() == PixelSubdetector::PixelBarrel`): Phase1 Pixel Barrel
 
@@ -153,8 +154,9 @@ The phase 2 detector DetId schema is identical to the one of the phase 1 detecto
 |------|-----------|-----------|-----|----|-----|
 | _not used_ | 24 | 0x1 | 1 | | |
 | Layer | 20 | 0xF | 4 | tobLayer(id) or layer(id) | increasing r |
-| Ladder | 12 | 0xFF | 8 | tobRod(id) | increasing phi |
-| Module | 2 | 0x3FF | 10 | tobModule(id) | increasing z |
+| _subdetector part_ | 18| 0x3 | 2 | tobSide(id) | 1=rings- 2=rings+ 3=barrel0|
+| Ladder | 10 | 0xFF | 8 | tobRod(id) | increasing abs(z) (rings) or phi(barrel) |
+| Module | 2 | 0xFF | 8 | tobModule(id) | increasing phi (rings) or z(barrel) |
 | Module type | 0 | 0x3 | 2 | tobLower(id) or tobUpper(id) | 1=lower in local s.o.r.(P sensor into PS), 2=upper in local s.o.r.(S sensor into PS), 0=pair |
 
 * Subdetector 4  (`DetId::subDetId() == StripSubdetector::TID`): Phase2 Outer Tracker Endcap
@@ -169,8 +171,7 @@ The phase 2 detector DetId schema is identical to the one of the phase 1 detecto
 | Module | 2 | 0xFF | 8 | tidModule(id) | increasing phi |
 | Module type | 0 | 0x3 | 2 | tidLower(id) or tidUpper(id) | 1=lower in local s.o.r.(P sensor into PS), 2=upper in local s.o.r.(S sensor into PS), 0=pair |
 
-The configuration names for this detid schema are `trackerNumberingGeometry_cfi` (to run on geometry built from xml files) or `trackerNumberingGeometryDB_cfi` (to run on geometry from DB) for `TrackerGeometricDetESModule` and `trackerTopology2023Constants_cfi` for `TrackerTopology`
-The xml description of tracker parameters for this detid schema is in [Geometry/TrackerCommonData/data/PhaseII/trackerParameters.xml](../TrackerCommonData/data/PhaseII/trackerParameters.xml)
+The configuration names for this detid schema are `trackerNumbering2023Geometry_cfi` for `TrackerGeometricDetESModule` and `trackerTopology2023Constants_cfi` for `TrackerTopology`
 
 ### Subdetector `GeometricDet` Enumerators
 
