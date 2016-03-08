@@ -81,7 +81,7 @@ ClusterMCsplitStrips(const edm::ParameterSet& conf)
 void ClusterMCsplitStrips::
 produce(edm::Event& event, const edm::EventSetup& evSetup)  {
 
-  //Retrieve tracker topology from geometry
+/*  //Retrieve tracker topology from geometry
   evSetup.get<TrackerTopologyRcd>().get(tTopoHandle_);
 
   std::auto_ptr< edmNew::DetSetVector<SiStripCluster> > output(new edmNew::DetSetVector<SiStripCluster>());
@@ -97,14 +97,14 @@ produce(edm::Event& event, const edm::EventSetup& evSetup)  {
   LogDebug("Output") << output->dataSize() << " clusters from " 
 		     << output->size()     << " modules";
   output->shrink_to_fit();
-  event.put(output);
+  event.put(output);*/
 }
 
 void  ClusterMCsplitStrips::
 refineCluster(const edm::Handle< edmNew::DetSetVector<SiStripCluster> >& input,
 	      std::auto_ptr< edmNew::DetSetVector<SiStripCluster> >& output) {
 
-  const TrackerTopology* const tTopo = tTopoHandle_.product();
+/*  const TrackerTopology* const tTopo = tTopoHandle_.product();
 
   for (edmNew::DetSetVector<SiStripCluster>::const_iterator det = input->begin(); det != input->end(); det++) {
 
@@ -211,7 +211,7 @@ refineCluster(const edm::Handle< edmNew::DetSetVector<SiStripCluster> >& input,
     }  // end loop over original clusters
       
   }  // end loop over sensors
-
+*/
 }
 
 template<class T>
