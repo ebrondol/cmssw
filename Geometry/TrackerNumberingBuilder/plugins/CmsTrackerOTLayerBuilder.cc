@@ -34,7 +34,7 @@ void CmsTrackerOTLayerBuilder::buildComponent(DDFilteredView& fv, GeometricDet* 
 
 void CmsTrackerOTLayerBuilder::sortNS(DDFilteredView& fv, GeometricDet* det){
 
-  GeometricDet::GeometricDetContainer comp = det->components();
+  GeometricDet::ConstGeometricDetContainer comp = det->components();
 
   //order ladder and rings together
   GeometricDet::GeometricDetContainer rods;
