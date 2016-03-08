@@ -8,6 +8,7 @@
 #define RecoLocalTracker_SiVectorHitBuilder_VectorHitBuilderAlgorithm_H
 
 #include "RecoLocalTracker/SiPixelVectorHitBuilder/interface/SiPixelVectorHitBuilderAlgorithmBase.h"
+#include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
 #include "DataFormats/TrackingRecHit/interface/VectorHit.h"
 #include "CommonTools/Statistics/interface/LinearFit.h"
 
@@ -32,12 +33,14 @@ class VectorHitBuilderAlgorithm : public SiPixelVectorHitBuilderAlgorithmBase {
   //not implemented yet
   bool checkClustersCompatibility(Local3DPoint& posinner, Local3DPoint& posouter, LocalError& errinner, LocalError& errouter);
 
-  std::vector<VectorHit> buildVectorHits(const StackGeomDet& stack,
+  std::vector<VectorHit> buildVectorHits(const StackGeomDet * stack,
                                          edm::Handle< edmNew::DetSetVector<Phase2TrackerCluster1D> > clusters,
-                                         const detset & DSVinner, 
-                                         const detset & DSVouter);
+                                         const detset & DSVinner, const detset & DSVouter,
+                                         const PixelGeomDetUnit * theLowerGeomDetUnit, 
+                                         const PixelGeomDetUnit * theUpperGeomDetUnit);
 
-  VectorHit buildVectorHit(const StackGeomDet& stack, Phase2TrackerCluster1DRef inner, Phase2TrackerCluster1DRef outer);
+  VectorHit buildVectorHit(const StackGeomDet* stack, Phase2TrackerCluster1DRef inner, Phase2TrackerCluster1DRef outer, 
+                           const PixelGeomDetUnit * theLowerGeomDetUnit, const PixelGeomDetUnit * theUpperGeomDetUnit);
 
   // Full I/O in DetSet
   //void buildDetUnit( const edm::DetSetVector<Phase2TrackerCluster1D> & input,

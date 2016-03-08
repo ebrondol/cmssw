@@ -1,6 +1,5 @@
 #include "RecoLocalTracker/SiPixelVectorHitBuilder/interface/VectorHitBuilderAlgorithm.h"
 #include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
-#include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
 #include "Geometry/CommonTopologies/interface/PixelTopology.h"
 #include "DataFormats/TrackingRecHit/interface/VectorHit2D.h"
 
@@ -29,46 +28,42 @@ void VectorHitBuilderAlgorithm::run(edm::Handle< edmNew::DetSetVector<Phase2Trac
     DetId detId1(rawDetId1);
     DetId detId2 = theTkTopo->PartnerDetId(detId1);
     DetId detIdStack = theTkTopo->Stack(detId1);
+
+    //debug
     LogTrace("VectorHitBuilderAlgorithm") << "  DetId stack : " << detIdStack.rawId();
     LogTrace("VectorHitBuilderAlgorithm") << "  DetId lower cluster : " << rawDetId1;
-    LogTrace("VectorHitBuilderAlgorithm") << "  DetId upper cluster : " << detId2.rawId();
-
-/*
-    it_temporary = temporary.find(detIdStack);
-    if ( it_temporary != temporary.end() ) {
-      LogTrace("VectorHitBuilderAlgorithm") << " this stack has already been analyzed -> skip it ";
-      //continue;
-    }
-*/
     if ( theTkTopo->isLower(detId1) )
       LogTrace("VectorHitBuilderAlgorithm") << " is lower";
     else
       LogTrace("VectorHitBuilderAlgorithm") << " is not lower ";
+    LogTrace("VectorHitBuilderAlgorithm") << "  DetId upper cluster : " << detId2.rawId();
     if ( theTkTopo->isUpper(detId2) )
       LogTrace("VectorHitBuilderAlgorithm") << " is upper ";
     else
       LogTrace("VectorHitBuilderAlgorithm") << " is not upper ";
 
+
+    it_temporary = temporary.find(detIdStack);
+    if ( it_temporary != temporary.end() ) {
+      LogTrace("VectorHitBuilderAlgorithm") << " this stack has already been analyzed -> skip it ";
+      continue;
+    }
+
     const GeomDet* gd;
     const StackGeomDet* stackDet;
-    edmNew::DetSetVector<Phase2TrackerCluster1D>::const_iterator it_lower;
-    edmNew::DetSetVector<Phase2TrackerCluster1D>::const_iterator it_upper;
-      it_lower = ClustersPhase2Collection->find( detId1 );
-      it_upper = ClustersPhase2Collection->find( detId2 );
-/*
-    if( theTkTopo->isLower(detId1) && theTkTopo->isUpper(detId2) ) {
-      it_lower = ClustersPhase2Collection->find( detId1 );
-      it_upper = ClustersPhase2Collection->find( detId2 );
-    }
-    if( theTkTopo->isLower(detId2) && theTkTopo->isUpper(detId1) ) {
-      it_lower = ClustersPhase2Collection->find( detId2 );
-      it_upper = ClustersPhase2Collection->find( detId1 );
-    }
-*/    
-    if ( it_lower != ClustersPhase2Collection->end() && it_upper != ClustersPhase2Collection->end() ){
+    edmNew::DetSetVector<Phase2TrackerCluster1D>::const_iterator it_det1 = ClustersPhase2Collection->find( detId1 );
+    edmNew::DetSetVector<Phase2TrackerCluster1D>::const_iterator it_det2 = ClustersPhase2Collection->find( detId2 );
+
+    // it can also be moved in buildVectorHit directly
+    const GeomDetUnit* geomDetUnit1(theTkGeom->idToDetUnit(detId1));
+    const PixelGeomDetUnit* theGeomDet1 = dynamic_cast< const PixelGeomDetUnit* >(geomDetUnit1);
+    const GeomDetUnit* geomDetUnit2(theTkGeom->idToDetUnit(detId2));
+    const PixelGeomDetUnit* theGeomDet2 = dynamic_cast< const PixelGeomDetUnit* >(geomDetUnit2);
+
+    if ( it_det1 != ClustersPhase2Collection->end() && it_det2 != ClustersPhase2Collection->end() ){
       gd = theTkGeom->idToDet(detIdStack);
       stackDet = dynamic_cast<const StackGeomDet*>(gd);
-      std::vector<VectorHit> vhsInStack = buildVectorHits(*stackDet, clusters, *it_lower, *it_upper);
+      std::vector<VectorHit> vhsInStack = buildVectorHits(stackDet, clusters, *it_det1, *it_det2, theGeomDet1, theGeomDet2);
       temporary[detIdStack] = vhsInStack;
     }
 
@@ -93,10 +88,12 @@ bool VectorHitBuilderAlgorithm::checkClustersCompatibility(Local3DPoint& posinne
 
 //----------------------------------------------------------------------------
 //ERICA::in the DT code the global position is used to compute the alpha angle and put a cut on that.
-std::vector<VectorHit> VectorHitBuilderAlgorithm::buildVectorHits(const StackGeomDet& stack, 
+std::vector<VectorHit> VectorHitBuilderAlgorithm::buildVectorHits(const StackGeomDet * stack, 
                                                                   edm::Handle< edmNew::DetSetVector<Phase2TrackerCluster1D> > clusters, 
                                                                   const detset & theLowerDetSet, 
-                                                                  const detset & theUpperDetSet)
+                                                                  const detset & theUpperDetSet, 
+                                                                  const PixelGeomDetUnit * theLowerGeomDetUnit, 
+                                                                  const PixelGeomDetUnit * theUpperGeomDetUnit)
 {
 
   LogTrace("VectorHitBuilderAlgorithm") << "  theLowerDetSet : " << theLowerDetSet.size();
@@ -110,7 +107,7 @@ std::vector<VectorHit> VectorHitBuilderAlgorithm::buildVectorHits(const StackGeo
     for ( const_iterator ciu = theUpperDetSet.begin(); ciu != theUpperDetSet.end(); ++ ciu ) {
 
       Phase2TrackerCluster1DRef clusterUpper = edmNew::makeRefTo( clusters, ciu );
-      VectorHit vh = buildVectorHit( stack, clusterLower, clusterUpper);
+      VectorHit vh = buildVectorHit( stack, clusterLower, clusterUpper, theLowerGeomDetUnit, theUpperGeomDetUnit);
       LogTrace("VectorHitBuilderAlgorithm") << "  Vectorhit " << vh ;
       LogTrace("VectorHitBuilderAlgorithm") << std::endl;
       //protection: the VH can also be empty!!
@@ -133,32 +130,31 @@ std::vector<VectorHit> VectorHitBuilderAlgorithm::buildVectorHits(const StackGeo
 
 }
 
-VectorHit VectorHitBuilderAlgorithm::buildVectorHit(const StackGeomDet& stack, 
+VectorHit VectorHitBuilderAlgorithm::buildVectorHit(const StackGeomDet * stack, 
                                                     Phase2TrackerCluster1DRef inner, 
-                                                    Phase2TrackerCluster1DRef outer)
+                                                    Phase2TrackerCluster1DRef outer, 
+                                                    const PixelGeomDetUnit * theLowerGeomDetUnit, 
+                                                    const PixelGeomDetUnit * theUpperGeomDetUnit)
 {
 
-  const GeomDetUnit* gDUnitInn = stack.lowerDet();
-  const GeomDetUnit* gDUnitOut = stack.upperDet();
-
   //FIXME::you should put the correct error when the StripCPE is ready
-  //FIXME StripClusterParameterEstimator::LocalValues parameters = parameterestimator->localParameters(*innerClus_iter,*gDUnitInn);
+  //FIXME StripClusterParameterEstimator::LocalValues parameters = parameterestimator->localParameters(*innerClus_iter,*theLowerGeomDetUnit);
   MeasurementPoint mpCluInn(inner->center(), inner->column() + 0.5);
-  Local3DPoint localPosCluInn = gDUnitInn->topology().localPosition(mpCluInn);
+  Local3DPoint localPosCluInn = theLowerGeomDetUnit->topology().localPosition(mpCluInn);
   MeasurementError meCluInn(1./12,0.0,1./12);
-  LocalError localErrCluInn  = gDUnitInn->topology().localError(mpCluInn,meCluInn);
+  LocalError localErrCluInn  = theLowerGeomDetUnit->topology().localError(mpCluInn,meCluInn);
 
   //FIXME::you should put the correct error when the StripCPE is ready
   //FIXME StripClusterParameterEstimator::LocalValues parameters =  parameterestimator->localParameters(*clustIt,geomDetUnit);
   MeasurementPoint mpCluOut(outer->center(), outer->column() + 0.5);
-  Local3DPoint localPosCluOut = gDUnitOut->topology().localPosition(mpCluOut);
-  Global3DPoint globalPosCluOut = gDUnitOut->surface().toGlobal(localPosCluOut);
-  Local3DPoint localPosCluOutINN = gDUnitInn->surface().toLocal(globalPosCluOut);
+  Local3DPoint localPosCluOut = theUpperGeomDetUnit->topology().localPosition(mpCluOut);
+  Global3DPoint globalPosCluOut = theUpperGeomDetUnit->surface().toGlobal(localPosCluOut);
+  Local3DPoint localPosCluOutINN = theLowerGeomDetUnit->surface().toLocal(globalPosCluOut);
   MeasurementError meCluOut(1./12,0.0,1./12);
-  LocalError localErrCluOutINN = gDUnitInn->topology().localError(mpCluOut,meCluOut);
+  LocalError localErrCluOutINN = theLowerGeomDetUnit->topology().localError(mpCluOut,meCluOut);
 
   //debug
-  Global3DPoint globalPosCluInn = gDUnitInn->surface().toGlobal(localPosCluInn);
+  Global3DPoint globalPosCluInn = theLowerGeomDetUnit->surface().toGlobal(localPosCluInn);
   LogTrace("VectorHitBuilderAlgorithm") << "\t inner global pos " << globalPosCluInn;
   LogTrace("VectorHitBuilderAlgorithm") << "\t outer global pos " << globalPosCluOut;
   //LogTrace("VectorHitBuilderAlgorithm") << "\t outer local pos " << localPosCluOut;
@@ -188,7 +184,7 @@ VectorHit VectorHitBuilderAlgorithm::buildVectorHit(const StackGeomDet& stack,
     fit2Dzy(localPosCluInn, localPosCluOutINN, localErrCluInn,localErrCluOutINN, pos2Dzy, dir2Dzy, covMat2Dzy, chi22Dzy);
     VectorHit2D vh2Dzy = VectorHit2D(pos2Dzy, dir2Dzy, covMat2Dzy, chi22Dzy);
 
-    VectorHit vh = VectorHit(stack.lowerDet()->geographicalId(), vh2Dzx, vh2Dzy, inner, outer);
+    VectorHit vh = VectorHit(stack->geographicalId(), vh2Dzx, vh2Dzy, inner, outer);
     return vh;
 
   }

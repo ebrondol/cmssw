@@ -284,8 +284,10 @@ void TrackerGeomBuilderFromGeometricDet::buildGeomDet(TrackerGeometry* tracker, 
 
       } else if (ModName.find("Lower")!=std::string::npos){
 
-        //FIXME::ERICA: the plane builder is still valid?
-        PlaneBuilderForGluedDet::ResultType plane = gluedplaneBuilder.plane(composed);
+        // the plane is built in the centre
+        //PlaneBuilderForGluedDet::ResultType plane = gluedplaneBuilder.plane(composed);
+        // the plane is built on the lower det
+        Plane* plane = new Plane(dus->surface());
         composedDetId = tTopo->Stack(gduId[i]);
         StackGeomDet* stackDet = new StackGeomDet(&(*plane),dum,dus,composedDetId);
         tracker->addDet((GeomDet*) stackDet);
