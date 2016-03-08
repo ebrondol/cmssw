@@ -33,12 +33,13 @@ void VectorHitBuilderAlgorithm::run(edm::Handle< edmNew::DetSetVector<Phase2Trac
     LogTrace("VectorHitBuilderAlgorithm") << "  DetId lower cluster : " << rawDetId1;
     LogTrace("VectorHitBuilderAlgorithm") << "  DetId upper cluster : " << detId2.rawId();
 
+/*
     it_temporary = temporary.find(detIdStack);
     if ( it_temporary != temporary.end() ) {
       LogTrace("VectorHitBuilderAlgorithm") << " this stack has already been analyzed -> skip it ";
       //continue;
     }
-
+*/
     if ( theTkTopo->isLower(detId1) )
       LogTrace("VectorHitBuilderAlgorithm") << " is lower";
     else
@@ -52,6 +53,8 @@ void VectorHitBuilderAlgorithm::run(edm::Handle< edmNew::DetSetVector<Phase2Trac
     const StackGeomDet* stackDet;
     edmNew::DetSetVector<Phase2TrackerCluster1D>::const_iterator it_lower;
     edmNew::DetSetVector<Phase2TrackerCluster1D>::const_iterator it_upper;
+      it_lower = ClustersPhase2Collection->find( detId1 );
+      it_upper = ClustersPhase2Collection->find( detId2 );
 /*
     if( theTkTopo->isLower(detId1) && theTkTopo->isUpper(detId2) ) {
       it_lower = ClustersPhase2Collection->find( detId1 );
