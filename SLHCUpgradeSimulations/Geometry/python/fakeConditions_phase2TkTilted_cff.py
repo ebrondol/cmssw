@@ -1,0 +1,19 @@
+import FWCore.ParameterSet.Config as cms
+
+siPixelFakeGainOfflineESSource = cms.ESSource("SiPixelFakeGainOfflineESSource",
+        file = 
+cms.FileInPath('SLHCUpgradeSimulations/Geometry/data/PhaseII/Tilted/EmptyPixelSkimmedGeometry.txt')
+        )
+es_prefer_fake_gain = cms.ESPrefer("SiPixelFakeGainOfflineESSource","siPixelFakeGainOfflineESSource")
+
+siPixelFakeLorentzAngleESSource = cms.ESSource("SiPixelFakeLorentzAngleESSource",
+        file = 
+cms.FileInPath('SLHCUpgradeSimulations/Geometry/data/PhaseII/Tilted/PixelSkimmedGeometry.txt')
+        )
+es_prefer_fake_lorentz = cms.ESPrefer("SiPixelFakeLorentzAngleESSource","siPixelFakeLorentzAngleESSource")
+
+
+#from Geometry.TrackerNumberingBuilder.pixelSLHCGeometryConstants_cfi import *
+#from Geometry.TrackerGeometryBuilder.idealForDigiTrackerSLHCGeometry_cff import *
+
+
