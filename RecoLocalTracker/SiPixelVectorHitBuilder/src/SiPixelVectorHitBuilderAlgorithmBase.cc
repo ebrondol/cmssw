@@ -79,14 +79,14 @@ void SiPixelVectorHitBuilderAlgorithmBase::printCluster(unsigned int rawId, cons
 
   unsigned int layer = theTkTopo->layer(detId);
   unsigned int module = theTkTopo->module(detId);
-  std::cout << "Layer:" << layer << std::endl;
+  std::cout << "Layer:" << layer << " and DetId: " << rawId << std::endl;
   if(topol.ncolumns() == 32) 
-    std::cout << "Pixel cluster with detId:" << rawId << "(module:" << module << ") " << std::endl;
+    LogTrace("SiPixelVectorHitBuilder") << "Pixel cluster with detId:" << rawId << "(module:" << module << ") " << std::endl;
   else if(topol.ncolumns() == 2 ) 
-    std::cout << "Strip cluster with detId " << rawId << "(module:" << module << ") " << std::endl;
-  else LogDebug("SiPixelVectorHitBuilder") << "no module?!" << std::endl;
-  LogDebug("SiPixelVectorHitBuilder") << "with pitch:" << topol.pitch().first << " , " << topol.pitch().second << std::endl;
-  LogDebug("SiPixelVectorHitBuilder") << " and width:" << theGeomDet->surface().bounds().width() << " , lenght:" << theGeomDet->surface().bounds().length() << std::endl;
+    LogTrace("SiPixelVectorHitBuilder") << "Strip cluster with detId " << rawId << "(module:" << module << ") " << std::endl;
+  else LogTrace("SiPixelVectorHitBuilder") << "no module?!" << std::endl;
+  LogTrace("SiPixelVectorHitBuilder") << "with pitch:" << topol.pitch().first << " , " << topol.pitch().second << std::endl;
+  LogTrace("SiPixelVectorHitBuilder") << " and width:" << theGeomDet->surface().bounds().width() << " , lenght:" << theGeomDet->surface().bounds().length() << std::endl;
 
   if (!geomDetUnit) return;
 
@@ -97,9 +97,9 @@ void SiPixelVectorHitBuilderAlgorithmBase::printCluster(unsigned int rawId, cons
   MeasurementError meClu(1./12,0.0,1./12);
   LocalError localErrClu = geomDetUnit->topology().localError(mpClu,meClu);
 
-  LogDebug("SiPixelVectorHitBuilder") << "\t global pos " << globalPosClu << std::endl;
-  LogDebug("SiPixelVectorHitBuilder") << "\t local  pos " << localPosClu << "with err " << localErrClu << std::endl;
-  LogDebug("SiPixelVectorHitBuilder") << std::endl;
+  LogTrace("SiPixelVectorHitBuilder") << "\t global pos " << globalPosClu << std::endl;
+  LogTrace("SiPixelVectorHitBuilder") << "\t local  pos " << localPosClu << "with err " << localErrClu << std::endl;
+  LogTrace("SiPixelVectorHitBuilder") << std::endl;
   std::cout << "\t global pos " << globalPosClu << std::endl;
   std::cout << std::endl;
 

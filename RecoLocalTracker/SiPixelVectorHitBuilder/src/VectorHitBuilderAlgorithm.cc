@@ -15,9 +15,11 @@ void VectorHitBuilderAlgorithm::run(edm::Handle< edmNew::DetSetVector<Phase2Trac
   LogDebug("VectorHitBuilderAlgorithm") << "Run VectorHitBuilderAlgorithm ... \n" ;
   const  edmNew::DetSetVector<Phase2TrackerCluster1D>* ClustersPhase2Collection = clusters.product();
 
+
   std::map< DetId, std::vector<VectorHit> > temporary;
   //std::map< DetId, std::vector<VectorHit> > tempVHacc, tempVHrej;
   //std::map< DetId, std::vector<Phase2TrackerCluster1D> > tempCLacc, tempCLrej;
+  std::map< DetId, std::vector<VectorHit> >::iterator it_temporary;
 
   //loop over the DetSetVector
   LogDebug("VectorHitBuilderAlgorithm") << "with #clusters : " << ClustersPhase2Collection->size() << std::endl ;
@@ -31,11 +33,35 @@ void VectorHitBuilderAlgorithm::run(edm::Handle< edmNew::DetSetVector<Phase2Trac
     LogTrace("VectorHitBuilderAlgorithm") << "  DetId lower cluster : " << rawDetId1;
     LogTrace("VectorHitBuilderAlgorithm") << "  DetId upper cluster : " << detId2.rawId();
 
+    it_temporary = temporary.find(detIdStack);
+    if ( it_temporary != temporary.end() ) {
+      LogTrace("VectorHitBuilderAlgorithm") << " this stack has already been analyzed -> skip it ";
+      //continue;
+    }
+
+    if ( theTkTopo->isLower(detId1) )
+      LogTrace("VectorHitBuilderAlgorithm") << " is lower";
+    else
+      LogTrace("VectorHitBuilderAlgorithm") << " is not lower ";
+    if ( theTkTopo->isUpper(detId2) )
+      LogTrace("VectorHitBuilderAlgorithm") << " is upper ";
+    else
+      LogTrace("VectorHitBuilderAlgorithm") << " is not upper ";
+
     const GeomDet* gd;
     const StackGeomDet* stackDet;
-
-    edmNew::DetSetVector<Phase2TrackerCluster1D>::const_iterator it_lower = ClustersPhase2Collection->find( detId1 );
-    edmNew::DetSetVector<Phase2TrackerCluster1D>::const_iterator it_upper = ClustersPhase2Collection->find( detId2 );
+    edmNew::DetSetVector<Phase2TrackerCluster1D>::const_iterator it_lower;
+    edmNew::DetSetVector<Phase2TrackerCluster1D>::const_iterator it_upper;
+/*
+    if( theTkTopo->isLower(detId1) && theTkTopo->isUpper(detId2) ) {
+      it_lower = ClustersPhase2Collection->find( detId1 );
+      it_upper = ClustersPhase2Collection->find( detId2 );
+    }
+    if( theTkTopo->isLower(detId2) && theTkTopo->isUpper(detId1) ) {
+      it_lower = ClustersPhase2Collection->find( detId2 );
+      it_upper = ClustersPhase2Collection->find( detId1 );
+    }
+*/    
     if ( it_lower != ClustersPhase2Collection->end() && it_upper != ClustersPhase2Collection->end() ){
       gd = theTkGeom->idToDet(detIdStack);
       stackDet = dynamic_cast<const StackGeomDet*>(gd);
