@@ -10,6 +10,7 @@ SiPixelVectorHitBuilder::SiPixelVectorHitBuilder(edm::ParameterSet const& conf)
     clusterProducer(conf.getParameter<edm::InputTag>("Clusters")),
     readytobuild(false)
 {
+  std::cout << "ci siamo! SiPixelVectorHitBuilder" << std::endl;
   produces< edmNew::DetSetVector< Phase2TrackerCluster1D > >( "ClustersAccepted" );
   produces< edmNew::DetSetVector< Phase2TrackerCluster1D > >( "ClustersRejected" );
   produces< VectorHitCollectionNew >( offlinestubsTag + "Accepted" );
@@ -76,6 +77,7 @@ void SiPixelVectorHitBuilder::produce(edm::Event& event, const edm::EventSetup& 
 }
 
 void SiPixelVectorHitBuilder::setupAlgorithm(edm::ParameterSet const& conf) {
+  std::cout << "ci siamo! setting algorithm in SiPixelVectorHitBuilder" << std::endl;
 
   if ( algoTag == "VectorHitBuilderAlgorithm" ) {
     stubsBuilder = new VectorHitBuilderAlgorithm(conf);
