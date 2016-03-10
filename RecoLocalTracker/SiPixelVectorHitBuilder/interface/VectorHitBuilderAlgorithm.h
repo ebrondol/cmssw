@@ -8,7 +8,6 @@
 #define RecoLocalTracker_SiVectorHitBuilder_VectorHitBuilderAlgorithm_H
 
 #include "RecoLocalTracker/SiPixelVectorHitBuilder/interface/SiPixelVectorHitBuilderAlgorithmBase.h"
-#include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
 #include "DataFormats/TrackingRecHit/interface/VectorHit.h"
 #include "CommonTools/Statistics/interface/LinearFit.h"
 
@@ -18,9 +17,6 @@
 
 class VectorHitBuilderAlgorithm : public SiPixelVectorHitBuilderAlgorithmBase {
  public:
-  typedef edm::Ref<edmNew::DetSetVector<Phase2TrackerCluster1D>, Phase2TrackerCluster1D> Phase2TrackerCluster1DRef;
-  typedef edmNew::DetSet<Phase2TrackerCluster1D> detset;
-  typedef detset::const_iterator const_iterator;
 
   VectorHitBuilderAlgorithm(const edm::ParameterSet& conf) :
     SiPixelVectorHitBuilderAlgorithmBase(conf), theFitter(new LinearFit()) {};

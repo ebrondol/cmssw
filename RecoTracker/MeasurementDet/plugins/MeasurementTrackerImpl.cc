@@ -611,7 +611,7 @@ void MeasurementTrackerImpl::updateStacks( const edm::Event& event) const
         //push cluster range in det
         (**i).update( *it_lower, *it_upper, phase2clusters );
       } else {
-        LogDebug("MeasurementTracker") << "MeasurementTrackerImpl::updateStacks: at least one cluster has not been found! " << std::endl;
+//        LogDebug("MeasurementTracker") << "MeasurementTrackerImpl::updateStacks: at least one cluster has not been found! " << std::endl;
         (**i).setEmpty();
       }
 

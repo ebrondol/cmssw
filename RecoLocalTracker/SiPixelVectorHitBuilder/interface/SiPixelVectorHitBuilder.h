@@ -25,7 +25,7 @@ class SiPixelVectorHitBuilder : public edm::EDProducer
   void run(edm::Handle< edmNew::DetSetVector<Phase2TrackerCluster1D> > clusters,
            edmNew::DetSetVector<Phase2TrackerCluster1D>& clustersAcc, edmNew::DetSetVector<Phase2TrackerCluster1D>& clustersRej,
            VectorHitCollectionNew& outputAcc, VectorHitCollectionNew& outputRej);
-
+ SiPixelVectorHitBuilderAlgorithmBase * algo() const { return stubsBuilder; };
 
  private:
 
