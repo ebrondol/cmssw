@@ -78,6 +78,7 @@ MeasurementTrackerImpl::MeasurementTrackerImpl(const edm::ParameterSet&         
 				       const PixelClusterParameterEstimator* pixelCPE,
 				       const StripClusterParameterEstimator* stripCPE,
 				       const SiStripRecHitMatcher*  hitMatcher,
+				       const SiPixelVectorHitBuilder*  ph2matcher,
 				       const TrackerGeometry*  trackerGeom,
 				       const GeometricSearchTracker* geometricSearchTracker,
                                        const SiStripQuality *stripQuality,
@@ -93,6 +94,7 @@ MeasurementTrackerImpl::MeasurementTrackerImpl(const edm::ParameterSet&         
   name_(conf.getParameter<std::string>("ComponentName")),
   theStDets(hitMatcher,stripCPE,isRegional),
   thePixelCPE(pixelCPE),
+  thePhase2Matcher(ph2matcher),
   theInactivePixelDetectorLabels(conf.getParameter<std::vector<edm::InputTag> >("inactivePixelDetectorLabels")),
   theInactiveStripDetectorLabels(conf.getParameter<std::vector<edm::InputTag> >("inactiveStripDetectorLabels"))
 {
@@ -254,7 +256,7 @@ void MeasurementTrackerImpl::addStackDet( const StackGeomDet* gd)
 {
   //since the Stack will be composed by PS or 2S, 
   //both cluster parameter estimators are needed? - right now just the thePixelCPE is used.
-  TkStackMeasurementDet* det = new TkStackMeasurementDet( gd, thePixelCPE);
+  TkStackMeasurementDet* det = new TkStackMeasurementDet( gd, thePhase2Matcher, thePixelCPE);
   theStackDets.push_back(det);
 }
 
@@ -603,6 +605,7 @@ void MeasurementTrackerImpl::updateStacks( const edm::Event& event) const
       unsigned int id_upper = (**i).upperDet()->geomDet().geographicalId().rawId();
       edmNew::DetSetVector<Phase2TrackerCluster1D>::const_iterator it_lower = ClustersPhase2Collection->find( id_lower );
       edmNew::DetSetVector<Phase2TrackerCluster1D>::const_iterator it_upper = ClustersPhase2Collection->find( id_upper );
+
       if ( it_lower != ClustersPhase2Collection->end()  && it_upper != ClustersPhase2Collection->end() ){
         LogDebug("MeasurementTracker") << "MeasurementTrackerImpl::updateStacks: found clusters >> " << id_lower << " , " << id_upper << std::endl;
         //push cluster range in det
@@ -611,6 +614,7 @@ void MeasurementTrackerImpl::updateStacks( const edm::Event& event) const
         LogDebug("MeasurementTracker") << "MeasurementTrackerImpl::updateStacks: at least one cluster has not been found! " << std::endl;
         (**i).setEmpty();
       }
+
     }
   }
 

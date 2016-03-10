@@ -15,6 +15,7 @@ MeasurementTracker = cms.ESProducer("MeasurementTrackerESProducer",
     PixelCPE = cms.string('PixelCPEGeneric'),
     StripCPE = cms.string('StripCPEfromTrackAngle'),
     HitMatcher = cms.string('StandardMatcher'),
+    Phase2HitMatcher = cms.string('SiPixelVectorHitMatcher'),
 
     SiStripQualityLabel         = cms.string(''),  ## unlabelled default SiStripQuality
     UseStripModuleQualityDB     = cms.bool(True),

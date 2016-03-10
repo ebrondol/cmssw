@@ -7,6 +7,7 @@
 #include "DataFormats/DetId/interface/DetId.h"
 #include "RecoLocalTracker/ClusterParameterEstimator/interface/StripClusterParameterEstimator.h"
 #include "RecoLocalTracker/ClusterParameterEstimator/interface/PixelClusterParameterEstimator.h"
+#include "RecoLocalTracker/SiPixelVectorHitBuilder/interface/SiPixelVectorHitBuilder.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "CalibFormats/SiStripObjects/interface/SiStripDetCabling.h"
 #include "CalibTracker/Records/interface/SiStripDetCablingRcd.h"
@@ -53,6 +54,7 @@ public:
 		     const PixelClusterParameterEstimator* pixelCPE,
 		     const StripClusterParameterEstimator* stripCPE,
 		     const SiStripRecHitMatcher*  hitMatcher,
+		     const SiPixelVectorHitBuilder*  ph2matcher,
 		     const TrackerGeometry*  trackerGeom,
 		     const GeometricSearchTracker* geometricSearchTracker,
                      const SiStripQuality *stripQuality,
@@ -126,6 +128,7 @@ public:
   mutable std::vector<bool> thePixelsToSkip;
 
   const PixelClusterParameterEstimator* thePixelCPE;
+  const SiPixelVectorHitBuilder*	thePhase2Matcher;
   const SiPixelFedCabling*              thePixelCabling;
 
   const std::vector<edm::InputTag>      theInactivePixelDetectorLabels;
