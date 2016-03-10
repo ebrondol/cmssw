@@ -4,7 +4,7 @@
 #include "FWCore/Framework/interface/ESProducer.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "RecoLocalTracker/Records/interface/TkPixelCPERecord.h"
-#include "RecoLocalTracker/SiPixelVectorHitBuilder/plugins/SiPixelVectorHitBuilder.h"
+#include "RecoLocalTracker/SiPixelVectorHitBuilder/interface/SiPixelVectorHitBuilder.h"
 #include <boost/shared_ptr.hpp>
 
 class SiPhase2RecHitMatcherESProducer: public edm::ESProducer {
