@@ -102,3 +102,6 @@ void SiPixelVectorHitBuilder::run(edm::Handle< edmNew::DetSetVector<Phase2Tracke
   stubsBuilder->run(clusters, outputAcc, outputRej, clustersAcc, clustersRej);
 
 }
+
+#include "FWCore/Utilities/interface/typelookup.h"
+TYPELOOKUP_DATA_REG(SiPixelVectorHitBuilder);
