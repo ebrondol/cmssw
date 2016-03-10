@@ -5,13 +5,12 @@
 #include "TkPixelMeasurementDet.h"
 
 #include "Geometry/TrackerGeometryBuilder/interface/StackGeomDet.h"
+#include "RecoLocalTracker/SiPixelVectorHitBuilder/interface/SiPixelVectorHitBuilder.h"
 #include "RecoLocalTracker/ClusterParameterEstimator/interface/PixelClusterParameterEstimator.h"
 
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include "DataFormats/Phase2TrackerCluster/interface/Phase2TrackerCluster1D.h"
 
-//#include "CommonTools/Statistics/interface/LinearFit.h"
- 
 class TkStackMeasurementDet : public MeasurementDet {
 
  public:
@@ -22,11 +21,12 @@ class TkStackMeasurementDet : public MeasurementDet {
 
   typedef PixelClusterParameterEstimator::LocalValues    LocalValues;
 
-  TkStackMeasurementDet( const StackGeomDet* gdet, const PixelClusterParameterEstimator* cpe) ;
+  TkStackMeasurementDet( const StackGeomDet* gdet, const SiPixelVectorHitBuilder* matcher, 
+                         const PixelClusterParameterEstimator* cpe) ;
   void init(const MeasurementDet* lowerDet,
 	    const MeasurementDet* upperDet);
 
-  virtual ~TkStackMeasurementDet() { }; //delete theFitter; };
+  virtual ~TkStackMeasurementDet() { }; 
 
   void update( const detset & lowerDetSet,
                const detset & upperDetSet,
@@ -45,9 +45,6 @@ class TkStackMeasurementDet : public MeasurementDet {
   virtual bool measurements( const TrajectoryStateOnSurface& stateOnThisDet,
 			     const MeasurementEstimator& est,
 			     TempMeasurements & result) const;
-  TransientTrackingRecHit::RecHitPointer buildVectorHit( const Phase2TrackerCluster1DRef & clusterLower,
-                                                         const Phase2TrackerCluster1DRef & clusterUpper,
-                                                         const LocalTrajectoryParameters & ltp) const;
 
   const TkPixelMeasurementDet* lowerDet() const{ return theLowerDet;}
   const TkPixelMeasurementDet* upperDet() const{ return theUpperDet;}
@@ -60,32 +57,15 @@ class TkStackMeasurementDet : public MeasurementDet {
   /// return TRUE if at least one of the lower and upper components has badChannels
   bool hasBadComponents( const TrajectoryStateOnSurface &tsos ) const {
     return (lowerDet()->hasBadComponents(tsos) || upperDet()->hasBadComponents(tsos));}
-/*
-  bool checkClustersCompatibility (Local3DPoint& posLower, Local3DPoint& posUpper, LocalError& errLower, LocalError& errUpper) const;
-  void fit2Dzx(const Local3DPoint lpCI, const Local3DPoint lpCO,
-               const LocalError leCI, const LocalError leCO,
-               Local3DPoint& pos, Local3DVector& dir,
-               AlgebraicSymMatrix22& covMatrix, double& chi2) const;
-  void fit2Dzy(const Local3DPoint lpCI, const Local3DPoint lpCO,
-               const LocalError leCI, const LocalError leCO,
-               Local3DPoint& pos, Local3DVector& dir,
-               AlgebraicSymMatrix22& covMatrix, double& chi2) const;
-
-  void fit(const std::vector<float>& x,
-           const std::vector<float>& y,
-           const std::vector<float>& sigy,
-           Local3DPoint& pos, Local3DVector& dir,
-           AlgebraicSymMatrix22& covMatrix, double& chi2) const;
-*/
 
  private:
+  const SiPixelVectorHitBuilder*        theMatcher;
   const PixelClusterParameterEstimator* thePixelCPE;
-  const TkPixelMeasurementDet*       theLowerDet;
-  const TkPixelMeasurementDet*       theUpperDet;
-  detset theLowerDetSet, theUpperDetSet;
+  const TkPixelMeasurementDet*          theLowerDet;
+  const TkPixelMeasurementDet*          theUpperDet;
+  detset                                theLowerDetSet, theUpperDetSet;
   edm::Handle<edmNew::DetSetVector<Phase2TrackerCluster1D> > theHandle;
   bool Active, Empty;
-//  LinearFit* theFitter;
 
 };
 
