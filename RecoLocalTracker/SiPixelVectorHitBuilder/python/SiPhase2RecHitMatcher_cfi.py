@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-process.SiPhase2RecHitMatcherESProducer = cms.ESProducer("SiPhase2RecHitMatcherESProducer",
+SiPhase2RecHitMatcherESProducer = cms.ESProducer("SiPhase2RecHitMatcherESProducer",
     ComponentName = cms.string('SiPixelVectorHitMatcher'),
 #    Clusters = cms.InputTag('siPixelClusters'),
      Clusters = cms.InputTag('siPhase2Clusters'),
