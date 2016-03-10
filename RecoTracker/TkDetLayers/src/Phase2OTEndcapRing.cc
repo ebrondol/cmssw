@@ -31,19 +31,12 @@ public:
 };
 
 Phase2OTEndcapRing::Phase2OTEndcapRing(vector<const GeomDet*>& innerDets,
-			       vector<const GeomDet*>& outerDets,
-			       vector<const GeomDet*>& innerDetBrothers,
-			       vector<const GeomDet*>& outerDetBrothers):
+			       vector<const GeomDet*>& outerDets):
   theFrontDets(innerDets.begin(),innerDets.end()), 
-  theBackDets(outerDets.begin(),outerDets.end()),
-  theFrontDetBrothers(innerDetBrothers.begin(),innerDetBrothers.end()), 
-  theBackDetBrothers(outerDetBrothers.begin(),outerDetBrothers.end())
+  theBackDets(outerDets.begin(),outerDets.end())
 {
   theDets.assign(theFrontDets.begin(),theFrontDets.end());
   theDets.insert(theDets.end(),theBackDets.begin(),theBackDets.end());
-  theDets.insert(theDets.end(),theFrontDetBrothers.begin(),theFrontDetBrothers.end());
-  theDets.insert(theDets.end(),theBackDetBrothers.begin(),theBackDetBrothers.end());
-
 
   // the dets should be already phi-ordered. TO BE CHECKED
   //sort( theFrontDets.begin(), theFrontDets.end(), DetLessPhi() );
@@ -113,30 +106,20 @@ Phase2OTEndcapRing::groupedCompatibleDetsV( const TrajectoryStateOnSurface& tsos
 
 
   std::vector<DetGroup> closestResult;
-  std::vector<DetGroup> closestBrotherResult;
-  addClosest( tsos, prop, est, crossings.closest(), closestResult,closestBrotherResult); 
+  addClosest( tsos, prop, est, crossings.closest(), closestResult ); 
   if (closestResult.empty())     return;
   
   DetGroupElement closestGel( closestResult.front().front());  
   int crossingSide = LayerCrossingSide().endcapSide( closestGel.trajectoryState(), prop);
   float phiWindow =  tkDetUtil::computeWindowSize( closestGel.det(), closestGel.trajectoryState(), est); 
   searchNeighbors( tsos, prop, est, crossings.closest(), phiWindow,
-		   closestResult, closestBrotherResult, false); 
-
-  vector<DetGroup> closestCompleteResult;
-  DetGroupMerger::orderAndMergeTwoLevels(std::move(closestResult),std::move(closestBrotherResult),closestCompleteResult,
-					 0, crossingSide);
+		   closestResult, false); 
 
   vector<DetGroup> nextResult;
-  vector<DetGroup> nextBrotherResult;
   searchNeighbors( tsos, prop, est, crossings.other(), phiWindow,
-		   nextResult, nextBrotherResult, true); 
+		   nextResult, true); 
 
-  vector<DetGroup> nextCompleteResult;
-  DetGroupMerger::orderAndMergeTwoLevels(std::move(nextResult),std::move(nextBrotherResult),nextCompleteResult,
-					 0, crossingSide);
-
-  DetGroupMerger::orderAndMergeTwoLevels( std::move(closestCompleteResult), std::move(nextCompleteResult), result,
+  DetGroupMerger::orderAndMergeTwoLevels( std::move(closestResult), std::move(nextResult), result,
 					  crossings.closestIndex(), crossingSide);
 
   //due to propagator problems, when we add single pt sub modules, we should order them in z (endcap)
@@ -200,17 +183,12 @@ bool Phase2OTEndcapRing::addClosest( const TrajectoryStateOnSurface& tsos,
 				 const Propagator& prop,
 				 const MeasurementEstimator& est,
 				 const SubLayerCrossing& crossing,
-				 vector<DetGroup>& result,
-				 vector<DetGroup>& brotherresult) const
+				 vector<DetGroup>& result) const
 {
   const vector<const GeomDet*>& sub( subLayer( crossing.subLayerIndex()));
   const GeomDet* det(sub[crossing.closestDetIndex()]);
   bool firstgroup = CompatibleDetToGroupAdder::add( *det, tsos, prop, est, result); 
-  // it assumes that the closestDetIndex is ok also for the brother detectors: the crossing is NOT recomputed
-  const vector<const GeomDet*>& subBrothers( subLayerBrothers( crossing.subLayerIndex()));
-  const GeomDet* detBrother(subBrothers[crossing.closestDetIndex()]);
-  bool brothergroup = CompatibleDetToGroupAdder::add( *detBrother, tsos, prop, est, brotherresult); 
-  return firstgroup || brothergroup;
+  return firstgroup;
 }
 
 
@@ -221,14 +199,11 @@ void Phase2OTEndcapRing::searchNeighbors( const TrajectoryStateOnSurface& tsos,
 				     const SubLayerCrossing& crossing,
 				     float window, 
 				     vector<DetGroup>& result,
-				     vector<DetGroup>& brotherresult,
 				     bool checkClosest) const
 {
   GlobalPoint gCrossingPos = crossing.position();
 
   const vector<const GeomDet*>& sLayer( subLayer( crossing.subLayerIndex()));
-  // It assumes that what is ok for the front modules in the pt modules is ok also for the back module
-  const vector<const GeomDet*>& sBrotherLayer( subLayerBrothers( crossing.subLayerIndex()));
  
   int closestIndex = crossing.closestDetIndex();
   int negStartIndex = closestIndex-1;
@@ -251,18 +226,12 @@ void Phase2OTEndcapRing::searchNeighbors( const TrajectoryStateOnSurface& tsos,
     const GeomDet & neighborDet = *sLayer[binFinder.binIndex(idet)];
     if (!tkDetUtil::overlapInPhi( gCrossingPos, neighborDet, window)) break;
     if (!Adder::add( neighborDet, tsos, prop, est, result)) break;
-    // If the two above checks are passed also the brother module will be added with no further checks
-    const GeomDet & neighborBrotherDet = *sBrotherLayer[binFinder.binIndex(idet)];
-    Adder::add( neighborBrotherDet, tsos, prop, est, brotherresult);
     // maybe also add shallow crossing angle test here???
   }
   for (int idet=posStartIndex; idet < posStartIndex + half; idet++) {
     const GeomDet & neighborDet = *sLayer[binFinder.binIndex(idet)];
     if (!tkDetUtil::overlapInPhi( gCrossingPos, neighborDet, window)) break;
     if (!Adder::add( neighborDet, tsos, prop, est, result)) break;
-    // If the two above checks are passed also the brother module will be added with no further checks
-    const GeomDet & neighborBrotherDet = *sBrotherLayer[binFinder.binIndex(idet)];
-    Adder::add( neighborBrotherDet, tsos, prop, est, brotherresult);
     // maybe also add shallow crossing angle test here???
   }
 }
