@@ -35,7 +35,7 @@ class VectorHitBuilderAlgorithm : public SiPixelVectorHitBuilderAlgorithmBase {
                                          const PixelGeomDetUnit * theLowerGeomDetUnit, 
                                          const PixelGeomDetUnit * theUpperGeomDetUnit);
 
-  VectorHit buildVectorHit(const StackGeomDet* stack, Phase2TrackerCluster1DRef inner, Phase2TrackerCluster1DRef outer, 
+  VectorHit buildVectorHit(const StackGeomDet* stack, Phase2TrackerCluster1DRef lower, Phase2TrackerCluster1DRef upper, 
                            const PixelGeomDetUnit * theLowerGeomDetUnit, const PixelGeomDetUnit * theUpperGeomDetUnit);
 
   // Full I/O in DetSet

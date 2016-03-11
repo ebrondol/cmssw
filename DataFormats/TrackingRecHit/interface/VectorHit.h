@@ -10,22 +10,25 @@
  *
  */
 
-#include "DataFormats/TrackingRecHit/interface/RecSegment.h"
+//#include "DataFormats/TrackingRecHit/interface/RecSegment.h"
+#include "DataFormats/TrackerRecHit2D/interface/BaseTrackerRecHit.h"
 #include "DataFormats/TrackingRecHit/interface/VectorHit2D.h"
+#include "DataFormats/TrackerRecHit2D/interface/OmniClusterRef.h"
 
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include "DataFormats/Common/interface/DetSetVectorNew.h"
 
 #include "DataFormats/Phase2TrackerCluster/interface/Phase2TrackerCluster1D.h"
+#include "DataFormats/GeometryVector/interface/LocalVector.h"
 
 #include "DataFormats/GeometrySurface/interface/Surface.h"
 
 
-class VectorHit GCC11_FINAL : public RecSegment {
+class VectorHit GCC11_FINAL : public BaseTrackerRecHit {
 
   public:
 
-  typedef edm::Ref<edmNew::DetSetVector<Phase2TrackerCluster1D>, Phase2TrackerCluster1D > Phase2TrackerCluster1DRef;
+  //typedef edm::Ref<edmNew::DetSetVector<Phase2TrackerCluster1D>, Phase2TrackerCluster1D > Phase2TrackerCluster1DRef;
 
   VectorHit() : thePosition(), theDirection(), theCovMatrix(), theDimension(0) { setType(bad); }
 
@@ -33,22 +36,28 @@ class VectorHit GCC11_FINAL : public RecSegment {
 
   VectorHit(DetId id, const LocalPoint& posInner, const LocalVector& dir,
             const AlgebraicSymMatrix& covMatrix, const double& Chi2,
-            const Phase2TrackerCluster1DRef inner, const Phase2TrackerCluster1DRef outer) ;
+            OmniClusterRef const& lower, OmniClusterRef const& upper) ;
 
   VectorHit(DetId id, const VectorHit2D& vh2Dzx, const VectorHit2D& vh2Dzy,
-            const Phase2TrackerCluster1DRef inner, const Phase2TrackerCluster1DRef outer) ;
+            OmniClusterRef const& lower, OmniClusterRef const& upper) ;
 
   ~VectorHit() ;
 
   virtual VectorHit* clone() const { return new VectorHit(*this);}
 
+  bool sharesInput( const TrackingRecHit* other, SharedInputType what) const;
+  bool sharesClusters(VectorHit const & h1, VectorHit const & h2,
+                      SharedInputType what) const ;
+
   // Parameters of the segment, for the track fit
   // For a 4D segment: (dx/dz,dy/dz,x,y)
-/*  bool BaseTrackerRecHit::hasPositionAndError() const {
-      return (err_.xx() != 0) || (err_.yy() != 0) || (err_.xy() != 0) ||
-             (pos_.x()  != 0) || (pos_.y()  != 0) || (pos_.z()  != 0);
+  bool hasPositionAndError() const  GCC11_FINAL{
+  //bool hasPositionAndError() const {
+    return true;
+//      return (err_.xx() != 0) || (err_.yy() != 0) || (err_.xy() != 0) ||
+//             (pos_.x()  != 0) || (pos_.y()  != 0) || (pos_.z()  != 0);
   };
-*/
+
   AlgebraicVector parameters() const ;
   void getKfComponents( KfComponentsHolder & holder ) const { getKfComponents4D(holder); }
   void getKfComponents4D( KfComponentsHolder & holder ) const ;
@@ -68,13 +77,15 @@ class VectorHit GCC11_FINAL : public RecSegment {
 
 */
   // returning methods
-  virtual LocalPoint localPosition() const { return thePosition; }
+  LocalPoint localPosition() const GCC11_FINAL { return thePosition; }
   virtual LocalVector localDirection() const { return theDirection; }
   AlgebraicSymMatrix parametersError() const ;
   virtual double chi2() const { return theChi2; }
   virtual int dimension() const { return theDimension; }
-  Phase2TrackerCluster1DRef const innerCluster() const { return theInnerCluster; }
-  Phase2TrackerCluster1DRef const outerCluster() const { return theOuterCluster; }
+  OmniClusterRef const lowerClusterRef() const { return theLowerCluster; }
+  OmniClusterRef const upperClusterRef() const { return theUpperCluster; }
+
+  virtual OmniClusterRef const & firstClusterRef() const GCC11_FINAL { return theLowerCluster;}
 
   //ERICA:change name! This method returns the delta (not the direction) in global coordinates
   Global3DVector globalDirection( const Surface& surf );
@@ -83,7 +94,7 @@ class VectorHit GCC11_FINAL : public RecSegment {
   virtual AlgebraicMatrix projectionMatrix() const;
 
   /// Local position error in Chamber frame
-  virtual LocalError localPositionError() const ;
+  LocalError localPositionError() const GCC11_FINAL ;
 
   /// Local direction error in the Chamber frame
   virtual LocalError localDirectionError() const ;
@@ -150,8 +161,8 @@ class VectorHit GCC11_FINAL : public RecSegment {
   AlgebraicSymMatrix theCovMatrix;
   double theChi2;
   int theDimension;
-  Phase2TrackerCluster1DRef theInnerCluster;
-  Phase2TrackerCluster1DRef theOuterCluster;
+  OmniClusterRef theLowerCluster;
+  OmniClusterRef theUpperCluster;
   //VectorHit2D theVh2Dzx;
   //VectorHit2D theVh2Dzy;
 

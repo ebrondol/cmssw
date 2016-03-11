@@ -1,40 +1,40 @@
 #include "DataFormats/TrackingRecHit/interface/VectorHit.h"
+#include "DataFormats/TrackerRecHit2D/interface/BaseTrackerRecHit.h"
 //#include "FWCore/Utilities/interface/Exception.h"
 
 VectorHit::VectorHit(const VectorHit& vh):
-  RecSegment(vh.geographicalId()),
+  BaseTrackerRecHit(vh.geographicalId(), trackerHitRTTI::vector),
   thePosition(vh.localPosition()),
   theDirection(vh.localDirection()),
   theCovMatrix(vh.parametersError()),
   theChi2(vh.chi2()),
   theDimension(vh.dimension()),
-  theInnerCluster(vh.innerCluster()),
-  theOuterCluster(vh.outerCluster())
+  theLowerCluster(vh.lowerClusterRef()),
+  theUpperCluster(vh.upperClusterRef())
 {}
 
 VectorHit::VectorHit(DetId id,
-                     const LocalPoint& posInner,
+                     const LocalPoint& posLower,
                      const LocalVector& dir,
                      const AlgebraicSymMatrix& covMatrix,
 		     const double& Chi2,
-                     const Phase2TrackerCluster1DRef inner, 
-                     const Phase2TrackerCluster1DRef outer):
-  RecSegment(id),
-  thePosition(posInner),
+                     OmniClusterRef const& lower, OmniClusterRef const& upper) :
+  BaseTrackerRecHit(id, trackerHitRTTI::vector),
+  thePosition(posLower),
   theDirection(dir),
   theCovMatrix(covMatrix),
   theChi2(Chi2),
   theDimension(4),
-  theInnerCluster(inner),
-  theOuterCluster(outer)
+  theLowerCluster(lower),
+  theUpperCluster(upper)
 {}
 
-VectorHit::VectorHit(DetId id,const VectorHit2D& vh2Dzx, const VectorHit2D& vh2Dzy,
-                     const Phase2TrackerCluster1DRef inner, const Phase2TrackerCluster1DRef outer) :
-  RecSegment(id),
+VectorHit::VectorHit(DetId id, const VectorHit2D& vh2Dzx, const VectorHit2D& vh2Dzy,
+                     OmniClusterRef const& lower, OmniClusterRef const& upper) :
+  BaseTrackerRecHit(id, trackerHitRTTI::vector),
   theDimension(4),
-  theInnerCluster(inner),
-  theOuterCluster(outer)
+  theLowerCluster(lower),
+  theUpperCluster(upper)
 {
   thePosition = LocalPoint(vh2Dzx.localPosition().x(), vh2Dzy.localPosition().x(), 0.);
 
@@ -55,6 +55,34 @@ VectorHit::VectorHit(DetId id,const VectorHit2D& vh2Dzx, const VectorHit2D& vh2D
 
   theChi2 = vh2Dzx.chi2() + vh2Dzy.chi2();
 }
+
+bool VectorHit::sharesInput( const TrackingRecHit* other, SharedInputType what) const
+{
+  if (what==all && (geographicalId() != other->geographicalId())) return false;
+ 
+  if (!sameDetModule(*other)) return false;
+
+  if (trackerHitRTTI::isVector(*other) ) {
+    const VectorHit* otherVh = static_cast<const VectorHit*>(other);
+    return sharesClusters(*this, *otherVh, what);
+  }
+   
+  if (what==all)  return false;
+
+  // what about multi???
+  auto const & otherClus = reinterpret_cast<const BaseTrackerRecHit *>(other)->firstClusterRef();
+  return (otherClus==lowerClusterRef())  ||  (otherClus==upperClusterRef());
+  
+}
+
+bool VectorHit::sharesClusters(VectorHit const & h1, VectorHit const & h2,
+            SharedInputType what) const {
+  bool lower =  h1.lowerClusterRef()== h2.lowerClusterRef();
+  bool upper =  h1.upperClusterRef()== h2.upperClusterRef();
+  
+  return (what==TrackingRecHit::all) ? (lower && upper) : (upper||lower);
+  
+} 
 
 void VectorHit::getKfComponents4D( KfComponentsHolder & holder ) const {
   //if (!hasPositionAndError()) throwExceptionUninitialized("getKfComponents");

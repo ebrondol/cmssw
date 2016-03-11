@@ -131,8 +131,8 @@ std::vector<VectorHit> VectorHitBuilderAlgorithm::buildVectorHits(const StackGeo
 }
 
 VectorHit VectorHitBuilderAlgorithm::buildVectorHit(const StackGeomDet * stack, 
-                                                    Phase2TrackerCluster1DRef inner, 
-                                                    Phase2TrackerCluster1DRef outer, 
+                                                    Phase2TrackerCluster1DRef lower, 
+                                                    Phase2TrackerCluster1DRef upper, 
                                                     const PixelGeomDetUnit * theLowerGeomDetUnit, 
                                                     const PixelGeomDetUnit * theUpperGeomDetUnit)
 {
@@ -184,7 +184,9 @@ VectorHit VectorHitBuilderAlgorithm::buildVectorHit(const StackGeomDet * stack,
     fit2Dzy(localPosCluInn, localPosCluOutINN, localErrCluInn,localErrCluOutINN, pos2Dzy, dir2Dzy, covMat2Dzy, chi22Dzy);
     VectorHit2D vh2Dzy = VectorHit2D(pos2Dzy, dir2Dzy, covMat2Dzy, chi22Dzy);
 
-    VectorHit vh = VectorHit(stack->geographicalId(), vh2Dzx, vh2Dzy, inner, outer);
+    OmniClusterRef lowerOmni(lower); 
+    OmniClusterRef upperOmni(upper); 
+    VectorHit vh = VectorHit(stack->geographicalId(), vh2Dzx, vh2Dzy, lowerOmni, upperOmni);
     return vh;
 
   }

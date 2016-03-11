@@ -1,6 +1,9 @@
 #ifndef TrackingRecHit_VectorHit2D_h
 #define TrackingRecHit_VectorHit2D_h
 
+#include "DataFormats/GeometryVector/interface/LocalVector.h"
+#include "DataFormats/GeometryVector/interface/LocalPoint.h"
+ 
 class VectorHit2D {
 
  public:
