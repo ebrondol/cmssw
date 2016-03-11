@@ -43,9 +43,15 @@ class VectorHit GCC11_FINAL : public RecSegment {
   virtual VectorHit* clone() const { return new VectorHit(*this);}
 
   // Parameters of the segment, for the track fit
-  // For a 4D segment: (dx/dy,dy/dz,x,y)
-  // FIXME::getKFcomponents ??
+  // For a 4D segment: (dx/dz,dy/dz,x,y)
+/*  bool BaseTrackerRecHit::hasPositionAndError() const {
+      return (err_.xx() != 0) || (err_.yy() != 0) || (err_.xy() != 0) ||
+             (pos_.x()  != 0) || (pos_.y()  != 0) || (pos_.z()  != 0);
+  };
+*/
   AlgebraicVector parameters() const ;
+  void getKfComponents( KfComponentsHolder & holder ) const { getKfComponents4D(holder); }
+  void getKfComponents4D( KfComponentsHolder & holder ) const ;
 /*
   friend class DTSegmentUpdator;
   VectorHit() : theProjection(none), theDimension(0) {}

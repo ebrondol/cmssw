@@ -56,6 +56,38 @@ VectorHit::VectorHit(DetId id,const VectorHit2D& vh2Dzx, const VectorHit2D& vh2D
   theChi2 = vh2Dzx.chi2() + vh2Dzy.chi2();
 }
 
+void VectorHit::getKfComponents4D( KfComponentsHolder & holder ) const {
+  //if (!hasPositionAndError()) throwExceptionUninitialized("getKfComponents");
+  AlgebraicVector4 & pars = holder.params<4>();
+  pars[0] = theDirection.x();
+  pars[1] = theDirection.y();
+  pars[2] = thePosition.x();
+  pars[3] = thePosition.y();
+
+  AlgebraicSymMatrix44 & errs = holder.errors<4>();
+  for(int i = 0; i < 4; i++){
+    for(int j = 0; j < 4; j++){
+      errs(i,j) = theCovMatrix[i][j];
+    }
+  }
+
+  AlgebraicMatrix45 & proj = holder.projection<4>();
+  proj(0,1) = 1;
+  proj(1,2) = 1;
+  proj(2,3) = 1;
+  proj(3,4) = 1;
+
+  ProjectMatrix<double,5,4>  & pf = holder.projFunc<4>();
+  pf.index[0] = 1;
+  pf.index[1] = 2;
+  pf.index[2] = 3;
+  pf.index[3] = 4;
+  holder.doUseProjFunc();
+
+  holder.measuredParams<4>() = AlgebraicVector4( & holder.tsosLocalParameters().At(1), 4 );
+  holder.measuredErrors<4>() = holder.tsosLocalErrors().Sub<AlgebraicSymMatrix44>( 1, 1 );
+
+}
 /*
 VectorHit::VectorHit(const DTChamberRecSegment2D& phiSeg,
 			       const DTSLRecSegment2D& zedSeg,
@@ -237,11 +269,11 @@ void VectorHit::setCovMatrixForZed(const LocalPoint& posZInCh){
 */
 std::ostream& operator<<(std::ostream& os, const VectorHit& vh) {
 
-  os << "Pos " << vh.localPosition() <<
-    " Dir: " << vh.localDirection() << "\n" <<
-    " cov: " << vh.parametersError() <<
-    " dim: " << vh.dimension() <<
-    " chi2/ndof: " << vh.chi2() << "/" << vh.degreesOfFreedom() << " :";
+  os << " Pos: " << vh.localPosition() << "\n" <<
+        " Dir: " << vh.localDirection() << "\n" <<
+        " Cov: " << vh.parametersError() << "\n" <<
+        " Dim: " << vh.dimension() << "\n" <<
+        " chi2/ndof: " << vh.chi2() << "/" << vh.degreesOfFreedom();
 
   return os;
 }
