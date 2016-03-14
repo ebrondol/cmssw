@@ -15,7 +15,7 @@ class TVectorHit GCC11_FINAL : public TValidTrackingRecHit {
 public:
 
   //typedef VectorHit::ClusterRef clusterRef;
-  typedef edm::Ref<edmNew::DetSetVector<Phase2TrackerCluster1D>, Phase2TrackerCluster1D> Phase2TrackerCluster1DRef;
+  //typedef edm::Ref<edmNew::DetSetVector<Phase2TrackerCluster1D>, Phase2TrackerCluster1D> Phase2TrackerCluster1DRef;
 
   virtual ~TVectorHit() {}
 
@@ -62,8 +62,8 @@ public:
     return RecHitPointer( new TVectorHit( geom, rh, cpe));
   }
 
-  static RecHitPointer build( const Phase2TrackerCluster1DRef & clusterLower,
-                              const Phase2TrackerCluster1DRef & clusterUpper,
+  static RecHitPointer build( const OmniClusterRef & clusterLower,
+                              const OmniClusterRef & clusterUpper,
                               const VectorHit2D vzx,
                               const VectorHit2D vzy,
                               const GeomDet* geom, 
@@ -96,8 +96,8 @@ private:
              const PixelClusterParameterEstimator* cpe);
 
 
-  TVectorHit( const Phase2TrackerCluster1DRef & clusterLower,
-              const Phase2TrackerCluster1DRef & clusterUpper,
+  TVectorHit( const OmniClusterRef & clusterLower,
+              const OmniClusterRef & clusterUpper,
               const VectorHit2D vxz,
               const VectorHit2D vyz,
               const GeomDet* geom, 
