@@ -55,8 +55,8 @@ TVectorHit::TVectorHit(const GeomDet* geom,
   TValidTrackingRecHit(geom), theCPE(cpe), theHitData(*vh)
 {};
 
-TVectorHit::TVectorHit( const Phase2TrackerCluster1DRef & clusterLower,
-              const Phase2TrackerCluster1DRef & clusterUpper,
+TVectorHit::TVectorHit( const OmniClusterRef & clusterLower,
+              const OmniClusterRef & clusterUpper,
               const VectorHit2D vzx,
               const VectorHit2D vzy,
               const GeomDet* geom, 

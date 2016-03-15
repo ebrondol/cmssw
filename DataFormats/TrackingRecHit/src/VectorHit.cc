@@ -1,5 +1,4 @@
 #include "DataFormats/TrackingRecHit/interface/VectorHit.h"
-#include "DataFormats/TrackerRecHit2D/interface/BaseTrackerRecHit.h"
 //#include "FWCore/Utilities/interface/Exception.h"
 
 VectorHit::VectorHit(const VectorHit& vh):

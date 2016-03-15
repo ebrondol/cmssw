@@ -76,10 +76,10 @@ void VectorHitBuilderAlgorithm::run(edm::Handle< edmNew::DetSetVector<Phase2Trac
 
 }
 
-bool VectorHitBuilderAlgorithm::checkClustersCompatibility(Local3DPoint& posinner, 
-                                                           Local3DPoint& posouter, 
-                                                           LocalError& errinner, 
-                                                           LocalError& errouter)
+bool VectorHitBuilderAlgorithm::checkClustersCompatibility(Local3DPoint& poslower, 
+                                                           Local3DPoint& posupper, 
+                                                           LocalError& errlower, 
+                                                           LocalError& errupper)
 {
 
   return true;
@@ -138,15 +138,15 @@ VectorHit VectorHitBuilderAlgorithm::buildVectorHit(const StackGeomDet * stack,
 {
 
   //FIXME::you should put the correct error when the StripCPE is ready
-  //FIXME StripClusterParameterEstimator::LocalValues parameters = parameterestimator->localParameters(*innerClus_iter,*theLowerGeomDetUnit);
-  MeasurementPoint mpCluInn(inner->center(), inner->column() + 0.5);
+  //FIXME StripClusterParameterEstimator::LocalValues parameters = parameterestimator->localParameters(*lowerClus_iter,*theLowerGeomDetUnit);
+  MeasurementPoint mpCluInn(lower->center(), lower->column() + 0.5);
   Local3DPoint localPosCluInn = theLowerGeomDetUnit->topology().localPosition(mpCluInn);
   MeasurementError meCluInn(1./12,0.0,1./12);
   LocalError localErrCluInn  = theLowerGeomDetUnit->topology().localError(mpCluInn,meCluInn);
 
   //FIXME::you should put the correct error when the StripCPE is ready
   //FIXME StripClusterParameterEstimator::LocalValues parameters =  parameterestimator->localParameters(*clustIt,geomDetUnit);
-  MeasurementPoint mpCluOut(outer->center(), outer->column() + 0.5);
+  MeasurementPoint mpCluOut(upper->center(), upper->column() + 0.5);
   Local3DPoint localPosCluOut = theUpperGeomDetUnit->topology().localPosition(mpCluOut);
   Global3DPoint globalPosCluOut = theUpperGeomDetUnit->surface().toGlobal(localPosCluOut);
   Local3DPoint localPosCluOutINN = theLowerGeomDetUnit->surface().toLocal(globalPosCluOut);
@@ -155,20 +155,20 @@ VectorHit VectorHitBuilderAlgorithm::buildVectorHit(const StackGeomDet * stack,
 
   //debug
   Global3DPoint globalPosCluInn = theLowerGeomDetUnit->surface().toGlobal(localPosCluInn);
-  LogTrace("VectorHitBuilderAlgorithm") << "\t inner global pos " << globalPosCluInn;
-  LogTrace("VectorHitBuilderAlgorithm") << "\t outer global pos " << globalPosCluOut;
-  //LogTrace("VectorHitBuilderAlgorithm") << "\t outer local pos " << localPosCluOut;
+  LogTrace("VectorHitBuilderAlgorithm") << "\t lower global pos " << globalPosCluInn;
+  LogTrace("VectorHitBuilderAlgorithm") << "\t upper global pos " << globalPosCluOut;
+  //LogTrace("VectorHitBuilderAlgorithm") << "\t upper local pos " << localPosCluOut;
 
-  LogTrace("VectorHitBuilderAlgorithm") << "\t inner local pos " << localPosCluInn << " with error: " << localErrCluInn;
-  LogTrace("VectorHitBuilderAlgorithm") << "\t outer local pos in the inner sof " << localPosCluOutINN << " with error: " << localErrCluOutINN;
+  LogTrace("VectorHitBuilderAlgorithm") << "\t lower local pos " << localPosCluInn << " with error: " << localErrCluInn;
+  LogTrace("VectorHitBuilderAlgorithm") << "\t upper local pos in the lower sof " << localPosCluOutINN << " with error: " << localErrCluOutINN;
 
   bool ok = checkClustersCompatibility(localPosCluInn, localPosCluOutINN, localErrCluInn, localErrCluOutINN);
 
   if(ok){
 
-    //in the inner reference of frame
+    //in the lower reference of frame
     Local3DVector localVecINN = localPosCluOutINN - localPosCluInn;
-    LogTrace("VectorHitBuilderAlgorithm") << "\t local vec in the inner sof " << localVecINN;
+    LogTrace("VectorHitBuilderAlgorithm") << "\t local vec in the lower sof " << localVecINN;
 
     AlgebraicSymMatrix22 covMat2Dzx;
     double chi22Dzx = 0.0;
@@ -266,7 +266,7 @@ void VectorHitBuilderAlgorithm::fit(const std::vector<float>& x,
 
   pos = Local3DPoint(intercept,0.,0.);
   if(x.size()==2){
-    //difference in z is the difference of the innermost and the outermost cluster z pos
+    //difference in z is the difference of the lowermost and the uppermost cluster z pos
     float slopeZ = x.at(1) - x.at(0);
     dir = LocalVector(slope,0.,slopeZ);
   } else {

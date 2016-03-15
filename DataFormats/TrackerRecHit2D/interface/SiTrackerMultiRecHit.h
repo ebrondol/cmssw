@@ -1,7 +1,7 @@
 #ifndef SiTrackerMultiRecHit_H
 #define SiTrackerMultiRecHit_H
 
-#include "DataFormats/TrackerRecHit2D/interface/BaseTrackerRecHit.h"
+#include "DataFormats/TrackingRecHit/interface/BaseTrackerRecHit.h"
 #include "DataFormats/TrackingRecHit/interface/TrackingRecHitFwd.h"
 #include <vector>
 #include <map>

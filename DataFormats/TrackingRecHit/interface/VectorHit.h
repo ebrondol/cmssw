@@ -11,7 +11,7 @@
  */
 
 //#include "DataFormats/TrackingRecHit/interface/RecSegment.h"
-#include "DataFormats/TrackerRecHit2D/interface/BaseTrackerRecHit.h"
+#include "DataFormats/TrackingRecHit/interface/BaseTrackerRecHit.h"
 #include "DataFormats/TrackingRecHit/interface/VectorHit2D.h"
 #include "DataFormats/TrackerRecHit2D/interface/OmniClusterRef.h"
 
