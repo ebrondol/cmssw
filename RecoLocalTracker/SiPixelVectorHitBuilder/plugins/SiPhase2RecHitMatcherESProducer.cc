@@ -14,10 +14,20 @@ SiPhase2RecHitMatcherESProducer::SiPhase2RecHitMatcherESProducer(const edm::Para
 }
 
 boost::shared_ptr<SiPixelVectorHitBuilder> SiPhase2RecHitMatcherESProducer::
-produce(const TkPixelCPERecord & iRecord)
+produce(const TkPhase2OTCPERecord & iRecord)
 { 
-  if( name == "SiPixelVectorHitMatcher" )
+  if( name == "SiPixelVectorHitMatcher" ){
     matcher_  = boost::shared_ptr<SiPixelVectorHitBuilder>(new SiPixelVectorHitBuilder(pset_));
+
+    edm::ESHandle<TrackerGeometry> tGeomHandle;
+    edm::ESHandle<TrackerTopology> tTopoHandle;
+  
+    iRecord.getRecord<TrackerDigiGeometryRecord>().get(tGeomHandle);
+    iRecord.getRecord<IdealGeometryRecord>().get(tTopoHandle);
+
+    matcher_->algo()->initTkGeom(tGeomHandle);
+    matcher_->algo()->initTkTopo(tTopoHandle);
+  }
   return matcher_;
 }
 
