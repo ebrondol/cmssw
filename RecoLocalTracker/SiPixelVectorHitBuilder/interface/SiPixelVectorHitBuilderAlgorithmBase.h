@@ -32,6 +32,8 @@ class SiPixelVectorHitBuilderAlgorithmBase {
   SiPixelVectorHitBuilderAlgorithmBase(const edm::ParameterSet&);
   virtual ~SiPixelVectorHitBuilderAlgorithmBase() {}
   void initialize(const edm::EventSetup&);
+  void initTkGeom(edm::ESHandle< TrackerGeometry > tkGeomHandle);
+  void initTkTopo(edm::ESHandle< TrackerTopology > tkTopoHandle);
 
   //FIXME::ERICA::this should be template, return different collection for different algo used!!
   virtual void run(edm::Handle< edmNew::DetSetVector<Phase2TrackerCluster1D> >  clusters, VectorHitCollectionNew& vhAcc, VectorHitCollectionNew& vhRej, 
@@ -40,11 +42,12 @@ class SiPixelVectorHitBuilderAlgorithmBase {
   virtual std::vector<VectorHit> buildVectorHits (const StackGeomDet * stack,
                                          edm::Handle< edmNew::DetSetVector<Phase2TrackerCluster1D> > clusters,
                                          const detset & DSVinner, const detset & DSVouter,
-                                         const PixelGeomDetUnit * theLowerGeomDetUnit,
-                                         const PixelGeomDetUnit * theUpperGeomDetUnit) = 0;
+                                         const GeomDetUnit * theLowerGeomDetUnit,
+                                         const GeomDetUnit * theUpperGeomDetUnit) = 0;
 
   void printClusters(const edmNew::DetSetVector<Phase2TrackerCluster1D>& clusters);
-  void printCluster(unsigned int rawId, const Phase2TrackerCluster1D* cluster);
+  void printCluster(const GeomDetUnit* geomDetUnit, const Phase2TrackerCluster1D* cluster);
+
   void loadDetSetVector( std::map< DetId,std::vector<VectorHit> >& theMap, edmNew::DetSetVector<VectorHit>& theCollection ) const ;
 
   const TrackerGeometry* theTkGeom;

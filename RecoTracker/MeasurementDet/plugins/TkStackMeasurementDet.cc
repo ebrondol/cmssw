@@ -37,11 +37,14 @@ TkStackMeasurementDet::recHits( const TrajectoryStateOnSurface& ts) const
 
   result.reserve(theLowerDetSet.size());
 
-  SiPixelVectorHitBuilderAlgorithmBase * vhalgo = theMatcher->algo() ;
-  vhalgo = dynamic_cast<VectorHitBuilderAlgorithm *>(vhalgo);
+  SiPixelVectorHitBuilderAlgorithmBase * algobase = theMatcher->algo() ;
+  VectorHitBuilderAlgorithm* vhalgo = dynamic_cast<VectorHitBuilderAlgorithm *>(algobase);
   std::vector<VectorHit> vhs;
-  if(vhalgo)
-    vhs = vhalgo->buildVectorHits(&specificGeomDet(), theHandle, theLowerDetSet, theUpperDetSet, &lowerDet()->specificGeomDet(), &upperDet()->specificGeomDet());
+  if(vhalgo){
+//    const GeomDetUnit* theLowerGeomDet = specificGeomDet().lowerDet();
+//    const GeomDetUnit* theUpperGeomDet = specificGeomDet().upperDet();
+    vhs = vhalgo->buildVectorHits(&specificGeomDet(), theHandle, theLowerDetSet, theUpperDetSet, specificGeomDet().lowerDet(), specificGeomDet().upperDet());
+  }
   else
     std::cout << "algo not valid" << std::endl;
 
@@ -68,12 +71,12 @@ bool TkStackMeasurementDet::measurements( const TrajectoryStateOnSurface& stateO
     std::cout << "\tTkStackMeasurementDet::newhit" << hit->globalPosition() << std::endl;
 
     std::pair<bool,double> diffEst = est.estimate( stateOnThisDet, *hit);
-    LogTrace("MeasurementTracker") << "estimate " << diffEst.first << "\t" << diffEst.second;
-    LogTrace("MeasurementTracker") << hit->globalPosition() << "," << stateOnThisDet << std::endl;
     if ( diffEst.first){
-      LogTrace("MeasurementTracker") << "add measurement " << std::endl;
+      LogTrace("MeasurementTracker") << "The measurement has been added with chi2 = " << diffEst.second << std::endl;
       result.add(std::move(hit), diffEst.second);
     }
+  
+    LogTrace("MeasurementTracker") << std::endl;
 
   }
   if (result.size()>oldSize) return true;

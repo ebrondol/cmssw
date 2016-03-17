@@ -14,6 +14,7 @@ SiPixelVectorHitBuilderAlgorithmBase::SiPixelVectorHitBuilderAlgorithmBase(const
 
 void SiPixelVectorHitBuilderAlgorithmBase::initialize(const edm::EventSetup& es)
 {
+  std::cout << "sono entrato proprio dove volevo" << std::endl;
   //FIXME:ask Vincenzo
   /*
   uint32_t tk_cache_id = es.get<TrackerDigiGeometryRecord>().cacheIdentifier();
@@ -33,13 +34,20 @@ void SiPixelVectorHitBuilderAlgorithmBase::initialize(const edm::EventSetup& es)
   // get the geometry
   edm::ESHandle< TrackerGeometry > geomHandle;
   es.get< TrackerDigiGeometryRecord >().get( geomHandle );
-  theTkGeom = geomHandle.product();
+  initTkGeom(geomHandle);
 
   edm::ESHandle< TrackerTopology > tTopoHandle;
   es.get< IdealGeometryRecord >().get(tTopoHandle);
-  theTkTopo = tTopoHandle.product();
+  initTkTopo(tTopoHandle);
 
   es.get< TkStripCPERecord >().get(cpeTag, parameterestimator);
+}
+
+void SiPixelVectorHitBuilderAlgorithmBase::initTkGeom(edm::ESHandle< TrackerGeometry > tkGeomHandle){
+  theTkGeom = tkGeomHandle.product();
+}
+void SiPixelVectorHitBuilderAlgorithmBase::initTkTopo(edm::ESHandle< TrackerTopology > tkTopoHandle){
+  theTkTopo = tkTopoHandle.product();
 }
 
 void SiPixelVectorHitBuilderAlgorithmBase::printClusters(const edmNew::DetSetVector<Phase2TrackerCluster1D>& clusters){
@@ -55,10 +63,12 @@ void SiPixelVectorHitBuilderAlgorithmBase::printClusters(const edmNew::DetSetVec
     for (edmNew::DetSet< Phase2TrackerCluster1D >::const_iterator clustIt = DSViter->begin(); clustIt != DSViter->end(); ++clustIt) {
 
       nCluster++;
-      // get the detector unit's id
-      unsigned int rawId(DSViter->detId());
 
-      printCluster(rawId, clustIt);
+      // get the detector unit's id
+      const GeomDetUnit* geomDetUnit(theTkGeom->idToDetUnit(DSViter->detId()));
+      if (!geomDetUnit) return;
+
+      printCluster(geomDetUnit, clustIt);
 
     }
   }
@@ -68,40 +78,36 @@ void SiPixelVectorHitBuilderAlgorithmBase::printClusters(const edmNew::DetSetVec
 }
 
 
-void SiPixelVectorHitBuilderAlgorithmBase::printCluster(unsigned int rawId, const Phase2TrackerCluster1D* clustIt){
-
-  DetId detId(rawId);
-
-  // get the geom of the tracker
-  const GeomDetUnit* geomDetUnit(theTkGeom->idToDetUnit(detId));
-  const PixelGeomDetUnit* theGeomDet = dynamic_cast< const PixelGeomDetUnit* >(geomDetUnit);
-  const PixelTopology& topol = theGeomDet->specificTopology();
-
-  unsigned int layer = theTkTopo->layer(detId);
-  unsigned int module = theTkTopo->module(detId);
-  std::cout << "Layer:" << layer << " and DetId: " << rawId << std::endl;
-  if(topol.ncolumns() == 32) 
-    LogTrace("SiPixelVectorHitBuilder") << "Pixel cluster with detId:" << rawId << "(module:" << module << ") " << std::endl;
-  else if(topol.ncolumns() == 2 ) 
-    LogTrace("SiPixelVectorHitBuilder") << "Strip cluster with detId " << rawId << "(module:" << module << ") " << std::endl;
-  else LogTrace("SiPixelVectorHitBuilder") << "no module?!" << std::endl;
-  LogTrace("SiPixelVectorHitBuilder") << "with pitch:" << topol.pitch().first << " , " << topol.pitch().second << std::endl;
-  LogTrace("SiPixelVectorHitBuilder") << " and width:" << theGeomDet->surface().bounds().width() << " , lenght:" << theGeomDet->surface().bounds().length() << std::endl;
+void SiPixelVectorHitBuilderAlgorithmBase::printCluster(const GeomDetUnit* geomDetUnit, const Phase2TrackerCluster1D* clustIt){
 
   if (!geomDetUnit) return;
 
+  const PixelGeomDetUnit* pixelGeomDetUnit = dynamic_cast< const PixelGeomDetUnit* >(geomDetUnit);
+  const PixelTopology& topol = pixelGeomDetUnit->specificTopology();
+  if (!pixelGeomDetUnit) return;
+
+  unsigned int layer = theTkTopo->layer(geomDetUnit->geographicalId());
+  unsigned int module = theTkTopo->module(geomDetUnit->geographicalId());
+  LogTrace("SiPixelVectorHitBuilder") << "Layer:" << layer << " and DetId: " << geomDetUnit->geographicalId().rawId() << std::endl;
+  if(topol.ncolumns() == 32) 
+    LogTrace("SiPixelVectorHitBuilder") << "Pixel cluster (module:" << module << ") " << std::endl;
+  else if(topol.ncolumns() == 2 ) 
+    LogTrace("SiPixelVectorHitBuilder") << "Strip cluster (module:" << module << ") " << std::endl;
+  else LogTrace("SiPixelVectorHitBuilder") << "no module?!" << std::endl;
+  LogTrace("SiPixelVectorHitBuilder") << "with pitch:" << topol.pitch().first << " , " << topol.pitch().second << std::endl;
+  LogTrace("SiPixelVectorHitBuilder") << " and width:" << pixelGeomDetUnit->surface().bounds().width() << " , lenght:" << pixelGeomDetUnit->surface().bounds().length() << std::endl;
+
+
   //FIXME StripClusterParameterEstimator::LocalValues parameters =  parameterestimator->localParameters(*clustIt,geomDetUnit);
   MeasurementPoint mpClu(clustIt->center(), clustIt->column() + 0.5);
-  Local3DPoint localPosClu = geomDetUnit->topology().localPosition(mpClu);
-  Global3DPoint globalPosClu = geomDetUnit->surface().toGlobal(localPosClu);
+  Local3DPoint localPosClu = pixelGeomDetUnit->topology().localPosition(mpClu);
+  Global3DPoint globalPosClu = pixelGeomDetUnit->surface().toGlobal(localPosClu);
   MeasurementError meClu(1./12,0.0,1./12);
-  LocalError localErrClu = geomDetUnit->topology().localError(mpClu,meClu);
+  LocalError localErrClu = pixelGeomDetUnit->topology().localError(mpClu,meClu);
 
   LogTrace("SiPixelVectorHitBuilder") << "\t global pos " << globalPosClu << std::endl;
   LogTrace("SiPixelVectorHitBuilder") << "\t local  pos " << localPosClu << "with err " << localErrClu << std::endl;
   LogTrace("SiPixelVectorHitBuilder") << std::endl;
-  std::cout << "\t global pos " << globalPosClu << std::endl;
-  std::cout << std::endl;
 
   return;
 }

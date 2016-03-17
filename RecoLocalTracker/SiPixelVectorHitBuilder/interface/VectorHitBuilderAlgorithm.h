@@ -32,11 +32,11 @@ class VectorHitBuilderAlgorithm : public SiPixelVectorHitBuilderAlgorithmBase {
   std::vector<VectorHit> buildVectorHits(const StackGeomDet * stack,
                                          edm::Handle< edmNew::DetSetVector<Phase2TrackerCluster1D> > clusters,
                                          const detset & DSVinner, const detset & DSVouter,
-                                         const PixelGeomDetUnit * theLowerGeomDetUnit, 
-                                         const PixelGeomDetUnit * theUpperGeomDetUnit);
+                                         const GeomDetUnit * theLowerGeomDetUnit,
+                                         const GeomDetUnit * theUpperGeomDetUnit);
 
   VectorHit buildVectorHit(const StackGeomDet* stack, Phase2TrackerCluster1DRef lower, Phase2TrackerCluster1DRef upper, 
-                           const PixelGeomDetUnit * theLowerGeomDetUnit, const PixelGeomDetUnit * theUpperGeomDetUnit);
+                           const GeomDetUnit * theLowerGeomDetUnit, const GeomDetUnit * theUpperGeomDetUnit);
 
   // Full I/O in DetSet
   //void buildDetUnit( const edm::DetSetVector<Phase2TrackerCluster1D> & input,
