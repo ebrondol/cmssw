@@ -28,7 +28,7 @@ class VectorHit GCC11_FINAL : public BaseTrackerRecHit {
 
   public:
 
-  //typedef edm::Ref<edmNew::DetSetVector<Phase2TrackerCluster1D>, Phase2TrackerCluster1D > Phase2TrackerCluster1DRef;
+  typedef OmniClusterRef::Phase2Cluster1DRef ClusterRef;
 
   VectorHit() : thePosition(), theDirection(), theCovMatrix(), theDimension(0) { setType(bad); }
 
@@ -144,8 +144,6 @@ class VectorHit GCC11_FINAL : public BaseTrackerRecHit {
   Projection theProjection;
 */
 
-  //VectorHit2D *ZXSegment() {return &theVh2Dzx;}
-  //VectorHit2D *ZYSegment() {return &theVh2Dzy;}
   LocalPoint thePosition;
   LocalVector theDirection;
 
@@ -163,8 +161,6 @@ class VectorHit GCC11_FINAL : public BaseTrackerRecHit {
   int theDimension;
   OmniClusterRef theLowerCluster;
   OmniClusterRef theUpperCluster;
-  //VectorHit2D theVh2Dzx;
-  //VectorHit2D theVh2Dzy;
 
 };
 

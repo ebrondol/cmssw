@@ -41,15 +41,13 @@ TkStackMeasurementDet::recHits( const TrajectoryStateOnSurface& ts) const
   VectorHitBuilderAlgorithm* vhalgo = dynamic_cast<VectorHitBuilderAlgorithm *>(algobase);
   std::vector<VectorHit> vhs;
   if(vhalgo){
-//    const GeomDetUnit* theLowerGeomDet = specificGeomDet().lowerDet();
-//    const GeomDetUnit* theUpperGeomDet = specificGeomDet().upperDet();
     vhs = vhalgo->buildVectorHits(&specificGeomDet(), theHandle, theLowerDetSet, theUpperDetSet, specificGeomDet().lowerDet(), specificGeomDet().upperDet());
   }
   else
     std::cout << "algo not valid" << std::endl;
 
   for ( auto vh : vhs ){
-    std::cout << "\tTkStackMeasurementDet::rechits adding VectorHits!" << std::endl;
+    LogTrace("MeasurementTracker") << "TkStackMeasurementDet::rechits adding VectorHits!" << std::endl;
     result.push_back( TVectorHit::build( &fastGeomDet(), &vh, thePixelCPE) );
   }
 
@@ -60,7 +58,7 @@ TkStackMeasurementDet::recHits( const TrajectoryStateOnSurface& ts) const
 bool TkStackMeasurementDet::measurements( const TrajectoryStateOnSurface& stateOnThisDet,
                                           const MeasurementEstimator& est,
                                           TempMeasurements & result) const {
-  std::cout << "\tTkStackMeasurementDet::measurements" << std::endl;
+  LogTrace("MeasurementTracker") << "TkStackMeasurementDet::measurements" << std::endl;
 
   //here there is the possibility to add if(isActive)
 
@@ -68,7 +66,7 @@ bool TkStackMeasurementDet::measurements( const TrajectoryStateOnSurface& stateO
   MeasurementDet::RecHitContainer && allHits = recHits(stateOnThisDet);
 
   for (auto && hit : allHits) {
-    std::cout << "\tTkStackMeasurementDet::newhit" << hit->globalPosition() << std::endl;
+    //std::cout << "\tTkStackMeasurementDet::newhit" << hit->globalPosition() << std::endl;
 
     std::pair<bool,double> diffEst = est.estimate( stateOnThisDet, *hit);
     if ( diffEst.first){
