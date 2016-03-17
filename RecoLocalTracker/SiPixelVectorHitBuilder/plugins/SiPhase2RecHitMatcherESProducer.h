@@ -3,14 +3,14 @@
 
 #include "FWCore/Framework/interface/ESProducer.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "RecoLocalTracker/Records/interface/TkPixelCPERecord.h"
+#include "RecoLocalTracker/Records/interface/TkPhase2OTCPERecord.h"
 #include "RecoLocalTracker/SiPixelVectorHitBuilder/interface/SiPixelVectorHitBuilder.h"
 #include <boost/shared_ptr.hpp>
 
 class SiPhase2RecHitMatcherESProducer: public edm::ESProducer {
  public:
   SiPhase2RecHitMatcherESProducer(const edm::ParameterSet&);
-  boost::shared_ptr<SiPixelVectorHitBuilder> produce(const TkPixelCPERecord&);
+  boost::shared_ptr<SiPixelVectorHitBuilder> produce(const TkPhase2OTCPERecord&);
  private:
   std::string name;
   boost::shared_ptr<SiPixelVectorHitBuilder> matcher_;

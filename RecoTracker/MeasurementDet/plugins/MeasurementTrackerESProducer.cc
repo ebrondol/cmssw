@@ -126,7 +126,7 @@ MeasurementTrackerESProducer::produce(const CkfComponentsRecord& iRecord)
 
   
   iRecord.getRecord<TkPixelCPERecord>().get(pixelCPEName,pixelCPE);
-  iRecord.getRecord<TkPixelCPERecord>().get(ph2MatcherName,ph2matcher);
+  iRecord.getRecord<TkPhase2OTCPERecord>().get(ph2MatcherName,ph2matcher);
   iRecord.getRecord<TkStripCPERecord>().get(stripCPEName,stripCPE);
   iRecord.getRecord<TkStripCPERecord>().get(matcherName,hitMatcher);
   iRecord.getRecord<TrackerDigiGeometryRecord>().get(trackerGeom);
