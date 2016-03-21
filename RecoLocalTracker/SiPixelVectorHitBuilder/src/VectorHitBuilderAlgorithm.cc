@@ -151,7 +151,8 @@ VectorHit VectorHitBuilderAlgorithm::buildVectorHit(const StackGeomDet * stack,
   Global3DPoint globalPosCluOut = theGeomDet2->surface().toGlobal(localPosCluOut);
   Local3DPoint localPosCluOutINN = theGeomDet1->surface().toLocal(globalPosCluOut);
   MeasurementError meCluOut(1./12,0.0,1./12);
-  LocalError localErrCluOutINN = theGeomDet1->topology().localError(mpCluOut,meCluOut);
+  LocalError localErrCluOutINN = theGeomDet2->topology().localError(mpCluOut,meCluOut);
+
 
   //debug
   //Global3DPoint globalPosCluInn = theGeomDet1->surface().toGlobal(localPosCluInn);
@@ -159,7 +160,7 @@ VectorHit VectorHitBuilderAlgorithm::buildVectorHit(const StackGeomDet * stack,
   //LogTrace("VectorHitBuilderAlgorithm") << "\t upper local pos " << localPosCluOut;
 
   //LogTrace("VectorHitBuilderAlgorithm") << "\t lower local pos " << localPosCluInn << " with error: " << localErrCluInn;
-  //LogTrace("VectorHitBuilderAlgorithm") << "\t upper local pos in the lower sof " << localPosCluOutINN << " with error: " << localErrCluOutINN;
+  LogTrace("VectorHitBuilderAlgorithm") << "\t upper local pos in the lower sof " << localPosCluOutINN << " with error: " << localErrCluOutINN;
 
   bool ok = checkClustersCompatibility(localPosCluInn, localPosCluOutINN, localErrCluInn, localErrCluOutINN);
 
@@ -174,6 +175,9 @@ VectorHit VectorHitBuilderAlgorithm::buildVectorHit(const StackGeomDet * stack,
     Local3DPoint pos2Dzx;
     Local3DVector dir2Dzx;
     fit2Dzx(localPosCluInn, localPosCluOutINN, localErrCluInn,localErrCluOutINN, pos2Dzx, dir2Dzx, covMat2Dzx, chi22Dzx);
+    LogTrace("VectorHitBuilderAlgorithm") << "\t  pos2Dzx: " << pos2Dzx;
+    LogTrace("VectorHitBuilderAlgorithm") << "\t  dir2Dzx: " << dir2Dzx;
+    LogTrace("VectorHitBuilderAlgorithm") << "\t  cov2Dzx: " << covMat2Dzx;
     VectorHit2D vh2Dzx = VectorHit2D(pos2Dzx, dir2Dzx, covMat2Dzx, chi22Dzx);
 
     AlgebraicSymMatrix22 covMat2Dzy;
@@ -181,6 +185,9 @@ VectorHit VectorHitBuilderAlgorithm::buildVectorHit(const StackGeomDet * stack,
     Local3DPoint pos2Dzy;
     Local3DVector dir2Dzy;
     fit2Dzy(localPosCluInn, localPosCluOutINN, localErrCluInn,localErrCluOutINN, pos2Dzy, dir2Dzy, covMat2Dzy, chi22Dzy);
+    LogTrace("VectorHitBuilderAlgorithm") << "\t  pos2Dzy: " << pos2Dzy;
+    LogTrace("VectorHitBuilderAlgorithm") << "\t  dir2Dzy: " << dir2Dzy;
+    LogTrace("VectorHitBuilderAlgorithm") << "\t  cov2Dzy: " << covMat2Dzy;
     VectorHit2D vh2Dzy = VectorHit2D(pos2Dzy, dir2Dzy, covMat2Dzy, chi22Dzy);
 
     OmniClusterRef lowerOmni(lower); 
