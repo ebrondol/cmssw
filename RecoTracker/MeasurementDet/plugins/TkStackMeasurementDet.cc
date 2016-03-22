@@ -30,21 +30,18 @@ void TkStackMeasurementDet::init(const MeasurementDet* lowerDet,
 TkStackMeasurementDet::RecHitContainer
 TkStackMeasurementDet::recHits( const TrajectoryStateOnSurface& ts) const
 {
-  std::cout << "\tTkStackMeasurementDet::rechits ok" << std::endl;
+
   RecHitContainer result;
   if (Empty == true ) return result;
   if (isActive() == false) return result;
 
   result.reserve(theLowerDetSet.size());
 
-  SiPixelVectorHitBuilderAlgorithmBase * algobase = theMatcher->algo() ;
-  VectorHitBuilderAlgorithm* vhalgo = dynamic_cast<VectorHitBuilderAlgorithm *>(algobase);
+  SiPixelVectorHitBuilderAlgorithmBase * algo = theMatcher->algo() ;
+  //VectorHitBuilderAlgorithm* vhalgo = dynamic_cast<VectorHitBuilderAlgorithm *>(algobase);
+  LogTrace("MeasurementTracker") << "TkStackMeasurementDet::recHits algo has been set" << std::endl;
   std::vector<VectorHit> vhs;
-  if(vhalgo){
-    vhs = vhalgo->buildVectorHits(&specificGeomDet(), theHandle, theLowerDetSet, theUpperDetSet, specificGeomDet().lowerDet(), specificGeomDet().upperDet());
-  }
-  else
-    std::cout << "algo not valid" << std::endl;
+  vhs = algo->buildVectorHits(&specificGeomDet(), theHandle, theLowerDetSet, theUpperDetSet, specificGeomDet().lowerDet(), specificGeomDet().upperDet());
 
   for ( auto vh : vhs ){
     LogTrace("MeasurementTracker") << "TkStackMeasurementDet::rechits adding VectorHits!" << std::endl;
@@ -58,7 +55,6 @@ TkStackMeasurementDet::recHits( const TrajectoryStateOnSurface& ts) const
 bool TkStackMeasurementDet::measurements( const TrajectoryStateOnSurface& stateOnThisDet,
                                           const MeasurementEstimator& est,
                                           TempMeasurements & result) const {
-  LogTrace("MeasurementTracker") << "TkStackMeasurementDet::measurements" << std::endl;
 
   //here there is the possibility to add if(isActive)
 
@@ -77,9 +73,8 @@ bool TkStackMeasurementDet::measurements( const TrajectoryStateOnSurface& stateO
     LogTrace("MeasurementTracker") << std::endl;
 
   }
-  if (result.size()>oldSize) return true;
 
   //here there is the possibility to add hasBadComponents
-  return true;
+  return result.size()>oldSize;
 }
 
