@@ -28,6 +28,7 @@ Phase2OTBarrelRod::Phase2OTBarrelRod(vector<const GeomDet*>& innerDets,
 					     vector<const GeomDet*>& outerDets):
   theInnerDets(innerDets),theOuterDets(outerDets)
 {
+
   theDets.assign(theInnerDets.begin(),theInnerDets.end());
   theDets.insert(theDets.end(),theOuterDets.begin(),theOuterDets.end());
 
@@ -100,6 +101,7 @@ Phase2OTBarrelRod::groupedCompatibleDetsV( const TrajectoryStateOnSurface& tsos,
   if(! crossings.isValid()) return;
 
   vector<DetGroup> closestResult;
+  addClosest( tsos, prop, est, crossings.closest(), closestResult );
   if (closestResult.empty()){
     vector<DetGroup> nextResult;
     addClosest( tsos, prop, est, crossings.other(), nextResult);
