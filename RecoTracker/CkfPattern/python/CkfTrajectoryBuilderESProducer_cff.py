@@ -17,6 +17,8 @@ from RecoLocalTracker.SiStripRecHitConverter.StripCPEfromTrackAngle_cfi import *
 from RecoLocalTracker.SiStripRecHitConverter.SiStripRecHitMatcher_cfi import *
 # pixelCPE
 from RecoLocalTracker.SiPixelRecHits.PixelCPEParmError_cfi import *
+# phase2CPE and matcher
+from RecoLocalTracker.SiPixelVectorHitBuilder.SiPhase2RecHitMatcher_cfi import *
 #TransientTrackingBuilder
 from RecoTracker.TransientTrackingRecHit.TransientTrackingRecHitBuilder_cfi import *
 # MeasurementTracker
