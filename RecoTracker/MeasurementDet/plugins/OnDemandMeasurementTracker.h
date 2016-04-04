@@ -17,6 +17,7 @@ public:
 			     const PixelClusterParameterEstimator* pixelCPE,
 			     const StripClusterParameterEstimator* stripCPE,
 			     const SiStripRecHitMatcher*  hitMatcher,
+		             const SiPixelVectorHitBuilder*  ph2matcher,
 			     const TrackerGeometry*  trackerGeom,
 			     const GeometricSearchTracker* geometricSearchTracker,
     			     const SiStripQuality *stripQuality,

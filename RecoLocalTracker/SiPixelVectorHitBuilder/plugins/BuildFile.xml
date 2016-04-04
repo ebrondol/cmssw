@@ -1,0 +1,5 @@
+<use   name="RecoLocalTracker/SiPixelVectorHitBuilder"/>
+<use   name="CalibTracker/SiPixelESProducers"/>
+<library   file="*.cc" name="RecoLocalTrackerSiPixelVectorHitBuilderPlugins">
+  <flags   EDM_PLUGIN="1"/>
+</library>

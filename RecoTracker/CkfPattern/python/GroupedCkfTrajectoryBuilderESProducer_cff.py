@@ -15,6 +15,8 @@ from TrackingTools.MaterialEffects.OppositeMaterialPropagator_cfi import *
 from RecoLocalTracker.SiStripRecHitConverter.StripCPE_cfi import *
 from RecoLocalTracker.SiStripRecHitConverter.StripCPEfromTrackAngle_cfi import *
 from RecoLocalTracker.SiStripRecHitConverter.SiStripRecHitMatcher_cfi import *
+# phase2CPE and matcher
+from RecoLocalTracker.SiPixelVectorHitBuilder.SiPhase2RecHitMatcher_cfi import *
 # pixelCPE
 from RecoLocalTracker.SiPixelRecHits.PixelCPEParmError_cfi import *
 #TransientTrackingBuilder

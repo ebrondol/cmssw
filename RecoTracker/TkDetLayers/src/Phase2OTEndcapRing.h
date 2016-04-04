@@ -14,9 +14,7 @@
 class Phase2OTEndcapRing GCC11_FINAL : public GeometricSearchDetWithGroups{
  public:
   Phase2OTEndcapRing(std::vector<const GeomDet*>& innerDets,
-		 std::vector<const GeomDet*>& outerDets,
-		 std::vector<const GeomDet*>& innerDetBrothers,
-		 std::vector<const GeomDet*>& outerDetBrothers);
+		 std::vector<const GeomDet*>& outerDets);
   ~Phase2OTEndcapRing();
   
   // GeometricSearchDet interface
@@ -50,8 +48,7 @@ class Phase2OTEndcapRing GCC11_FINAL : public GeometricSearchDetWithGroups{
 		   const Propagator& prop,
 		   const MeasurementEstimator& est,
 		   const SubLayerCrossing& crossing,
-		   std::vector<DetGroup>& result,
-		   std::vector<DetGroup>& brotherresult) const;
+		   std::vector<DetGroup>& result) const;
 
   void searchNeighbors( const TrajectoryStateOnSurface& tsos,
 			const Propagator& prop,
@@ -59,15 +56,10 @@ class Phase2OTEndcapRing GCC11_FINAL : public GeometricSearchDetWithGroups{
 			const SubLayerCrossing& crossing,
 			float window, 
 			std::vector<DetGroup>& result,
-			std::vector<DetGroup>& brotherresult,
 			bool checkClosest) const;
 
   const std::vector<const GeomDet*>& subLayer( int ind) const {
     return (ind==0 ? theFrontDets : theBackDets);
-  }
-
-  const std::vector<const GeomDet*>& subLayerBrothers( int ind) const {
-    return (ind==0 ? theFrontDetBrothers : theBackDetBrothers);
   }
 
 
@@ -75,8 +67,6 @@ class Phase2OTEndcapRing GCC11_FINAL : public GeometricSearchDetWithGroups{
   std::vector<const GeomDet*> theDets;
   std::vector<const GeomDet*> theFrontDets;
   std::vector<const GeomDet*> theBackDets;
-  std::vector<const GeomDet*> theFrontDetBrothers;
-  std::vector<const GeomDet*> theBackDetBrothers;
 
   ReferenceCountingPointer<BoundDisk> theDisk;
   ReferenceCountingPointer<BoundDisk> theFrontDisk;

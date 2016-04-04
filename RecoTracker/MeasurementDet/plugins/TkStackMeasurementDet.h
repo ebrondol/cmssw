@@ -5,19 +5,38 @@
 #include "TkPixelMeasurementDet.h"
 
 #include "Geometry/TrackerGeometryBuilder/interface/StackGeomDet.h"
+#include "RecoLocalTracker/SiPixelVectorHitBuilder/interface/SiPixelVectorHitBuilder.h"
 #include "RecoLocalTracker/ClusterParameterEstimator/interface/PixelClusterParameterEstimator.h"
 
-#include "FWCore/Utilities/interface/Visibility.h"
+#include "DataFormats/Common/interface/DetSetVector.h"
+#include "DataFormats/Phase2TrackerCluster/interface/Phase2TrackerCluster1D.h"
 
-// FIXME::TkStackMeasurementDet in this moment is just a prototype: to be fixed soon!
-
-class TkStackMeasurementDet GCC11_FINAL : public MeasurementDet {
+class TkStackMeasurementDet : public MeasurementDet {
 
  public:
 
-  TkStackMeasurementDet( const StackGeomDet* gdet, const PixelClusterParameterEstimator* cpe);
+  typedef edm::Ref<edmNew::DetSetVector<Phase2TrackerCluster1D>, Phase2TrackerCluster1D> Phase2TrackerCluster1DRef;
+  typedef edmNew::DetSet<Phase2TrackerCluster1D> detset;
+  typedef detset::const_iterator const_iterator;
+
+  typedef PixelClusterParameterEstimator::LocalValues    LocalValues;
+
+  TkStackMeasurementDet( const StackGeomDet* gdet, const SiPixelVectorHitBuilder* matcher, 
+                         const PixelClusterParameterEstimator* cpe) ;
   void init(const MeasurementDet* lowerDet,
 	    const MeasurementDet* upperDet);
+
+  virtual ~TkStackMeasurementDet() { }; 
+
+  void update( const detset & lowerDetSet,
+               const detset & upperDetSet,
+               const edm::Handle<edmNew::DetSetVector<Phase2TrackerCluster1D> > & h) {
+    theLowerDetSet = lowerDetSet;
+    theUpperDetSet = upperDetSet;
+    theHandle = h;
+    Empty = false;
+    Active = true;
+  }
 
   virtual RecHitContainer recHits( const TrajectoryStateOnSurface&) const;
 
@@ -27,20 +46,26 @@ class TkStackMeasurementDet GCC11_FINAL : public MeasurementDet {
 			     const MeasurementEstimator& est,
 			     TempMeasurements & result) const;
 
-  const TkPixelMeasurementDet* lowerDet() const{ return theInnerDet;}
-  const TkPixelMeasurementDet* upperDet() const{ return theOuterDet;}
-
-  /// return TRUE if both lower and upper components are active
-  bool isActive() const {return lowerDet()->isActive() && upperDet()->isActive(); }
+  const TkPixelMeasurementDet* lowerDet() const{ return theLowerDet;}
+  const TkPixelMeasurementDet* upperDet() const{ return theUpperDet;}
+  
+  // set if the event is active
+  void setActiveThisEvent(bool active) { Active = active; return; }
+  void setEmpty() { Empty = true; Active = true; }
+  bool isActive() const {return Active; }
 
   /// return TRUE if at least one of the lower and upper components has badChannels
   bool hasBadComponents( const TrajectoryStateOnSurface &tsos ) const {
     return (lowerDet()->hasBadComponents(tsos) || upperDet()->hasBadComponents(tsos));}
 
  private:
+  const SiPixelVectorHitBuilder*        theMatcher;
   const PixelClusterParameterEstimator* thePixelCPE;
-  const TkPixelMeasurementDet*       theInnerDet;
-  const TkPixelMeasurementDet*       theOuterDet;
+  const TkPixelMeasurementDet*          theLowerDet;
+  const TkPixelMeasurementDet*          theUpperDet;
+  detset                                theLowerDetSet, theUpperDetSet;
+  edm::Handle<edmNew::DetSetVector<Phase2TrackerCluster1D> > theHandle;
+  bool Active, Empty;
 
 };
 

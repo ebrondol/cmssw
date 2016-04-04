@@ -8,12 +8,14 @@ MeasurementTracker = cms.ESProducer("MeasurementTrackerESProducer",
 
     pixelClusterProducer = cms.string('siPixelClusters'),
     stripClusterProducer = cms.string('siStripClusters'),
+    Phase2TrackerCluster1DProducer = cms.string('siPhase2Clusters'),
     #stripLazyGetterProducer label only matters if Regional=true
     stripLazyGetterProducer = cms.string(''),
 
     PixelCPE = cms.string('PixelCPEGeneric'),
     StripCPE = cms.string('StripCPEfromTrackAngle'),
     HitMatcher = cms.string('StandardMatcher'),
+    Phase2HitMatcher = cms.string('SiPixelVectorHitMatcher'),
 
     SiStripQualityLabel         = cms.string(''),  ## unlabelled default SiStripQuality
     UseStripModuleQualityDB     = cms.bool(True),
