@@ -32,6 +32,8 @@ GeometryConf={
     'TrackerOnly' : 'Configuration.Geometry.GeometrySimTracker_cff,Configuration.Geometry.GeometryRecoTracker_cff',
     'HCal'        : 'Configuration.Geometry.GeometrySimHCAL_cff,Configuration.Geometry.GeometryRecoHCAL_cff',
     'Extended2023sim'   : 'Extended2023sim,Extended2023simReco',
-    'Extended2023dev'   : 'Extended2023dev,Extended2023devReco'
+    'Extended2023dev'   : 'Extended2023dev,Extended2023devReco',
+    'Extended2023LReco'   : 'Extended2023LReco,Extended2023LRecoReco',
+    'Extended2023Reco'   : 'Extended2023Reco,Extended2023RecoReco'
     
     }
