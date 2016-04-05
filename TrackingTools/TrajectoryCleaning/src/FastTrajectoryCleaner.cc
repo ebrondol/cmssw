@@ -7,7 +7,6 @@ void FastTrajectoryCleaner::clean( TrajectoryPointerContainer & tc) const
 
 void FastTrajectoryCleaner::clean( TempTrajectoryContainer & tc) const
 {
-  LogTrace("CkfPattern") << "FastTrajectoryCleaner::clean" << std::endl;
 
   if (tc.size() <= 1) return; // nothing to clean
   float maxScore= -std::numeric_limits<float>::max();
@@ -23,7 +22,6 @@ void FastTrajectoryCleaner::clean( TempTrajectoryContainer & tc) const
       dof+=h.dimension();
     }
     float score = validHitBonus_*dof - missingHitPenalty_*it.lostHits() - it.chiSquared();
-    LogTrace("CkfPattern") << "  The traj has a score " << score;
     if (score>=maxScore) {
      bestTr = &it;
      maxScore = score;
@@ -38,12 +36,12 @@ void FastTrajectoryCleaner::clean( TempTrajectoryContainer & tc) const
 }
 
 /*
- *      auto score = [&](Trajectory const&t)->float {
- *                  // possible variant under study
- *                              // auto ns = t.foundHits()-t.trailingFoundHits();
- *                                          //auto penalty =  0.8f*missingHitPenalty_;
- *                                                      // return validHitBonus_*(t.foundHits()-0.2f*t.cccBadHits())  - penalty*t.lostHits() - t.chiSquared();
- *                                                               // classical score
- *                                                                        return validHitBonus_*t.foundHits()  - missingHitPenalty_*t.lostHits() - t.chiSquared();
- *                                                                             };
- *                                                                             */
+ *  auto score = [&](Trajectory const&t)->float {
+ *  // possible variant under study
+ *  // auto ns = t.foundHits()-t.trailingFoundHits();
+ *  //auto penalty =  0.8f*missingHitPenalty_;
+ *  // return validHitBonus_*(t.foundHits()-0.2f*t.cccBadHits())  - penalty*t.lostHits() - t.chiSquared();
+ *  // classical score
+ *  return validHitBonus_*t.foundHits()  - missingHitPenalty_*t.lostHits() - t.chiSquared();
+ *  };
+ *  */
