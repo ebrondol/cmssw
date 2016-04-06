@@ -10,7 +10,6 @@
  *
  */
 
-//#include "DataFormats/TrackingRecHit/interface/RecSegment.h"
 #include "DataFormats/TrackingRecHit/interface/BaseTrackerRecHit.h"
 #include "DataFormats/TrackingRecHit/interface/VectorHit2D.h"
 #include "DataFormats/TrackerRecHit2D/interface/OmniClusterRef.h"
@@ -82,6 +81,8 @@ class VectorHit GCC11_FINAL : public BaseTrackerRecHit {
   AlgebraicSymMatrix parametersError() const ;
   virtual double chi2() const { return theChi2; }
   virtual int dimension() const { return theDimension; }
+  ClusterRef lowerCluster() const { return theLowerCluster.cluster_phase2(); }
+  ClusterRef upperCluster() const { return theUpperCluster.cluster_phase2(); }
   OmniClusterRef const lowerClusterRef() const { return theLowerCluster; }
   OmniClusterRef const upperClusterRef() const { return theUpperCluster; }
 
