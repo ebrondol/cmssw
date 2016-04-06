@@ -20,8 +20,10 @@
 #include "SimDataFormats/Track/interface/SimTrackContainer.h"
 #include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
 #include "DataFormats/SiStripCluster/interface/SiStripCluster.h"
+#include "DataFormats/Phase2TrackerCluster/interface/Phase2TrackerCluster1D.h"
 #include "SimDataFormats/TrackerDigiSimLink/interface/StripDigiSimLink.h"
 #include "SimDataFormats/TrackerDigiSimLink/interface/PixelDigiSimLink.h"
+#include "DataFormats/Phase2TrackerDigi/interface/Phase2TrackerDigi.h"
 
 #include "SimTracker/TrackerHitAssociation/interface/ClusterTPAssociationProducer.h"
 
@@ -29,8 +31,10 @@ ClusterTPAssociationProducer::ClusterTPAssociationProducer(const edm::ParameterS
   : _verbose(cfg.getParameter<bool>("verbose")),
     _pixelSimLinkSrc(cfg.getParameter<edm::InputTag>("pixelSimLinkSrc")),
     _stripSimLinkSrc(cfg.getParameter<edm::InputTag>("stripSimLinkSrc")),
+    _phase2SimLinkSrc(cfg.getParameter<edm::InputTag>("phase2SimLinkSrc")),
     _pixelClusterSrc(cfg.getParameter<edm::InputTag>("pixelClusterSrc")),
     _stripClusterSrc(cfg.getParameter<edm::InputTag>("stripClusterSrc")),
+    _phase2ClusterSrc(cfg.getParameter<edm::InputTag>("phase2ClusterSrc")),
     _trackingParticleSrc(cfg.getParameter<edm::InputTag>("trackingParticleSrc"))
 {
   produces<ClusterTPAssociationList>();
@@ -50,6 +54,10 @@ void ClusterTPAssociationProducer::produce(edm::Event& iEvent, const edm::EventS
   edm::Handle<edm::DetSetVector<StripDigiSimLink> > sistripSimLinks;
   iEvent.getByLabel(_stripSimLinkSrc, sistripSimLinks);
 
+  // Phase2 DigiSimLink
+  edm::Handle<edm::DetSetVector<PixelDigiSimLink> > siphase2SimLinks;
+  iEvent.getByLabel(_phase2SimLinkSrc, siphase2SimLinks);
+
   // Pixel Cluster
   edm::Handle<edmNew::DetSetVector<SiPixelCluster> > pixelClusters;
   iEvent.getByLabel(_pixelClusterSrc, pixelClusters);
@@ -57,6 +65,10 @@ void ClusterTPAssociationProducer::produce(edm::Event& iEvent, const edm::EventS
   // Strip Cluster
   edm::Handle<edmNew::DetSetVector<SiStripCluster> > stripClusters;
   iEvent.getByLabel(_stripClusterSrc, stripClusters);
+
+  // Phase2 Cluster
+  edm::Handle<edmNew::DetSetVector<Phase2TrackerCluster1D> > phase2Clusters;
+  iEvent.getByLabel(_phase2ClusterSrc, phase2Clusters);
 
   // TrackingParticle
   edm::Handle<TrackingParticleCollection>  TPCollectionH;
@@ -143,6 +155,39 @@ void ClusterTPAssociationProducer::produce(edm::Event& iEvent, const edm::EventS
         } 
       }
     } 
+  }
+
+
+  // Phase2 Clusters
+  for (edmNew::DetSetVector<Phase2TrackerCluster1D>::const_iterator iter  = phase2Clusters->begin();
+                                                            iter != phase2Clusters->end(); ++iter) {
+    uint32_t detid = iter->id();
+    DetId detId(detid);
+    edmNew::DetSet<Phase2TrackerCluster1D> link_phase2 = (*iter);
+
+    for (edmNew::DetSet<Phase2TrackerCluster1D>::const_iterator di  = link_phase2.begin();
+                                                        di != link_phase2.end(); di++) {
+      const Phase2TrackerCluster1D& cluster = (*di);
+      edm::Ref<edmNew::DetSetVector<Phase2TrackerCluster1D>, Phase2TrackerCluster1D> c_ref =
+        edmNew::makeRefTo(phase2Clusters, di);
+
+      std::set<std::pair<uint32_t, EncodedEventId> > simTkIds;
+
+      for (unsigned int istr(0); istr < cluster.size(); ++istr) {
+        uint32_t channel = Phase2TrackerDigi::pixelToChannel(cluster.firstRow() + istr, cluster.column());
+        std::vector<std::pair<uint32_t, EncodedEventId> > trkid(getSimTrackId<PixelDigiSimLink>(siphase2SimLinks, detId, channel));
+        if (trkid.size()==0) continue;
+        simTkIds.insert(trkid.begin(),trkid.end());
+      }
+
+      for (std::set<std::pair<uint32_t, EncodedEventId> >::const_iterator iset  = simTkIds.begin();
+                                                                          iset != simTkIds.end(); iset++) {
+        auto ipos = mapping.find(*iset);
+        if (ipos != mapping.end()) {
+          clusterTPList->push_back(std::make_pair(OmniClusterRef(c_ref), ipos->second));
+        }
+      }
+    }
   }
   iEvent.put(clusterTPList);
 }
