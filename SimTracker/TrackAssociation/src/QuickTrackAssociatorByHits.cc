@@ -9,6 +9,7 @@
 #include "DataFormats/TrackerRecHit2D/interface/SiStripMatchedRecHit2D.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit2D.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit1D.h"
+#include "DataFormats/TrackingRecHit/interface/VectorHit.h"
 #include "DataFormats/SiStripDetId/interface/SiStripDetId.h"
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
@@ -264,6 +265,7 @@ reco::SimToRecoCollection QuickTrackAssociatorByHits::associateSimToRecoImplemen
 	if( pTrackCollection_ ) collectionSize=pTrackCollection_->size();
 	else collectionSize=(*pTrackCollectionHandle_)->size();
 
+
 	for( size_t i=0; i<collectionSize; ++i )
 	{
 		const reco::Track* pTrack; // Get a normal pointer for ease of use.
@@ -468,6 +470,13 @@ template<typename iter> std::vector<OmniClusterRef> QuickTrackAssociatorByHits::
 	    edm::LogError("TrackAssociator") << ">>> RecHit does not have an associated cluster!" << " file: " << __FILE__ << " line: " << __LINE__;
 	  returnValue.push_back(sRHit->omniClusterRef());
 	}
+	else if (tid == typeid(VectorHit)) {
+	  const VectorHit* pVectorHit = dynamic_cast<const VectorHit*>(rhit);
+          if (!pVectorHit->lowerCluster().isNonnull() || !pVectorHit->upperCluster().isNonnull())
+	    edm::LogError("TrackAssociator") << ">>> RecHit does not have an associated cluster!" << " file: " << __FILE__ << " line: " << __LINE__;
+	  returnValue.push_back(pVectorHit->lowerClusterRef());
+	  returnValue.push_back(pVectorHit->upperClusterRef());
+        }
         else {
   	  edm::LogError("TrackAssociator") << ">>> getMatchedClusters: TrackingRecHit not associated to any SiStripCluster! subdetid = " << subdetid;
         }
