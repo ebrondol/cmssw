@@ -173,7 +173,6 @@ def customise_Reco(process,pileup):
     del process.HighPtTripletStep
     del process.LowPtQuadStep
     del process.LowPtTripletStep
-    #del process.DetachedTripletStep
     del process.DetachedQuadStep
     del process.MixedTripletStep
     del process.PixelPairStep
@@ -248,13 +247,13 @@ def customise_Reco(process,pileup):
     # End of pixel template needed section
     
     process.regionalCosmicTrackerSeedingLayers.layerList  = cms.vstring('BPix9+BPix8')  # Optimize later
-    process.regionalCosmicTrackerSeedingLayers.layerInfo.BPix = cms.PSet(
-#        HitProducer = cms.string('siPixelRecHits'),
-#        hitErrorRZ = cms.double(0.006),
-#        useErrorsFromParam = cms.bool(True),
+    process.regionalCosmicTrackerSeedingLayers.BPix = cms.PSet(
+        HitProducer = cms.string('siPixelRecHits'),
+        hitErrorRZ = cms.double(0.006),
+        useErrorsFromParam = cms.bool(True),
         TTRHBuilder = cms.string('TTRHBuilderWithoutAngle4PixelPairs'),
-#        skipClusters = cms.InputTag("pixelPairStepClusters"),
-#        hitErrorRPhi = cms.double(0.0027)
+        skipClusters = cms.InputTag("pixelPairStepClusters"),
+        hitErrorRPhi = cms.double(0.0027)
     )
     # Make pixelTracks use quadruplets
     process.pixelTracks.SeedMergerPSet = cms.PSet(
