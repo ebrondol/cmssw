@@ -8,7 +8,6 @@ Phase2OTBarrelRod* Phase2OTBarrelRodBuilder::build(const GeometricDet* thePhase2
 						   const TrackerGeometry* theGeomDetGeometry,
                                                    const bool usePhase2Stacks)
 {  
-  //std::cout << "Phase2OTBarrelRodBuilder::build usePhase2Stacks: " << usePhase2Stacks << std::endl;
   vector<const GeometricDet*> allGeometricDets = thePhase2OTBarrelRod->components();
   LogDebug("TkDetLayers") << "Phase2OTBarrelRodBuilder with #Modules: " << allGeometricDets.size() << std::endl;
   

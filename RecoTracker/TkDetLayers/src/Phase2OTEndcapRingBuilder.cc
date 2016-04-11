@@ -7,7 +7,6 @@ Phase2OTEndcapRing* Phase2OTEndcapRingBuilder::build(const GeometricDet* aPhase2
 			                             const TrackerGeometry* theGeomDetGeometry,
                                                      const bool usePhase2Stacks)
 {
-  std::cout << "Phase2OTEndcapRingBuilder::build usePhase2Stacks:" << usePhase2Stacks << std::endl;
   vector<const GeometricDet*>  allGeometricDets = aPhase2OTEndcapRing->components();
   LogDebug("TkDetLayers") << "Phase2OTEndcapRingBuilder with #Modules: " << allGeometricDets.size() << std::endl;
   
