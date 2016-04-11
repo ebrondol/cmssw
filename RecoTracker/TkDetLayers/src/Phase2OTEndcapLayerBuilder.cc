@@ -5,7 +5,8 @@ using namespace edm;
 using namespace std;
 
 Phase2OTEndcapLayer* Phase2OTEndcapLayerBuilder::build(const GeometricDet* aPhase2OTEndcapLayer,
-				 const TrackerGeometry* theGeomDetGeometry)
+				                       const TrackerGeometry* theGeomDetGeometry,
+                                                       const bool usePhase2Stacks)
 {
   vector<const GeometricDet*>  theGeometricRings = aPhase2OTEndcapLayer->components();
   LogDebug("TkDetLayers") << "Phase2OTEndcapLayerBuilder with #Rings: " << theGeometricRings.size() << std::endl;
@@ -15,7 +16,7 @@ Phase2OTEndcapLayer* Phase2OTEndcapLayerBuilder::build(const GeometricDet* aPhas
 
   for(vector<const GeometricDet*>::const_iterator it=theGeometricRings.begin();
       it!=theGeometricRings.end();it++){
-    thePhase2OTEndcapRings.push_back(myBuilder.build( *it,theGeomDetGeometry));    
+    thePhase2OTEndcapRings.push_back(myBuilder.build( *it,theGeomDetGeometry,usePhase2Stacks));
   }
 
   return new Phase2OTEndcapLayer(thePhase2OTEndcapRings);

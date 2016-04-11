@@ -27,13 +27,14 @@ TrackerRecoGeometryESProducer::TrackerRecoGeometryESProducer(const edm::Paramete
     // The default parameter ("") makes this change transparent to the user
     // See FastSimulation/Configuration/data/ for examples of cfi's.
     geoLabel = p.getUntrackedParameter<std::string>("trackerGeometryLabel","");
+    _useStacks = p.getParameter<bool>("useStacks");
 }
 
 TrackerRecoGeometryESProducer::~TrackerRecoGeometryESProducer() {}
 
 boost::shared_ptr<GeometricSearchTracker> 
 TrackerRecoGeometryESProducer::produce(const TrackerRecoGeometryRecord & iRecord){ 
-
+  std::cout << "TrackerRecoGeometryESProducer::produce useStacks" << _useStacks << std::endl;
 
   edm::ESHandle<TrackerGeometry> tG;
   iRecord.getRecord<TrackerDigiGeometryRecord>().get( geoLabel, tG );
@@ -45,7 +46,7 @@ TrackerRecoGeometryESProducer::produce(const TrackerRecoGeometryRecord & iRecord
 
 
   GeometricSearchTrackerBuilder builder;
-  _tracker  = boost::shared_ptr<GeometricSearchTracker>(builder.build( tG->trackerDet(), &(*tG), tTopo ));
+  _tracker  = boost::shared_ptr<GeometricSearchTracker>(builder.build( tG->trackerDet(), &(*tG), tTopo, _useStacks));
   return _tracker;
 }
 

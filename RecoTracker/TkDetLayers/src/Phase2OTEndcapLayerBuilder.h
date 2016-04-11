@@ -16,7 +16,8 @@ class Phase2OTEndcapLayerBuilder {
  public:
   Phase2OTEndcapLayerBuilder(){};
   Phase2OTEndcapLayer* build(const GeometricDet* aPhase2OTEndcapLayer,
-		  const TrackerGeometry* theGeomDetGeometry);
+		             const TrackerGeometry* theGeomDetGeometry,
+                             const bool usePhase2Stacks);
 
    
 };
