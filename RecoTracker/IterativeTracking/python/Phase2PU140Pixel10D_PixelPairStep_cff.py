@@ -22,7 +22,7 @@ pixelPairStepSeedLayers = cms.EDProducer("SeedingLayersEDProducer",
                             'BPix2+FPix1_pos', 'BPix2+FPix1_neg', 
                             'BPix1+FPix2_pos', 'BPix1+FPix2_neg',
                             'FPix1_pos+FPix2_pos', 'FPix1_neg+FPix2_neg',
-                            'FPix2_pos+FPix3_pos', 'FPix2_neg+FPix3_neg'
+                            'FPix2_pos+FPix3_pos', 'FPix2_neg+FPix3_neg',
                             'FPix3_pos+FPix4_pos', 'FPix3_neg+FPix4_neg',
                             'FPix4_pos+FPix5_pos', 'FPix4_neg+FPix5_neg',
                             'FPix5_pos+FPix6_pos', 'FPix5_neg+FPix6_neg'),
