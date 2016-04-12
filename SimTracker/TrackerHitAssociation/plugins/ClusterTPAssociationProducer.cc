@@ -159,32 +159,34 @@ void ClusterTPAssociationProducer::produce(edm::Event& iEvent, const edm::EventS
 
 
   // Phase2 Clusters
-  for (edmNew::DetSetVector<Phase2TrackerCluster1D>::const_iterator iter  = phase2Clusters->begin();
-                                                            iter != phase2Clusters->end(); ++iter) {
-    uint32_t detid = iter->id();
-    DetId detId(detid);
-    edmNew::DetSet<Phase2TrackerCluster1D> link_phase2 = (*iter);
-
-    for (edmNew::DetSet<Phase2TrackerCluster1D>::const_iterator di  = link_phase2.begin();
-                                                        di != link_phase2.end(); di++) {
-      const Phase2TrackerCluster1D& cluster = (*di);
-      edm::Ref<edmNew::DetSetVector<Phase2TrackerCluster1D>, Phase2TrackerCluster1D> c_ref =
-        edmNew::makeRefTo(phase2Clusters, di);
-
-      std::set<std::pair<uint32_t, EncodedEventId> > simTkIds;
-
-      for (unsigned int istr(0); istr < cluster.size(); ++istr) {
-        uint32_t channel = Phase2TrackerDigi::pixelToChannel(cluster.firstRow() + istr, cluster.column());
-        std::vector<std::pair<uint32_t, EncodedEventId> > trkid(getSimTrackId<PixelDigiSimLink>(siphase2SimLinks, detId, channel));
-        if (trkid.size()==0) continue;
-        simTkIds.insert(trkid.begin(),trkid.end());
-      }
-
-      for (std::set<std::pair<uint32_t, EncodedEventId> >::const_iterator iset  = simTkIds.begin();
-                                                                          iset != simTkIds.end(); iset++) {
-        auto ipos = mapping.find(*iset);
-        if (ipos != mapping.end()) {
-          clusterTPList->push_back(std::make_pair(OmniClusterRef(c_ref), ipos->second));
+  if(phase2Clusters.isValid()){
+    for (edmNew::DetSetVector<Phase2TrackerCluster1D>::const_iterator iter  = phase2Clusters->begin();
+                                                              iter != phase2Clusters->end(); ++iter) {
+      uint32_t detid = iter->id();
+      DetId detId(detid);
+      edmNew::DetSet<Phase2TrackerCluster1D> link_phase2 = (*iter);
+  
+      for (edmNew::DetSet<Phase2TrackerCluster1D>::const_iterator di  = link_phase2.begin();
+                                                          di != link_phase2.end(); di++) {
+        const Phase2TrackerCluster1D& cluster = (*di);
+        edm::Ref<edmNew::DetSetVector<Phase2TrackerCluster1D>, Phase2TrackerCluster1D> c_ref =
+          edmNew::makeRefTo(phase2Clusters, di);
+  
+        std::set<std::pair<uint32_t, EncodedEventId> > simTkIds;
+  
+        for (unsigned int istr(0); istr < cluster.size(); ++istr) {
+          uint32_t channel = Phase2TrackerDigi::pixelToChannel(cluster.firstRow() + istr, cluster.column());
+          std::vector<std::pair<uint32_t, EncodedEventId> > trkid(getSimTrackId<PixelDigiSimLink>(siphase2SimLinks, detId, channel));
+          if (trkid.size()==0) continue;
+          simTkIds.insert(trkid.begin(),trkid.end());
+        }
+  
+        for (std::set<std::pair<uint32_t, EncodedEventId> >::const_iterator iset  = simTkIds.begin();
+                                                                            iset != simTkIds.end(); iset++) {
+          auto ipos = mapping.find(*iset);
+          if (ipos != mapping.end()) {
+            clusterTPList->push_back(std::make_pair(OmniClusterRef(c_ref), ipos->second));
+          }
         }
       }
     }

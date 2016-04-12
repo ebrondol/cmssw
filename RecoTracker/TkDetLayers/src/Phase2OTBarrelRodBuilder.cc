@@ -16,10 +16,10 @@ Phase2OTBarrelRod* Phase2OTBarrelRodBuilder::build(const GeometricDet* thePhase2
   double meanR = 0;
 
   if(usePhase2Stacks){  
-    vector<const GeometricDet*> compGeometricDets;
+//    vector<const GeometricDet*> compGeometricDets;
   
     for(vector<const GeometricDet*>::const_iterator compGeometricDets=allGeometricDets.begin(); compGeometricDets!=allGeometricDets.end();compGeometricDets++){
-      LogTrace("TkDetLayers") << " compGeometricDets.positionBounds().perp() " << (*compGeometricDets)->positionBounds().perp() << std::endl;
+      //LogTrace("TkDetLayers") << " compGeometricDets.positionBounds().perp() " << (*compGeometricDets)->positionBounds().perp() << std::endl;
       meanR = meanR + (*compGeometricDets)->positionBounds().perp();
     }
     meanR = meanR/allGeometricDets.size();
@@ -27,7 +27,6 @@ Phase2OTBarrelRod* Phase2OTBarrelRodBuilder::build(const GeometricDet* thePhase2
   
     for(vector<const GeometricDet*>::const_iterator compGeometricDets=allGeometricDets.begin(); compGeometricDets!=allGeometricDets.end(); compGeometricDets++){
       const GeomDet* theGeomDet = theGeomDetGeometry->idToDet( (*compGeometricDets)->geographicalID() );
-      LogTrace("TkDetLayers") << " inserisco " << (*compGeometricDets)->geographicalID().rawId() << std::endl;
   
       if( (*compGeometricDets)->positionBounds().perp() < meanR)
         innerGeomDets.push_back(theGeomDet);
@@ -42,43 +41,54 @@ Phase2OTBarrelRod* Phase2OTBarrelRodBuilder::build(const GeometricDet* thePhase2
     return new Phase2OTBarrelRod(innerGeomDets,outerGeomDets);
 
   } else {
+  vector<const GeometricDet*> compGeometricDets;
 
-    vector<const GeomDet*> innerGeomDetBrothers;
-    vector<const GeomDet*> outerGeomDetBrothers;
-  
-    // compute meanR using the first and the third module because of the pt module pairs
-    LogDebug("TkDetLayers") << "mean computed with " 
-  				     << allGeometricDets[0]->positionBounds().perp() 
-  				     << " and " << allGeometricDets[2]->positionBounds().perp() 
-  				     << " and " << allGeometricDets[1]->positionBounds().perp() 
-  				     << " and " << allGeometricDets[3]->positionBounds().perp() ;
-    meanR = (allGeometricDets[0]->positionBounds().perp()+allGeometricDets[2]->positionBounds().perp())/2;
-    double meanRBrothers = (allGeometricDets[1]->positionBounds().perp()+allGeometricDets[3]->positionBounds().perp())/2;
-  
-    unsigned int counter=0;
-    for(vector<const GeometricDet*>::iterator it=allGeometricDets.begin(); it!=allGeometricDets.end(); it++,counter++){
-      const GeomDet* theGeomDet = theGeomDetGeometry->idToDet( (*it)->geographicalID() );
-  
-      if(counter%2==0) {
-        if( (*it)->positionBounds().perp() < meanR) 
-  	innerGeomDets.push_back(theGeomDet);
-      
-        if( (*it)->positionBounds().perp() > meanR) 
-  	outerGeomDets.push_back(theGeomDet);
-      } else {
-        if( (*it)->positionBounds().perp() < meanRBrothers) 
-  	innerGeomDetBrothers.push_back(theGeomDet);
-      
-        if( (*it)->positionBounds().perp() > meanRBrothers) 
-  	outerGeomDetBrothers.push_back(theGeomDet);
-      }
+  vector<const GeomDet*> innerGeomDetBrothers;
+  vector<const GeomDet*> outerGeomDetBrothers;
+
+  double meanRBrothers = 0;
+  for(vector<const GeometricDet*>::const_iterator it=allGeometricDets.begin(); it!=allGeometricDets.end();it++){
+    compGeometricDets = (*it)->components(); 
+    if (compGeometricDets.size() != 2){
+      LogDebug("TkDetLayers") << " Stack not with two components but with " << compGeometricDets.size() << std::endl;
+    } else {
+      //LogTrace("TkDetLayers") << " compGeometricDets[0]->positionBounds().perp() " << compGeometricDets[0]->positionBounds().perp() << std::endl;
+      //LogTrace("TkDetLayers") << " compGeometricDets[1]->positionBounds().perp() " << compGeometricDets[1]->positionBounds().perp() << std::endl;
+      meanR = meanR + compGeometricDets[0]->positionBounds().perp();
+      meanRBrothers = meanRBrothers + compGeometricDets[1]->positionBounds().perp();
     }
+
+  }
+  meanR = meanR/allGeometricDets.size();
+  meanRBrothers = meanRBrothers/allGeometricDets.size();
+  LogDebug("TkDetLayers") << " meanR Lower " << meanR << std::endl;
+  LogDebug("TkDetLayers") << " meanR Upper " << meanRBrothers << std::endl;
+
+  for(vector<const GeometricDet*>::iterator it=allGeometricDets.begin(); it!=allGeometricDets.end(); it++){
+    compGeometricDets = (*it)->components(); 
+    const GeomDet* theGeomDet = theGeomDetGeometry->idToDet( compGeometricDets[0]->geographicalID() );
+
+    if( compGeometricDets[0]->positionBounds().perp() < meanR)
+      innerGeomDets.push_back(theGeomDet);
+
+    if( compGeometricDets[0]->positionBounds().perp() > meanR)
+      outerGeomDets.push_back(theGeomDet);
+
+    const GeomDet* theGeomDetBrother = theGeomDetGeometry->idToDet( compGeometricDets[1]->geographicalID() );
+    if( compGeometricDets[1]->positionBounds().perp() < meanRBrothers) 
+      innerGeomDetBrothers.push_back(theGeomDetBrother);
     
-    LogDebug("TkDetLayers") << "innerGeomDets.size(): " << innerGeomDets.size() ;
-    LogDebug("TkDetLayers") << "outerGeomDets.size(): " << outerGeomDets.size() ;
-    LogDebug("TkDetLayers") << "innerGeomDetsBrothers.size(): " << innerGeomDetBrothers.size() ;
-    LogDebug("TkDetLayers") << "outerGeomDetsBrothers.size(): " << outerGeomDetBrothers.size() ;
-    return new Phase2OTBarrelRod(innerGeomDets,outerGeomDets,innerGeomDetBrothers,outerGeomDetBrothers);
+    if( compGeometricDets[1]->positionBounds().perp() > meanRBrothers) 
+      outerGeomDetBrothers.push_back(theGeomDetBrother);
+  }
+
+  LogDebug("TkDetLayers") << "innerGeomDets.size(): " << innerGeomDets.size() ;
+  LogDebug("TkDetLayers") << "outerGeomDets.size(): " << outerGeomDets.size() ;
+  LogDebug("TkDetLayers") << "innerGeomDetsBro.size(): " << innerGeomDetBrothers.size() ;
+  LogDebug("TkDetLayers") << "outerGeomDetsBro.size(): " << outerGeomDetBrothers.size() ;
+
+  return new Phase2OTBarrelRod(innerGeomDets,outerGeomDets,innerGeomDetBrothers,outerGeomDetBrothers);
+ 
   }
 
   return new Phase2OTBarrelRod(innerGeomDets,outerGeomDets);

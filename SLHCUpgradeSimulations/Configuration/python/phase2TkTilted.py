@@ -215,6 +215,8 @@ def customise_Reco(process,pileup):
     # when linking tracks to HF clusters
     process=customise_PFlow.customise_extendedTrackerBarrel( process )
 
+    process.load('RecoTracker.GeometryESProducer.TrackerRecoGeometryESProducer_cfi')
+    process.TrackerRecoGeometryESProducer.useStacks = cms.bool(True)
     return process
 
 def customise_condOverRides(process):
@@ -337,6 +339,10 @@ def customise_Validation(process,pileup):
     if hasattr(process,'simHitTPAssocProducer'):
         process.simHitTPAssocProducer.simHitSrc=cms.VInputTag(cms.InputTag("g4SimHits","TrackerHitsPixelBarrelLowTof"),
                                                               cms.InputTag("g4SimHits","TrackerHitsPixelEndcapLowTof"))
+
+    if hasattr(process,'tpClusterProducer'):
+        process.tpClusterProducer.pixelSimLinkSrc = cms.InputTag("simSiPixelDigis", "Pixel")
+        process.tpClusterProducer.phase2SimLinkSrc  = cms.InputTag("simSiPixelDigis","Tracker")
 
     return process
 
