@@ -1,5 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
+from RecoTracker.IterativeTracking.InitialStepPreSplitting_cff import *
 from RecoTracker.IterativeTracking.Phase1PU140_InitialStep_cff import *
 from RecoTracker.IterativeTracking.Phase2PU140Pixel10D_HighPtTripletStep_cff import *
 from RecoTracker.IterativeTracking.Phase2PU140Pixel10D_LowPtQuadStep_cff import *
@@ -12,7 +13,8 @@ from RecoTracker.FinalTrackSelectors.Phase2BE_preDuplicateMergingGeneralTracks_c
 from RecoTracker.FinalTrackSelectors.MergeTrackCollections_cff import *
 from RecoTracker.ConversionSeedGenerators.Phase2BE_ConversionStep_cff import *
 
-iterTracking = cms.Sequence(InitialStep*
+iterTracking = cms.Sequence(InitialStepPreSplitting* 
+                            InitialStep*
                             HighPtTripletStep*
                             LowPtQuadStep*
                             LowPtTripletStep*

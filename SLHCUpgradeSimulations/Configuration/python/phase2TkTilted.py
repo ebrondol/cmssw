@@ -69,6 +69,8 @@ def customise_RawToDigi(process):
 def customise_Reco(process,pileup):
     # insert the new clusterizer
     process.load('SimTracker.SiPhase2Digitizer.phase2TrackerClusterizer_cfi')
+    #itIndex = process.pixeltrackerlocalreco.index(process.siPixelClusters)
+    #process.pixeltrackerlocalreco.insert(itIndex, process.siPhase2Clusters)
     
     #process.load('RecoLocalTracker.SubCollectionProducers.jetCoreClusterSplitter_cfi')	
     #clustersTmp = 'siPixelClustersPreSplitting'
@@ -81,8 +83,9 @@ def customise_Reco(process,pileup):
     #process.clusterSummaryProducer.pixelClusters = clustersTmp
     itIndex = process.pixeltrackerlocalreco.index(process.siPixelClustersPreSplitting)
     process.pixeltrackerlocalreco.insert(itIndex, process.siPhase2Clusters)
-    process.pixeltrackerlocalreco.remove(process.siPixelClustersPreSplitting)
-    process.pixeltrackerlocalreco.remove(process.siPixelRecHitsPreSplitting)
+    process.siPixelClustersPreSplitting.src = cms.InputTag("simSiPixelDigis","Pixel")
+    #process.pixeltrackerlocalreco.remove(process.siPixelClustersPreSplitting)
+    #process.pixeltrackerlocalreco.remove(process.siPixelRecHitsPreSplitting)
     process.trackerlocalreco.remove(process.clusterSummaryProducer)
     # keep new clusters
     alist=['RAWSIM','FEVTDEBUG','FEVTDEBUGHLT','GENRAW','RAWSIMHLT','FEVT']
@@ -196,7 +199,7 @@ def customise_Reco(process,pileup):
     
     # End of new tracking configuration which can be removed if new Reconstruction is used.
 
-    process.InitialStepPreSplitting.remove(process.siPixelClusters)
+#    process.InitialStepPreSplitting.remove(process.siPixelClusters)
 
     process.reconstruction.remove(process.castorreco)
     process.reconstruction.remove(process.CastorTowerReco)
