@@ -81,12 +81,12 @@ def customise_Reco(process,pileup):
     #process.pixeltrackerlocalreco.replace(process.siPixelClusters, process.siPixelClustersPreSplitting)
     #process.pixeltrackerlocalreco.replace(process.siPixelRecHits, process.siPixelRecHitsPreSplitting)
     #process.clusterSummaryProducer.pixelClusters = clustersTmp
-    itIndex = process.pixeltrackerlocalreco.index(process.siPixelClustersPreSplitting)
-    process.pixeltrackerlocalreco.insert(itIndex, process.siPhase2Clusters)
-    process.siPixelClustersPreSplitting.src = cms.InputTag("simSiPixelDigis","Pixel")
+    #itIndex = process.pixeltrackerlocalreco.index(process.siPixelClustersPreSplitting)
+    #process.pixeltrackerlocalreco.insert(itIndex, process.siPhase2Clusters)
+    #process.siPixelClustersPreSplitting.src = cms.InputTag("simSiPixelDigis","Pixel")
     #process.pixeltrackerlocalreco.remove(process.siPixelClustersPreSplitting)
     #process.pixeltrackerlocalreco.remove(process.siPixelRecHitsPreSplitting)
-    process.trackerlocalreco.remove(process.clusterSummaryProducer)
+    #process.trackerlocalreco.remove(process.clusterSummaryProducer)
     # keep new clusters
     alist=['RAWSIM','FEVTDEBUG','FEVTDEBUGHLT','GENRAW','RAWSIMHLT','FEVT']
     for a in alist:
@@ -199,7 +199,7 @@ def customise_Reco(process,pileup):
     
     # End of new tracking configuration which can be removed if new Reconstruction is used.
 
-#    process.InitialStepPreSplitting.remove(process.siPixelClusters)
+    process.InitialStepPreSplitting.remove(process.siPixelClusters)
 
     process.reconstruction.remove(process.castorreco)
     process.reconstruction.remove(process.CastorTowerReco)
@@ -226,10 +226,47 @@ def customise_Reco(process,pileup):
 						       'FPix5_pos+FPix6_pos+FPix7_pos+FPix8_pos', 'FPix5_neg+FPix6_neg+FPix7_neg+FPix8_neg',
 						       'FPix5_pos+FPix6_pos+FPix7_pos+FPix9_pos', 'FPix5_neg+FPix6_neg+FPix7_neg+FPix9_neg',
 						       'FPix6_pos+FPix7_pos+FPix8_pos+FPix9_pos', 'FPix6_neg+FPix7_neg+FPix8_neg+FPix9_neg')
-    
+
     
     # Need these until pixel templates are used
     process.load("SLHCUpgradeSimulations.Geometry.recoFromSimDigis_cff")
+    process.siPixelClusters.src = cms.InputTag('simSiPixelDigis', "Pixel")
+
+    # As in the phase1 tracking reconstruction,
+    # Remove the pre-cluster-splitting clustering step
+    # To be enabled later together with or after the jet core step is enabled
+    # This snippet must be after the loading of recoFromSimDigis_cff    
+    process.pixeltrackerlocalreco = cms.Sequence(
+        process.siPhase2Clusters +
+        process.siPixelClusters +
+        process.siPixelRecHits
+    )
+    process.clusterSummaryProducer.pixelClusters = "siPixelClusters"
+    process.globalreco_tracking.replace(process.MeasurementTrackerEventPreSplitting, process.MeasurementTrackerEvent)
+    process.globalreco_tracking.replace(process.siPixelClusterShapeCachePreSplitting, process.siPixelClusterShapeCache)
+
+    # As in the phase1 tracking reconstruction,
+    # Enable, for now, pixel tracks and vertices
+    # To be removed later together with the cluster splitting
+    process.globalreco_tracking.replace(process.standalonemuontracking,
+                                        process.standalonemuontracking+process.recopixelvertexing)
+    process.initialStepSelector.vertices = "pixelVertices"
+    process.highPtTripletStepSelector.vertices = "pixelVertices"
+    process.lowPtQuadStepSelector.vertices = "pixelVertices"
+    process.lowPtTripletStepSelector.vertices = "pixelVertices"
+    process.detachedQuadStepSelector.vertices = "pixelVertices"
+    process.mixedTripletStepSelector.vertices = "pixelVertices"
+    process.pixelPairStepSeeds.RegionFactoryPSet.RegionPSet.VertexCollection = "pixelVertices"
+    process.pixelPairStepSelector.vertices = "pixelVertices"
+    process.tobTecStepSelector.vertices = "pixelVertices"
+    process.muonSeededTracksInOutSelector.vertices = "pixelVertices"
+    process.muonSeededTracksOutInSelector.vertices = "pixelVertices"
+    process.duplicateTrackClassifier.vertices = "pixelVertices"
+    process.convStepSelector.vertices = "pixelVertices"
+    process.ak4CaloJetsForTrk.srcPVs = "pixelVertices"
+    process.muonSeededTracksOutInDisplacedClassifier.vertices = "pixelVertices"
+    process.duplicateDisplacedTrackClassifier.vertices = "pixelVertices"
+
     # PixelCPEGeneric #
     process.PixelCPEGenericESProducer.Upgrade = cms.bool(True)
     process.PixelCPEGenericESProducer.UseErrorsFromTemplates = cms.bool(False)
@@ -260,7 +297,7 @@ def customise_Reco(process,pileup):
     )
     # Make pixelTracks use quadruplets
     process.pixelTracks.SeedMergerPSet = cms.PSet(
-        layerListName = cms.string('PixelSeedMergerQuadruplets'),
+        layerList = cms.PSet(refToPSet_ = cms.string('PixelSeedMergerQuadruplets')),
         addRemainingTriplets = cms.bool(False),
         mergeTriplets = cms.bool(True),
         ttrhBuilderLabel = cms.string('PixelTTRHBuilderWithoutAngle')
@@ -269,6 +306,9 @@ def customise_Reco(process,pileup):
     process.pixelTracks.FilterPSet.chi2 = cms.double(50.0)
     process.pixelTracks.FilterPSet.tipMax = cms.double(0.05)
     process.pixelTracks.RegionFactoryPSet.RegionPSet.originRadius =  cms.double(0.02)
+
+    process.preDuplicateMergingDisplacedTracks.inputClassifiers.remove("muonSeededTracksInOutClassifier")
+    process.preDuplicateMergingDisplacedTracks.trackProducers.remove("muonSeededTracksInOut")
 
     # STILL TO DO (when the ph2 PF will be included):
     # Particle flow needs to know that the eta range has increased, for

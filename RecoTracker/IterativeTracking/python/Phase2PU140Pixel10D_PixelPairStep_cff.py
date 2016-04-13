@@ -5,11 +5,11 @@ import FWCore.ParameterSet.Config as cms
 from RecoLocalTracker.SubCollectionProducers.trackClusterRemover_cfi import *
 pixelPairStepClusters = trackClusterRemover.clone(
     maxChi2                                  = cms.double(9.0),
-    trajectories                             = cms.InputTag("mixedTripletStepTracks"),
+    trajectories                             = cms.InputTag("detachedQuadStepTracks"),
     pixelClusters                            = cms.InputTag("siPixelClusters"),
     stripClusters                            = cms.InputTag("siStripClusters"),
-    oldClusterRemovalInfo                    = cms.InputTag("mixedTripletStepClusters"),
-    overrideTrkQuals                         = cms.InputTag('mixedTripletStep'),
+    oldClusterRemovalInfo                    = cms.InputTag("detachedQuadStepClusters"),
+    overrideTrkQuals                         = cms.InputTag('detachedQuadStep'),
     TrackQuality                             = cms.string('highPurity'),
     minNumberOfLayersWithMeasBeforeFiltering = cms.int32(0),
 )

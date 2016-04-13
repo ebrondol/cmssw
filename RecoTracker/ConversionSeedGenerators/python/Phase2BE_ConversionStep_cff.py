@@ -6,11 +6,11 @@ from RecoTracker.ConversionSeedGenerators.ConversionStep2_cff import *
 from RecoLocalTracker.SubCollectionProducers.trackClusterRemover_cfi import *
 convClusters = trackClusterRemover.clone(
    maxChi2               = cms.double(30.0),
-   trajectories          = cms.InputTag("tobTecStepTracks"),
+   trajectories          = cms.InputTag("pixelPairStepTracks"),
    pixelClusters         = cms.InputTag("siPixelClusters"),
    stripClusters         = cms.InputTag("siStripClusters"),
-   oldClusterRemovalInfo = cms.InputTag("tobTecStepClusters"),
-   overrideTrkQuals      = cms.InputTag('tobTecStepSelector','tobTecStep'),
+   oldClusterRemovalInfo = cms.InputTag("pixelPairStepClusters"),
+   overrideTrkQuals      = cms.InputTag('pixelPairStepSelector','pixelPairStep'),
    TrackQuality          = cms.string('highPurity'),
 )
 
