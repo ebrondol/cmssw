@@ -312,7 +312,6 @@ reco::SimToRecoCollection QuickTrackAssociatorByHits::associateSimToRecoImplemen
 			else if( simToRecoDenominator_==denomsim && numberOfSimulatedHits != 0 ) quality=static_cast<double>(numberOfSharedHits)/static_cast<double>(numberOfSimulatedHits);
 			else if( simToRecoDenominator_==denomreco && numberOfValidTrackHits != 0 ) quality=purity;
 			else quality=0;
-
 			if( quality>qualitySimToReco_ && !( threeHitTracksAreSpecial_ && numberOfSimulatedHits==3 && numberOfSharedHits<3 ) && ( absoluteNumberOfHits_ || (purity>puritySimToReco_) ) )
 			{
 				if( pTrackCollection_ ) returnValue.insert( trackingParticleRef, std::make_pair( (*pTrackCollection_)[i], quality ) );
@@ -476,6 +475,13 @@ template<typename iter> std::vector<OmniClusterRef> QuickTrackAssociatorByHits::
 	    edm::LogError("TrackAssociator") << ">>> RecHit does not have an associated cluster!" << " file: " << __FILE__ << " line: " << __LINE__;
 	  returnValue.push_back(pVectorHit->lowerClusterRef());
 	  returnValue.push_back(pVectorHit->upperClusterRef());
+        }
+        // Phase2 OT clusters are defined in the Strip detector
+        else if  (tid == typeid(SiPixelRecHit)) {
+          const SiPixelRecHit* pRHit = dynamic_cast<const SiPixelRecHit*>(rhit);
+          if (!pRHit->cluster().isNonnull())
+            edm::LogError("TrackAssociator") << ">>> RecHit does not have an associated cluster!" << " file: " << __FILE__ << " line: " << __LINE__;
+          returnValue.push_back(pRHit->omniClusterRef());
         }
         else {
   	  edm::LogError("TrackAssociator") << ">>> getMatchedClusters: TrackingRecHit not associated to any SiStripCluster! subdetid = " << subdetid;
