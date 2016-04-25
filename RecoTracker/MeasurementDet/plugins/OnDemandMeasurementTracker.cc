@@ -55,6 +55,7 @@ OnDemandMeasurementTracker::OnDemandMeasurementTracker(const edm::ParameterSet& 
 						       const PixelClusterParameterEstimator* pixelCPE,
 						       const StripClusterParameterEstimator* stripCPE,
 						       const SiStripRecHitMatcher*  hitMatcher,
+		     				       const SiPixelVectorHitBuilder*  ph2matcher,
 						       const TrackerGeometry*  trackerGeom,
 						       const GeometricSearchTracker* geometricSearchTracker,
 						       const SiStripQuality *stripQuality,
@@ -66,7 +67,7 @@ OnDemandMeasurementTracker::OnDemandMeasurementTracker(const edm::ParameterSet& 
                                                        int   pixelQualityDebugFlags,
 						       const SiStripRegionCabling * stripRegionCabling,
 						       bool isRegional):
-  MeasurementTrackerImpl(conf,pixelCPE,stripCPE,hitMatcher,trackerGeom,geometricSearchTracker,
+  MeasurementTrackerImpl(conf,pixelCPE,stripCPE,hitMatcher,ph2matcher,trackerGeom,geometricSearchTracker,
         stripQuality,stripQualityFlags,stripQualityDebugFlags,
         pixelQuality,pixelCabling,pixelQualityFlags,pixelQualityDebugFlags,
         isRegional)

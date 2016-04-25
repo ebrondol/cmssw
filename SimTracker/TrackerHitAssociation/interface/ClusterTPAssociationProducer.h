@@ -38,8 +38,10 @@ private:
   bool _verbose;
   edm::InputTag _pixelSimLinkSrc;
   edm::InputTag _stripSimLinkSrc;
+  edm::InputTag _phase2SimLinkSrc;
   edm::InputTag _pixelClusterSrc;
   edm::InputTag _stripClusterSrc;
+  edm::InputTag _phase2ClusterSrc;
   edm::InputTag _trackingParticleSrc;
 };
 #endif

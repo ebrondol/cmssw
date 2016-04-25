@@ -3,6 +3,14 @@
 
 #include "FWCore/Utilities/interface/typelookup.h"
 
+#include<cassert>
+
+void TrajectoryCleaner::clean(TempTrajectoryContainer&) const
+{
+  edm::LogError("TrajectoryCleaner") << "not implemented for TempTrajectory";
+  assert(false);
+}
+
 void TrajectoryCleaner::clean( TrajectoryContainer& tc) const
 {
   TrajectoryPointerContainer thePointerContainer;

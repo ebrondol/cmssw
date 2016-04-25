@@ -17,7 +17,7 @@ GroupedCkfTrajectoryBuilder = cms.ESProducer("GroupedCkfTrajectoryBuilderESProdu
     ComponentName = cms.string('GroupedCkfTrajectoryBuilder'),
     intermediateCleaning = cms.bool(True),
     # Chi2 added to track candidate if no hit found in layer
-    lostHitPenalty = cms.double(30.0),
+    lostHitPenalty = cms.double(20.0),
     MeasurementTrackerName = cms.string(''),
     lockHits = cms.bool(True),
     TTRHBuilder = cms.string('WithTrackAngle'),

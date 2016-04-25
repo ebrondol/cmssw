@@ -1,4 +1,4 @@
-#include "DataFormats/TrackerRecHit2D/interface/BaseTrackerRecHit.h"
+#include "DataFormats/TrackingRecHit/interface/BaseTrackerRecHit.h"
 #include "DataFormats/Math/interface/ProjectMatrix.h"
 #include "FWCore/Utilities/interface/Exception.h"
 
