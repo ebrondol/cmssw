@@ -142,6 +142,27 @@ def customise_Reco(process,pileup):
     process.reconstruction_fromRECO.remove(process.tripletElectronSeedLayers)
     process.reconstruction_fromRECO.remove(process.tripletElectronSeeds)
 
+    process.reconstruction_fromRECO.remove(process.detachedQuadStep)
+    process.reconstruction_fromRECO.remove(process.detachedQuadStepClusters)
+    process.reconstruction_fromRECO.remove(process.detachedQuadStepSeedLayers)
+    process.reconstruction_fromRECO.remove(process.detachedQuadStepSeeds)
+    process.reconstruction_fromRECO.remove(process.detachedQuadStepTrackCandidates)
+    process.reconstruction_fromRECO.remove(process.detachedQuadStepTracks)
+    process.reconstruction_fromRECO.remove(process.detachedQuadStepSelector)
+
+    process.reconstruction_fromRECO.remove(process.highPtTripletStepClusters)
+    process.reconstruction_fromRECO.remove(process.highPtTripletStepSeedLayers)
+    process.reconstruction_fromRECO.remove(process.highPtTripletStepSeeds)
+    process.reconstruction_fromRECO.remove(process.highPtTripletStepTrackCandidates)
+    process.reconstruction_fromRECO.remove(process.highPtTripletStepTracks)
+    process.reconstruction_fromRECO.remove(process.highPtTripletStepSelector)
+
+    process.reconstruction_fromRECO.remove(process.lowPtQuadStepClusters)
+    process.reconstruction_fromRECO.remove(process.lowPtQuadStepSeedLayers)
+    process.reconstruction_fromRECO.remove(process.lowPtQuadStepSeeds)
+    process.reconstruction_fromRECO.remove(process.lowPtQuadStepTrackCandidates)
+    process.reconstruction_fromRECO.remove(process.lowPtQuadStepTracks)
+
     del process.iterTracking
     del process.ckftracks
     del process.ckftracks_woBH
