@@ -431,6 +431,50 @@ void MeasurementTrackerImpl::updatePixels( const edm::Event& event) const
        }
     }
   }
+
+  //Phase2clusters
+  std::string Phase2TrackerCluster1DProducer = pset_.getParameter<std::string>("Phase2TrackerCluster1DProducer");
+  edm::Handle<edmNew::DetSetVector<Phase2TrackerCluster1D> >  phase2clusters;
+  event.getByLabel( Phase2TrackerCluster1DProducer, phase2clusters);
+  if(phase2clusters.isValid()){
+    const edmNew::DetSetVector<Phase2TrackerCluster1D>* ClustersPhase2Collection = phase2clusters.product();
+
+    if(ClustersPhase2Collection->empty()) {
+      LogDebug("MeasurementTracker") << "MeasurementTrackerImpl::updatePixels: ClustersPhase2Collection empty! " << std::endl;
+      //nothing to do : the px measDet depends is just pixel clusters
+      for (std::vector<TkPixelMeasurementDet*>::const_iterator i=thePixelDets.begin();i!=thePixelDets.end(); i++) {
+        (**i).setPhase2ActiveThisEvent(false);
+      }
+
+    } else {
+      //debug
+      LogDebug("MeasurementTracker") << "MeasurementTrackerImpl::updatePixels: ClustersPhase2Collection size: " << ClustersPhase2Collection->dataSize() << std::endl;
+      for (edmNew::DetSetVector< Phase2TrackerCluster1D >::const_iterator DSViter = ClustersPhase2Collection->begin(); DSViter != ClustersPhase2Collection->end(); ++DSViter) {
+        unsigned int rawid(DSViter->detId());
+        LogTrace("MeasurementTracker") << "\t phase2 cluster in detId: " << rawid << std::endl;
+      }
+      
+      for (std::vector<TkPixelMeasurementDet*>::const_iterator i=thePixelDets.begin();i!=thePixelDets.end(); i++) {
+        unsigned int id = (**i).geomDet().geographicalId().rawId();
+	//fill the set with what needs to be skipped
+	edmNew::DetSetVector<Phase2TrackerCluster1D>::const_iterator it = ClustersPhase2Collection->find( id );
+	if ( it != ClustersPhase2Collection->end() ){
+          LogTrace("MeasurementTracker") << "MeasurementTrackerImpl::updatePixels: found cluster >> " << id << std::endl;
+          // push cluster range in det
+          (**i).update( *it, phase2clusters, id );
+	} else {
+          LogDebug("MeasurementTracker") << "MeasurementTrackerImpl::updatePixels: cluster in " << id << " has not been found! " << std::endl;
+          //nothing to do : the px measDet depends is just pixel clusters
+          (**i).setPhase2Empty();
+	}
+      }
+    }
+  } else {
+    for (std::vector<TkPixelMeasurementDet*>::const_iterator i=thePixelDets.begin();i!=thePixelDets.end(); i++)
+      (**i).setPhase2ActiveThisEvent(false);
+  }
+  
+  
 }
 
 void MeasurementTrackerImpl::getInactiveStrips(const edm::Event& event,
