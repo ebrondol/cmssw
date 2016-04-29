@@ -5,6 +5,7 @@
 
 #include "DataFormats/SiStripCluster/interface/SiStripCluster.h"
 #include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
+#include "DataFormats/Phase2TrackerCluster/interface/Phase2TrackerCluster1D.h"
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include "DataFormats/Common/interface/DetSetVectorNew.h"
 #include "DataFormats/Common/interface/RefGetter.h"
@@ -18,11 +19,13 @@ class OmniClusterRef {
 public:
   typedef edm::Ref<edmNew::DetSetVector<SiPixelCluster>,SiPixelCluster > ClusterPixelRef;
   typedef edm::Ref<edmNew::DetSetVector<SiStripCluster>,SiStripCluster > ClusterStripRef;
+  typedef edm::Ref<edmNew::DetSetVector<Phase2TrackerCluster1D>, Phase2TrackerCluster1D> Phase2Cluster1DRef;
   typedef edm::Ref< edm::LazyGetter<SiStripCluster>, SiStripCluster, edm::FindValue<SiStripCluster> >  ClusterRegionalRef;
   
   OmniClusterRef() : me(edm::RefCore(),kInvalid) {}
-  explicit OmniClusterRef(ClusterPixelRef const & ref) : me(ref.refCore(), (ref.isNonnull() ? ref.key() : kInvalid) ){}
-  explicit OmniClusterRef(ClusterStripRef const & ref) : me(ref.refCore(), (ref.isNonnull() ? ref.key() | kIsStrip : kInvalid) ){}
+  explicit OmniClusterRef(ClusterPixelRef    const & ref) : me(ref.refCore(), (ref.isNonnull() ? ref.key() : kInvalid) ){}
+  explicit OmniClusterRef(ClusterStripRef    const & ref) : me(ref.refCore(), (ref.isNonnull() ? ref.key() | kIsStrip : kInvalid) ){}
+  explicit OmniClusterRef(Phase2Cluster1DRef const & ref) : me(ref.refCore(), (ref.isNonnull() ? ref.key() | kIsStrip : kInvalid) ){}
   explicit OmniClusterRef(ClusterRegionalRef const & ref) : me(ref.refCore(), (ref.isNonnull() ? ref.key() | kIsRegional : kInvalid)){}
   
   ClusterPixelRef cluster_pixel()  const { 
@@ -31,6 +34,10 @@ public:
 
   ClusterStripRef cluster_strip()  const { 
     return isNonRegionalStrip() ? ClusterStripRef(me.toRefCore(),index()) : ClusterStripRef();
+  }
+
+  Phase2Cluster1DRef cluster_phase2()  const { 
+    return isNonRegionalStrip() ? Phase2Cluster1DRef(me.toRefCore(),index()) : Phase2Cluster1DRef();
   }
   
   ClusterRegionalRef cluster_regional()  const { 
