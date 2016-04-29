@@ -69,6 +69,7 @@ public:
   virtual  void update( const edm::Event&) const;
   void updatePixels( const edm::Event&) const;
   void updateStrips( const edm::Event&) const;
+  void updateStacks( const edm::Event& event) const;
 
   const TrackingGeometry* geomTracker() const { return theTrackerGeom;}
 
@@ -103,7 +104,7 @@ public:
   const std::vector<TkStripMeasurementDet>& stripDets() const {return theStripDets;}
   const std::vector<TkPixelMeasurementDet*>& pixelDets() const {return thePixelDets;}
   const std::vector<TkGluedMeasurementDet>& gluedDets() const {return theGluedDets;}
-  const std::vector<TkStackMeasurementDet>& stackDets() const {return theStackDets;}
+  const std::vector<TkStackMeasurementDet*>& stackDets() const {return theStackDets;}
 
   void setClusterToSkip(const edm::InputTag & cluster, const edm::Event& event) const;
   void unsetClusterToSkip() const;
@@ -120,7 +121,7 @@ public:
   mutable std::vector<TkPixelMeasurementDet*> thePixelDets;
   mutable std::vector<TkStripMeasurementDet> theStripDets;
   mutable std::vector<TkGluedMeasurementDet> theGluedDets;
-  mutable std::vector<TkStackMeasurementDet> theStackDets;
+  mutable std::vector<TkStackMeasurementDet*> theStackDets;
   
   mutable std::vector<bool> thePixelsToSkip;
 
