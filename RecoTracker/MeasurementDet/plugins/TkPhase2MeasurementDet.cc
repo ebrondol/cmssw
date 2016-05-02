@@ -54,22 +54,24 @@ bool TkPhase2MeasurementDet::measurements( const TrajectoryStateOnSurface& state
 
 }
 
-/*
 TransientTrackingRecHit::RecHitPointer
 TkPhase2MeasurementDet::buildRecHit( const Phase2TrackerCluster1DRef & cluster,
 				    const LocalTrajectoryParameters & ltp) const
 {
   const GeomDetUnit& gdu( specificGeomDet());
-  LocalValues lv = theCPE->localParameters( * cluster, gdu, ltp );
-  return TSiPixelRecHit::build( lv.first, lv.second, &fastGeomDet(), cluster, theCPE);
+  MeasurementPoint mpClu(cluster->center(), cluster->column() + 0.5);
+  LocalPoint lp = gdu.topology().localPosition(mpClu);
+  MeasurementError meClu(1./12,0.0,1./12);
+  LocalError le = gdu.topology().localError(mpClu,meClu);
+  return TSiPixelRecHit::build( lp, le, &fastGeomDet(), cluster, theCPE);
 }
-*/
+
 TkPhase2MeasurementDet::RecHitContainer
 TkPhase2MeasurementDet::recHits( const TrajectoryStateOnSurface& ts ) const
 {
   LogDebug("MeasurementTracker") << "rechits collected from TkPhase2MeasurementDet ... " << std::endl;
+  LogTrace("MeasurementTracker") << "empty : " << empty << " isActive() : " << isActive()<< std::endl;
   RecHitContainer result;
-/*
   if (empty == true ) return result;
   if (isActive() == false) return result;
   const Phase2TrackerCluster1D* begin=0;
@@ -83,11 +85,9 @@ TkPhase2MeasurementDet::recHits( const TrajectoryStateOnSurface& ts ) const
       edm::LogError("IndexMisMatch")<<"TkPhase2MeasurementDet cannot create hit because of index mismatch.";
       return result;
     }
-     unsigned int index = ci-begin;
-       Phase2TrackerCluster1DRef cluster = edmNew::makeRefTo( handle_, ci );
-       result.push_back( buildRecHit( cluster, ts.localParameters() ) );
+    Phase2TrackerCluster1DRef cluster = edmNew::makeRefTo( handle_, ci );
+    result.push_back( buildRecHit( cluster, ts.localParameters() ) );
   }
-*/
   return result;
 }
 

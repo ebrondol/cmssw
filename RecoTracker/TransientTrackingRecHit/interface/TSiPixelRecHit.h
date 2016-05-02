@@ -15,6 +15,7 @@ class TSiPixelRecHit GCC11_FINAL : public TValidTrackingRecHit {
 public:
 
   typedef SiPixelRecHit::ClusterRef clusterRef;
+  typedef SiPixelRecHit::phase2ClusterRef phase2clusterRef;
 
 
   virtual ~TSiPixelRecHit() {}
@@ -70,6 +71,12 @@ public:
     return RecHitPointer( new TSiPixelRecHit( pos, err, det, cluster, cpe));
   }
 
+  static RecHitPointer build( const LocalPoint& pos, const LocalError& err,
+                              const GeomDet* det,
+                              const phase2clusterRef & cluster,
+                              const PixelClusterParameterEstimator* cpe) {
+    return RecHitPointer( new TSiPixelRecHit( pos, err, det, cluster, cpe));
+  }
 
   //!  Probability of the compatibility of the track with the pixel cluster shape.
   virtual float clusterProbability() const {
@@ -99,6 +106,10 @@ private:
 		  const clusterRef & clust,
 		  const PixelClusterParameterEstimator* cpe);
 
+  TSiPixelRecHit( const LocalPoint& pos, const LocalError& err,
+		  const GeomDet* det, 
+		  const phase2clusterRef & clust,
+		  const PixelClusterParameterEstimator* cpe);
 
   virtual TSiPixelRecHit * clone() const {
     return new TSiPixelRecHit(*this);

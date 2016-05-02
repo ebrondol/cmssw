@@ -4,6 +4,8 @@
 #include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
 #include<typeinfo>
 
+
+//FIXME:: check what happen with phase2lusters!!
 TSiPixelRecHit::RecHitPointer TSiPixelRecHit::clone (const TrajectoryStateOnSurface& ts) const
 {
   if (theCPE == 0){
@@ -62,4 +64,11 @@ TSiPixelRecHit::TSiPixelRecHit( const LocalPoint& pos, const LocalError& err,
   theHitData.setRawQualityWord( cpe->rawQualityWord() );
   theClusterProbComputationFlag = cpe->clusterProbComputationFlag(); 
 }
+
+TSiPixelRecHit::TSiPixelRecHit( const LocalPoint& pos, const LocalError& err,
+	        const GeomDet* det, 
+	        const phase2clusterRef & clust,
+	        const PixelClusterParameterEstimator* cpe) :
+  TValidTrackingRecHit(det), theCPE(cpe),
+  theHitData( pos, err, det->geographicalId(), clust) {}
 

@@ -24,6 +24,7 @@ class SiPixelRecHit GCC11_FINAL : public TrackerSingleRecHit {
 public:
   
   typedef edm::Ref<edmNew::DetSetVector<SiPixelCluster>, SiPixelCluster > ClusterRef;
+  typedef edm::Ref<edmNew::DetSetVector<Phase2TrackerCluster1D>, Phase2TrackerCluster1D > phase2ClusterRef;
   
   SiPixelRecHit(): qualWord_(0) {}
   
@@ -36,6 +37,13 @@ public:
     qualWord_(0) 
   {}
   
+  SiPixelRecHit( const LocalPoint& pos , const LocalError& err,
+		 const DetId& id, 
+		 phase2ClusterRef const&  clus) : 
+    TrackerSingleRecHit(pos,err,id,clus), 
+    qualWord_(0) 
+  {}
+
   virtual SiPixelRecHit * clone() const {return new SiPixelRecHit( * this); }
   
   ClusterRef cluster()  const { return cluster_pixel(); }
