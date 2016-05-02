@@ -35,6 +35,7 @@ class StrictWeakOrdering{
 
 class TkStripMeasurementDet;
 class TkPixelMeasurementDet;
+class TkPhase2MeasurementDet;
 class TkGluedMeasurementDet;
 class TkStackMeasurementDet;
 class GeometricSearchTracker;
@@ -69,7 +70,8 @@ public:
   virtual  void update( const edm::Event&) const;
   void updatePixels( const edm::Event&) const;
   void updateStrips( const edm::Event&) const;
-  void updateStacks( const edm::Event& event) const;
+  void updatePhase2( const edm::Event&) const;
+  void updateStacks( const edm::Event&) const;
 
   const TrackingGeometry* geomTracker() const { return theTrackerGeom;}
 
@@ -103,6 +105,7 @@ public:
   const DetContainer& allDets() const {return theDetMap;}
   const std::vector<TkStripMeasurementDet>& stripDets() const {return theStripDets;}
   const std::vector<TkPixelMeasurementDet*>& pixelDets() const {return thePixelDets;}
+  const std::vector<TkPhase2MeasurementDet*>& phase2Dets() const {return thePhase2Dets;}
   const std::vector<TkGluedMeasurementDet>& gluedDets() const {return theGluedDets;}
   const std::vector<TkStackMeasurementDet*>& stackDets() const {return theStackDets;}
 
@@ -120,6 +123,7 @@ public:
 
   mutable std::vector<TkPixelMeasurementDet*> thePixelDets;
   mutable std::vector<TkStripMeasurementDet> theStripDets;
+  mutable std::vector<TkPhase2MeasurementDet*> thePhase2Dets;
   mutable std::vector<TkGluedMeasurementDet> theGluedDets;
   mutable std::vector<TkStackMeasurementDet*> theStackDets;
   
@@ -137,6 +141,7 @@ public:
 
   void addStripDet( const GeomDet* gd);
   void addPixelDet( const GeomDet* gd);
+  void addPhase2Det( const GeomDet* gd);
 
   void addGluedDet( const GluedGeomDet* gd);
   void addStackDet( const StackGeomDet* gd);
@@ -144,7 +149,7 @@ public:
   void initGluedDet( TkGluedMeasurementDet & det);
   void initStackDet( TkStackMeasurementDet & det);
 
-  void addDets( const TrackingGeometry::DetContainer& dets, bool subIsPixel);
+  void addDets( const TrackingGeometry::DetContainer& dets, bool subIsPixel, bool subIsOT);
 
   bool checkDets();
 

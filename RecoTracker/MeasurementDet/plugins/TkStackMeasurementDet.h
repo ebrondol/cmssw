@@ -2,7 +2,7 @@
 #define TkStackMeasurementDet_H
 
 #include "TrackingTools/MeasurementDet/interface/MeasurementDet.h"
-#include "TkPixelMeasurementDet.h"
+#include "TkPhase2MeasurementDet.h"
 
 #include "Geometry/TrackerGeometryBuilder/interface/StackGeomDet.h"
 #include "RecoLocalTracker/ClusterParameterEstimator/interface/PixelClusterParameterEstimator.h"
@@ -45,8 +45,8 @@ class TkStackMeasurementDet : public MeasurementDet {
 			     const MeasurementEstimator& est,
 			     TempMeasurements & result) const;
 
-  const TkPixelMeasurementDet* lowerDet() const{ return theLowerDet;}
-  const TkPixelMeasurementDet* upperDet() const{ return theUpperDet;}
+  const TkPhase2MeasurementDet* lowerDet() const{ return theLowerDet;}
+  const TkPhase2MeasurementDet* upperDet() const{ return theUpperDet;}
   
   // set if the event is active
   void setActiveThisEvent(bool active) { Active = active; return; }
@@ -59,8 +59,8 @@ class TkStackMeasurementDet : public MeasurementDet {
 
  private:
   const PixelClusterParameterEstimator* thePixelCPE;
-  const TkPixelMeasurementDet*          theLowerDet;
-  const TkPixelMeasurementDet*          theUpperDet;
+  const TkPhase2MeasurementDet*          theLowerDet;
+  const TkPhase2MeasurementDet*          theUpperDet;
   detset                                theLowerDetSet, theUpperDetSet;
   edm::Handle<edmNew::DetSetVector<Phase2TrackerCluster1D> > theHandle;
   bool Active, Empty;
