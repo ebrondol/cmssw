@@ -30,8 +30,6 @@ bool TkPhase2MeasurementDet::measurements( const TrajectoryStateOnSurface& state
 					  const MeasurementEstimator& est,
 					  TempMeasurements & result) const {
 
-  LogDebug("MeasurementTracker") << "measurements collected from TkPhase2MeasurementDet ... " << std::endl;
-
   if (!isActive()) {
     result.add(InvalidTransientRecHit::build(&geomDet(), TrackingRecHit::inactive), 0.F);
     return true;
@@ -70,7 +68,6 @@ TkPhase2MeasurementDet::buildRecHit( const Phase2TrackerCluster1DRef & cluster,
 TkPhase2MeasurementDet::RecHitContainer
 TkPhase2MeasurementDet::recHits( const TrajectoryStateOnSurface& ts ) const
 {
-  LogDebug("MeasurementTracker") << "rechits collected from TkPhase2MeasurementDet ... " << std::endl;
   RecHitContainer result;
 
   if (empty == true ) return result;

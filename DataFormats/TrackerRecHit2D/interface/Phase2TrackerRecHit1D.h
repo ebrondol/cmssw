@@ -5,11 +5,6 @@
 
 #include "DataFormats/TrackerRecHit2D/interface/TrackerSingleRecHit.h"
 
-//#include "DataFormats/Phase2TrackerCluster/interface/Phase2TrackerCluster1D.h"
-//#include "DataFormats/GeometrySurface/interface/LocalError.h"
-//#include "DataFormats/GeometryVector/interface/LocalPoint.h"
-
-
 class Phase2TrackerRecHit1D GCC11_FINAL : public TrackerSingleRecHit {
 
 public:

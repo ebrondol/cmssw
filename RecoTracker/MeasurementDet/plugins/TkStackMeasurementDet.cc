@@ -40,23 +40,18 @@ bool TkStackMeasurementDet::measurements( const TrajectoryStateOnSurface& stateO
                                           const MeasurementEstimator& est,
                                           TempMeasurements & result) const {
 
-  LogDebug("MeasurementTracker") << "measurements collected from TkStackMeasurementDet ... " << std::endl;
   //here there is the possibility to add if(isActive)
 
   auto oldSize = result.size();
   MeasurementDet::RecHitContainer && allHits = recHits(stateOnThisDet);
 
   for (auto && hit : allHits) {
-    //std::cout << "\tTkStackMeasurementDet::newhit" << hit->globalPosition() << std::endl;
 
     std::pair<bool,double> diffEst = est.estimate( stateOnThisDet, *hit);
     if ( diffEst.first){
-      LogTrace("MeasurementTracker") << "The measurement has been added with chi2 = " << diffEst.second << std::endl;
       result.add(std::move(hit), diffEst.second);
     }
   
-    LogTrace("MeasurementTracker") << std::endl;
-
   }
 
   //here there is the possibility to add hasBadComponents
