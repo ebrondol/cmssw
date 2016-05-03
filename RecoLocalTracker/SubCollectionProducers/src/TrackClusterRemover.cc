@@ -14,6 +14,8 @@
 #include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHit.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHitCollection.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit2DCollection.h"
+
+#include "DataFormats/TrackerRecHit2D/interface/Phase2TrackerRecHit1D.h"
 #include "DataFormats/Common/interface/Handle.h"
 
 #include "DataFormats/Common/interface/DetSetVector.h"
@@ -250,25 +252,38 @@ TrackClusterRemover::cleanup(const edmNew::DetSetVector<T> &oldClusters, const s
 
 
 void TrackClusterRemover::process(OmniClusterRef const & ocluster, uint32_t subdet, bool fromTrack) {
-    SiStripRecHit2D::ClusterRef cluster = ocluster.cluster_strip();
-  if (cluster.id() != stripSourceProdID) throw cms::Exception("Inconsistent Data") <<
-    "TrackClusterRemover: strip cluster ref from Product ID = " << cluster.id() <<
-    " does not match with source cluster collection (ID = " << stripSourceProdID << ")\n.";
-  
-  assert(cluster.id() == stripSourceProdID);
-  if (pblocks_[subdet-1].usesSize_ && (cluster->amplitudes().size() > pblocks_[subdet-1].maxSize_)) return;
-  if (!fromTrack) {
-    int clusCharge=0;
-    for( std::vector<uint8_t>::const_iterator iAmp = cluster->amplitudes().begin(); iAmp != cluster->amplitudes().end(); ++iAmp){
-      clusCharge += *iAmp;
+
+  SiStripRecHit2D::ClusterRef cluster = ocluster.cluster_strip();
+  if (cluster.id() == stripSourceProdID){
+    assert(cluster.id() == stripSourceProdID);
+    if (pblocks_[subdet-1].usesSize_ && (cluster->amplitudes().size() > pblocks_[subdet-1].maxSize_)) return;
+    if (!fromTrack) {
+      int clusCharge=0;
+      for( std::vector<uint8_t>::const_iterator iAmp = cluster->amplitudes().begin(); iAmp != cluster->amplitudes().end(); ++iAmp){
+        clusCharge += *iAmp;
+      }
+      if (pblocks_[subdet-1].cutOnStripCharge_ && clusCharge > pblocks_[subdet-1].minGoodStripCharge_) return;
     }
-    if (pblocks_[subdet-1].cutOnStripCharge_ && clusCharge > pblocks_[subdet-1].minGoodStripCharge_) return;
+    strips[cluster.key()] = false;  
+    //if (!clusterWasteSolution_) collectedStrip[hit->geographicalId()].insert(cluster);
+    assert(collectedStrips_.size() > cluster.key());
+    //assert(hit->geographicalId() == cluster->geographicalId()); //This condition fails
+    if (!clusterWasteSolution_) collectedStrips_[cluster.key()]=true;
+
+  } else {
+
+    //Case of Phase2 OT clusters
+    Phase2TrackerRecHit1D::Phase2ClusterRef cluster = ocluster.cluster_phase2();
+    std::cout << "TrackClusterRemover::process >> Not so sure what to do here ..." << std::endl;
+    std::cout << " phase2 cluster ref from Product ID = " << cluster.id() 
+              << " and source cluster collection (ID = " << stripSourceProdID << ")\n.";
+    //throw cms::Exception("Inconsistent Data") <<
+    //  "TrackClusterRemover: strip cluster ref from Product ID = " << cluster.id() <<
+    //  " does not match with source cluster collection (ID = " << stripSourceProdID << ")\n.";
+
   }
-  strips[cluster.key()] = false;  
-  //if (!clusterWasteSolution_) collectedStrip[hit->geographicalId()].insert(cluster);
-  assert(collectedStrips_.size() > cluster.key());
-  //assert(hit->geographicalId() == cluster->geographicalId()); //This condition fails
-  if (!clusterWasteSolution_) collectedStrips_[cluster.key()]=true;
+
+
 }
 
 
@@ -283,6 +298,15 @@ void TrackClusterRemover::process(const TrackingRecHit *hit, float chi2, const T
 
     if(GeomDetEnumerators::isTrackerPixel(tg->geomDetSubDetector(subdet))) {
         if (!doPixel_) return;
+ 
+        // Phase 2 OT is defined as Pixel detector (for now)
+        const type_info &hitType = typeid(*hit);
+        if (hitType == typeid(Phase2TrackerRecHit1D)) {
+            const Phase2TrackerRecHit1D *ph2Hit = static_cast<const Phase2TrackerRecHit1D *>(hit);
+            process(ph2Hit->omniClusterRef(),subdet, true);
+            return;
+        } 
+       
         // this is a pixel, and i *know* it is
         const SiPixelRecHit *pixelHit = static_cast<const SiPixelRecHit *>(hit);
 
@@ -312,8 +336,8 @@ void TrackClusterRemover::process(const TrackingRecHit *hit, float chi2, const T
         if (hitType == typeid(SiStripRecHit2D)) {
             const SiStripRecHit2D *stripHit = static_cast<const SiStripRecHit2D *>(hit);
 //DBG//     cout << "Plain RecHit 2D: " << endl;
-            process(stripHit->omniClusterRef(),subdet, true);}
-	else if (hitType == typeid(SiStripRecHit1D)) {
+            process(stripHit->omniClusterRef(),subdet, true);
+        } else if (hitType == typeid(SiStripRecHit1D)) {
 	  const SiStripRecHit1D *hit1D = static_cast<const SiStripRecHit1D *>(hit);
 	  process(hit1D->omniClusterRef(),subdet, true);
         } else if (hitType == typeid(SiStripMatchedRecHit2D)) {
