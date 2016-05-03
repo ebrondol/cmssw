@@ -45,11 +45,11 @@ public:
 
 
   const PixelGeomDetUnit& specificGeomDet() const {return static_cast<PixelGeomDetUnit const &>(fastGeomDet());}
-/*
+
   TransientTrackingRecHit::RecHitPointer 
   buildRecHit( const Phase2TrackerCluster1DRef & cluster,
 	       const LocalTrajectoryParameters & ltp) const;
-*/
+
   /** \brief Turn on/off the module for reconstruction, for the full run or lumi (using info from DB, usually).
              This also resets the 'setActiveThisEvent' to true */
   void setActive(bool active) { activeThisPeriod_ = active; activeThisEvent_ = true; if (!active) empty = true; }

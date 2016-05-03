@@ -8,11 +8,13 @@
 #include "RecoTracker/TransientTrackingRecHit/interface/TSiStripRecHit1D.h"
 #include "RecoTracker/TransientTrackingRecHit/interface/TSiStripMatchedRecHit.h"
 #include "RecoTracker/TransientTrackingRecHit/interface/TSiPixelRecHit.h"
+#include "RecoTracker/TransientTrackingRecHit/interface/TSiPhase2RecHit.h"
 #include "TrackingTools/TransientTrackingRecHit/interface/InvalidTransientRecHit.h"
 #include "DataFormats/TrackingRecHit/interface/InvalidTrackingRecHit.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiStripMatchedRecHit2D.h"
 #include "DataFormats/TrackerRecHit2D/interface/ProjectedSiStripRecHit2D.h"
 #include "RecoTracker/TransientTrackingRecHit/interface/ProjectedRecHit2D.h"
+#include "DataFormats/TrackerRecHit2D/interface/Phase2TrackerRecHit1D.h"
 //
 // For FAMOS
 //
@@ -84,6 +86,11 @@ TkTransientTrackingRecHitBuilder::build (const TrackingRecHit * p) const
       const SiTrackerGSMatchedRecHit2D* gh = reinterpret_cast<const SiTrackerGSMatchedRecHit2D*>(p);
       return ( GenericTransientTrackingRecHit::build(tGeometry_->idToDet(p->geographicalId()), gh )); 
     } 
+  else if (tp == typeid(Phase2TrackerRecHit1D))
+    {
+      const Phase2TrackerRecHit1D* p2h = reinterpret_cast<const Phase2TrackerRecHit1D*>(p);
+      return ( TSiPhase2RecHit::build(tGeometry_->idToDet(p->geographicalId()), p2h, pixelCPE, theComputeCoarseLocalPosition)); 
+    } 
   return oldbuild(p);
 }
 
@@ -114,6 +121,8 @@ TkTransientTrackingRecHitBuilder::oldbuild (const TrackingRecHit * p) const
 
   } else if ( const SiTrackerGSMatchedRecHit2D* gh = dynamic_cast<const SiTrackerGSMatchedRecHit2D*>(p)) {
     return ( GenericTransientTrackingRecHit::build(tGeometry_->idToDet(p->geographicalId()), gh )); 
+  } else if (const Phase2TrackerRecHit1D* p2h = dynamic_cast<const Phase2TrackerRecHit1D*>(p)){
+    return ( TSiPhase2RecHit::build( tGeometry_->idToDet(p->geographicalId()), p2h, pixelCPE, theComputeCoarseLocalPosition) ); 
   } 
   
   throw cms::Exception("LogicError") << "TrackingRecHit* cannot be casted to a known concrete type. hit type is: "<< className(*p);
