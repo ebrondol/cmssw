@@ -9,6 +9,7 @@
 #include "DataFormats/TrackerRecHit2D/interface/SiStripMatchedRecHit2D.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit2D.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit1D.h"
+#include "DataFormats/TrackerRecHit2D/interface/Phase2TrackerRecHit1D.h"
 #include "DataFormats/SiStripDetId/interface/SiStripDetId.h"
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
@@ -264,6 +265,7 @@ reco::SimToRecoCollection QuickTrackAssociatorByHits::associateSimToRecoImplemen
 	if( pTrackCollection_ ) collectionSize=pTrackCollection_->size();
 	else collectionSize=(*pTrackCollectionHandle_)->size();
 
+
 	for( size_t i=0; i<collectionSize; ++i )
 	{
 		const reco::Track* pTrack; // Get a normal pointer for ease of use.
@@ -310,7 +312,6 @@ reco::SimToRecoCollection QuickTrackAssociatorByHits::associateSimToRecoImplemen
 			else if( simToRecoDenominator_==denomsim && numberOfSimulatedHits != 0 ) quality=static_cast<double>(numberOfSharedHits)/static_cast<double>(numberOfSimulatedHits);
 			else if( simToRecoDenominator_==denomreco && numberOfValidTrackHits != 0 ) quality=purity;
 			else quality=0;
-
 			if( quality>qualitySimToReco_ && !( threeHitTracksAreSpecial_ && numberOfSimulatedHits==3 && numberOfSharedHits<3 ) && ( absoluteNumberOfHits_ || (purity>puritySimToReco_) ) )
 			{
 				if( pTrackCollection_ ) returnValue.insert( trackingParticleRef, std::make_pair( (*pTrackCollection_)[i], quality ) );
@@ -468,6 +469,19 @@ template<typename iter> std::vector<OmniClusterRef> QuickTrackAssociatorByHits::
 	    edm::LogError("TrackAssociator") << ">>> RecHit does not have an associated cluster!" << " file: " << __FILE__ << " line: " << __LINE__;
 	  returnValue.push_back(sRHit->omniClusterRef());
 	}
+	else if (tid == typeid(Phase2TrackerRecHit1D)) {
+	  const Phase2TrackerRecHit1D* ph2Hit = dynamic_cast<const Phase2TrackerRecHit1D*>(rhit);
+          if (!ph2Hit->cluster().isNonnull() )
+	    edm::LogError("TrackAssociator") << ">>> RecHit does not have an associated cluster!" << " file: " << __FILE__ << " line: " << __LINE__;
+	  returnValue.push_back(ph2Hit->omniClusterRef());
+        }
+        // Phase2 OT clusters are defined in the Strip detector
+        else if  (tid == typeid(SiPixelRecHit)) {
+          const SiPixelRecHit* pRHit = dynamic_cast<const SiPixelRecHit*>(rhit);
+          if (!pRHit->cluster().isNonnull())
+            edm::LogError("TrackAssociator") << ">>> RecHit does not have an associated cluster!" << " file: " << __FILE__ << " line: " << __LINE__;
+          returnValue.push_back(pRHit->omniClusterRef());
+        }
         else {
   	  edm::LogError("TrackAssociator") << ">>> getMatchedClusters: TrackingRecHit not associated to any SiStripCluster! subdetid = " << subdetid;
         }

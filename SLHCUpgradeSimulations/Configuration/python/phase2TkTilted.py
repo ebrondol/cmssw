@@ -338,6 +338,10 @@ def customise_Validation(process,pileup):
         process.simHitTPAssocProducer.simHitSrc=cms.VInputTag(cms.InputTag("g4SimHits","TrackerHitsPixelBarrelLowTof"),
                                                               cms.InputTag("g4SimHits","TrackerHitsPixelEndcapLowTof"))
 
+    if hasattr(process,'tpClusterProducer'):
+        process.tpClusterProducer.pixelSimLinkSrc = cms.InputTag("simSiPixelDigis", "Pixel")
+        process.tpClusterProducer.phase2SimLinkSrc  = cms.InputTag("simSiPixelDigis","Tracker")
+
     return process
 
 def customise_harvesting(process):
