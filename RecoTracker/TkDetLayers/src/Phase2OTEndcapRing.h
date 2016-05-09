@@ -15,8 +15,8 @@ class Phase2OTEndcapRing GCC11_FINAL : public GeometricSearchDetWithGroups{
  public:
   Phase2OTEndcapRing(std::vector<const GeomDet*>& innerDets,
 		 std::vector<const GeomDet*>& outerDets,
-		 std::vector<const GeomDet*>& innerDetBrothers,
-		 std::vector<const GeomDet*>& outerDetBrothers);
+		 const std::vector<const GeomDet*>& innerDetBrothers = std::vector<const GeomDet*>(),
+		 const std::vector<const GeomDet*>& outerDetBrothers = std::vector<const GeomDet*>());
   ~Phase2OTEndcapRing();
   
   // GeometricSearchDet interface

@@ -8,6 +8,7 @@
 #include "RecoTracker/TransientTrackingRecHit/interface/TSiStripRecHit1D.h"
 #include "RecoTracker/TransientTrackingRecHit/interface/TSiStripMatchedRecHit.h"
 #include "RecoTracker/TransientTrackingRecHit/interface/TSiPixelRecHit.h"
+#include "RecoTracker/TransientTrackingRecHit/interface/TVectorHit.h"
 #include "TrackingTools/TransientTrackingRecHit/interface/InvalidTransientRecHit.h"
 #include "DataFormats/TrackingRecHit/interface/InvalidTrackingRecHit.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiStripMatchedRecHit2D.h"
@@ -59,6 +60,11 @@ TkTransientTrackingRecHitBuilder::build (const TrackingRecHit * p) const
       const SiStripMatchedRecHit2D* mh = reinterpret_cast<const SiStripMatchedRecHit2D*>(p);
       return TSiStripMatchedRecHit::build(tGeometry_->idToDet(p->geographicalId()), mh, theMatcher, stripCPE,  theComputeCoarseLocalPosition); 
     }
+  else if (tp == typeid(VectorHit))
+    {
+      const VectorHit* vh = reinterpret_cast<const VectorHit*>(p);
+      return TVectorHit::build(tGeometry_->idToDet(p->geographicalId()), vh, pixelCPE); 
+    }
   else if (tp == typeid(InvalidTrackingRecHit))
     {
       return InvalidTransientRecHit::build((p->geographicalId().rawId() == 0 ? 0 : 
@@ -98,6 +104,8 @@ TkTransientTrackingRecHitBuilder::oldbuild (const TrackingRecHit * p) const
     return ( TSiStripRecHit1D::build(tGeometry_->idToDet(p->geographicalId()), sh, stripCPE,  theComputeCoarseLocalPosition ) ); 
   } else if ( const SiStripMatchedRecHit2D* mh = dynamic_cast<const SiStripMatchedRecHit2D*>(p)) {
     return ( TSiStripMatchedRecHit::build(tGeometry_->idToDet(p->geographicalId()), mh, theMatcher, stripCPE,  theComputeCoarseLocalPosition)); 
+  } else if ( const VectorHit* vh = dynamic_cast<const VectorHit*>(p)) {
+    return ( TVectorHit::build(tGeometry_->idToDet(p->geographicalId()), vh, pixelCPE));
   } else if (dynamic_cast<const InvalidTrackingRecHit*>(p)){
     return ( InvalidTransientRecHit::build((p->geographicalId().rawId() == 0 ? 0 : 
 					    tGeometry_->idToDet(p->geographicalId())),

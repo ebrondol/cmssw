@@ -278,16 +278,18 @@ void TrackerGeomBuilderFromGeometricDet::buildGeomDet(TrackerGeometry* tracker, 
 
         PlaneBuilderForGluedDet::ResultType plane = gluedplaneBuilder.plane(composed);
         composedDetId = tTopo->Glued(gduId[i]);
-        GluedGeomDet* gluedDet = new GluedGeomDet(&(*plane),dum,dus,composedDetId);
+        GluedGeomDet* gluedDet = new GluedGeomDet(&(*plane),dus,dum,composedDetId);
         tracker->addDet((GeomDet*) gluedDet);
         tracker->addDetId(composedDetId);
 
       } else if (ModName.find("Lower")!=std::string::npos){
 
-        //FIXME::ERICA: the plane builder is still valid?
-        PlaneBuilderForGluedDet::ResultType plane = gluedplaneBuilder.plane(composed);
+        // the plane is built in the centre
+        //PlaneBuilderForGluedDet::ResultType plane = gluedplaneBuilder.plane(composed);
+        // the plane is built on the lower det
+        Plane* plane = new Plane(dus->surface());
         composedDetId = tTopo->Stack(gduId[i]);
-        StackGeomDet* stackDet = new StackGeomDet(&(*plane),dum,dus,composedDetId);
+        StackGeomDet* stackDet = new StackGeomDet(&(*plane),dus,dum,composedDetId);
         tracker->addDet((GeomDet*) stackDet);
         tracker->addDetId(composedDetId);
 

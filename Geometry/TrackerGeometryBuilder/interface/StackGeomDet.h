@@ -9,7 +9,7 @@ class StackGeomDet : public GeomDet{
 public:
 
   StackGeomDet(Plane* sp) : GeomDet(sp) {};
-  StackGeomDet( Plane* sp, const GeomDetUnit* lowerDet,  const GeomDetUnit* upperDet, const DetId stackDetId);
+  StackGeomDet(Plane* sp, const GeomDetUnit* lowerDet,  const GeomDetUnit* upperDet, const DetId stackDetId);
   
   virtual ~StackGeomDet();
 

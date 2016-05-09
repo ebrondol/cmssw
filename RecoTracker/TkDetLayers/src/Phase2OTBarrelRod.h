@@ -18,9 +18,9 @@ class Phase2OTBarrelRod GCC11_FINAL : public DetRod, public GeometricSearchDetWi
   typedef GenericBinFinderInZ<float,GeomDet>   BinFinderType;
 
   Phase2OTBarrelRod(std::vector<const GeomDet*>& innerDets,
-			std::vector<const GeomDet*>& outerDets,
-			std::vector<const GeomDet*>& innerDetBrothers,
-			std::vector<const GeomDet*>& outerDetBrothers);
+		    std::vector<const GeomDet*>& outerDets,
+		    const std::vector<const GeomDet*>& innerDetBrothers = std::vector<const GeomDet*>(),
+		    const std::vector<const GeomDet*>& outerDetBrothers = std::vector<const GeomDet*>());
   ~Phase2OTBarrelRod();
   
   // GeometricSearchDet interface

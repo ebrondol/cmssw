@@ -18,6 +18,7 @@
 <use   name="Geometry/TrackerGeometryBuilder"/>
 <use   name="RecoLocalTracker/Records"/>
 <use   name="RecoLocalTracker/SiPixelRecHits"/>
+<use   name="RecoLocalTracker/SiPixelVectorHitBuilder"/>
 <use   name="RecoLocalTracker/SiStripRecHitConverter"/>
 <use   name="RecoTracker/TransientTrackingRecHit"/>
 <use   name="TrackingTools/TrajectoryState"/>

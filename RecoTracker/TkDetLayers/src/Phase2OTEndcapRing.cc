@@ -32,8 +32,8 @@ public:
 
 Phase2OTEndcapRing::Phase2OTEndcapRing(vector<const GeomDet*>& innerDets,
 			       vector<const GeomDet*>& outerDets,
-			       vector<const GeomDet*>& innerDetBrothers,
-			       vector<const GeomDet*>& outerDetBrothers):
+			       const vector<const GeomDet*>& innerDetBrothers,
+			       const vector<const GeomDet*>& outerDetBrothers):
   theFrontDets(innerDets.begin(),innerDets.end()), 
   theBackDets(outerDets.begin(),outerDets.end()),
   theFrontDetBrothers(innerDetBrothers.begin(),innerDetBrothers.end()), 
@@ -43,11 +43,6 @@ Phase2OTEndcapRing::Phase2OTEndcapRing(vector<const GeomDet*>& innerDets,
   theDets.insert(theDets.end(),theBackDets.begin(),theBackDets.end());
   theDets.insert(theDets.end(),theFrontDetBrothers.begin(),theFrontDetBrothers.end());
   theDets.insert(theDets.end(),theBackDetBrothers.begin(),theBackDetBrothers.end());
-
-
-  // the dets should be already phi-ordered. TO BE CHECKED
-  //sort( theFrontDets.begin(), theFrontDets.end(), DetLessPhi() );
-  //sort( theBackDets.begin(), theBackDets.end(), DetLessPhi() );
 
   theDisk = ForwardRingDiskBuilderFromDet()( theDets );
 
@@ -60,24 +55,49 @@ Phase2OTEndcapRing::Phase2OTEndcapRing(vector<const GeomDet*>& innerDets,
 				     theBackDets.size());  
 
 
-  
-  LogDebug("TkDetLayers") << "DEBUG INFO for Phase2OTEndcapRing" ;
-  for(vector<const GeomDet*>::const_iterator it=theFrontDets.begin(); 
-      it!=theFrontDets.end(); it++){
-    LogDebug("TkDetLayers") << "frontDet phi,z,r: " 
-			    << (*it)->surface().position().phi()  << " , "
-			    << (*it)->surface().position().z()    << " , "
-			    << (*it)->surface().position().perp() ;
+  LogDebug("TkDetLayers") << "==== DEBUG Phase2OTEndcapRing =====" ;
+  if(theFrontDetBrothers.empty() && theBackDetBrothers.empty())   LogDebug("TkDetLayers") << "====       with stacks       =====" ;
+  if(!theFrontDetBrothers.empty() && !theBackDetBrothers.empty()) LogDebug("TkDetLayers") << "====     without stacks      =====" ;
+  for (vector<const GeomDet*>::const_iterator i=theFrontDets.begin();
+       i != theFrontDets.end(); i++){
+    LogDebug("TkDetLayers") << "inner Phase2OTEndcapRing's Det pos z,perp,eta,phi: "
+                            << (**i).position().z() << " , "
+                            << (**i).position().perp() << " , "
+                            << (**i).position().eta() << " , "
+                            << (**i).position().phi() ;
   }
 
-  for(vector<const GeomDet*>::const_iterator it=theBackDets.begin(); 
-      it!=theBackDets.end(); it++){
-    LogDebug("TkDetLayers") << "backDet phi,z,r: " 
-			    << (*it)->surface().position().phi() << " , "
-			    << (*it)->surface().position().z()   << " , "
-			    << (*it)->surface().position().perp() ;
+  if(!theFrontDetBrothers.empty()){
+    for (vector<const GeomDet*>::const_iterator i=theFrontDetBrothers.begin();
+       i != theFrontDetBrothers.end(); i++){
+      LogDebug("TkDetLayers") << "inner Phase2OTEndcapRing's Det Brother pos z,perp,eta,phi: "
+                              << (**i).position().z() << " , "
+                              << (**i).position().perp() << " , "
+                              << (**i).position().eta() << " , "
+                              << (**i).position().phi() ;
+    }
   }
 
+  for (vector<const GeomDet*>::const_iterator i=theBackDets.begin();
+       i != theBackDets.end(); i++){
+    LogDebug("TkDetLayers") << "outer Phase2OTEndcapRing's Det pos z,perp,eta,phi: "
+                            << (**i).position().z() << " , "
+                            << (**i).position().perp() << " , "
+                            << (**i).position().eta() << " , "
+                            << (**i).position().phi() ;
+  }
+
+  if(!theBackDetBrothers.empty()){
+    for (vector<const GeomDet*>::const_iterator i=theBackDetBrothers.begin();
+         i != theBackDetBrothers.end(); i++){
+      LogDebug("TkDetLayers") << "outer Phase2OTEndcapRing's Det Brother pos z,perp,eta,phi: "
+                            << (**i).position().z() << " , "
+                            << (**i).position().perp() << " , "
+                            << (**i).position().eta() << " , "
+                            << (**i).position().phi() ;
+    }
+  }
+  LogDebug("TkDetLayers") << "==== end DEBUG Phase2OTEndcapRing =====" ;
 
 }
 
@@ -206,6 +226,7 @@ bool Phase2OTEndcapRing::addClosest( const TrajectoryStateOnSurface& tsos,
   const vector<const GeomDet*>& sub( subLayer( crossing.subLayerIndex()));
   const GeomDet* det(sub[crossing.closestDetIndex()]);
   bool firstgroup = CompatibleDetToGroupAdder::add( *det, tsos, prop, est, result); 
+  if(theFrontDetBrothers.empty() && theBackDetBrothers.empty())   return firstgroup;
   // it assumes that the closestDetIndex is ok also for the brother detectors: the crossing is NOT recomputed
   const vector<const GeomDet*>& subBrothers( subLayerBrothers( crossing.subLayerIndex()));
   const GeomDet* detBrother(subBrothers[crossing.closestDetIndex()]);
@@ -251,6 +272,7 @@ void Phase2OTEndcapRing::searchNeighbors( const TrajectoryStateOnSurface& tsos,
     const GeomDet & neighborDet = *sLayer[binFinder.binIndex(idet)];
     if (!tkDetUtil::overlapInPhi( gCrossingPos, neighborDet, window)) break;
     if (!Adder::add( neighborDet, tsos, prop, est, result)) break;
+    if(theFrontDetBrothers.empty() && theBackDetBrothers.empty()) break;
     // If the two above checks are passed also the brother module will be added with no further checks
     const GeomDet & neighborBrotherDet = *sBrotherLayer[binFinder.binIndex(idet)];
     Adder::add( neighborBrotherDet, tsos, prop, est, brotherresult);
@@ -260,6 +282,7 @@ void Phase2OTEndcapRing::searchNeighbors( const TrajectoryStateOnSurface& tsos,
     const GeomDet & neighborDet = *sLayer[binFinder.binIndex(idet)];
     if (!tkDetUtil::overlapInPhi( gCrossingPos, neighborDet, window)) break;
     if (!Adder::add( neighborDet, tsos, prop, est, result)) break;
+    if(theFrontDetBrothers.empty() && theBackDetBrothers.empty()) break;
     // If the two above checks are passed also the brother module will be added with no further checks
     const GeomDet & neighborBrotherDet = *sBrotherLayer[binFinder.binIndex(idet)];
     Adder::add( neighborBrotherDet, tsos, prop, est, brotherresult);

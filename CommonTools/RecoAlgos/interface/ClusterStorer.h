@@ -15,8 +15,9 @@
  *
  */
 #include "DataFormats/TrackingRecHit/interface/TrackingRecHitFwd.h"
-#include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHit.h"
-#include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit2D.h"
+//#include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHit.h"
+//#include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit2D.h"
+#include "DataFormats/TrackerRecHit2D/interface/OmniClusterRef.h"
 #include "DataFormats/SiStripCluster/interface/SiStripCluster.h"
 #include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
 #include "DataFormats/Common/interface/DetSetVectorNew.h"
@@ -71,9 +72,10 @@ namespace helper {
       ClusterRefType ref_;
     };
     
-    typedef ClusterHitRecord<SiPixelRecHit::ClusterRef>   PixelClusterHitRecord;
+    typedef ClusterHitRecord<OmniClusterRef::ClusterPixelRef>   PixelClusterHitRecord;
     /// Assuming that the ClusterRef is the same for all SiStripRecHit*:
-    typedef ClusterHitRecord<SiStripRecHit2D::ClusterRef> StripClusterHitRecord;
+    typedef ClusterHitRecord<OmniClusterRef::ClusterStripRef> StripClusterHitRecord;
+    typedef ClusterHitRecord<OmniClusterRef::Phase2Cluster1DRef> Phase2ClusterHitRecord;
 
     //------------------------------------------------------------------
     //!  Processes all the clusters of a specific type
@@ -88,6 +90,7 @@ namespace helper {
     //--- Information about the cloned clusters
     std::vector<PixelClusterHitRecord>                  pixelClusterRecords_;
     std::vector<StripClusterHitRecord>                  stripClusterRecords_;
+    std::vector<Phase2ClusterHitRecord>                 phase2ClusterRecords_;
   };
 
 }
