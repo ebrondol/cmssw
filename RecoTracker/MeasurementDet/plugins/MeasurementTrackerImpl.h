@@ -32,6 +32,7 @@
 
 class TkStripMeasurementDet;
 class TkPixelMeasurementDet;
+class TkPhase2MeasurementDet;
 class TkGluedMeasurementDet;
 class TkStackMeasurementDet;
 class GeometricSearchTracker;
@@ -103,6 +104,7 @@ public:
 
   virtual const StMeasurementConditionSet & stripDetConditions() const { return theStDetConditions; }
   virtual const PxMeasurementConditionSet & pixelDetConditions() const { return thePxDetConditions; }
+  virtual const Phase2MeasurementConditionSet & phase2DetConditions() const { return thePhase2DetConditions; }
 
  protected:
   const edm::ParameterSet& pset_;
@@ -110,11 +112,13 @@ public:
 
   StMeasurementConditionSet theStDetConditions;
   PxMeasurementConditionSet thePxDetConditions;
+  Phase2MeasurementConditionSet thePhase2DetConditions;
 
   DetContainer                        theDetMap;
 
   std::vector<TkPixelMeasurementDet> thePixelDets;
   std::vector<TkStripMeasurementDet> theStripDets;
+  std::vector<TkPhase2MeasurementDet> thePhase2Dets;
   std::vector<TkGluedMeasurementDet> theGluedDets;
   std::vector<TkStackMeasurementDet> theStackDets;
 
@@ -123,9 +127,11 @@ public:
   void initialize();
   void initStMeasurementConditionSet(std::vector<TkStripMeasurementDet> & stripDets);
   void initPxMeasurementConditionSet(std::vector<TkPixelMeasurementDet> & pixelDets);
+  void initPhase2MeasurementConditionSet(std::vector<TkPhase2MeasurementDet> & phase2Dets);
 
   void addStripDet( const GeomDet* gd);
   void addPixelDet( const GeomDet* gd);
+  void addPhase2Det( const GeomDet* gd);
 
   void addGluedDet( const GluedGeomDet* gd);
   void addStackDet( const StackGeomDet* gd);
@@ -133,7 +139,7 @@ public:
   void initGluedDet( TkGluedMeasurementDet & det);
   void initStackDet( TkStackMeasurementDet & det);
 
-  void addDets( const TrackingGeometry::DetContainer& dets, bool subIsPixel);
+  void addDets( const TrackingGeometry::DetContainer& dets, bool subIsPixel, bool subIsOT);
 
   bool checkDets();
 
