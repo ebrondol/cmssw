@@ -47,6 +47,7 @@ MeasurementTrackerEventProducer::produce(edm::Event &iEvent, const edm::EventSet
     // create new data structures from templates
     std::auto_ptr<StMeasurementDetSet> stripData(new StMeasurementDetSet(measurementTracker->stripDetConditions()));
     std::auto_ptr<PxMeasurementDetSet> pixelData(new PxMeasurementDetSet(measurementTracker->pixelDetConditions()));
+    std::auto_ptr<Phase2MeasurementDetSet> phase2Data(new Phase2MeasurementDetSet(measurementTracker->phase2DetConditions()));
     //std::cout << "Created new strip data @" << &* stripData << std::endl;
     std::vector<bool> stripClustersToSkip;
     std::vector<bool> pixelClustersToSkip;
@@ -54,6 +55,8 @@ MeasurementTrackerEventProducer::produce(edm::Event &iEvent, const edm::EventSet
     // fill them
     updateStrips(iEvent, *stripData, stripClustersToSkip);
     updatePixels(iEvent, *pixelData, pixelClustersToSkip);
+    updatePhase2(iEvent, *phase2Data);
+    updateStacks(iEvent, *phase2Data);
 
     // put into MTE
     std::auto_ptr<MeasurementTrackerEvent> out(new MeasurementTrackerEvent(*measurementTracker, stripData.release(), pixelData.release(), stripClustersToSkip, pixelClustersToSkip));
@@ -108,6 +111,15 @@ MeasurementTrackerEventProducer::updatePixels( const edm::Event& event, PxMeasur
     event.getByToken(thePixelClusterLabel, pixelClusters);
     
     const  edmNew::DetSetVector<SiPixelCluster>* pixelCollection = pixelClusters.product();
+
+    //debug
+    LogDebug("MeasurementTracker") << "MeasurementTrackerImpl::updateixel: ClustersPhase2Collection size: " << pixelCollection->dataSize() << std::endl;
+    for (edmNew::DetSetVector< SiPixelCluster >::const_iterator DSViter = pixelCollection->begin(); DSViter != pixelCollection->end(); ++DSViter) {
+    //for (auto DSViter = pixelCollection ) {
+        unsigned int rawid(DSViter->detId());
+        LogTrace("MeasurementTracker") << "\t cluster in detId: " << rawid << std::endl;
+    }
+
    
     if (switchOffPixelsIfEmpty && pixelCollection->empty()) {
        thePxDets.setActiveThisEvent(false);
