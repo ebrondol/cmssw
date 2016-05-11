@@ -5,6 +5,7 @@
 
 #include "DataFormats/SiStripCluster/interface/SiStripCluster.h"
 #include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
+#include "DataFormats/Phase2TrackerCluster/interface/Phase2TrackerCluster1D.h"
 #include "DataFormats/Common/interface/DetSetVectorNew.h"
 
 class OmniClusterRef {
@@ -20,10 +21,12 @@ class OmniClusterRef {
 public:
   typedef edm::Ref<edmNew::DetSetVector<SiPixelCluster>,SiPixelCluster > ClusterPixelRef;
   typedef edm::Ref<edmNew::DetSetVector<SiStripCluster>,SiStripCluster > ClusterStripRef;
+  typedef edm::Ref<edmNew::DetSetVector<Phase2TrackerCluster1D>, Phase2TrackerCluster1D> Phase2Cluster1DRef;
   
   OmniClusterRef() : me(edm::RefCore(),kInvalid) {}
   explicit OmniClusterRef(ClusterPixelRef const & ref, unsigned int subClus=0) : me(ref.refCore(), (ref.isNonnull() ? ref.key()               | (subClus<<subClusShift)   : kInvalid) ){  }
   explicit OmniClusterRef(ClusterStripRef const & ref, unsigned int subClus=0) : me(ref.refCore(), (ref.isNonnull() ? (ref.key() | kIsStrip ) | (subClus<<subClusShift) : kInvalid) ){ }
+  explicit OmniClusterRef(Phase2Cluster1DRef const & ref, unsigned int subClus=0) : me(ref.refCore(), (ref.isNonnull() ? ref.key() | kIsStrip | (subClus<<subClusShift) : kInvalid) ){ }
   
   ClusterPixelRef cluster_pixel()  const { 
     return (isPixel() && isValid()) ?  ClusterPixelRef(me.toRefCore(),index()) : ClusterPixelRef();
@@ -32,7 +35,11 @@ public:
   ClusterStripRef cluster_strip()  const { 
     return isStrip() ? ClusterStripRef(me.toRefCore(),index()) : ClusterStripRef();
   }
-  
+  //FIXME:: isStrip or isPixel depending on what?
+  Phase2Cluster1DRef cluster_phase2()  const { 
+    return isStrip() ? Phase2Cluster1DRef(me.toRefCore(),index()) : Phase2Cluster1DRef();
+  }
+ 
   SiPixelCluster const & pixelCluster() const {
     return *ClusterPixelRef(me.toRefCore(),index());
   }
