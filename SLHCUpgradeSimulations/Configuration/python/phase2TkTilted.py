@@ -189,7 +189,7 @@ def customise_Reco(process,pileup):
     del process.ConvStep
     
     # add the correct tracking back in
-    process.load("RecoTracker.Configuration.RecoTrackerPhase2BEPixel10D_cff")
+    process.load("RecoTracker.Configuration.RecoTrackerPhase2Tracker_cff")
 
     process.globalreco_tracking.insert(itIndex,process.trackingGlobalReco)
     process.globalreco.insert(grIndex,process.globalreco_tracking)
