@@ -50,7 +50,7 @@ MeasurementTrackerEventProducer::produce(edm::Event &iEvent, const edm::EventSet
     // create new data structures from templates
     std::auto_ptr<StMeasurementDetSet> stripData(new StMeasurementDetSet(measurementTracker->stripDetConditions()));
     std::auto_ptr<PxMeasurementDetSet> pixelData(new PxMeasurementDetSet(measurementTracker->pixelDetConditions()));
-    std::auto_ptr<Phase2MeasurementDetSet> phase2Data(new Phase2MeasurementDetSet(measurementTracker->phase2DetConditions()));
+    std::auto_ptr<Phase2MeasurementDetSet> phase2OTData(new Phase2MeasurementDetSet(measurementTracker->phase2DetConditions()));
     //std::cout << "Created new strip data @" << &* stripData << std::endl;
     std::vector<bool> stripClustersToSkip;
     std::vector<bool> pixelClustersToSkip;
@@ -58,11 +58,11 @@ MeasurementTrackerEventProducer::produce(edm::Event &iEvent, const edm::EventSet
     // fill them
     updateStrips(iEvent, *stripData, stripClustersToSkip);
     updatePixels(iEvent, *pixelData, pixelClustersToSkip);
-    updatePhase2(iEvent, *phase2Data);
-    updateStacks(iEvent, *phase2Data);
+    updatePhase2(iEvent, *phase2OTData);
+    updateStacks(iEvent, *phase2OTData);
 
     // put into MTE
-    std::auto_ptr<MeasurementTrackerEvent> out(new MeasurementTrackerEvent(*measurementTracker, stripData.release(), pixelData.release(), stripClustersToSkip, pixelClustersToSkip));
+    std::auto_ptr<MeasurementTrackerEvent> out(new MeasurementTrackerEvent(*measurementTracker, stripData.release(), pixelData.release(), phase2OTData.release(), stripClustersToSkip, pixelClustersToSkip));
 
     // put into event
     iEvent.put(out);

@@ -6,6 +6,7 @@ MeasurementTrackerEvent::~MeasurementTrackerEvent() {
         //std::cout << "Deleting owned MT @" << this << " (strip data @ " << theStripData << ")" << std::endl;
         delete theStripData; theStripData = 0; // also sets to zero since sometimes the FWK seems
         delete thePixelData; thePixelData = 0; // to double-delete the same object (!!!)
+        delete thePhase2OTData; thePhase2OTData = 0; // to double-delete the same object (!!!)
     }
 }
 
@@ -17,6 +18,7 @@ MeasurementTrackerEvent::swap(MeasurementTrackerEvent &other)
         swap(theTracker, other.theTracker); 
         swap(theStripData, other.theStripData);
         swap(thePixelData, other.thePixelData);
+        swap(thePhase2OTData, other.thePhase2OTData);
         swap(theOwner, other.theOwner);
         swap(theStripClustersToSkip, other.theStripClustersToSkip);
         swap(thePixelClustersToSkip, other.thePixelClustersToSkip);
@@ -27,7 +29,9 @@ MeasurementTrackerEvent::MeasurementTrackerEvent(const MeasurementTrackerEvent &
                            const edm::ContainerMask<edmNew::DetSetVector<SiStripCluster> > & stripClustersToSkip,
                            const edm::ContainerMask<edmNew::DetSetVector<SiPixelCluster> > & pixelClustersToSkip) :
      theTracker(trackerEvent.theTracker), 
-     theStripData(trackerEvent.theStripData), thePixelData(trackerEvent.thePixelData), theOwner(false),
+     theStripData(trackerEvent.theStripData), thePixelData(trackerEvent.thePixelData), 
+     thePhase2OTData(trackerEvent.thePhase2OTData),
+     theOwner(false),
      theStripClustersToSkip(), 
      thePixelClustersToSkip() 
 {

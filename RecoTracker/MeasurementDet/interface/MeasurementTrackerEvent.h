@@ -4,6 +4,7 @@
 #include <vector>
 class StMeasurementDetSet;
 class PxMeasurementDetSet;
+class Phase2MeasurementDetSet;
 #include "DataFormats/SiStripCluster/interface/SiStripCluster.h"
 #include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
 #include "DataFormats/Common/interface/ContainerMask.h"
@@ -25,22 +26,24 @@ public:
 #endif
 
    /// Dummy constructor used for I/O (even if it's a transient object)
-   MeasurementTrackerEvent() : theTracker(0), theStripData(0), thePixelData(0), theOwner(false), theStripClustersToSkip(), thePixelClustersToSkip() {}
+   MeasurementTrackerEvent() : theTracker(0), theStripData(0), thePixelData(0), thePhase2OTData(0), theOwner(false), theStripClustersToSkip(), thePixelClustersToSkip() {}
 
    ~MeasurementTrackerEvent() ;
 
    /// Real constructor 1: with the full data (not owned)
    MeasurementTrackerEvent(const MeasurementTracker &tracker, const StMeasurementDetSet &strips, const PxMeasurementDetSet &pixels, 
+                           const Phase2MeasurementDetSet &phase2OT,
                            const std::vector<bool> & stripClustersToSkip = std::vector<bool>(),
                            const std::vector<bool> & pixelClustersToSkip = std::vector<bool>()):
-         theTracker(&tracker), theStripData(&strips), thePixelData(&pixels), theOwner(false),
+         theTracker(&tracker), theStripData(&strips), thePixelData(&pixels), thePhase2OTData(&phase2OT), theOwner(false),
          theStripClustersToSkip(stripClustersToSkip), thePixelClustersToSkip(pixelClustersToSkip) {}
 
    /// Real constructor 1: with the full data (owned)
    MeasurementTrackerEvent(const MeasurementTracker &tracker, const StMeasurementDetSet *strips, const PxMeasurementDetSet *pixels, 
+                           const Phase2MeasurementDetSet *phase2OT,
                            const std::vector<bool> & stripClustersToSkip = std::vector<bool>(),
                            const std::vector<bool> & pixelClustersToSkip = std::vector<bool>()):
-         theTracker(&tracker), theStripData(strips), thePixelData(pixels), theOwner(true),
+         theTracker(&tracker), theStripData(strips), thePixelData(pixels), thePhase2OTData(phase2OT), theOwner(true),
          theStripClustersToSkip(stripClustersToSkip), thePixelClustersToSkip(pixelClustersToSkip) {}
 
    ///// Real constructor 2: with new cluster skips (unchecked)
@@ -60,6 +63,7 @@ public:
         theTracker(other.theTracker), 
         theStripData(other.theStripData),
         thePixelData(other.thePixelData),
+        thePhase2OTData(other.thePhase2OTData),
         theOwner(false),
         theStripClustersToSkip(other.theStripClustersToSkip),
         thePixelClustersToSkip(other.thePixelClustersToSkip)
@@ -81,12 +85,14 @@ public:
         theTracker(other.theTracker), 
         theStripData(other.theStripData),
         thePixelData(other.thePixelData),
+        thePhase2OTData(other.thePhase2OTData),
         theOwner(other.theOwner),
         theStripClustersToSkip(std::move(other.theStripClustersToSkip)),
         thePixelClustersToSkip(std::move(other.thePixelClustersToSkip))
     { 
         other.theTracker = 0;
         other.theStripData = 0; other.thePixelData = 0;
+        other.thePhase2OTData = 0;
         other.theOwner = false;
     }
 
@@ -105,6 +111,7 @@ public:
    const MeasurementTracker & measurementTracker() const { return * theTracker; }
    const StMeasurementDetSet & stripData() const { return * theStripData; }
    const PxMeasurementDetSet & pixelData() const { return * thePixelData; }
+   const Phase2MeasurementDetSet & phase2OTData() const { return * thePhase2OTData; }
    const std::vector<bool> & stripClustersToSkip() const { return theStripClustersToSkip; }
    const std::vector<bool> & pixelClustersToSkip() const { return thePixelClustersToSkip; }
 
@@ -121,6 +128,7 @@ protected:
    const MeasurementTracker * theTracker;
    const StMeasurementDetSet *theStripData;
    const PxMeasurementDetSet *thePixelData;
+   const Phase2MeasurementDetSet *thePhase2OTData;
    bool  theOwner; // do I own the two above?
    // these two could be const pointers as well, but ContainerMask doesn't expose the vector
    std::vector<bool> theStripClustersToSkip; 
