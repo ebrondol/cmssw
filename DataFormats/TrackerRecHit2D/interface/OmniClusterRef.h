@@ -36,7 +36,7 @@ public:
     return isStrip() ? ClusterStripRef(me.toRefCore(),index()) : ClusterStripRef();
   }
   //FIXME:: isStrip or isPixel depending on what?
-  Phase2Cluster1DRef cluster_phase2()  const { 
+  Phase2Cluster1DRef cluster_phase2OT()  const { 
     return isStrip() ? Phase2Cluster1DRef(me.toRefCore(),index()) : Phase2Cluster1DRef();
   }
  
@@ -45,6 +45,9 @@ public:
   }
   SiStripCluster const & stripCluster() const {
     return *ClusterStripRef(me.toRefCore(),index());
+  }
+  Phase2TrackerCluster1D const & phase2OTCluster() const {
+    return *Phase2Cluster1DRef(me.toRefCore(),index());
   }
   
   bool operator==(OmniClusterRef const & lh) const { 

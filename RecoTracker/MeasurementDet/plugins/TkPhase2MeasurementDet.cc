@@ -3,8 +3,8 @@
 #include "Geometry/CommonTopologies/interface/PixelTopology.h"
 #include "TrackingTools/MeasurementDet/interface/MeasurementDetException.h"
 #include "TrackingTools/PatternTools/interface/TrajectoryMeasurement.h"
-#include "RecoTracker/TransientTrackingRecHit/interface/TSiPixelRecHit.h"
-#include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHit.h"
+//#include "RecoTracker/TransientTrackingRecHit/interface/TSiPixelRecHit.h"
+#include "DataFormats/TrackerRecHit2D/interface/Phase2TrackerRecHit1D.h"
 #include "TrackingTools/DetLayers/interface/MeasurementEstimator.h"
 #include "TrackingTools/PatternTools/interface/TrajMeasLessEstim.h"
 
@@ -27,6 +27,7 @@ TkPhase2MeasurementDet::TkPhase2MeasurementDet( const GeomDet* gdet,
 bool TkPhase2MeasurementDet::measurements( const TrajectoryStateOnSurface& stateOnThisDet,
 					  const MeasurementEstimator& est, const MeasurementTrackerEvent & data,
 					  TempMeasurements & result) const {
+
 
   LogDebug("MeasurementTracker") << "TkPhase2MeasurementDet::measurements" ;
   if (!isActive(data)) {
@@ -55,30 +56,33 @@ bool TkPhase2MeasurementDet::measurements( const TrajectoryStateOnSurface& state
 
 }
 
-/*
 TrackingRecHit::RecHitPointer
 TkPhase2MeasurementDet::buildRecHit( const Phase2TrackerCluster1DRef & cluster,
 				    const LocalTrajectoryParameters & ltp) const
 {
-  const GeomDetUnit& gdu( specificGeomDet());
+  const GeomDetUnit& gdu( specificGeomDet() );
+  MeasurementPoint mpClu(cluster->center(), cluster->column() + 0.5);
+  LocalPoint lp = gdu.topology().localPosition(mpClu);
+  MeasurementError meClu(1./12,0.0,1./12);
+  LocalError le = gdu.topology().localError(mpClu,meClu);
+  return std::make_shared<Phase2TrackerRecHit1D>( lp, le, fastGeomDet(), cluster);
 
-  auto && params = cpe()->getParameters( * cluster, gdu, ltp );
-  return std::make_shared<SiPixelRecHit>( std::get<0>(params), std::get<1>(params), std::get<2>(params), fastGeomDet(), cluster);
+//  auto && params = cpe()->getParameters( * cluster, gdu, ltp );
+//  return std::make_shared<SiPixelRecHit>( std::get<0>(params), std::get<1>(params), std::get<2>(params), fastGeomDet(), cluster);
 }
-*/
+
 TkPhase2MeasurementDet::RecHitContainer 
 TkPhase2MeasurementDet::recHits( const TrajectoryStateOnSurface& ts, const MeasurementTrackerEvent & data ) const
 {
   LogDebug("MeasurementTracker") << "TkPhase2MeasurementDet::recHits" ;
   RecHitContainer result;
-/*
-  if (isEmpty(data.pixelData())== true ) return result;
+  if (isEmpty(data.phase2OTData())== true ) return result;
   if (isActive(data) == false) return result;
   const Phase2TrackerCluster1D* begin=0;
-  if (0 != data.pixelData().handle()->data().size()) {
-     begin = &(data.pixelData().handle()->data().front());
+  if (0 != data.phase2OTData().handle()->data().size()) {
+     begin = &(data.phase2OTData().handle()->data().front());
   }
-  const detset & detSet = data.pixelData().detSet(index());
+  const detset & detSet = data.phase2OTData().detSet(index());
   result.reserve(detSet.size());
   for ( const_iterator ci = detSet.begin(); ci != detSet.end(); ++ ci ) {
     
@@ -92,13 +96,12 @@ TkPhase2MeasurementDet::recHits( const TrajectoryStateOnSurface& ts, const Measu
        return result;
      }
      if(data.pixelClustersToSkip().empty() or (not data.pixelClustersToSkip()[index]) ) {
-       Phase2TrackerCluster1DRef cluster = detSet.makeRefTo( data.pixelData().handle(), ci );
+       Phase2TrackerCluster1DRef cluster = detSet.makeRefTo( data.phase2OTData().handle(), ci );
        result.push_back( buildRecHit( cluster, ts.localParameters() ) );
      }else{   
        LogDebug("TkPhase2MeasurementDet")<<"skipping this cluster from last iteration on "<<fastGeomDet().geographicalId().rawId()<<" key: "<<index;
      }
   }
-*/
   return result;
 }
 

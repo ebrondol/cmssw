@@ -53,9 +53,9 @@ public:
 
   const PixelGeomDetUnit& specificGeomDet() const {return static_cast<PixelGeomDetUnit const &>(fastGeomDet());}
 
-//  TrackingRecHit::RecHitPointer 
-//  buildRecHit( const Phase2TrackerCluster1DRef & cluster,
-//  	       const LocalTrajectoryParameters & ltp) const;
+  TrackingRecHit::RecHitPointer
+  buildRecHit( const Phase2TrackerCluster1DRef & cluster,
+  	       const LocalTrajectoryParameters & ltp) const;
 
   /** \brief Turn on/off the module for reconstruction, for the full run or lumi (using info from DB, usually). */
   void setActive(bool active) { conditionSet().setActive(index(), active); }
