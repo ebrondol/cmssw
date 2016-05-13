@@ -25,6 +25,7 @@ public:
 
   Phase2ClusterRef cluster()  const { return cluster_phase2OT(); }
   void setClusterRef(Phase2ClusterRef const & ref)  {setClusterPhase2Ref(ref);}
+  virtual bool isPhase2() const override { return true; }
   //FIXME::check dimension of this!!
   virtual int dimension() const {return 2;}
   virtual void getKfComponents( KfComponentsHolder & holder ) const { getKfComponents2D(holder); }
