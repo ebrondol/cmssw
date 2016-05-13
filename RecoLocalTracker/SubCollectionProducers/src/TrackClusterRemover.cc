@@ -177,7 +177,6 @@ namespace {
     }
 
     // if (!pquals) std::cout << "no qual collection" << std::endl;
-    
     for (auto i=0U; i<s; ++i){
       const reco::Track & track = tracks[i];
       bool goodTk =  (pquals) ? (*pquals)[i] & qualMask : track.quality(trackQuality_);
@@ -192,7 +191,7 @@ namespace {
         auto const & thit = reinterpret_cast<BaseTrackerRecHit const&>(hit);
         auto const & cluster = thit.firstClusterRef();
 	if (cluster.isStrip()) collectedStrips[cluster.key()]=true;
-	else                   collectedPixels[cluster.key()]=true;
+	else if (cluster.isPixel()) collectedPixels[cluster.key()]=true;
 	if (trackerHitRTTI::isMatched(thit))
 	  collectedStrips[reinterpret_cast<SiStripMatchedRecHit2D const&>(hit).stereoClusterRef().key()]=true;
       }

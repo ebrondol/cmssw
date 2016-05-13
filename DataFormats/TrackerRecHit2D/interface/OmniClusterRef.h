@@ -12,6 +12,7 @@ class OmniClusterRef {
 
   static const unsigned int kInvalid = 0x80000000; // bit 31 on
   static const unsigned int kIsStrip = 0x20000000; // bit 29 on
+  static const unsigned int kIsPhase2 = 0x40000000; // bit 30 on
   static const unsigned int kIsRegional = 0x60000000; // bit 30 and 29 on  (will become fastsim???)
 
   static const unsigned int indexMask = 0xFFFFFF;
@@ -24,9 +25,9 @@ public:
   typedef edm::Ref<edmNew::DetSetVector<Phase2TrackerCluster1D>, Phase2TrackerCluster1D> Phase2Cluster1DRef;
   
   OmniClusterRef() : me(edm::RefCore(),kInvalid) {}
-  explicit OmniClusterRef(ClusterPixelRef const & ref, unsigned int subClus=0) : me(ref.refCore(), (ref.isNonnull() ? ref.key()               | (subClus<<subClusShift)   : kInvalid) ){  }
-  explicit OmniClusterRef(ClusterStripRef const & ref, unsigned int subClus=0) : me(ref.refCore(), (ref.isNonnull() ? (ref.key() | kIsStrip ) | (subClus<<subClusShift) : kInvalid) ){ }
-  explicit OmniClusterRef(Phase2Cluster1DRef const & ref, unsigned int subClus=0) : me(ref.refCore(), (ref.isNonnull() ? ref.key() | kIsStrip | (subClus<<subClusShift) : kInvalid) ){ }
+  explicit OmniClusterRef(ClusterPixelRef const & ref, unsigned int subClus=0) : me(ref.refCore(), (ref.isNonnull() ? ref.key()                  | (subClus<<subClusShift) : kInvalid) ){  }
+  explicit OmniClusterRef(ClusterStripRef const & ref, unsigned int subClus=0) : me(ref.refCore(), (ref.isNonnull() ? (ref.key()   | kIsStrip  ) | (subClus<<subClusShift) : kInvalid) ){ }
+  explicit OmniClusterRef(Phase2Cluster1DRef const & ref, unsigned int subClus=0) : me(ref.refCore(), (ref.isNonnull() ? (ref.key() | kIsPhase2) | (subClus<<subClusShift) : kInvalid) ){ }
   
   ClusterPixelRef cluster_pixel()  const { 
     return (isPixel() && isValid()) ?  ClusterPixelRef(me.toRefCore(),index()) : ClusterPixelRef();
@@ -37,7 +38,7 @@ public:
   }
   //FIXME:: isStrip or isPixel depending on what?
   Phase2Cluster1DRef cluster_phase2OT()  const { 
-    return isStrip() ? Phase2Cluster1DRef(me.toRefCore(),index()) : Phase2Cluster1DRef();
+    return isPhase2() ? Phase2Cluster1DRef(me.toRefCore(),index()) : Phase2Cluster1DRef();
   }
  
   SiPixelCluster const & pixelCluster() const {
@@ -71,8 +72,9 @@ public:
   unsigned int subCluster() const { return (rawIndex() & subClusMask)>>subClusShift; }
 
   bool isValid() const { return !(rawIndex() & kInvalid); }
-  bool isPixel() const { return !isStrip(); } //NOTE: non-valid will also show up as a pixel
-  bool isStrip() const { return rawIndex() & kIsStrip; }
+  bool isPixel() const { return !isStrip() && !isPhase2(); } //NOTE: non-valid will also show up as a pixel
+  bool isStrip() const { return  rawIndex() & kIsStrip; }
+  bool isPhase2() const { return rawIndex() & kIsPhase2; }
   // bool isRegional() const { return (rawIndex() & kIsRegional)==kIsRegional; }
   // bool isNonRegionalStrip() const {return (rawIndex() & kIsRegional)==kIsStrip;}
 
