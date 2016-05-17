@@ -23,7 +23,7 @@ MuonME0DetLayerGeometryBuilder::~MuonME0DetLayerGeometryBuilder() {
 
 
 // Builds the forward (first) and backward (second) layers - NOTE: Currently just one layer, all 'front'
-pair<vector<DetLayer*>, vector<DetLayer*> > 
+pair<vector<DetLayer*>, vector<DetLayer*> >
 MuonME0DetLayerGeometryBuilder::buildEndcapLayers(const ME0Geometry& geo) {
   
   vector<DetLayer*> result[2];
@@ -57,7 +57,7 @@ MuonME0DetLayerGeometryBuilder::buildEndcapLayers(const ME0Geometry& geo) {
 
 }
 
-MuRingForwardLayer* 
+MuRingForwardLayer*
 MuonME0DetLayerGeometryBuilder::buildLayer(int endcap,
 					   int layer,
 					   vector<int>& chambers,
@@ -98,11 +98,16 @@ MuonME0DetLayerGeometryBuilder::buildLayer(int endcap,
       LogTrace(metname) << "New front ring with " << frontDets.size()
 			<< " chambers at z="<< frontRings.back()->position().z();
     }
-    if (backDets.size()!=0) {
-      precomputed_value_sort(backDets.begin(), backDets.end(), geomsort::DetPhi());
-      backRings.push_back(new MuDetRing(backDets));
-      LogTrace(metname) << "New back ring with " << backDets.size()
-			<< " chambers at z="<< backRings.back()->position().z();
+    
+    LogTrace(metname) << "About to make a MuRingForwardLayer";
+    if(frontRings.size()!=0) result = new MuRingForwardLayer(frontRings);
+    else result = 0;
+    if(result != 0){
+        LogTrace(metname) << "New MuRingForwardLayer with " << frontRings.size()
+        << " and " << backRings.size()
+        << " rings, at Z " << result->position().z()
+        << " R1: " << result->specificSurface().innerRadius()
+        << " R2: " << result->specificSurface().outerRadius();
     }
 
   }
@@ -124,23 +129,23 @@ MuonME0DetLayerGeometryBuilder::buildLayer(int endcap,
 
 bool MuonME0DetLayerGeometryBuilder::isFront(const ME0DetId & me0Id)
 {
-
-  //ME0s do not currently have an arrangement of which are front and which are back, going to always return true
-
-  bool result = true;
-  return result;
+    
+    //ME0s do not currently have an arrangement of which are front and which are back, going to always return true
+    
+    bool result = true;
+    return result;
 }
 
 MuDetRing * MuonME0DetLayerGeometryBuilder::makeDetRing(vector<const GeomDet*> & geomDets)
 {
     const std::string metname = "Muon|RecoMuon|RecoMuonDetLayers|MuonME0DetLayerGeometryBuilder";
-
-
+    
+    
     precomputed_value_sort(geomDets.begin(), geomDets.end(), geomsort::DetPhi());
     MuDetRing * result = new MuDetRing(geomDets);
     LogTrace(metname) << "New MuDetRing with " << geomDets.size()
-                        << " chambers at z="<< result->position().z()
-                        << " R1: " << result->specificSurface().innerRadius()
-                        << " R2: " << result->specificSurface().outerRadius();
+    << " chambers at z="<< result->position().z()
+    << " R1: " << result->specificSurface().innerRadius()
+    << " R2: " << result->specificSurface().outerRadius();
     return result;
 }
