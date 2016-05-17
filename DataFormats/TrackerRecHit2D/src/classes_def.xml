@@ -157,8 +157,8 @@
 
   // phase2 containers
 
-  <class name="Phase2TrackerRecHit1D" ClassVersion="2">
-      <version ClassVersion="2" checksum="3085242308"/>
+  <class name="Phase2TrackerRecHit1D" ClassVersion="3">
+      <version ClassVersion="3" checksum="1217326271"/>
   </class>
   <class name="std::vector< Phase2TrackerRecHit1D >"/>
   <class name="std::vector< edmNew::DetSet< Phase2TrackerRecHit1D > >"/>

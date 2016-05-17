@@ -91,11 +91,11 @@ TkPhase2MeasurementDet::recHits( const TrajectoryStateOnSurface& ts, const Measu
       return result;
     }
      unsigned int index = ci-begin;
-     if (!data.pixelClustersToSkip().empty() &&  index>=data.pixelClustersToSkip().size()){
-       edm::LogError("IndexMisMatch")<<"TkPhase2MeasurementDet cannot create hit because of index mismatch. i.e "<<index<<" >= "<<data.pixelClustersToSkip().size();
+     if (!data.phase2OTClustersToSkip().empty() &&  index>=data.phase2OTClustersToSkip().size()){
+       edm::LogError("IndexMisMatch")<<"TkPhase2MeasurementDet cannot create hit because of index mismatch. i.e "<<index<<" >= "<<data.phase2OTClustersToSkip().size();
        return result;
      }
-     if(data.pixelClustersToSkip().empty() or (not data.pixelClustersToSkip()[index]) ) {
+     if(data.phase2OTClustersToSkip().empty() or (not data.phase2OTClustersToSkip()[index]) ) {
        Phase2TrackerCluster1DRef cluster = detSet.makeRefTo( data.phase2OTData().handle(), ci );
        result.push_back( buildRecHit( cluster, ts.localParameters() ) );
      }else{   
