@@ -63,7 +63,7 @@ public:
              This per-event flag is cleared by any call to 'update' or 'setEmpty'  */
   void setActiveThisEvent(Phase2MeasurementDetSet & data, bool active) const { data.setActiveThisEvent(index(), active); }
   /** \brief Is this module active in reconstruction? It must be both 'setActiveThisEvent' and 'setActive'. */
-  bool isActive(const MeasurementTrackerEvent & data) const { return data.pixelData().isActive(index()); }
+  bool isActive(const MeasurementTrackerEvent & data) const { return data.phase2OTData().isActive(index()); }
 
   bool hasBadComponents( const TrajectoryStateOnSurface &tsos, const MeasurementTrackerEvent & dat ) const ; 
 
