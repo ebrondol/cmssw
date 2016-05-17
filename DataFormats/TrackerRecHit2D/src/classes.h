@@ -25,7 +25,7 @@
 #include "DataFormats/TrackerRecHit2D/interface/FastMatchedTrackerRecHit.h"
 #include "DataFormats/TrackerRecHit2D/interface/FastProjectedTrackerRecHit.h"
 #include "DataFormats/TrackerRecHit2D/interface/FastTrackerRecHitCollection.h"
-#include "DataFormats/Phase2TrackerRecHit/interface/Phase2TrackerRecHit1D.h"
+#include "DataFormats/TrackerRecHit2D/interface/Phase2TrackerRecHit1D.h"
 #include <vector>
 
 namespace DataFormats_TrackerRecHit2D {
