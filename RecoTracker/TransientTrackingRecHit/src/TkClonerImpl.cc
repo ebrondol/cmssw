@@ -5,6 +5,7 @@
 #include "DataFormats/TrackerRecHit2D/interface/ProjectedSiStripRecHit2D.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit2D.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit1D.h"
+#include "DataFormats/TrackerRecHit2D/interface/Phase2TrackerRecHit1D.h"
 
 #include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
 #include "TrackingTools/TrajectoryState/interface/TrajectoryStateOnSurface.h"
@@ -44,6 +45,16 @@ std::unique_ptr<SiStripRecHit1D> TkClonerImpl::operator()(SiStripRecHit1D const 
   return std::unique_ptr<SiStripRecHit1D>{new SiStripRecHit1D(lv.first, le, *hit.det(), hit.omniCluster())};
 }
 
+std::unique_ptr<Phase2TrackerRecHit1D> TkClonerImpl::operator()(Phase2TrackerRecHit1D const & hit, TrajectoryStateOnSurface const& tsos) const {
+  const Phase2TrackerCluster1D&  clust = hit.phase2OTCluster();
+  const GeomDetUnit& gdu = *(hit.detUnit());
+  MeasurementPoint mpClu(clust.center(), clust.column() + 0.5);
+  LocalPoint lp = gdu.topology().localPosition(mpClu);
+  MeasurementError meClu(1./12,0.0,1./12);
+  LocalError le = gdu.topology().localError(mpClu,meClu);
+  return std::unique_ptr<Phase2TrackerRecHit1D>{new Phase2TrackerRecHit1D(lp, le, *hit.det(), hit.cluster())};
+}
+
 TrackingRecHit::ConstRecHitPointer TkClonerImpl::makeShared(SiPixelRecHit const & hit, TrajectoryStateOnSurface const& tsos) const {
  // std::cout << "cloning " << typeid(hit).name() << std::endl;
   const SiPixelCluster& clust = *hit.cluster();  
@@ -70,6 +81,15 @@ TrackingRecHit::ConstRecHitPointer TkClonerImpl::makeShared(SiStripRecHit1D cons
   return  std::make_shared<SiStripRecHit1D>(lv.first, le, *hit.det(), hit.omniCluster());
 }
 
+TrackingRecHit::ConstRecHitPointer TkClonerImpl::makeShared(Phase2TrackerRecHit1D const & hit, TrajectoryStateOnSurface const& tsos) const {
+  const Phase2TrackerCluster1D&  clust = hit.phase2OTCluster();
+  const GeomDetUnit& gdu = *(hit.detUnit());
+  MeasurementPoint mpClu(clust.center(), clust.column() + 0.5);
+  LocalPoint lp = gdu.topology().localPosition(mpClu);
+  MeasurementError meClu(1./12,0.0,1./12);
+  LocalError le = gdu.topology().localError(mpClu,meClu);
+  return std::make_shared<Phase2TrackerRecHit1D>( lp, le, *hit.det(), hit.cluster());
+}
 
 
 namespace {

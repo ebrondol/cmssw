@@ -9,7 +9,7 @@ class Phase2TrackerRecHit1D GCC11_FINAL : public TrackerSingleRecHit {
 
 public:
 
-  typedef edm::Ref<edmNew::DetSetVector<Phase2TrackerCluster1D>, Phase2TrackerCluster1D> Phase2ClusterRef;
+  typedef OmniClusterRef::Phase2Cluster1DRef CluRef;
 
   Phase2TrackerRecHit1D() {}
 
@@ -17,18 +17,20 @@ public:
 
   Phase2TrackerRecHit1D( const LocalPoint& pos, const LocalError& err, 
                          GeomDet const & idet,
-                         Phase2ClusterRef clus) : 
-    TrackerSingleRecHit(pos,err,idet,clus)
-  {}
+		         CluRef const&  clus) : TrackerSingleRecHit(pos,err,idet,clus){}
 
-  virtual Phase2TrackerRecHit1D * clone() const {return new Phase2TrackerRecHit1D( * this); }
+  virtual Phase2TrackerRecHit1D * clone() const override { return new Phase2TrackerRecHit1D( * this); }
+#ifndef __GCCXML__
+  virtual RecHitPointer cloneSH() const override { return std::make_shared<Phase2TrackerRecHit1D>(*this);}
+#endif
 
-  Phase2ClusterRef cluster()  const { return cluster_phase2OT(); }
-  void setClusterRef(Phase2ClusterRef const & ref)  {setClusterPhase2Ref(ref);}
+  CluRef cluster()  const { return cluster_phase2OT(); }
+  void setClusterRef(CluRef const & ref)  {setClusterPhase2Ref(ref);}
+
   virtual bool isPhase2() const override { return true; }
   //FIXME::check dimension of this!!
-  virtual int dimension() const {return 2;}
-  virtual void getKfComponents( KfComponentsHolder & holder ) const { getKfComponents2D(holder); }
+  virtual int dimension() const override {return 2;}
+  virtual void getKfComponents( KfComponentsHolder & holder ) const override { getKfComponents2D(holder); }
 
 private:
 
