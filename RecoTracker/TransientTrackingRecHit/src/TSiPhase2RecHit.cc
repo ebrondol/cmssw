@@ -1,7 +1,8 @@
 #include "RecoTracker/TransientTrackingRecHit/interface/TSiPhase2RecHit.h"
 #include "DataFormats/Phase2TrackerCluster/interface/Phase2TrackerCluster1D.h"
-#include "DataFormats/GeometryCommonDetAlgo/interface/MeasurementPoint.h"
-#include "DataFormats/GeometryCommonDetAlgo/interface/MeasurementError.h"
+//#include "DataFormats/GeometryCommonDetAlgo/interface/MeasurementPoint.h"
+//#include "DataFormats/GeometryCommonDetAlgo/interface/MeasurementError.h"
+#include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
 
 TSiPhase2RecHit::RecHitPointer TSiPhase2RecHit::clone (const TrajectoryStateOnSurface& ts) const
 {
@@ -9,13 +10,20 @@ TSiPhase2RecHit::RecHitPointer TSiPhase2RecHit::clone (const TrajectoryStateOnSu
     return new TSiPhase2RecHit( det(), &theHitData, 0,false);
   }else{
     const Phase2TrackerCluster1D& clust = *specificHit()->cluster();  
-  MeasurementPoint mpClu(clust.center(), clust.column() + 0.5);
-  LocalPoint lp = detUnit()->topology().localPosition(mpClu);
-  MeasurementError meClu(1./12,0.0,1./12);
-  LocalError le = detUnit()->topology().localError(mpClu,meClu);
-//    PixelClusterParameterEstimator::LocalValues lv = 
-//      theCPE->localParameters( clust, *detUnit(), ts);
+    //PixelClusterParameterEstimator::LocalValues lv = 
+    //  theCPE->localParameters( clust, *detUnit(), ts);
+    const PixelGeomDetUnit & gdu = (const PixelGeomDetUnit &) *(detUnit()) ;
+    const PixelTopology * topo = &gdu.specificTopology();
+  
+    float pitch_x = topo->pitch().first;
+    float pitch_y = topo->pitch().second;
+    float ix = clust.center();
+    float iy = clust.column()+0.5; // halfway the column
+  
+    LocalPoint lp( topo->localX(ix), topo->localY(iy), 0 );          // x, y, z
+    LocalError le( pow(pitch_x, 2) / 12, 0, pow(pitch_y, 2) / 12);   // e2_xx, e2_xy, e2_yy
     return TSiPhase2RecHit::build( lp, le, det(), specificHit()->cluster(), theCPE);
+
   }
 }
 
@@ -36,12 +44,17 @@ TSiPhase2RecHit::TSiPhase2RecHit(const GeomDet * geom, const Phase2TrackerRecHit
   if (! (rh->hasPositionAndError() || !computeCoarseLocalPosition)) {
     const GeomDetUnit* gdu = dynamic_cast<const GeomDetUnit*>(geom);
     if (gdu){
-      MeasurementPoint mpClu(rh->cluster()->center(), rh->cluster()->column() + 0.5);
-      LocalPoint lp = (*gdu).topology().localPosition(mpClu);
-      MeasurementError meClu(1./12,0.0,1./12);
-      LocalError le = gdu->topology().localError(mpClu,meClu);
-//      PixelClusterParameterEstimator::LocalValues lval= theCPE->localParameters(*rh->cluster(), *gdu);
-      LogDebug("TSiPhase2RecHit")<<"calculating coarse position/error.";
+      //PixelClusterParameterEstimator::LocalValues lval= theCPE->localParameters(*rh->cluster(), *gdu);
+      const PixelGeomDetUnit & pgdu = (const PixelGeomDetUnit &) *gdu ;
+      const PixelTopology * topo = &pgdu.specificTopology();
+  
+      float pitch_x = topo->pitch().first;
+      float pitch_y = topo->pitch().second;
+      float ix = rh->cluster()->center();
+      float iy = rh->cluster()->column()+0.5; // halfway the column
+  
+      LocalPoint lp( topo->localX(ix), topo->localY(iy), 0 );          // x, y, z
+      LocalError le( pow(pitch_x, 2) / 12, 0, pow(pitch_y, 2) / 12);   // e2_xx, e2_xy, e2_yy
       theHitData = Phase2TrackerRecHit1D(lp, le, geom->geographicalId(),rh->cluster());
     }else{
       edm::LogError("TSiPhase2RecHit") << " geomdet does not cast into geomdet unit. cannot create pixel local parameters.";
