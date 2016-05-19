@@ -193,5 +193,4 @@ selectedIterTrackingStep_trackingPhase2PU140 = [
     "detachedQuadStep",
     "pixelPairStep",
     "muonSeededStepInOut",
-    "muonSeededStepOutIn",
 ]

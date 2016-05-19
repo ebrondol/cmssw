@@ -85,7 +85,6 @@ _algos_trackingPhase2PU140 = [
     "detachedQuadStep",
     "pixelPairStep",
     "muonSeededStepInOut",
-    "muonSeededStepOutIn",
 ]
 
 _seedProducers = [
@@ -160,7 +159,6 @@ _seedProducers_trackingPhase2PU140 = [
     "detachedQuadStepSeeds",
     "pixelPairStepSeeds",
     "muonSeededSeedsInOut",
-    "muonSeededSeedsOutIn",
 ]
 
 
@@ -229,7 +227,6 @@ _trackProducers_trackingPhase2PU140 = [
     "detachedQuadStepTracks",
     "pixelPairStepTracks",
     "muonSeededTracksInOut",
-    "muonSeededTracksOutIn",
 ]
 
 def _algoToSelector(algo):
@@ -324,6 +321,7 @@ _relevantEras = [
     _eraPostfix("trackingLowPU"),
     _eraPostfix("trackingPhase1"),
     _eraPostfix("trackingPhase1PU70"),
+    _eraPostfix("trackingPhase2PU140"),
 ]
 _relevantErasAndFastSim = _relevantEras + [_eraPostfix("fastSim")]
 def _translateArgs(args, postfix, modDict):
