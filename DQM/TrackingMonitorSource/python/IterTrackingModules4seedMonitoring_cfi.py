@@ -185,3 +185,13 @@ selectedIterTrackingStep_trackingPhase1PU70 = [
     "muonSeededStepInOut",
     "muonSeededStepOutIn",
 ]
+selectedIterTrackingStep_trackingPhase2PU140 = [
+    "initialStep",
+    "highPtTripletStep",
+    "lowPtQuadStep",
+    "lowPtTripletStep",
+    "detachedQuadStep",
+    "pixelPairStep",
+    "muonSeededStepInOut",
+    "muonSeededStepOutIn",
+]

@@ -76,6 +76,17 @@ _algos_trackingPhase1PU70 = [
     "muonSeededStepInOut",
     "muonSeededStepOutIn",
 ]
+_algos_trackingPhase2PU140 = [
+    "generalTracks",
+    "initialStep",
+    "highPtTripletStep",
+    "lowPtQuadStep",
+    "lowPtTripletStep",
+    "detachedQuadStep",
+    "pixelPairStep",
+    "muonSeededStepInOut",
+    "muonSeededStepOutIn",
+]
 
 _seedProducers = [
     "initialStepSeedsPreSplitting",
@@ -141,6 +152,16 @@ _seedProducers_trackingPhase1PU70 = [
     "muonSeededSeedsInOut",
     "muonSeededSeedsOutIn",
 ]
+_seedProducers_trackingPhase2PU140 = [
+    "initialStepSeeds",
+    "highPtTripletStepSeeds",
+    "lowPtQuadStepSeeds",
+    "lowPtTripletStepSeeds",
+    "detachedQuadStepSeeds",
+    "pixelPairStepSeeds",
+    "muonSeededSeedsInOut",
+    "muonSeededSeedsOutIn",
+]
 
 
 _trackProducers = [
@@ -197,6 +218,16 @@ _trackProducers_trackingPhase1PU70 = [
     "mixedTripletStepTracks",
     "pixelPairStepTracks",
     "tobTecStepTracks",
+    "muonSeededTracksInOut",
+    "muonSeededTracksOutIn",
+]
+_trackProducers_trackingPhase2PU140 = [
+    "initialStepTracks",
+    "highPtTripletStepTracks",
+    "lowPtQuadStepTracks",
+    "lowPtTripletStepTracks",
+    "detachedQuadStepTracks",
+    "pixelPairStepTracks",
     "muonSeededTracksInOut",
     "muonSeededTracksOutIn",
 ]
