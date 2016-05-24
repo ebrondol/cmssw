@@ -177,7 +177,7 @@ for tracks in selectedTracks :
     label = 'TrackerCollisionSelectedTrackMonCommon' + str(tracks)
     TrackingDQMSourceTier0 += locals()[label]
 # seeding monitoring
-for era in ["", "trackingLowPU", "trackingPhase1", "trackingPhase1PU70"]:
+for era in ["", "trackingLowPU", "trackingPhase1", "trackingPhase1PU70", "trackingPhase2PU140"]:
     postfix = "_"+era if era != "" else era
     _seq = cms.Sequence()
     for step in locals()["selectedIterTrackingStep"+postfix]:
