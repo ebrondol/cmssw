@@ -64,6 +64,10 @@ def customise_RawToDigi(process):
     return process
 
 def customise_Reco(process,pileup):
+
+    # using stacks in phase2 tracking  
+    process.TrackerRecoGeometryESProducer.usePhase2Stacks = True
+ 
     return process
 
 def customise_condOverRides(process):
