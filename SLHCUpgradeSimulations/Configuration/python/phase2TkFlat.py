@@ -331,6 +331,8 @@ def customise_Reco(process,pileup):
     # FIXME::process.electronSeedsSeq broken
     process.ckftracks.remove(process.electronSeedsSeq)
  
+    # using stacks in phase2 tracking  
+    process.TrackerRecoGeometryESProducer.usePhase2Stacks = False
     return process
 
 def customise_condOverRides(process):
