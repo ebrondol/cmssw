@@ -27,8 +27,8 @@ class TkStackMeasurementDet GCC11_FINAL : public MeasurementDet {
 			     const MeasurementEstimator& est, const MeasurementTrackerEvent & data,
 			     TempMeasurements & result) const;
 
-  const TkPhase2OTMeasurementDet* lowerDet() const{ return theInnerDet;}
-  const TkPhase2OTMeasurementDet* upperDet() const{ return theOuterDet;}
+  const TkPhase2OTMeasurementDet* lowerDet() const{ return theLowerDet;}
+  const TkPhase2OTMeasurementDet* upperDet() const{ return theUpperDet;}
 
   /// return TRUE if both lower and upper components are active
   bool isActive(const MeasurementTrackerEvent & data) const {return lowerDet()->isActive(data) && upperDet()->isActive(data); }
@@ -39,8 +39,8 @@ class TkStackMeasurementDet GCC11_FINAL : public MeasurementDet {
 
  private:
   const PixelClusterParameterEstimator* thePixelCPE;
-  const TkPhase2OTMeasurementDet*       theInnerDet;
-  const TkPhase2OTMeasurementDet*       theOuterDet;
+  const TkPhase2OTMeasurementDet*       theLowerDet;
+  const TkPhase2OTMeasurementDet*       theUpperDet;
 
 };
 
