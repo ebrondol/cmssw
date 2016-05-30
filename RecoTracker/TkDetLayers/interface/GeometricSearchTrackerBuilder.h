@@ -20,7 +20,8 @@ class GeometricSearchTrackerBuilder {
   
   GeometricSearchTracker* build(const GeometricDet* theGeometricTracker,
 				const TrackerGeometry* theGeomDetGeometry,
-				const TrackerTopology* tTopo) __attribute__ ((cold));
+				const TrackerTopology* tTopo,
+				const bool usePhase2Stacks = false) __attribute__ ((cold));
 };
 
 
