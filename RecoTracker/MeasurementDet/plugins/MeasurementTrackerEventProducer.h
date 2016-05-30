@@ -27,8 +27,7 @@ protected:
 			 const TrackerGeometry& trackerGeom, const edm::EventSetup& iSetup) const;
       void updateStrips( const edm::Event&, StMeasurementDetSet & theStDets, std::vector<bool> & stripClustersToSkip ) const;
       void updatePhase2OT( const edm::Event&, Phase2OTMeasurementDetSet & thePh2OTDets ) const;
-      //FIXME:: going to be updated soon
-      void updateStacks( const edm::Event&, Phase2OTMeasurementDetSet & theStDets ) const {};
+      //void updateStacks( const edm::Event&, Phase2OTMeasurementDetSet & theStDets ) const {};
 
       void getInactiveStrips(const edm::Event& event,std::vector<uint32_t> & rawInactiveDetIds) const;
 

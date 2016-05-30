@@ -90,7 +90,7 @@ MeasurementTrackerEventProducer::produce(edm::Event &iEvent, const edm::EventSet
     updateStrips(iEvent, *stripData, stripClustersToSkip);
     updatePixels(iEvent, *pixelData, pixelClustersToSkip, dynamic_cast<const TrackerGeometry&>(*(measurementTracker->geomTracker())), iSetup);
     updatePhase2OT(iEvent, *phase2OTData);
-    updateStacks(iEvent, *phase2OTData);
+    //updateStacks(iEvent, *phase2OTData);
 
     // put into MTE
     // put into event
