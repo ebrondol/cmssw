@@ -1,0 +1,7 @@
+<use   name="RecoLocalTracker/ClusterParameterEstimator"/>
+<use   name="RecoLocalTracker/Records"/>
+<use   name="RecoLocalTracker/Phase2ITPixelRecHits"/>
+<use   name="DataFormats/TrackerCommon"/>
+<library   file="*.cc" name="RecoLocalTrackerPhase2ITPixelRecHitsPlugins">
+  <flags   EDM_PLUGIN="1"/>
+</library>

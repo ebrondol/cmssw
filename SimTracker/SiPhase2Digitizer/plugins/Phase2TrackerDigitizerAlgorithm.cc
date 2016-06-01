@@ -945,7 +945,7 @@ void Phase2TrackerDigitizerAlgorithm::digitize(const Phase2TrackerGeomDetUnit* p
     if (signalInElectrons >= theThresholdInE) { // check threshold
 
       if (doDigitalReadout) adc = theAdcFullScale;
-      else adc = int(signalInElectrons / theElectronPerADC);
+      else adc = std::min(int(signalInElectrons / theElectronPerADC), theAdcFullScale);
       DigitizerUtility::DigiSimInfo info;
       info.sig_tot     = adc;
       if (makeDigiSimLinks_ && sig_data.hitInfo() != 0) {

@@ -284,7 +284,21 @@ float TrackerGeometry::getDetectorThickness(DetId detid) const {
 }
 
 TrackerGeometry::ModuleType TrackerGeometry::moduleType(const std::string& name) const {
-  if ( name.find("PixelBarrel") != std::string::npos) return ModuleType::Ph1PXB;
+  
+  // add for Phase2 pixels
+  if ( name.find("InnerPixelActive") != std::string::npos) {
+    if ( name.find("BModule") != std::string::npos)
+      {
+        //std::cout << "Phase2PixelBarrel:Ph1PXB" << std::endl;
+        return ModuleType::Ph1PXB;
+      }
+    else if ( name.find("EModule") != std::string::npos)
+      {
+        //std::cout << "Phase2PixelForward:Ph1PXF" << std::endl;
+        return ModuleType::Ph1PXF;
+      }
+  } 
+  else if ( name.find("PixelBarrel") != std::string::npos) return ModuleType::Ph1PXB;
   else if (name.find("PixelForward") != std::string::npos) return ModuleType::Ph1PXF;
   else if ( name.find("TIB") != std::string::npos) {
     if ( name.find("0") != std::string::npos) return ModuleType::IB1;

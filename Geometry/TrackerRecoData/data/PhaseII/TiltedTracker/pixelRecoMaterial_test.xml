@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DDDefinition xmlns="http://www.cern.ch/cms/DDL" xmlns:xsi="http://www.cern.ch/www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.cern.ch/cms/DDL ../../../DetectorDescription/Schema/DDLSchema.xsd">
+ <SpecParSection label="spec-pars2.xml">
+  <SpecPar name="TrackerRecMaterialPhase1PixelBarrelLayer1" eval="true">
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer1/pixel_test:Rod1/pixel_test:BModuleBox1Layer1/pixel_test:BModule1Layer1InnerPixel/pixel_test:BModule1Layer1InnerPixelWafer/pixel_test:BModule1Layer1InnerPixelActive"/>
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer1/pixel_test:Rod1/pixel_test:BModuleBox2Layer1/pixel_test:BModule2Layer1InnerPixel/pixel_test:BModule2Layer1InnerPixelWafer/pixel_test:BModule2Layer1InnerPixelActive"/>
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer1/pixel_test:Rod1/pixel_test:BModuleBox3Layer1/pixel_test:BModule3Layer1InnerPixel/pixel_test:BModule3Layer1InnerPixelWafer/pixel_test:BModule3Layer1InnerPixelActive"/>
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer1/pixel_test:Rod1/pixel_test:BModuleBox4Layer1/pixel_test:BModule4Layer1InnerPixel/pixel_test:BModule4Layer1InnerPixelWafer/pixel_test:BModule4Layer1InnerPixelActive"/>
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer1/pixel_test:Rod1/pixel_test:BModuleBox5Layer1/pixel_test:BModule5Layer1InnerPixel/pixel_test:BModule5Layer1InnerPixelWafer/pixel_test:BModule5Layer1InnerPixelActive"/>
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer1/pixel_test:Rod1/pixel_test:BModuleBox6Layer1/pixel_test:BModule6Layer1InnerPixel/pixel_test:BModule6Layer1InnerPixelWafer/pixel_test:BModule6Layer1InnerPixelActive"/>
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer1/pixel_test:Rod1/pixel_test:BModuleBox7Layer1/pixel_test:BModule7Layer1InnerPixel/pixel_test:BModule7Layer1InnerPixelWafer/pixel_test:BModule7Layer1InnerPixelActive"/>
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer1/pixel_test:Rod1/pixel_test:BModuleBox8Layer1/pixel_test:BModule8Layer1InnerPixel/pixel_test:BModule8Layer1InnerPixelWafer/pixel_test:BModule8Layer1InnerPixelActive"/>
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer1/pixel_test:Rod1/pixel_test:BModuleBox9Layer1/pixel_test:BModule9Layer1InnerPixel/pixel_test:BModule9Layer1InnerPixelWafer/pixel_test:BModule9Layer1InnerPixelActive"/>
+   <Parameter name="TrackerRadLength" value="0.01769350558026558"/>
+   <Parameter name="TrackerXi" value="0.003641067124631147"/>
+  </SpecPar>
+  <SpecPar name="TrackerRecMaterialPhase1PixelBarrelLayer2" eval="true">
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer2/pixel_test:Rod2/pixel_test:BModuleBox1Layer2/pixel_test:BModule1Layer2InnerPixel/pixel_test:BModule1Layer2InnerPixelWafer/pixel_test:BModule1Layer2InnerPixelActive"/>
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer2/pixel_test:Rod2/pixel_test:BModuleBox2Layer2/pixel_test:BModule2Layer2InnerPixel/pixel_test:BModule2Layer2InnerPixelWafer/pixel_test:BModule2Layer2InnerPixelActive"/>
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer2/pixel_test:Rod2/pixel_test:BModuleBox3Layer2/pixel_test:BModule3Layer2InnerPixel/pixel_test:BModule3Layer2InnerPixelWafer/pixel_test:BModule3Layer2InnerPixelActive"/>
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer2/pixel_test:Rod2/pixel_test:BModuleBox4Layer2/pixel_test:BModule4Layer2InnerPixel/pixel_test:BModule4Layer2InnerPixelWafer/pixel_test:BModule4Layer2InnerPixelActive"/>
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer2/pixel_test:Rod2/pixel_test:BModuleBox5Layer2/pixel_test:BModule5Layer2InnerPixel/pixel_test:BModule5Layer2InnerPixelWafer/pixel_test:BModule5Layer2InnerPixelActive"/>
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer2/pixel_test:Rod2/pixel_test:BModuleBox6Layer2/pixel_test:BModule6Layer2InnerPixel/pixel_test:BModule6Layer2InnerPixelWafer/pixel_test:BModule6Layer2InnerPixelActive"/>
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer2/pixel_test:Rod2/pixel_test:BModuleBox7Layer2/pixel_test:BModule7Layer2InnerPixel/pixel_test:BModule7Layer2InnerPixelWafer/pixel_test:BModule7Layer2InnerPixelActive"/>
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer2/pixel_test:Rod2/pixel_test:BModuleBox8Layer2/pixel_test:BModule8Layer2InnerPixel/pixel_test:BModule8Layer2InnerPixelWafer/pixel_test:BModule8Layer2InnerPixelActive"/>
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer2/pixel_test:Rod2/pixel_test:BModuleBox9Layer2/pixel_test:BModule9Layer2InnerPixel/pixel_test:BModule9Layer2InnerPixelWafer/pixel_test:BModule9Layer2InnerPixelActive"/>
+   <Parameter name="TrackerRadLength" value="0.01681915204378458"/>
+   <Parameter name="TrackerXi" value="0.003347791863959359"/>
+  </SpecPar>
+  <SpecPar name="TrackerRecMaterialPhase1PixelBarrelLayer3" eval="true">
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer3/pixel_test:Rod3/pixel_test:BModuleBox1Layer3/pixel_test:BModule1Layer3InnerPixel/pixel_test:BModule1Layer3InnerPixelWafer/pixel_test:BModule1Layer3InnerPixelActive"/>
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer3/pixel_test:Rod3/pixel_test:BModuleBox2Layer3/pixel_test:BModule2Layer3InnerPixel/pixel_test:BModule2Layer3InnerPixelWafer/pixel_test:BModule2Layer3InnerPixelActive"/>
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer3/pixel_test:Rod3/pixel_test:BModuleBox3Layer3/pixel_test:BModule3Layer3InnerPixel/pixel_test:BModule3Layer3InnerPixelWafer/pixel_test:BModule3Layer3InnerPixelActive"/>
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer3/pixel_test:Rod3/pixel_test:BModuleBox4Layer3/pixel_test:BModule4Layer3InnerPixel/pixel_test:BModule4Layer3InnerPixelWafer/pixel_test:BModule4Layer3InnerPixelActive"/>
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer3/pixel_test:Rod3/pixel_test:BModuleBox5Layer3/pixel_test:BModule5Layer3InnerPixel/pixel_test:BModule5Layer3InnerPixelWafer/pixel_test:BModule5Layer3InnerPixelActive"/>
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer3/pixel_test:Rod3/pixel_test:BModuleBox6Layer3/pixel_test:BModule6Layer3InnerPixel/pixel_test:BModule6Layer3InnerPixelWafer/pixel_test:BModule6Layer3InnerPixelActive"/>
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer3/pixel_test:Rod3/pixel_test:BModuleBox7Layer3/pixel_test:BModule7Layer3InnerPixel/pixel_test:BModule7Layer3InnerPixelWafer/pixel_test:BModule7Layer3InnerPixelActive"/>
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer3/pixel_test:Rod3/pixel_test:BModuleBox8Layer3/pixel_test:BModule8Layer3InnerPixel/pixel_test:BModule8Layer3InnerPixelWafer/pixel_test:BModule8Layer3InnerPixelActive"/>
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer3/pixel_test:Rod3/pixel_test:BModuleBox9Layer3/pixel_test:BModule9Layer3InnerPixel/pixel_test:BModule9Layer3InnerPixelWafer/pixel_test:BModule9Layer3InnerPixelActive"/>
+   <Parameter name="TrackerRadLength" value="0.01470838359577194"/>
+   <Parameter name="TrackerXi" value="0.003103074959776811"/>
+  </SpecPar>
+  <SpecPar name="TrackerRecMaterialPhase1PixelBarrelLayer4" eval="true">
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer4/pixel_test:Rod4/pixel_test:BModuleBox1Layer4/pixel_test:BModule1Layer4InnerPixel/pixel_test:BModule1Layer4InnerPixelWafer/pixel_test:BModule1Layer4InnerPixelActive"/>
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer4/pixel_test:Rod4/pixel_test:BModuleBox2Layer4/pixel_test:BModule2Layer4InnerPixel/pixel_test:BModule2Layer4InnerPixelWafer/pixel_test:BModule2Layer4InnerPixelActive"/>
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer4/pixel_test:Rod4/pixel_test:BModuleBox3Layer4/pixel_test:BModule3Layer4InnerPixel/pixel_test:BModule3Layer4InnerPixelWafer/pixel_test:BModule3Layer4InnerPixelActive"/>
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer4/pixel_test:Rod4/pixel_test:BModuleBox4Layer4/pixel_test:BModule4Layer4InnerPixel/pixel_test:BModule4Layer4InnerPixelWafer/pixel_test:BModule4Layer4InnerPixelActive"/>
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer4/pixel_test:Rod4/pixel_test:BModuleBox5Layer4/pixel_test:BModule5Layer4InnerPixel/pixel_test:BModule5Layer4InnerPixelWafer/pixel_test:BModule5Layer4InnerPixelActive"/>
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer4/pixel_test:Rod4/pixel_test:BModuleBox6Layer4/pixel_test:BModule6Layer4InnerPixel/pixel_test:BModule6Layer4InnerPixelWafer/pixel_test:BModule6Layer4InnerPixelActive"/>
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer4/pixel_test:Rod4/pixel_test:BModuleBox7Layer4/pixel_test:BModule7Layer4InnerPixel/pixel_test:BModule7Layer4InnerPixelWafer/pixel_test:BModule7Layer4InnerPixelActive"/>
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer4/pixel_test:Rod4/pixel_test:BModuleBox8Layer4/pixel_test:BModule8Layer4InnerPixel/pixel_test:BModule8Layer4InnerPixelWafer/pixel_test:BModule8Layer4InnerPixelActive"/>
+   <PartSelector path="//pixbar:Phase1PixelBarrel/pixel_test:Layer4/pixel_test:Rod4/pixel_test:BModuleBox9Layer4/pixel_test:BModule9Layer4InnerPixel/pixel_test:BModule9Layer4InnerPixelWafer/pixel_test:BModule9Layer4InnerPixelActive"/>
+   <Parameter name="TrackerRadLength" value="0.01470838359577194"/>
+   <Parameter name="TrackerXi" value="0.003103074959776811"/>
+  </SpecPar>
+  <SpecPar name="TrackerRecMaterialPhase2PixelEndcapDisk11Fw" eval="true">
+   <PartSelector path="//pixfwd:Phase2PixelEndcap/pixel_test:Disc11/pixel_test:Ring1Disc11/pixel_test:EModuleBox1Disc11/pixel_test:EModule1Disc11InnerPixel/pixel_test:EModule1Disc11InnerPixelWafer/pixel_test:EModule1Disc11InnerPixelActive"/>
+   <PartSelector path="//pixfwd:Phase2PixelEndcap/pixel_test:Disc11/pixel_test:Ring2Disc11/pixel_test:EModuleBox2Disc11/pixel_test:EModule2Disc11InnerPixel/pixel_test:EModule2Disc11InnerPixelWafer/pixel_test:EModule2Disc11InnerPixelActive"/>
+   <PartSelector path="//pixfwd:Phase2PixelEndcap/pixel_test:Disc11/pixel_test:Ring3Disc11/pixel_test:EModuleBox3Disc11/pixel_test:EModule3Disc11InnerPixel/pixel_test:EModule3Disc11InnerPixelWafer/pixel_test:EModule3Disc11InnerPixelActive"/>
+   <Parameter name="TrackerRadLength" value="0.01520066783795803"/>
+   <Parameter name="TrackerXi" value="0.002804920636758391"/>
+  </SpecPar>
+  <SpecPar name="TrackerRecMaterialPhase2PixelEndcapDisk12Fw" eval="true">
+   <PartSelector path="//pixfwd:Phase2PixelEndcap/pixel_test:Disc12/pixel_test:Ring1Disc12/pixel_test:EModuleBox1Disc12/pixel_test:EModule1Disc12InnerPixel/pixel_test:EModule1Disc12InnerPixelWafer/pixel_test:EModule1Disc12InnerPixelActive"/>
+   <PartSelector path="//pixfwd:Phase2PixelEndcap/pixel_test:Disc12/pixel_test:Ring2Disc12/pixel_test:EModuleBox2Disc12/pixel_test:EModule2Disc12InnerPixel/pixel_test:EModule2Disc12InnerPixelWafer/pixel_test:EModule2Disc12InnerPixelActive"/>
+   <PartSelector path="//pixfwd:Phase2PixelEndcap/pixel_test:Disc12/pixel_test:Ring3Disc12/pixel_test:EModuleBox3Disc12/pixel_test:EModule3Disc12InnerPixel/pixel_test:EModule3Disc12InnerPixelWafer/pixel_test:EModule3Disc12InnerPixelActive"/>
+   <Parameter name="TrackerRadLength" value="0.01520066783795803"/>
+   <Parameter name="TrackerXi" value="0.002804920636758391"/>
+  </SpecPar>
+  <SpecPar name="TrackerRecMaterialPhase2PixelEndcapDisk13Fw" eval="true">
+   <PartSelector path="//pixfwd:Phase2PixelEndcap/pixel_test:Disc13/pixel_test:Ring1Disc13/pixel_test:EModuleBox1Disc13/pixel_test:EModule1Disc13InnerPixel/pixel_test:EModule1Disc13InnerPixelWafer/pixel_test:EModule1Disc13InnerPixelActive"/>
+   <PartSelector path="//pixfwd:Phase2PixelEndcap/pixel_test:Disc13/pixel_test:Ring2Disc13/pixel_test:EModuleBox2Disc13/pixel_test:EModule2Disc13InnerPixel/pixel_test:EModule2Disc13InnerPixelWafer/pixel_test:EModule2Disc13InnerPixelActive"/>
+   <PartSelector path="//pixfwd:Phase2PixelEndcap/pixel_test:Disc13/pixel_test:Ring3Disc13/pixel_test:EModuleBox3Disc13/pixel_test:EModule3Disc13InnerPixel/pixel_test:EModule3Disc13InnerPixelWafer/pixel_test:EModule3Disc13InnerPixelActive"/>
+   <Parameter name="TrackerRadLength" value="0.01520066783795803"/>
+   <Parameter name="TrackerXi" value="0.002804920636758391"/>
+  </SpecPar>
+  <SpecPar name="TrackerRecMaterialPhase2PixelEndcapDisk14Fw" eval="true">
+   <PartSelector path="//pixfwd:Phase2PixelEndcap/pixel_test:Disc14/pixel_test:Ring1Disc14/pixel_test:EModuleBox1Disc14/pixel_test:EModule1Disc14InnerPixel/pixel_test:EModule1Disc14InnerPixelWafer/pixel_test:EModule1Disc14InnerPixelActive"/>
+   <PartSelector path="//pixfwd:Phase2PixelEndcap/pixel_test:Disc14/pixel_test:Ring2Disc14/pixel_test:EModuleBox2Disc14/pixel_test:EModule2Disc14InnerPixel/pixel_test:EModule2Disc14InnerPixelWafer/pixel_test:EModule2Disc14InnerPixelActive"/>
+   <PartSelector path="//pixfwd:Phase2PixelEndcap/pixel_test:Disc14/pixel_test:Ring3Disc14/pixel_test:EModuleBox3Disc14/pixel_test:EModule3Disc14InnerPixel/pixel_test:EModule3Disc14InnerPixelWafer/pixel_test:EModule3Disc14InnerPixelActive"/>
+   <Parameter name="TrackerRadLength" value="0.01520066783795803"/>
+   <Parameter name="TrackerXi" value="0.002804920636758391"/>
+  </SpecPar>
+  <SpecPar name="TrackerRecMaterialPhase2PixelEndcapDisk15Fw" eval="true">
+   <PartSelector path="//pixfwd:Phase2PixelEndcap/pixel_test:Disc15/pixel_test:Ring1Disc15/pixel_test:EModuleBox1Disc15/pixel_test:EModule1Disc15InnerPixel/pixel_test:EModule1Disc15InnerPixelWafer/pixel_test:EModule1Disc15InnerPixelActive"/>
+   <PartSelector path="//pixfwd:Phase2PixelEndcap/pixel_test:Disc15/pixel_test:Ring2Disc15/pixel_test:EModuleBox2Disc15/pixel_test:EModule2Disc15InnerPixel/pixel_test:EModule2Disc15InnerPixelWafer/pixel_test:EModule2Disc15InnerPixelActive"/>
+   <PartSelector path="//pixfwd:Phase2PixelEndcap/pixel_test:Disc15/pixel_test:Ring3Disc15/pixel_test:EModuleBox3Disc15/pixel_test:EModule3Disc15InnerPixel/pixel_test:EModule3Disc15InnerPixelWafer/pixel_test:EModule3Disc15InnerPixelActive"/>
+   <Parameter name="TrackerRadLength" value="0.01520066783795803"/>
+   <Parameter name="TrackerXi" value="0.002804920636758391"/>
+  </SpecPar>
+  <SpecPar name="TrackerRecMaterialPhase2PixelEndcapDisk16Fw" eval="true">
+   <PartSelector path="//pixfwd:Phase2PixelEndcap/pixel_test:Disc16/pixel_test:Ring1Disc16/pixel_test:EModuleBox1Disc16/pixel_test:EModule1Disc16InnerPixel/pixel_test:EModule1Disc16InnerPixelWafer/pixel_test:EModule1Disc16InnerPixelActive"/>
+   <PartSelector path="//pixfwd:Phase2PixelEndcap/pixel_test:Disc16/pixel_test:Ring2Disc16/pixel_test:EModuleBox2Disc16/pixel_test:EModule2Disc16InnerPixel/pixel_test:EModule2Disc16InnerPixelWafer/pixel_test:EModule2Disc16InnerPixelActive"/>
+   <PartSelector path="//pixfwd:Phase2PixelEndcap/pixel_test:Disc16/pixel_test:Ring3Disc16/pixel_test:EModuleBox3Disc16/pixel_test:EModule3Disc16InnerPixel/pixel_test:EModule3Disc16InnerPixelWafer/pixel_test:EModule3Disc16InnerPixelActive"/>
+   <Parameter name="TrackerRadLength" value="0.01520066783795803"/>
+   <Parameter name="TrackerXi" value="0.002804920636758391"/>
+  </SpecPar>
+  <SpecPar name="TrackerRecMaterialPhase2PixelEndcapDisk17Fw" eval="true">
+   <PartSelector path="//pixfwd:Phase2PixelEndcap/pixel_test:Disc17/pixel_test:Ring1Disc17/pixel_test:EModuleBox1Disc17/pixel_test:EModule1Disc17InnerPixel/pixel_test:EModule1Disc17InnerPixelWafer/pixel_test:EModule1Disc17InnerPixelActive"/>
+   <PartSelector path="//pixfwd:Phase2PixelEndcap/pixel_test:Disc17/pixel_test:Ring2Disc17/pixel_test:EModuleBox2Disc17/pixel_test:EModule2Disc17InnerPixel/pixel_test:EModule2Disc17InnerPixelWafer/pixel_test:EModule2Disc17InnerPixelActive"/>
+   <PartSelector path="//pixfwd:Phase2PixelEndcap/pixel_test:Disc17/pixel_test:Ring3Disc17/pixel_test:EModuleBox3Disc17/pixel_test:EModule3Disc17InnerPixel/pixel_test:EModule3Disc17InnerPixelWafer/pixel_test:EModule3Disc17InnerPixelActive"/>
+   <Parameter name="TrackerRadLength" value="0.01520066783795803"/>
+   <Parameter name="TrackerXi" value="0.002804920636758391"/>
+  </SpecPar>
+  <SpecPar name="TrackerRecMaterialPhase2PixelEndcapDisk18Fw" eval="true">
+   <PartSelector path="//pixfwd:Phase2PixelEndcap/pixel_test:Disc18/pixel_test:Ring1Disc18/pixel_test:EModuleBox1Disc18/pixel_test:EModule1Disc18InnerPixel/pixel_test:EModule1Disc18InnerPixelWafer/pixel_test:EModule1Disc18InnerPixelActive"/>
+   <PartSelector path="//pixfwd:Phase2PixelEndcap/pixel_test:Disc18/pixel_test:Ring2Disc18/pixel_test:EModuleBox2Disc18/pixel_test:EModule2Disc18InnerPixel/pixel_test:EModule2Disc18InnerPixelWafer/pixel_test:EModule2Disc18InnerPixelActive"/>
+   <Parameter name="TrackerRadLength" value="0.01520066783795803"/>
+   <Parameter name="TrackerXi" value="0.002804920636758391"/>
+  </SpecPar>
+  <SpecPar name="TrackerRecMaterialPhase2PixelEndcapDisk19Fw" eval="true">
+   <PartSelector path="//pixfwd:Phase2PixelEndcap/pixel_test:Disc19/pixel_test:Ring1Disc19/pixel_test:EModuleBox1Disc19/pixel_test:EModule1Disc19InnerPixel/pixel_test:EModule1Disc19InnerPixelWafer/pixel_test:EModule1Disc19InnerPixelActive"/>
+   <PartSelector path="//pixfwd:Phase2PixelEndcap/pixel_test:Disc19/pixel_test:Ring2Disc19/pixel_test:EModuleBox2Disc19/pixel_test:EModule2Disc19InnerPixel/pixel_test:EModule2Disc19InnerPixelWafer/pixel_test:EModule2Disc19InnerPixelActive"/>
+   <Parameter name="TrackerRadLength" value="0.01520066783795803"/>
+   <Parameter name="TrackerXi" value="0.002804920636758391"/>
+  </SpecPar>
+  <SpecPar name="TrackerRecMaterialPhase2PixelEndcapDisk20Fw" eval="true">
+   <PartSelector path="//pixfwd:Phase2PixelEndcap/pixel_test:Disc20/pixel_test:Ring1Disc20/pixel_test:EModuleBox1Disc20/pixel_test:EModule1Disc20InnerPixel/pixel_test:EModule1Disc20InnerPixelWafer/pixel_test:EModule1Disc20InnerPixelActive"/>
+   <Parameter name="TrackerRadLength" value="0.01362939412522091"/>
+   <Parameter name="TrackerXi" value="0.002741160808309499"/>
+  </SpecPar>
+ </SpecParSection>
+</DDDefinition>

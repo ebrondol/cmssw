@@ -1,0 +1,4 @@
+#ifndef DataFormats_Phase2ITPixelRecHitCollectionFWD_H
+#define DataFormats_Phase2ITPixelRecHitCollectionFWD_H
+class Phase2ITPixelRecHitCollection;
+#endif

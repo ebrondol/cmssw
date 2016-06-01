@@ -26,6 +26,8 @@
 #include "DataFormats/TrackerRecHit2D/interface/FastProjectedTrackerRecHit.h"
 #include "DataFormats/TrackerRecHit2D/interface/FastTrackerRecHitCollection.h"
 #include "DataFormats/TrackerRecHit2D/interface/Phase2TrackerRecHit1D.h"
+#include "DataFormats/TrackerRecHit2D/interface/Phase2ITPixelRecHitCollection.h"
+#include "DataFormats/TrackerRecHit2D/interface/Phase2ITPixelRecHit.h" 
 #include <vector>
 
 namespace DataFormats_TrackerRecHit2D {
@@ -134,6 +136,28 @@ namespace DataFormats_TrackerRecHit2D {
         edm::Wrapper< edmNew::DetSet< Phase2TrackerRecHit1D > > cl2;
         edm::Wrapper< std::vector< edmNew::DetSet< Phase2TrackerRecHit1D > > > cl3;
         edm::Wrapper< Phase2TrackerRecHit1DCollectionNew > cl4;
+
+    //
+    Phase2ITPixelRecHit b1_ph2cl;
+
+    edm::ClonePolicy<Phase2ITPixelRecHit> b2_ph2cl;
+
+    edm::OwnVector<Phase2ITPixelRecHit,
+      edm::ClonePolicy<Phase2ITPixelRecHit> > b3_ph2cl;
+    edm::OwnVector<Phase2ITPixelRecHit,
+      edm::ClonePolicy<Phase2ITPixelRecHit> >::const_iterator it3_ph2cl;
+
+
+    edm::Wrapper< edm::RangeMap<DetId,
+      edm::OwnVector<Phase2ITPixelRecHit,
+      edm::ClonePolicy<Phase2ITPixelRecHit> >, 
+      edm::ClonePolicy<Phase2ITPixelRecHit> > >  phase2ITPixelRecHitCollectionWrapper;
+    edm::RangeMap<DetId,
+      edm::OwnVector<Phase2ITPixelRecHit,
+      edm::ClonePolicy<Phase2ITPixelRecHit> >, 
+      edm::ClonePolicy<Phase2ITPixelRecHit> >::id_iterator itpix_ph2cl;
+
+    edm::Wrapper<edmNew::DetSetVector<Phase2ITPixelRecHit> > wdstvDummy3_ph2cl;
 
   };
 }

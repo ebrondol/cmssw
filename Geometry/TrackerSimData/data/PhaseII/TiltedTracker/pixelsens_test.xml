@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DDDefinition xmlns="http://www.cern.ch/cms/DDL" xmlns:xsi="http://www.cern.ch/www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.cern.ch/cms/DDL ../../../DetectorDescription/Schema/DDLSchema.xsd">
+ <SpecParSection label="spec-pars2.xml">
+  <SpecPar name="ROUHitsTrackerPhase1PixelBarrel">
+   <PartSelector path="//pixel_test:BModule1Layer1InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule2Layer1InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule3Layer1InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule4Layer1InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule5Layer1InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule6Layer1InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule7Layer1InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule8Layer1InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule9Layer1InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule1Layer2InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule2Layer2InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule3Layer2InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule4Layer2InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule5Layer2InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule6Layer2InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule7Layer2InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule8Layer2InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule9Layer2InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule1Layer3InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule2Layer3InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule3Layer3InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule4Layer3InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule5Layer3InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule6Layer3InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule7Layer3InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule8Layer3InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule9Layer3InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule1Layer4InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule2Layer4InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule3Layer4InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule4Layer4InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule5Layer4InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule6Layer4InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule7Layer4InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule8Layer4InnerPixelActive"/>
+   <PartSelector path="//pixel_test:BModule9Layer4InnerPixelActive"/>
+   <Parameter name="SensitiveDetector" value="TkAccumulatingSensitiveDetector"/>
+   <Parameter name="ReadOutName" value="TrackerHitsPixelBarrel"/>
+  </SpecPar>
+  <SpecPar name="ROUHitsTrackerPhase2PixelEndcap">
+   <PartSelector path="//pixel_test:EModule1Disc11InnerPixelActive"/>
+   <PartSelector path="//pixel_test:EModule2Disc11InnerPixelActive"/>
+   <PartSelector path="//pixel_test:EModule3Disc11InnerPixelActive"/>
+   <PartSelector path="//pixel_test:EModule1Disc12InnerPixelActive"/>
+   <PartSelector path="//pixel_test:EModule2Disc12InnerPixelActive"/>
+   <PartSelector path="//pixel_test:EModule3Disc12InnerPixelActive"/>
+   <PartSelector path="//pixel_test:EModule1Disc13InnerPixelActive"/>
+   <PartSelector path="//pixel_test:EModule2Disc13InnerPixelActive"/>
+   <PartSelector path="//pixel_test:EModule3Disc13InnerPixelActive"/>
+   <PartSelector path="//pixel_test:EModule1Disc14InnerPixelActive"/>
+   <PartSelector path="//pixel_test:EModule2Disc14InnerPixelActive"/>
+   <PartSelector path="//pixel_test:EModule3Disc14InnerPixelActive"/>
+   <PartSelector path="//pixel_test:EModule1Disc15InnerPixelActive"/>
+   <PartSelector path="//pixel_test:EModule2Disc15InnerPixelActive"/>
+   <PartSelector path="//pixel_test:EModule3Disc15InnerPixelActive"/>
+   <PartSelector path="//pixel_test:EModule1Disc16InnerPixelActive"/>
+   <PartSelector path="//pixel_test:EModule2Disc16InnerPixelActive"/>
+   <PartSelector path="//pixel_test:EModule3Disc16InnerPixelActive"/>
+   <PartSelector path="//pixel_test:EModule1Disc17InnerPixelActive"/>
+   <PartSelector path="//pixel_test:EModule2Disc17InnerPixelActive"/>
+   <PartSelector path="//pixel_test:EModule3Disc17InnerPixelActive"/>
+   <PartSelector path="//pixel_test:EModule1Disc18InnerPixelActive"/>
+   <PartSelector path="//pixel_test:EModule2Disc18InnerPixelActive"/>
+   <PartSelector path="//pixel_test:EModule1Disc19InnerPixelActive"/>
+   <PartSelector path="//pixel_test:EModule2Disc19InnerPixelActive"/>
+   <PartSelector path="//pixel_test:EModule1Disc20InnerPixelActive"/>
+   <Parameter name="SensitiveDetector" value="TkAccumulatingSensitiveDetector"/>
+   <Parameter name="ReadOutName" value="TrackerHitsPixelEndcap"/>
+  </SpecPar>
+ </SpecParSection>
+</DDDefinition>
