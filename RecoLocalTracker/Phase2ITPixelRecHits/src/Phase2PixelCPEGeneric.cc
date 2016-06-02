@@ -87,8 +87,8 @@ Phase2PixelCPEGeneric::localPosition(DetParam const & theDetParam, ClusterParam 
 
   //cout<<" main la width "<<chargeWidthX<<" "<<chargeWidthY<<endl;
 
-  float qclus = theClusterParam.theCluster->charge();     
-  float locBz = theDetParam.bz;
+  //float qclus = theClusterParam.theCluster->charge();     
+  //float locBz = theDetParam.bz;
   //cout << "Phase2PixelCPEGeneric::localPosition(...) : locBz = " << locBz << endl;
   
   theClusterParam.pixmx  = -999.9; // max pixel charge for truncation of 2-D cluster

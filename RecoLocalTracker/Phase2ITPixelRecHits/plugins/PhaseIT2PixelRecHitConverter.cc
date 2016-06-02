@@ -127,7 +127,7 @@ using namespace std;
 	std::tuple<LocalPoint, LocalError,SiPixelRecHitQuality::QualWordType> tuple = cpe_->getParameters( *clustIt, *genericDet );
 	LocalPoint lp( std::get<0>(tuple) );
 	LocalError le( std::get<1>(tuple) );
-        SiPixelRecHitQuality::QualWordType rqw( std::get<2>(tuple) );
+        //SiPixelRecHitQuality::QualWordType rqw( std::get<2>(tuple) );
 	// Create a persistent edm::Ref to the cluster
 	edm::Ref< edmNew::DetSetVector<Phase2ITPixelCluster>, Phase2ITPixelCluster > cluster = edmNew::makeRefTo( inputhandle, clustIt);
 	// Make a RecHit and add it to the DetSet
