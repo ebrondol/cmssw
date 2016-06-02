@@ -10,6 +10,7 @@ Phase2OTEndcapRing* Phase2OTEndcapRingBuilder::build(const GeometricDet* aPhase2
   vector<const GeometricDet*>  allGeometricDets = aPhase2OTEndcapRing->components();
   vector<const GeometricDet*>  compGeometricDets;
   LogDebug("TkDetLayers") << "Phase2OTEndcapRingBuilder with #Modules: " << allGeometricDets.size() << std::endl;
+  LogDebug("TkDetLayers") << "                        usePhase2Stacks: " << usePhase2Stacks << std::endl;
 
   vector<const GeomDet*> frontGeomDets;
   vector<const GeomDet*> backGeomDets;
@@ -84,10 +85,10 @@ Phase2OTEndcapRing* Phase2OTEndcapRingBuilder::build(const GeometricDet* aPhase2
       const GeomDet* theGeomDetBrother = theGeomDetGeometry->idToDet( compGeometricDets[1]->geographicalID() );
       LogTrace("TkDetLayers") << " inserisco " << compGeometricDets[1]->geographicalID().rawId() << std::endl;
   
-      if( fabs( compGeometricDets[1]->positionBounds().z() ) < fabs(meanZ))
+      if( fabs( compGeometricDets[1]->positionBounds().z() ) < fabs(meanZBrothers))
         frontGeomDetBrothers.push_back(theGeomDetBrother);
   
-      if( fabs( compGeometricDets[1]->positionBounds().z() ) > fabs(meanZ))
+      if( fabs( compGeometricDets[1]->positionBounds().z() ) > fabs(meanZBrothers))
         backGeomDetBrothers.push_back(theGeomDetBrother);
     }
   

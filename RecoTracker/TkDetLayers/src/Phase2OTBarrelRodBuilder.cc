@@ -11,6 +11,7 @@ Phase2OTBarrelRod* Phase2OTBarrelRodBuilder::build(const GeometricDet* thePhase2
   vector<const GeometricDet*> allGeometricDets = thePhase2OTBarrelRod->components();
 //  vector<const GeometricDet*> compGeometricDets;
   LogDebug("TkDetLayers") << "Phase2OTBarrelRodBuilder with #Modules: " << allGeometricDets.size() << std::endl;
+  LogDebug("TkDetLayers") << "                        usePhase2Stacks: " << usePhase2Stacks << std::endl;
 
   vector<const GeomDet*> innerGeomDets;
   vector<const GeomDet*> outerGeomDets;
