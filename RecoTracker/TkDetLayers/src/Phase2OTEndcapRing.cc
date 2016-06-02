@@ -73,7 +73,7 @@ Phase2OTEndcapRing::Phase2OTEndcapRing(vector<const GeomDet*>& innerDets,
 
   if(!theFrontDetBrothers.empty()){
     for(vector<const GeomDet*>::const_iterator it=theFrontDetBrothers.begin(); 
-        it!=theFrontDets.end(); it++){
+        it!=theFrontDetBrothers.end(); it++){
       LogDebug("TkDetLayers") << "frontDet brothers phi,z,r: " 
   			    << (*it)->surface().position().phi()  << " , "
   			    << (*it)->surface().position().z()    << " , "
@@ -91,7 +91,7 @@ Phase2OTEndcapRing::Phase2OTEndcapRing(vector<const GeomDet*>& innerDets,
 
   if(!theBackDetBrothers.empty()){
     for(vector<const GeomDet*>::const_iterator it=theBackDetBrothers.begin(); 
-        it!=theBackDets.end(); it++){
+        it!=theBackDetBrothers.end(); it++){
       LogDebug("TkDetLayers") << "backDet brothers phi,z,r: " 
   			    << (*it)->surface().position().phi() << " , "
   			    << (*it)->surface().position().z()   << " , "
