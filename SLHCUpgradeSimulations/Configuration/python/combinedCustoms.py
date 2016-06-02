@@ -6,8 +6,7 @@ from SLHCUpgradeSimulations.Configuration.HCalCustoms import customise_HcalPhase
 
 from SLHCUpgradeSimulations.Configuration.fixMissingUpgradeGTPayloads import fixRPCConditions
 
-#from SLHCUpgradeSimulations.Configuration.phase2TkTilted import customise as customiseTiltedTK
-from SLHCUpgradeSimulations.Configuration.phase2TkTilted_dev import customise as customiseTiltedTK
+from SLHCUpgradeSimulations.Configuration.phase2TkTilted import customise as customiseTiltedTK
 from SLHCUpgradeSimulations.Configuration.phase2TkFlat import customise as customiseFlatTK
 
 import SLHCUpgradeSimulations.Configuration.aging as aging

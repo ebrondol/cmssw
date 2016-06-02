@@ -29,6 +29,10 @@ def customise_Digi(process):
     process.digitisation_step.remove(process.mix.digitizers.pixel)
     process.load('SimTracker.SiPhase2Digitizer.phase2TrackerDigitizer_cfi')
     process.mix.digitizers.pixel=process.phase2TrackerDigitizer
+    process.mix.digitizers.pixel.PixelDigitizerAlgorithm.AddNoisyPixels = cms.bool(False) 
+    process.mix.digitizers.pixel.PixelDigitizerAlgorithm.AddThresholdSmearing = cms.bool(False)
+    process.mix.digitizers.pixel.PixelDigitizerAlgorithm.AddNoise = cms.bool(False)
+    process.mix.digitizers.pixel.PixelDigitizerAlgorithm.AddXTalk = cms.bool(False) 
     process.mix.digitizers.strip.ROUList = cms.vstring("g4SimHitsTrackerHitsPixelBarrelLowTof",
                          'g4SimHitsTrackerHitsPixelEndcapLowTof')
     #Check if mergedtruth is in the sequence first, could be taken out depending on cmsDriver options
@@ -43,11 +47,13 @@ def customise_Digi(process):
         process.mix.digitizers.mergedtruth.simHitCollections.tracker.remove( cms.InputTag("g4SimHits","TrackerHitsTIDHighTof"))
 
     # keep new digis
-    alist=['FEVTDEBUG','FEVTDEBUGHLT','FEVT']
+    #alist=['FEVTDEBUG','FEVTDEBUGHLT','FEVT']
+    alist=['FEVTDEBUG','FEVTDEBUGHLT','FEVT','RECOSIM']
     for a in alist:
         b=a+'output'
         if hasattr(process,b):
             getattr(process,b).outputCommands.append('keep Phase2TrackerDigiedmDetSetVector_*_*_*')
+            getattr(process,b).outputCommands.append('keep *_simSiPixelDigis_*_*')
     return process
 
 
@@ -64,12 +70,31 @@ def customise_Reco(process,pileup):
     # insert the new clusterizer
     process.load('SimTracker.SiPhase2Digitizer.phase2TrackerClusterizer_cfi')
     
-    # keep new clusters
-    alist=['RAWSIM','FEVTDEBUG','FEVTDEBUGHLT','GENRAW','RAWSIMHLT','FEVT']
+    # added to produce phase2 DataFormats
+    process.load("RecoLocalTracker.Phase2ITPixelClusterizer.Phase2ITPixelClusterizerPreSplitting_cfi")
+    process.phase2ITPixelClustersPreSplitting.src = cms.InputTag('simSiPixelDigis', "Pixel")
+    process.phase2ITPixelClustersPreSplitting.MissCalibrate = cms.untracked.bool(False)
+    process.load("RecoLocalTracker.Phase2ITPixelRecHits.Phase2ITPixelRecHits_cfi")
+    process.phase2ITPixelRecHitsPreSplitting.src = cms.InputTag("phase2ITPixelClustersPreSplitting")
+
+    # keep new clusters and rechits
+    alist=['RAWSIM','FEVTDEBUG','FEVTDEBUGHLT','GENRAW','RAWSIMHLT','FEVT','RECOSIM']
     for a in alist:
         b=a+'output'
         if hasattr(process,b):
             getattr(process,b).outputCommands.append('keep *_siPhase2Clusters_*_*')
+            getattr(process,b).outputCommands.append('keep *_phase2ITPixelClusters_*_*')
+            getattr(process,b).outputCommands.append('keep *_phase2ITPixelClustersPreSplitting_*_*')
+            getattr(process,b).outputCommands.append('keep *_phase2ITPixelRecHits_*_*')
+            getattr(process,b).outputCommands.append('keep *_phase2ITPixelRecHitsPreSplitting_*_*')
+            getattr(process,b).outputCommands.append('keep *_simSiPixelDigis_*_*')
+
+#    # keep new clusters
+#    alist=['RAWSIM','FEVTDEBUG','FEVTDEBUGHLT','GENRAW','RAWSIMHLT','FEVT']
+#    for a in alist:
+#        b=a+'output'
+#        if hasattr(process,b):
+#            getattr(process,b).outputCommands.append('keep *_siPhase2Clusters_*_*')
 
     #use with latest pixel geometry
     process.ClusterShapeHitFilterESProducer.PixelShapeFile = cms.string('RecoPixelVertexing/PixelLowPtUtilities/data/pixelShape_Phase1Tk.par')
@@ -237,10 +262,13 @@ def customise_Reco(process,pileup):
     # This snippet must be after the loading of recoFromSimDigis_cff    
     process.pixeltrackerlocalreco = cms.Sequence(
         process.siPhase2Clusters +
+        process.phase2ITPixelClustersPreSplitting +
+        process.phase2ITPixelRecHitsPreSplitting +
         process.siPixelClusters +
         process.siPixelRecHits
     )
-    process.clusterSummaryProducer.pixelClusters = "siPixelClusters"
+    #process.clusterSummaryProducer.pixelClusters = "siPixelClusters"
+    process.trackerlocalreco.remove(process.clusterSummaryProducer)
     process.globalreco_tracking.replace(process.MeasurementTrackerEventPreSplitting, process.MeasurementTrackerEvent)
     process.globalreco_tracking.replace(process.siPixelClusterShapeCachePreSplitting, process.siPixelClusterShapeCache)
 
@@ -278,6 +306,14 @@ def customise_Reco(process,pileup):
     process.templates.LoadTemplatesFromDB = cms.bool(False)
     # CPE for other steps
     process.siPixelRecHits.CPE = cms.string('PixelCPEGeneric')
+
+    # Phase2PixelCPEGeneric #
+    process.load("RecoLocalTracker.Phase2ITPixelRecHits.Phase2PixelCPEESProducers_cff")
+    process.Phase2PixelCPEGenericESProducer.useLAWidthFromDB = cms.bool(False)
+    process.Phase2PixelCPEGenericESProducer.DoCosmics = cms.bool(False)
+    # CPE for other steps
+    process.phase2ITPixelRecHits.CPE = cms.string('Phase2PixelCPEGeneric')
+
     # Turn of template use in tracking (iterative steps handled inside their configs)
     process.duplicateTrackCandidates.ttrhBuilderName = 'WithTrackAngle'
     process.mergedDuplicateTracks.TTRHBuilder = 'WithTrackAngle'
