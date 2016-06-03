@@ -33,7 +33,7 @@ class VectorHitBuilderEDProducer : public edm::EDProducer
   std::string offlinestubsTag;
   unsigned int maxOfflinestubs;
   std::string algoTag;
-  edm::InputTag clusterProducer;
+  edm::EDGetTokenT< edmNew::DetSetVector<Phase2TrackerCluster1D> > clusterProducer;
   bool readytobuild;
 
 };
