@@ -1,0 +1,15 @@
+03-Jun-2016 17:38:19 CEST  Initiating request to open file file:step2_tilted_newDigis.root
+03-Jun-2016 17:38:25 CEST  Successfully opened file file:step2_tilted_newDigis.root
+----- Begin Fatal Exception 03-Jun-2016 17:39:01 CEST-----------------------
+An exception of category 'GetByLabelWithoutRegistration' occurred while
+   [0] Processing run: 1 lumi: 1 event: 1
+   [1] Running path 'trackerlocalreco_step'
+   [2] Calling event method for module VectorHitBuilderEDProducer/'siPhase2VectorHits'
+Exception Message:
+::getByLabel without corresponding call to consumes or mayConsumes for this module.
+  type: edmNew::DetSetVector<Phase2TrackerCluster1D>
+  module label: siPhase2Clusters
+  product instance name: ''
+  process name: ''
+----- End Fatal Exception -------------------------------------------------
+03-Jun-2016 17:39:01 CEST  Closed file file:step2_tilted_newDigis.root
