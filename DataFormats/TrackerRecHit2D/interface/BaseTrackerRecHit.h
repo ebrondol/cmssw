@@ -16,7 +16,7 @@ class OmniClusterRef;
 namespace trackerHitRTTI {
   // tracking hit can be : single (si1D, si2D, pix), projected, matched or multi
   enum RTTI { undef=0, single=1, projStereo=2, projMono=3, match=4, multi=5,
-	      fastSingle=6, fastProjStereo=7,fastProjMono=8,fastMatch=9};
+	      fastSingle=6, fastProjStereo=7,fastProjMono=8,fastMatch=9, vector=10};
   inline RTTI rtti(TrackingRecHit const & hit)  { return RTTI(hit.getRTTI());}
   inline bool isUndef(TrackingRecHit const & hit) { return rtti(hit)==undef;}
   inline bool isSingle(TrackingRecHit const & hit)  { return rtti(hit)==single || rtti(hit)==fastSingle;}
@@ -27,6 +27,7 @@ namespace trackerHitRTTI {
   inline bool isMulti(TrackingRecHit const & hit)  { return rtti(hit)==multi;}
   inline bool isSingleType(TrackingRecHit const & hit)  { return (rtti(hit)>0) & (rtti(hit)<4) ;}
   inline bool isFast(TrackingRecHit const & hit)  { return (rtti(hit)>5) & (rtti(hit)<=9) ;}
+  inline bool isVector(TrackingRecHit const & hit)  { return rtti(hit)==vector;}
   inline unsigned int  projId(TrackingRecHit const & hit) { return hit.rawId()+int(rtti(hit))-1;}
 }
 
@@ -71,11 +72,11 @@ public:
   // verify that hits can share clusters...
   inline bool sameDetModule(TrackingRecHit const & hit) const;
 
-  bool hasPositionAndError() const  final; 
+  bool hasPositionAndError() const ; 
 
-  virtual LocalPoint localPosition() const  final { check(); return pos_;}
+  virtual LocalPoint localPosition() const  { check(); return pos_;}
 
-  virtual LocalError localPositionError() const  final { check(); return err_;}
+  virtual LocalError localPositionError() const  { check(); return err_;}
 
  
   const LocalPoint & localPositionFast()      const { check(); return pos_; }
@@ -89,6 +90,7 @@ public:
 
   void getKfComponents1D( KfComponentsHolder & holder ) const;
   void getKfComponents2D( KfComponentsHolder & holder ) const;
+  //void getKfComponents4D( KfComponentsHolder & holder ) const;
 
 
   // global coordinates
