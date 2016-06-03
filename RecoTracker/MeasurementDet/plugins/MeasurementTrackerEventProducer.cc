@@ -61,7 +61,7 @@ MeasurementTrackerEventProducer::produce(edm::Event &iEvent, const edm::EventSet
     updateStrips(iEvent, *stripData, stripClustersToSkip);
     updatePixels(iEvent, *pixelData, pixelClustersToSkip);
     updatePhase2OT(iEvent, *phase2OTData);
-    updateStacks(iEvent, *phase2OTData);
+    //updateStacks(iEvent, *phase2OTData);
 
     // put into MTE
     std::auto_ptr<MeasurementTrackerEvent> out(new MeasurementTrackerEvent(*measurementTracker, stripData.release(), pixelData.release(), phase2OTData.release(), stripClustersToSkip, pixelClustersToSkip));
