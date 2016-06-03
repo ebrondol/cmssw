@@ -7,9 +7,12 @@ VectorHitBuilderEDProducer::VectorHitBuilderEDProducer(edm::ParameterSet const& 
   : offlinestubsTag( conf.getParameter<std::string>( "offlinestubs" ) ),
     maxOfflinestubs(conf.getParameter<int>( "maxVectorHits" )),
     algoTag(conf.getParameter<std::string>( "Algorithm" )),
-    clusterProducer(conf.getParameter<edm::InputTag>("Clusters")),
+    //clusterProducer(conf.getParameter<edm::InputTag>("Clusters")),
     readytobuild(false)
 {
+
+  clusterProducer = consumes< edmNew::DetSetVector<Phase2TrackerCluster1D> >(edm::InputTag(conf.getParameter<std::string>("Clusters")));
+
   produces< edmNew::DetSetVector< Phase2TrackerCluster1D > >( "ClustersAccepted" );
   produces< edmNew::DetSetVector< Phase2TrackerCluster1D > >( "ClustersRejected" );
   produces< VectorHitCollectionNew >( offlinestubsTag + "Accepted" );
@@ -23,11 +26,11 @@ VectorHitBuilderEDProducer::~VectorHitBuilderEDProducer() {
 
 void VectorHitBuilderEDProducer::produce(edm::Event& event, const edm::EventSetup& es)
 {
-  //LogDebug("VectorHitBuilderEDProducer") << "VectorHitBuilderEDProducer::produce() begin";
+  LogDebug("VectorHitBuilderEDProducer") << "VectorHitBuilderEDProducer::produce() begin";
 
   // get input clusters data
   edm::Handle< edmNew::DetSetVector<Phase2TrackerCluster1D> >  clustersHandle;
-  event.getByLabel( clusterProducer, clustersHandle);
+  event.getByToken( clusterProducer, clustersHandle);
 
   // create the final output collection
   std::auto_ptr< edmNew::DetSetVector< Phase2TrackerCluster1D > > outputClustersAccepted( new edmNew::DetSetVector< Phase2TrackerCluster1D > );
