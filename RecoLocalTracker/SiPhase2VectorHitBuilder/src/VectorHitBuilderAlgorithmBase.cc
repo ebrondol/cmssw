@@ -37,7 +37,7 @@ void VectorHitBuilderAlgorithmBase::initialize(const edm::EventSetup& es)
   initTkGeom(geomHandle);
 
   edm::ESHandle< TrackerTopology > tTopoHandle;
-  es.get< IdealGeometryRecord >().get(tTopoHandle);
+  es.get< TrackerTopologyRcd >().get(tTopoHandle);
   initTkTopo(tTopoHandle);
 
   es.get< TkStripCPERecord >().get(cpeTag, parameterestimator);
