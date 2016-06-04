@@ -263,9 +263,9 @@ def customise_Reco(process,pileup):
     process.pixeltrackerlocalreco = cms.Sequence(
         process.siPhase2Clusters +
         process.phase2ITPixelClustersPreSplitting +
-        process.phase2ITPixelRecHitsPreSplitting +
-        process.siPixelClusters +
-        process.siPixelRecHits
+        process.phase2ITPixelRecHitsPreSplitting 
+    #    process.siPixelClusters +
+    #    process.siPixelRecHits
     )
     #process.clusterSummaryProducer.pixelClusters = "siPixelClusters"
     process.trackerlocalreco.remove(process.clusterSummaryProducer)
@@ -358,6 +358,7 @@ def customise_Reco(process,pileup):
 #    process=customise_PFlow.customise_extendedTrackerBarrel( process )
 
     process.MeasurementTrackerEvent.Phase2TrackerCluster1DProducer = cms.string('siPhase2Clusters')
+    process.MeasurementTrackerEvent.Phase2ITPixelClusterProducer = cms.string('phase2ITPixelClustersPreSplitting')
     process.MeasurementTrackerEvent.stripClusterProducer = cms.string('')
     # FIXME::process.electronSeedsSeq broken
     process.ckftracks.remove(process.electronSeedsSeq)
@@ -366,4 +367,5 @@ def customise_Reco(process,pileup):
 
 def customise_condOverRides(process):
     process.load('SLHCUpgradeSimulations.Geometry.fakeConditions_phase2TkTilted_cff')
+    process.siPixelFakeLorentzAngleESSource.file = cms.FileInPath('SLHCUpgradeSimulations/Geometry/data/PhaseII/Tilted/PixelSkimmedGeometry_GeometryExtended2023Tilted.txt')
     return process
