@@ -94,6 +94,9 @@ class VectorHitsBuilderValidation : public edm::EDAnalyzer {
         edm::EDGetTokenT< edmNew::DetSetVector<Phase2TrackerCluster1D> > srcClu_;
         edm::EDGetTokenT< VectorHitCollectionNew > srcVH_;
         edm::EDGetTokenT< edm::DetSetVector<PixelDigiSimLink> > siphase2OTSimLinksToken_;
+        edm::EDGetTokenT< edm::PSimHitContainer > simHitsToken_;
+        edm::EDGetTokenT< edm::SimTrackContainer> simTracksToken_;
+        edm::EDGetTokenT< edm::SimVertexContainer > simVerticesToken_;
         //SiPixelVectorHitBuilderAlgorithmBase *algo;
         const TrackerGeometry* tkGeom;
         const TrackerTopology* tkTopo;

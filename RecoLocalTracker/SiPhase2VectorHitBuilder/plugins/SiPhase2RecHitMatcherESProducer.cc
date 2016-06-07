@@ -24,7 +24,7 @@ produce(const TkPhase2OTCPERecord & iRecord)
     edm::ESHandle<TrackerTopology> tTopoHandle;
   
     iRecord.getRecord<TrackerDigiGeometryRecord>().get(tGeomHandle);
-    iRecord.getRecord<IdealMagneticFieldRecord>().get(tTopoHandle);
+    iRecord.getRecord<TrackerTopologyRcd>().get(tTopoHandle);
 
     matcher_->algo()->initTkGeom(tGeomHandle);
     matcher_->algo()->initTkTopo(tTopoHandle);
