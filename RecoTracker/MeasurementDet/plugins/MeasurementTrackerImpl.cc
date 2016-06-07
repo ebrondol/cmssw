@@ -80,6 +80,7 @@ MeasurementTrackerImpl::MeasurementTrackerImpl(const edm::ParameterSet&         
 				       const PixelClusterParameterEstimator* pixelCPE,
 				       const StripClusterParameterEstimator* stripCPE,
 				       const SiStripRecHitMatcher*  hitMatcher,
+				       const VectorHitBuilderEDProducer*  ph2hitMatcher,
 				       const TrackerTopology*  trackerTopology,
 				       const TrackerGeometry*  trackerGeom,
 				       const GeometricSearchTracker* geometricSearchTracker,
@@ -96,7 +97,7 @@ MeasurementTrackerImpl::MeasurementTrackerImpl(const edm::ParameterSet&         
   name_(conf.getParameter<std::string>("ComponentName")),
   theStDetConditions(hitMatcher,stripCPE),
   thePxDetConditions(pixelCPE),
-  thePhase2DetConditions(phase2OTCPE)
+  thePhase2DetConditions(ph2hitMatcher, phase2OTCPE)
 {
   this->initialize(trackerTopology);
   this->initializeStripStatus(stripQuality, stripQualityFlags, stripQualityDebugFlags);
