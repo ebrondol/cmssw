@@ -14,7 +14,7 @@
 #include "boost/mpl/vector.hpp"
 
 class  TkPhase2OTCPERecord: public edm::eventsetup::DependentRecordImplementation<TkPhase2OTCPERecord,
-  boost::mpl::vector<TrackerDigiGeometryRecord,IdealMagneticFieldRecord,SiPixelLorentzAngleRcd,SiPixelGenErrorDBObjectRcd,SiPixelTemplateDBObjectESProducerRcd> > {};
+  boost::mpl::vector<TrackerDigiGeometryRecord,TrackerTopologyRcd,IdealMagneticFieldRecord,SiPixelLorentzAngleRcd,SiPixelGenErrorDBObjectRcd,SiPixelTemplateDBObjectESProducerRcd> > {};
 
 #endif 
 
