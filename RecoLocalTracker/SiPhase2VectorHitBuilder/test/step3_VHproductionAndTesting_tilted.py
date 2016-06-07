@@ -79,7 +79,7 @@ process.MessageLogger = cms.Service("MessageLogger",
 # Analyzer
 process.analysis = cms.EDAnalyzer('VectorHitsBuilderValidation',
     src = cms.string("siPhase2Clusters"),
-    src2 = cms.string("siPixelVectorHits", "vectorHitsAccepted"),
+    src2 = cms.InputTag("siPhase2VectorHits", "vectorHitsAccepted"),
     links = cms.InputTag("simSiPixelDigis", "Tracker")
 )
 process.TFileService = cms.Service('TFileService',
@@ -100,6 +100,7 @@ process.RECOSIMoutput_step = cms.EndPath(process.RECOSIMoutput)
 
 # Schedule definition
 process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.trackerlocalreco_step,process.RECOSIMoutput_step, process.analysis_step)
+#process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.trackerlocalreco_step,process.RECOSIMoutput_step)
 #process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.reconstruction_step,process.prevalidation_step,process.validation_step,process.dqmoffline_step,process.FEVTDEBUGHLToutput_step,process.DQMoutput_step)
 
 # customisation of the process.
