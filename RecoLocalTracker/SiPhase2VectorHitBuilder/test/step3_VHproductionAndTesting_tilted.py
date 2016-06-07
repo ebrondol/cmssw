@@ -66,25 +66,25 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
 process.MessageLogger = cms.Service("MessageLogger",
                                     destinations = cms.untracked.vstring("debugVH_tilted"),
                                     debugModules = cms.untracked.vstring("*"),
-                                    categories = cms.untracked.vstring("SiPixelVectorHitBuilder","VectorHitBuilderAlgorithm","VectorHitsBuilderValidation"),
+                                    categories = cms.untracked.vstring("VectorHitBuilderEDProducer","VectorHitBuilderAlgorithm","VectorHitsBuilderValidation"),
                                     debugVH_tilted = cms.untracked.PSet(threshold = cms.untracked.string("DEBUG"),
                                                                        DEBUG = cms.untracked.PSet(limit = cms.untracked.int32(0)),
                                                                        default = cms.untracked.PSet(limit = cms.untracked.int32(0)),
-                                                                       SiPixelVectorHitBuilder = cms.untracked.PSet(limit = cms.untracked.int32(-1)),
+                                                                       VectorHitBuilderEDProducer = cms.untracked.PSet(limit = cms.untracked.int32(-1)),
                                                                        VectorHitBuilderAlgorithm = cms.untracked.PSet(limit = cms.untracked.int32(-1)),
                                                                        VectorHitsBuilderValidation = cms.untracked.PSet(limit = cms.untracked.int32(-1))
                                                                        )
                                     )
 
 # Analyzer
-#process.analysis = cms.EDAnalyzer('VectorHitsBuilderValidation',
-#    src = cms.InputTag("siPhase2Clusters"),
-#    src2 = cms.InputTag("siPixelVectorHits", "vectorHitsAccepted"),
-#    links = cms.InputTag("simSiPixelDigis", "Tracker")
-#)
-#process.TFileService = cms.Service('TFileService',
-#    fileName = cms.string('file:vh_validation_tilted.root')
-#)
+process.analysis = cms.EDAnalyzer('VectorHitsBuilderValidation',
+    src = cms.string("siPhase2Clusters"),
+    src2 = cms.string("siPixelVectorHits", "vectorHitsAccepted"),
+    links = cms.InputTag("simSiPixelDigis", "Tracker")
+)
+process.TFileService = cms.Service('TFileService',
+    fileName = cms.string('file:vh_validation_tilted.root')
+)
 
 
 # Other statements
@@ -95,11 +95,11 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 process.raw2digi_step = cms.Path(process.RawToDigi)
 process.L1Reco_step = cms.Path(process.L1Reco)
 process.trackerlocalreco_step  = cms.Path(process.trackerlocalreco+process.siPhase2VectorHits)
-#process.analysis_step = cms.Path(process.analysis)
+process.analysis_step = cms.Path(process.analysis)
 process.RECOSIMoutput_step = cms.EndPath(process.RECOSIMoutput)
 
 # Schedule definition
-process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.trackerlocalreco_step,process.RECOSIMoutput_step)
+process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.trackerlocalreco_step,process.RECOSIMoutput_step, process.analysis_step)
 #process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.reconstruction_step,process.prevalidation_step,process.validation_step,process.dqmoffline_step,process.FEVTDEBUGHLToutput_step,process.DQMoutput_step)
 
 # customisation of the process.
