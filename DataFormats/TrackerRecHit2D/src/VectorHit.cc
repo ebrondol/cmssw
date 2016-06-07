@@ -2,7 +2,7 @@
 //#include "FWCore/Utilities/interface/Exception.h"
 
 VectorHit::VectorHit(const VectorHit& vh):
-  BaseTrackerRecHit(vh.geographicalId(), trackerHitRTTI::vector),
+  BaseTrackerRecHit(*vh.det(), trackerHitRTTI::vector),
   thePosition(vh.localPosition()),
   theDirection(vh.localDirection()),
   theCovMatrix(vh.parametersError()),
@@ -12,13 +12,13 @@ VectorHit::VectorHit(const VectorHit& vh):
   theUpperCluster(vh.upperClusterRef())
 {}
 
-VectorHit::VectorHit(DetId id,
+VectorHit::VectorHit(const GeomDet& idet,
                      const LocalPoint& posLower,
                      const LocalVector& dir,
                      const AlgebraicSymMatrix& covMatrix,
 		     const double& Chi2,
                      OmniClusterRef const& lower, OmniClusterRef const& upper) :
-  BaseTrackerRecHit(id, trackerHitRTTI::vector),
+  BaseTrackerRecHit(idet, trackerHitRTTI::vector),
   thePosition(posLower),
   theDirection(dir),
   theCovMatrix(covMatrix),
@@ -28,9 +28,9 @@ VectorHit::VectorHit(DetId id,
   theUpperCluster(upper)
 {}
 
-VectorHit::VectorHit(DetId id, const VectorHit2D& vh2Dzx, const VectorHit2D& vh2Dzy,
+VectorHit::VectorHit(const GeomDet& idet, const VectorHit2D& vh2Dzx, const VectorHit2D& vh2Dzy,
                      OmniClusterRef const& lower, OmniClusterRef const& upper) :
-  BaseTrackerRecHit(id, trackerHitRTTI::vector),
+  BaseTrackerRecHit(idet, trackerHitRTTI::vector),
   theDimension(4),
   theLowerCluster(lower),
   theUpperCluster(upper)

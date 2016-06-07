@@ -33,16 +33,19 @@ class VectorHit GCC11_FINAL : public BaseTrackerRecHit {
 
   VectorHit(const VectorHit& vh) ;
 
-  VectorHit(DetId id, const LocalPoint& posInner, const LocalVector& dir,
+  VectorHit(const GeomDet& idet, const LocalPoint& posInner, const LocalVector& dir,
             const AlgebraicSymMatrix& covMatrix, const double& Chi2,
             OmniClusterRef const& lower, OmniClusterRef const& upper) ;
 
-  VectorHit(DetId id, const VectorHit2D& vh2Dzx, const VectorHit2D& vh2Dzy,
+  VectorHit(const GeomDet& idet, const VectorHit2D& vh2Dzx, const VectorHit2D& vh2Dzy,
             OmniClusterRef const& lower, OmniClusterRef const& upper) ;
 
   ~VectorHit() ;
 
   virtual VectorHit* clone() const override { return new VectorHit(*this);}
+#ifndef __GCCXML__
+  virtual RecHitPointer cloneSH() const override { return std::make_shared<VectorHit>(*this);}
+#endif
 
   virtual bool sharesInput( const TrackingRecHit* other, SharedInputType what) const override;
   bool sharesClusters(VectorHit const & h1, VectorHit const & h2,
@@ -85,8 +88,11 @@ class VectorHit GCC11_FINAL : public BaseTrackerRecHit {
   ClusterRef upperCluster() const { return theUpperCluster.cluster_phase2OT(); }
   OmniClusterRef const lowerClusterRef() const { return theLowerCluster; }
   OmniClusterRef const upperClusterRef() const { return theUpperCluster; }
+  virtual bool isPhase2() const override { return true; }
 
+  //FIXME: I have always two clusters in a VH
   virtual OmniClusterRef const & firstClusterRef() const GCC11_FINAL { return theLowerCluster;}
+  ClusterRef cluster()  const { return theLowerCluster.cluster_phase2OT(); }
 
   //ERICA:change name! This method returns the delta (not the direction) in global coordinates
   Global3DVector globalDirection( const Surface& surf );
