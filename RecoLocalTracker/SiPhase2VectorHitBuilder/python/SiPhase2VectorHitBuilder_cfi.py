@@ -1,8 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 siPhase2VectorHits = cms.EDProducer("VectorHitBuilderEDProducer",
-#    Clusters = cms.InputTag('siPixelClusters'),
-     Clusters = cms.InputTag('siPhase2Clusters'),
+     Clusters = cms.string('siPhase2Clusters'),
      offlinestubs = cms.string('vectorHits'),
      maxVectorHits = cms.int32(999999999),
      maxVectorHitsinaStack = cms.int32(999),
