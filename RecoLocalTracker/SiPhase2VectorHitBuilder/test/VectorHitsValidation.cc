@@ -7,8 +7,11 @@ VectorHitsBuilderValidation::VectorHitsBuilderValidation(const edm::ParameterSet
 //    srcVH_(conf.getParameter< edm::InputTag >("src2")),
 //    links_(conf.getParameiter< edm::InputTag >("links")) { 
   srcClu_ = consumes< edmNew::DetSetVector<Phase2TrackerCluster1D> >(edm::InputTag(conf.getParameter<std::string>("src")));
-  srcVH_ = consumes< VectorHitCollectionNew >(edm::InputTag(conf.getParameter<std::string>("src2")));
+  srcVH_ = consumes< VectorHitCollectionNew >(edm::InputTag(conf.getParameter<edm::InputTag>("src2")));
   siphase2OTSimLinksToken_ = consumes<edm::DetSetVector<PixelDigiSimLink> >(conf.getParameter<edm::InputTag>("links"));
+  simHitsToken_ = consumes< edm::PSimHitContainer >(edm::InputTag("g4SimHits", "TrackerHitsPixelBarrelLowTof"));
+  simTracksToken_ = consumes< edm::SimTrackContainer >(edm::InputTag("g4SimHits"));
+  simVerticesToken_ = consumes< edm::SimVertexContainer >(edm::InputTag("g4SimHits")); 
 }
 
 VectorHitsBuilderValidation::~VectorHitsBuilderValidation() { 
@@ -87,25 +90,25 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
   event.getByToken(siphase2OTSimLinksToken_, siphase2SimLinks);
 
   // Get the SimHits
-  edm::Handle< edm::PSimHitContainer > simHitsRawBarrel;
-  event.getByLabel("g4SimHits", "TrackerHitsPixelBarrelLowTof", simHitsRawBarrel);
-  edm::Handle< edm::PSimHitContainer > simHitsRawEndcap;
-  event.getByLabel("g4SimHits", "TrackerHitsPixelEndcapLowTof", simHitsRawEndcap);
+  edm::Handle< edm::PSimHitContainer > simHitsRaw;
+  event.getByToken(simHitsToken_, simHitsRaw);
+//  edm::Handle< edm::PSimHitContainer > simHitsRawEndcap;
+//  event.getByLabel("g4SimHits", "TrackerHitsPixelEndcapLowTof", simHitsRawEndcap);
 
   // Get the SimTracks
   edm::Handle< edm::SimTrackContainer > simTracksRaw;
-  event.getByLabel("g4SimHits", simTracksRaw);
+  event.getByToken(simTracksToken_, simTracksRaw);
 
   // Get the SimVertex
   edm::Handle< edm::SimVertexContainer > simVertices;
-  event.getByLabel("g4SimHits", simVertices);
+  event.getByToken(simVerticesToken_, simVertices);
 
   // Get the geometry
   edm::ESHandle< TrackerGeometry > geomHandle;
   eventSetup.get< TrackerDigiGeometryRecord >().get(geomHandle);
   tkGeom = &(*geomHandle);
   edm::ESHandle< TrackerTopology > tTopoHandle;
-  eventSetup.get< IdealGeometryRecord >().get(tTopoHandle);
+  eventSetup.get< TrackerTopologyRcd >().get(tTopoHandle);
   tkTopo = tTopoHandle.product();
 
   //set up for tree
@@ -139,15 +142,15 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
   for (edm::SimTrackContainer::const_iterator simTrackIt(simTracksRaw->begin()); simTrackIt != simTracksRaw->end(); ++simTrackIt) simTracks.insert(std::pair< unsigned int, SimTrack >(simTrackIt->trackId(), *simTrackIt));
 
   // Collect barrel and endcap SimHits in one vector
-  edm::PSimHitContainer simHitsRaw;
-  simHitsRaw.reserve( simHitsRawBarrel->size() + simHitsRawEndcap->size() ); // preallocate memory
-  simHitsRaw.insert( simHitsRaw.end(), simHitsRawBarrel->begin(), simHitsRawBarrel->end() );
-  simHitsRaw.insert( simHitsRaw.end(), simHitsRawEndcap->begin(), simHitsRawEndcap->end() );
+//  edm::PSimHitContainer simHitsRaw;
+//  simHitsRaw.reserve( simHitsRawBarrel->size() + simHitsRawEndcap->size() ); // preallocate memory
+//  simHitsRaw.insert( simHitsRaw.end(), simHitsRawBarrel->begin(), simHitsRawBarrel->end() );
+//  simHitsRaw.insert( simHitsRaw.end(), simHitsRawEndcap->begin(), simHitsRawEndcap->end() );
 
   // Rearrange the simHits by detUnit for ease of use
   SimHitsMap simHitsDetUnit;
   SimHitsMap simHitsTrackId;
-  for (edm::PSimHitContainer::const_iterator simHitIt(simHitsRaw.begin()); simHitIt != simHitsRaw.end(); ++simHitIt) {
+  for (edm::PSimHitContainer::const_iterator simHitIt(simHitsRaw->begin()); simHitIt != simHitsRaw->end(); ++simHitIt) {
     SimHitsMap::iterator simHitsDetUnitIt(simHitsDetUnit.find(simHitIt->detUnitId()));
     if (simHitsDetUnitIt == simHitsDetUnit.end()) {
         std::pair< SimHitsMap::iterator, bool > newIt(simHitsDetUnit.insert(std::pair< unsigned int, std::vector< PSimHit > >(simHitIt->detUnitId(), std::vector< PSimHit >())));
@@ -181,6 +184,7 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
     layer = getLayerNumber(detId);
 
     LogDebug("VectorHitsBuilderValidation") << "Layer: " << layer << "  det id" << rawid << std::endl;
+
 
     // Get the geometry of the tracker
     const GeomDet* geomDet(tkGeom->idToDet(detId));
@@ -307,7 +311,7 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
            unsigned int otherSimHits(0);
 
 
-           for (edm::PSimHitContainer::const_iterator hitIt(simHitsRaw.begin()); hitIt != simHitsRaw.end(); ++hitIt) {
+           for (edm::PSimHitContainer::const_iterator hitIt(simHitsRaw->begin()); hitIt != simHitsRaw->end(); ++hitIt) {
 
              if(hitIt->detUnitId() == geomDetLower->geographicalId()){// || hitIt->detUnitId() == geomDetUpper->geographicalId()){
 
