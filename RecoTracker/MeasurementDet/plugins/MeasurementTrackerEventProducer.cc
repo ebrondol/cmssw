@@ -229,6 +229,7 @@ MeasurementTrackerEventProducer::updateStrips( const edm::Event& event, StMeasur
 void 
 MeasurementTrackerEventProducer::updatePhase2OT( const edm::Event& event, Phase2OTMeasurementDetSet & thePh2OTDets ) const {
 
+  thePh2OTDets.setEmpty();
 
   // Phase2OT Clusters
   if ( isPhase2 ) {
