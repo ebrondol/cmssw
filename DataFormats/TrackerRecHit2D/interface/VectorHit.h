@@ -85,6 +85,7 @@ class VectorHit GCC11_FINAL : public BaseTrackerRecHit {
   ClusterRef upperCluster() const { return theUpperCluster.cluster_phase2OT(); }
   OmniClusterRef const lowerClusterRef() const { return theLowerCluster; }
   OmniClusterRef const upperClusterRef() const { return theUpperCluster; }
+  virtual bool isPhase2() const override { return true; }
 
   virtual OmniClusterRef const & firstClusterRef() const GCC11_FINAL { return theLowerCluster;}
 
