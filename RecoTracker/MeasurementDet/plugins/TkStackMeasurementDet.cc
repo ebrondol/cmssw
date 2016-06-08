@@ -77,11 +77,8 @@ bool TkStackMeasurementDet::measurements( const TrajectoryStateOnSurface& stateO
 
   if (result.size()>oldSize) return true;
 
-/*
   // create a TrajectoryMeasurement with an invalid RecHit and zero estimate
-  bool inac = hasBadComponents(stateOnThisDet, data);
-  result.add(inac ? theInactiveHit : theMissingHit, 0.F);
-  return inac;
-*/
-  return true;
+  result.add(theMissingHit, 0.F);
+  LogDebug("MeasurementTracker")<< "adding missing hit";
+  return false;
 }
