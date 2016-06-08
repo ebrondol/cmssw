@@ -33,14 +33,10 @@ TkStackMeasurementDet::recHits( const TrajectoryStateOnSurface& ts, const Measur
   LogTrace("MeasurementTracker")<<" is not empty";
   if (isActive(data) == false) return result;
   LogTrace("MeasurementTracker")<<" and is active";
-  //const Phase2TrackerCluster1D* begin=0;
-  //if (0 != data.phase2OTData().handle()->data().size()) {
-  //   begin = &(data.phase2OTData().handle()->data().front());
-  //}
+
   const detset & lowerDetSet = data.phase2OTData().detSet(lowerDet()->index());
   const detset & upperDetSet = data.phase2OTData().detSet(upperDet()->index());
   LogTrace("MeasurementTracker")<<" DetSets set with sizes:" << lowerDetSet.size() << " and " << upperDetSet.size() << "!";
-  //FIXME :: size of lower, upper or the bigger one? 
   result.reserve(lowerDetSet.size()>upperDetSet.size() ? lowerDetSet.size() : upperDetSet.size());
 
   VectorHitBuilderAlgorithmBase * algo = theMatcher->algo() ;
@@ -71,19 +67,18 @@ bool TkStackMeasurementDet::measurements( const TrajectoryStateOnSurface& stateO
 
   auto oldSize = result.size();
   MeasurementDet::RecHitContainer && allHits = recHits(stateOnThisDet, data);
-/*
+
   for (auto && hit : allHits) {
     std::pair<bool,double> diffEst = est.estimate( stateOnThisDet, *hit);
+    LogDebug("MeasurementTracker")<< "New vh added with chi2: " << diffEst.second ;
     if ( diffEst.first)
       result.add(std::move(hit), diffEst.second);
   }
-*/
+
   if (result.size()>oldSize) return true;
-/*
+
   // create a TrajectoryMeasurement with an invalid RecHit and zero estimate
-  bool inac = hasBadComponents(stateOnThisDet, data);
-  result.add(inac ? theInactiveHit : theMissingHit, 0.F);
-  return inac;
-*/
-  return true;
+  result.add(theMissingHit, 0.F);
+  LogDebug("MeasurementTracker")<< "adding missing hit";
+  return false;
 }
