@@ -33,11 +33,11 @@ class VectorHit GCC11_FINAL : public BaseTrackerRecHit {
 
   VectorHit(const VectorHit& vh) ;
 
-  VectorHit(DetId id, const LocalPoint& posInner, const LocalVector& dir,
+  VectorHit(const GeomDet& idet, const LocalPoint& posInner, const LocalVector& dir,
             const AlgebraicSymMatrix& covMatrix, const double& Chi2,
             OmniClusterRef const& lower, OmniClusterRef const& upper) ;
 
-  VectorHit(DetId id, const VectorHit2D& vh2Dzx, const VectorHit2D& vh2Dzy,
+  VectorHit(const GeomDet& idet, const VectorHit2D& vh2Dzx, const VectorHit2D& vh2Dzy,
             OmniClusterRef const& lower, OmniClusterRef const& upper) ;
 
   ~VectorHit() ;
