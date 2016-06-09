@@ -43,6 +43,9 @@ class VectorHit GCC11_FINAL : public BaseTrackerRecHit {
   ~VectorHit() ;
 
   virtual VectorHit* clone() const override { return new VectorHit(*this);}
+#ifndef __GCCXML__
+  virtual RecHitPointer cloneSH() const override { return std::make_shared<VectorHit>(*this);}
+#endif
 
   virtual bool sharesInput( const TrackingRecHit* other, SharedInputType what) const override;
   bool sharesClusters(VectorHit const & h1, VectorHit const & h2,

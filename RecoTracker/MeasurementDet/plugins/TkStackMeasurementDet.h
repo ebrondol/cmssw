@@ -38,7 +38,7 @@ class TkStackMeasurementDet GCC11_FINAL : public MeasurementDet {
 
   /// return TRUE if both lower and upper components are active
   bool isActive(const MeasurementTrackerEvent & data) const {return lowerDet()->isActive(data) && upperDet()->isActive(data); }
-  bool isEmpty(const Phase2OTMeasurementDetSet & data) const {return data.empty(lowerDet()->index()) && data.empty(upperDet()->index());}
+  bool isEmpty(const Phase2OTMeasurementDetSet & data) const {return data.empty(lowerDet()->index()) || data.empty(upperDet()->index());}
 
   /// return TRUE if at least one of the lower and upper components has badChannels
   bool hasBadComponents( const TrajectoryStateOnSurface &tsos, const MeasurementTrackerEvent & data ) const {
