@@ -21,6 +21,8 @@ def customise(process):
         process=customise_Reco(process,float(n))
     if hasattr(process,'digitisation_step'):
         process=customise_Digi(process)
+    if hasattr(process,'validation_step'):
+        process=customise_Validation(process,float(n))
     process=customise_condOverRides(process)
 
     return process
@@ -323,11 +325,35 @@ def customise_Reco(process,pileup):
 
     process.MeasurementTrackerEvent.Phase2TrackerCluster1DProducer = cms.string('siPhase2Clusters')
     process.MeasurementTrackerEvent.stripClusterProducer = cms.string('')
+    # phase2CPE and matcher
+    process.load('RecoLocalTracker.SiPhase2VectorHitBuilder.SiPhase2RecHitMatcher_cfi')
+    process.MeasurementTracker.Phase2HitMatcher = cms.string('SiPhase2VectorHitMatcher')
     # FIXME::process.electronSeedsSeq broken
     process.ckftracks.remove(process.electronSeedsSeq)
+
+    # using stacks in phase2 tracking  
+    process.TrackerRecoGeometryESProducer.usePhase2Stacks = True
  
     return process
 
 def customise_condOverRides(process):
     process.load('SLHCUpgradeSimulations.Geometry.fakeConditions_phase2TkTilted_cff')
+    return process
+
+
+def customise_Validation(process,pileup):
+
+    process.pixelDigisValid.src = cms.InputTag('simSiPixelDigis', "Pixel")
+    if hasattr(process,'tpClusterProducer'):
+        process.tpClusterProducer.pixelSimLinkSrc = cms.InputTag("simSiPixelDigis", "Pixel")
+        process.tpClusterProducer.phase2OTSimLinkSrc  = cms.InputTag("simSiPixelDigis","Tracker")
+
+    if hasattr(process,'simHitTPAssocProducer'):
+        process.simHitTPAssocProducer.simHitSrc=cms.VInputTag(cms.InputTag("g4SimHits","TrackerHitsPixelBarrelLowTof"),
+                                                              cms.InputTag("g4SimHits","TrackerHitsPixelEndcapLowTof"))
+
+    if hasattr(process,'trackingParticleNumberOfLayersProducer'):
+        process.trackingParticleNumberOfLayersProducer.simHits=cms.VInputTag(cms.InputTag("g4SimHits","TrackerHitsPixelBarrelLowTof"),
+                                                               cms.InputTag("g4SimHits","TrackerHitsPixelEndcapLowTof"))
+
     return process
