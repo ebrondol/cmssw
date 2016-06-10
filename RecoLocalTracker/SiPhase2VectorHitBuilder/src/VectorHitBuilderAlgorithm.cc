@@ -159,7 +159,7 @@ VectorHit VectorHitBuilderAlgorithm::buildVectorHit(const StackGeomDet * stack,
   //LogTrace("VectorHitBuilderAlgorithm") << "\t upper global pos " << globalPosCluOut;
   //LogTrace("VectorHitBuilderAlgorithm") << "\t upper local pos " << localPosCluOut;
 
-  //LogTrace("VectorHitBuilderAlgorithm") << "\t lower local pos " << localPosCluInn << " with error: " << localErrCluInn;
+  LogTrace("VectorHitBuilderAlgorithm") << "\t lower local pos " << localPosCluInn << " with error: " << localErrCluInn;
   LogTrace("VectorHitBuilderAlgorithm") << "\t upper local pos in the lower sof " << localPosCluOutINN << " with error: " << localErrCluOutINN;
 
   bool ok = checkClustersCompatibility(localPosCluInn, localPosCluOutINN, localErrCluInn, localErrCluOutINN);
@@ -193,7 +193,7 @@ VectorHit VectorHitBuilderAlgorithm::buildVectorHit(const StackGeomDet * stack,
     OmniClusterRef lowerOmni(lower); 
     OmniClusterRef upperOmni(upper); 
     VectorHit vh = VectorHit(*stack, vh2Dzx, vh2Dzy, lowerOmni, upperOmni);
-    //vh.setDet(*stack);
+    vh.curvature();
     return vh;
 
   }
