@@ -90,7 +90,9 @@ class VectorHit GCC11_FINAL : public BaseTrackerRecHit {
   OmniClusterRef const upperClusterRef() const { return theUpperCluster; }
   virtual bool isPhase2() const override { return true; }
 
+  //FIXME: I have always two clusters in a VH
   virtual OmniClusterRef const & firstClusterRef() const GCC11_FINAL { return theLowerCluster;}
+  ClusterRef cluster()  const { return theLowerCluster.cluster_phase2OT(); }
 
   //ERICA:change name! This method returns the delta (not the direction) in global coordinates
   Global3DVector globalDirection( const Surface& surf );
