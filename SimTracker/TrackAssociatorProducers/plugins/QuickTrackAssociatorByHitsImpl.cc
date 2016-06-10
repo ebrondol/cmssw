@@ -10,6 +10,7 @@
 #include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit2D.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit1D.h"
 #include "DataFormats/TrackerRecHit2D/interface/Phase2TrackerRecHit1D.h"
+#include "DataFormats/TrackerRecHit2D/interface/VectorHit.h"
 #include "DataFormats/SiStripDetId/interface/SiStripDetId.h"
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
@@ -423,6 +424,13 @@ template<typename iter> std::vector<OmniClusterRef> QuickTrackAssociatorByHitsIm
           if (!ph2Hit->cluster().isNonnull() )
 	    edm::LogError("TrackAssociator") << ">>> RecHit does not have an associated cluster!" << " file: " << __FILE__ << " line: " << __LINE__;
 	  returnValue.push_back(ph2Hit->omniClusterRef());
+        }
+	else if (tid == typeid(VectorHit)) {
+	  const VectorHit* vHit = dynamic_cast<const VectorHit*>(rhit);
+          if (!vHit->cluster().isNonnull() )
+	    edm::LogError("TrackAssociator") << ">>> RecHit does not have an associated cluster!" << " file: " << __FILE__ << " line: " << __LINE__;
+	  returnValue.push_back(vHit->lowerClusterRef());
+	  returnValue.push_back(vHit->upperClusterRef());
         }
 	else {
 	  auto const & thit = static_cast<BaseTrackerRecHit const&>(*rhit);
