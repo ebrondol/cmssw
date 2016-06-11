@@ -63,27 +63,18 @@ class VectorHit GCC11_FINAL : public BaseTrackerRecHit {
   virtual AlgebraicVector parameters() const override;
   virtual void getKfComponents( KfComponentsHolder & holder ) const override { getKfComponents4D(holder); }
   void getKfComponents4D( KfComponentsHolder & holder ) const ;
-/*
-  friend class DTSegmentUpdator;
-  VectorHit() : theProjection(none), theDimension(0) {}
 
-  /// Construct from phi and Z projections
-  VectorHit(const DTChamberRecSegment2D& phiSeg, const DTSLRecSegment2D& zedSeg, const LocalPoint& posZInCh, const LocalVector& dirZInCh);
-
-  /// Construct from phi projection
-  VectorHit(const DTChamberRecSegment2D& phiSeg);
-
-  /// Construct from Z projection
-  VectorHit(const DTSLRecSegment2D& zedSeg, const LocalPoint& posZInCh, const LocalVector& dirZInCh);
-
-
-*/
   // returning methods
   LocalPoint localPosition() const GCC11_FINAL { return thePosition; }
   virtual LocalVector localDirection() const { return theDirection; }
   AlgebraicSymMatrix parametersError() const override ;
+  LocalError localPositionError() const GCC11_FINAL ;
+  virtual LocalError localDirectionError() const ;
+
   virtual double chi2() const { return theChi2; }
   virtual int dimension() const override { return theDimension; }
+  double curvatureORphi(std::string curvORphi = "curvature") const ;
+
   ClusterRef lowerCluster() const { return theLowerCluster.cluster_phase2OT(); }
   ClusterRef upperCluster() const { return theUpperCluster.cluster_phase2OT(); }
   OmniClusterRef const lowerClusterRef() const { return theLowerCluster; }
@@ -100,19 +91,11 @@ class VectorHit GCC11_FINAL : public BaseTrackerRecHit {
   /// The projection matrix relates the trajectory state parameters to the segment parameters().
   virtual AlgebraicMatrix projectionMatrix() const override;
 
-  /// Local position error in Chamber frame
-  LocalError localPositionError() const GCC11_FINAL ;
-
-  /// Local direction error in the Chamber frame
-  virtual LocalError localDirectionError() const ;
-
   // Degrees of freedom of the segment fit
   virtual int degreesOfFreedom() const { return 0; } //number of hits (2+2) - dimension
 
   // Access to component RecHits (if any)
   virtual std::vector<const TrackingRecHit*> recHits() const override;
-
-  // Non-const access to component RecHits (if any)
   virtual std::vector<TrackingRecHit*> recHits() override ;
 
   // setting methods
@@ -120,41 +103,10 @@ class VectorHit GCC11_FINAL : public BaseTrackerRecHit {
   void setDirection(LocalVector dir) { theDirection = dir; }
   void setCovMatrix(AlgebraicSymMatrix mat) { theCovMatrix = mat; }
 
-/*
-
-  //--- Extension of the interface
-
-
-  /// Does it have the Phi projection?
-  bool hasPhi() const {return (theProjection==full || theProjection==phi);}
-
-  /// Does it have the Z projection?
-  bool hasZed() const {return (theProjection==full || theProjection==Z);}
-
-  /// The superPhi segment: 0 if no phi projection available
-  const DTChamberRecSegment2D *phiSegment() const {
-    return hasPhi()? &thePhiSeg: 0;
-  }
-
-  /// The Z segment: 0 if not zed projection available
-  const DTSLRecSegment2D *zSegment() const {
-    return hasZed()? &theZedSeg : 0;
-  }
-
-  /// The (specific) DetId of the chamber on which the segment resides
-  virtual DTChamberId chamberId() const;
-*/
  private:
-/*
-  /// Which projections are actually there
-  enum Projection {full, phi, Z, none};
-  Projection theProjection;
-*/
 
   LocalPoint thePosition;
   LocalVector theDirection;
-
-//  void setCovMatrixForZed(const LocalPoint& posZInCh);
 
   // the covariance matrix, has the following meaning
   // mat[0][0]=sigma (dx/dz)
@@ -185,4 +137,4 @@ std::ostream& operator<<(std::ostream& os, const VectorHit& vh);
 typedef edm::DetSetVector<VectorHit> VectorHitCollection;
 typedef edmNew::DetSetVector<VectorHit> VectorHitCollectionNew;
 
-#endif // TrackingRecHit_VectorHit_h
+#endif
