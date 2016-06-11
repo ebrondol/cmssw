@@ -1,5 +1,6 @@
 #include "DataFormats/TrackerRecHit2D/interface/VectorHit.h"
-//#include "FWCore/Utilities/interface/Exception.h"
+#include "Geometry/TrackerGeometryBuilder/interface/StackGeomDet.h"
+#include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
 
 VectorHit::VectorHit(const VectorHit& vh):
   BaseTrackerRecHit(*vh.det(), trackerHitRTTI::vector),
@@ -51,8 +52,6 @@ VectorHit::VectorHit(const GeomDet& idet, const VectorHit2D& vh2Dzx, const Vecto
   theCovMatrix[3][3] = covMatZY[1][1];   // sigma (y)
   theCovMatrix[0][2] = covMatZX[0][1];   // cov(dx/dz,x)
   theCovMatrix[1][3] = covMatZY[0][1];   // cov(dy/dz,y)
-
-//  theCovMatrix = 1.6*theCovMatrix;
 
   theChi2 = vh2Dzx.chi2() + vh2Dzy.chi2();
 }
@@ -111,73 +110,7 @@ void VectorHit::getKfComponents4D( KfComponentsHolder & holder ) const {
 
 }
 
-/*
-VectorHit::VectorHit(const DTChamberRecSegment2D& phiSeg,
-			       const DTSLRecSegment2D& zedSeg,
-			       const LocalPoint& posZInCh,
-			       const LocalVector& dirZInCh):
-  RecSegment(phiSeg.chamberId()),
-  theProjection(full),
-  thePhiSeg(phiSeg),
-  theZedSeg(zedSeg),
-  theDimension(4)
-{
-
-  // Check consistency of 2 sub-segments
-  if(DTChamberId(phiSeg.geographicalId().rawId()) != DTChamberId(zedSeg.geographicalId().rawId()))
-    throw cms::Exception("VectorHit")
-      <<"the z Segment and the phi segment have different chamber id"<<std::endl;
-
-  // The position of 2D segments are defined in the SL frame: I must first
-  // extrapolate that position at the Chamber reference plane
-  LocalPoint posZAt0 = posZInCh +
-    dirZInCh * (-posZInCh.z())/cos(dirZInCh.theta());
-
-
-  thePosition=LocalPoint(phiSeg.localPosition().x(),posZAt0.y(),0.);
-  LocalVector dirPhiInCh=phiSeg.localDirection();
-
-  // given the actual definition of chamber refFrame, (with z poiniting to IP),
-  // the zed component of direction is negative.
-  theDirection=LocalVector(dirPhiInCh.x()/fabs(dirPhiInCh.z()),
-                           dirZInCh.y()/fabs(dirZInCh.z()),
-                           -1.);
-  theDirection=theDirection.unit();
-
-  // set cov matrix
-  theCovMatrix=AlgebraicSymMatrix(4);
-  theCovMatrix[0][0]=phiSeg.covMatrix()[0][0]; //sigma (dx/dz)
-  theCovMatrix[0][2]=phiSeg.covMatrix()[0][1]; //cov(dx/dz,x)
-  theCovMatrix[2][2]=phiSeg.covMatrix()[1][1]; //sigma (x)
-//  setCovMatrixForZed(posZInCh);
-
-}
-
-
-VectorHit::VectorHit(const DTSLRecSegment2D& zedSeg,
-			       const LocalPoint& posZInCh,
-			       const LocalVector& dirZInCh) :
-  RecSegment(zedSeg.superLayerId().chamberId()),
-  theProjection(Z),
-  thePhiSeg(DTChamberRecSegment2D()),
-  theZedSeg(zedSeg),
-  theDimension(2)
-{
-
-  LocalPoint posZAt0=posZInCh+
-    dirZInCh*(-posZInCh.z()/cos(dirZInCh.theta()));
-
-  thePosition=posZAt0;
-  theDirection = dirZInCh;
-
-  // set cov matrix
-  theCovMatrix=AlgebraicSymMatrix(4);
-  setCovMatrixForZed(posZInCh);
-}
-*/
-
 VectorHit::~VectorHit() {}
-
 
 AlgebraicVector VectorHit::parameters() const {
 
@@ -196,6 +129,106 @@ Global3DVector VectorHit::globalDirection( const Surface& surf ) {
   Local3DVector theLocalDelta = LocalVector(theDirection.x()*theDirection.z(), theDirection.y()*theDirection.z(), theDirection.z());
   Global3DVector g = surf.toGlobal(theLocalDelta);
   return g;
+}
+
+double VectorHit::curvatureORphi(std::string curvORphi) const {
+
+std::cout << "VectorHit::curvature" << std::endl;
+  double curvature = 0.0;
+  double phi = 0.0;
+
+  const StackGeomDet* stackDet = dynamic_cast< const StackGeomDet* >(det());
+  const PixelGeomDetUnit* lowerDet = dynamic_cast< const PixelGeomDetUnit* >(stackDet->lowerDet());
+  const PixelGeomDetUnit* upperDet = dynamic_cast< const PixelGeomDetUnit* >(stackDet->upperDet());
+
+  MeasurementPoint mpLower(lowerCluster()->center(), lowerCluster()->column() + 0.5);
+  Local3DPoint lPositionLower  = lowerDet->topology().localPosition(mpLower);
+  Global3DPoint gPositionLower = lowerDet->surface().toGlobal(lPositionLower);
+std::cout << "gPositionLower: " << gPositionLower << std::endl;
+
+  MeasurementPoint mpUpper(upperCluster()->center(), upperCluster()->column() + 0.5);
+  Local3DPoint lPositionUpper  = upperDet->topology().localPosition(mpUpper);
+  Global3DPoint gPositionUpper = upperDet->surface().toGlobal(lPositionUpper);
+std::cout << "gPositionUpper: " << gPositionUpper << std::endl;
+
+  double h1 = gPositionLower.x()*gPositionUpper.y() - gPositionUpper.x()*gPositionLower.y();
+  if(h1!=0) {
+    double h2 = 2*h1;
+    double r12 = pow(gPositionLower.x(),2) + pow(gPositionLower.y(),2);
+    double r22 = pow(gPositionUpper.x(),2) + pow(gPositionUpper.y(),2);
+    double h3 = r12 + r22 - 2*gPositionLower.x()*gPositionUpper.x() - 2*gPositionLower.y()*gPositionUpper.y();
+    double h4 = - pow(gPositionLower.x(),2)*gPositionUpper.x() + gPositionLower.x()*pow(gPositionUpper.x(),2) 
+                + gPositionLower.x()*pow(gPositionUpper.y(),2) - gPositionUpper.x()*pow(gPositionLower.y(),2);
+    double h5 = pow(gPositionLower.x(),2)*gPositionUpper.y() - pow(gPositionUpper.x(),2)*gPositionLower.y()
+              + pow(gPositionLower.y(),2)*gPositionUpper.y() - gPositionLower.y()*pow(gPositionUpper.y(),2);
+
+    //radius of circle
+    double rho = sqrt(r12*r22*h3)/(2*h1);
+    curvature = 1./rho;
+std::cout << "curvature:" << curvature << std::endl;
+
+    //center of circle
+    double xcentre = h5/h2;
+    double ycentre = h4/h2;
+    double dx1 = gPositionLower.x() - xcentre;
+    double dy1 = gPositionLower.y() - ycentre;
+
+    //tangent vector at (x1/y1)
+    double xtg = dy1;
+    double ytg = -(dx1);
+    phi = atan2(ytg,xtg);
+std::cout << "phi:" << phi << std::endl;
+
+    AlgebraicROOTObject<4,4>::Matrix jacobian;
+    for(int i = 0; i < 4; i++){
+      for(int j = 0; j < 4; j++){
+        jacobian[i][j] = 0.0;
+      }
+    }
+
+    jacobian[0][0] = 1.0;    // dx1/dx1 dx1/dy1 dx2/dx1 dy2/dx1
+    jacobian[1][1] = 1.0;    //dy1/dx1 dy1/dy1 dy2/dx1 dy2/dx1
+    jacobian[2][0] = (h1*(2*gPositionLower.x()*r22*h3 + (2*gPositionLower.x() - 2*gPositionUpper.x())*r12*r22))/(pow(r12*r22*h3,3/2)) 
+                  - (2*gPositionUpper.y())/sqrt(r12*r22*h3); // dkappa/dx1
+    jacobian[2][1] = (2*gPositionUpper.x())/sqrt(r12*r22*h3) + (h1*(2*gPositionLower.y()*r22*h3 + r12*r22*(2*gPositionLower.y() 
+                  - 2*gPositionUpper.y())))/pow(r12*r22*h3,3/2); // dkappa/dy1
+    jacobian[2][2] = (2*gPositionLower.y())/sqrt(r12*r22*h3) + (h1*(2*gPositionUpper.x()*r12*h3 
+                  - 2*(gPositionLower.x() - gPositionUpper.x())*r12*r22))/pow(r12*r22*h3,3/2); // dkappa/dx2
+    jacobian[2][3] = (h1*(2*gPositionUpper.y()*r12*h3 - r12*r22*2*(gPositionLower.y() - gPositionUpper.y())))/pow(r12*r22*h3,3/2)
+                  - (2*gPositionLower.x())/sqrt(r12*r22*h3); // dkappa/dy2
+
+    AlgebraicVector2 M;
+    M[0] = (gPositionLower.y() - ycentre)/(pow(gPositionLower.x() - xcentre,2) + pow(gPositionLower.y() - ycentre,2)); // dphi/dxcentre
+    M[1] =-(gPositionLower.x() - xcentre)/(pow(gPositionLower.x() - xcentre,2) + pow(gPositionLower.y() - ycentre,2)); // dphi/dycentre
+std::cout << "M:" << M << std::endl;
+
+    AlgebraicROOTObject<2,4>::Matrix K;
+    K[0][0]=(2*gPositionLower.x()*gPositionUpper.y())/h2 - (2*gPositionUpper.y()*h5)/pow(h2,2); // dxm/dx1
+    K[0][1]=(2*gPositionUpper.x()*h5)/pow(h2,2) - (pow(gPositionUpper.x(),2) + pow(gPositionUpper.y(),2) - 2*gPositionLower.y()*gPositionUpper.y())/h2; // dxm/dy1
+    K[0][2]=(2*gPositionLower.y()*h5)/pow(h2,2) - (2*gPositionUpper.x()*gPositionLower.y())/h2; // dxm/dx2
+    K[0][3]=(pow(gPositionLower.x(),2) + pow(gPositionLower.y(),2) - 2*gPositionUpper.y()*gPositionLower.y())/h2 - (2*gPositionLower.x()*h5)/pow(h2,2); // dxm/dy2
+    K[1][0]=(pow(gPositionUpper.x(),2) - 2*gPositionLower.x()*gPositionUpper.x() + pow(gPositionUpper.y(),2))/h2 - (2*gPositionUpper.y()*h4)/pow(h2,2); // dym/dx1
+    K[1][1]=(2*gPositionUpper.x()*h4)/pow(h2,2) - (2*gPositionUpper.x()*gPositionLower.y())/h2; // dym/dy1
+    K[1][2]=(2*gPositionLower.y()*h4)/pow(h2,2) - (pow(gPositionLower.x(),2) - 2*gPositionUpper.x()*gPositionLower.x() + pow(gPositionLower.y(),2))/h2; // dym/dx2
+    K[1][3]=(2*gPositionLower.x()*gPositionUpper.y())/h2 - (2*gPositionLower.x()*h4)/pow(h2,2); // dym/dy2
+std::cout << "K:" << K << std::endl;
+
+    AlgebraicVector4 N = M*K;
+    jacobian[3][0] = N[0]; // dphi/(dx1,dy1,dx2,dy2)
+    jacobian[3][1] = N[1]; // dphi/(dx1,dy1,dx2,dy2)
+    jacobian[3][2] = N[2]; // dphi/(dx1,dy1,dx2,dy2)
+    jacobian[3][3] = N[3]; // dphi/(dx1,dy1,dx2,dy2)
+std::cout << "jacobian:" << jacobian << std::endl;
+
+  } else {
+std::cout << " straight line!" << std::endl;
+    return 0;
+  }
+  
+  if( curvORphi == "curvature" ) return curvature;
+  else if( curvORphi == "phi"  ) return phi;
+  else return 0.0;
+
 }
 
 AlgebraicMatrix VectorHit::projectionMatrix() const {
@@ -257,42 +290,10 @@ AlgebraicSymMatrix VectorHit::parametersError() const {
   return result;
 }
 
-/*
-void VectorHit::setCovMatrixForZed(const LocalPoint& posZInCh){
-  // Warning!!! the covariance matrix for Theta SL segment is defined in the SL
-  // reference frame, here that in the Chamber ref frame must be used.
-  // For direction, no problem, but the position is extrapolated, so we must
-  // propagate the error properly.
-
-  // many thanks to Paolo Ronchese for the help in deriving the formulas!
-
-  // y=m*z+q in SL frame
-  // y=m'*z+q' in CH frame
-
-  // var(m') = var(m)
-  theCovMatrix[1][1] = theZedSeg.parametersError()[0][0]; //sigma (dy/dz)
-
-  // cov(m',q') = DeltaZ*Var(m) + Cov(m,q)
-  theCovMatrix[1][3] =
-    posZInCh.z()*theZedSeg.parametersError()[0][0]+
-    theZedSeg.parametersError()[0][1]; //cov(dy/dz,y)
-
-  // Var(q') = DeltaZ^2*Var(m) + Var(q) + 2*DeltaZ*Cov(m,q)
-  // cout << "Var(q') = DeltaZ^2*Var(m) + Var(q) + 2*DeltaZ*Cov(m,q)" << endl;
-  // cout << "Var(q')= " << posZInCh.z()*posZInCh.z() << "*" <<
-  //   theZedSeg.parametersError()[0][0] << " + " <<
-  //   theZedSeg.parametersError()[1][1] << " + " <<
-  //   2*posZInCh.z() << "*" << theZedSeg.parametersError()[0][1] ;
-  theCovMatrix[3][3] =
-    2.*(posZInCh.z()*posZInCh.z())*theZedSeg.parametersError()[0][0] +
-    theZedSeg.parametersError()[1][1] +
-    2.*posZInCh.z()*theZedSeg.parametersError()[0][1];
-  // cout << " = " << theCovMatrix[3][3] << endl;
-}
-*/
 std::ostream& operator<<(std::ostream& os, const VectorHit& vh) {
 
-  os << " Pos: " << vh.localPosition() << "\n" <<
+  os << " DetId: " << vh.geographicalId() << "\n" <<
+        " Pos: " << vh.localPosition() << "\n" <<
         " Dir: " << vh.localDirection() << "\n" <<
         " Cov: " << vh.parametersError() << "\n" <<
         " Dim: " << vh.dimension() << "\n" <<
@@ -305,10 +306,6 @@ std::ostream& operator<<(std::ostream& os, const VectorHit& vh) {
 /// Access to component RecHits (if any)
 std::vector<const TrackingRecHit*> VectorHit::recHits() const{
   std::vector<const TrackingRecHit*> pointersOfRecHits;
-/*
-  if (hasPhi()) pointersOfRecHits.push_back(phiSegment());
-  if (hasZed()) pointersOfRecHits.push_back(zSegment());
-*/
   return pointersOfRecHits;
 }
 
@@ -317,16 +314,6 @@ std::vector<const TrackingRecHit*> VectorHit::recHits() const{
 std::vector<TrackingRecHit*> VectorHit::recHits(){
 
   std::vector<TrackingRecHit*> pointersOfRecHits;
-/*
-  if (hasPhi()) pointersOfRecHits.push_back(phiSegment());
-  if (hasZed()) pointersOfRecHits.push_back(zSegment());
-*/
   return pointersOfRecHits;
 }
 
-/*
-DTChamberId VectorHit::chamberId() const {
-  return DTChamberId(geographicalId());
-}
-
-*/

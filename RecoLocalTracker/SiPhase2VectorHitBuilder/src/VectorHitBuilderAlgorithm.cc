@@ -136,33 +136,42 @@ VectorHit VectorHitBuilderAlgorithm::buildVectorHit(const StackGeomDet * stack,
 
   //FIXME::you should put the correct error when the StripCPE is ready
   //FIXME StripClusterParameterEstimator::LocalValues parameters = parameterestimator->localParameters(*lowerClus_iter,*theLowerGeomDetUnit);
-  const PixelGeomDetUnit* theGeomDet1 = dynamic_cast< const PixelGeomDetUnit* >(theLowerGeomDetUnit);
-  const PixelGeomDetUnit* theGeomDet2 = dynamic_cast< const PixelGeomDetUnit* >(theUpperGeomDetUnit);
+  const PixelGeomDetUnit* geomDetLower = dynamic_cast< const PixelGeomDetUnit* >(theLowerGeomDetUnit);
+  const PixelGeomDetUnit* geomDetUpper = dynamic_cast< const PixelGeomDetUnit* >(theUpperGeomDetUnit);
 
-  MeasurementPoint mpCluInn(lower->center(), lower->column() + 0.5);
-  Local3DPoint localPosCluInn = theGeomDet1->topology().localPosition(mpCluInn);
-  MeasurementError meCluInn(1./12,0.0,1./12);
-  LocalError localErrCluInn  = theGeomDet1->topology().localError(mpCluInn,meCluInn);
+  const PixelTopology * topoLower = &geomDetLower->specificTopology();
+  const PixelTopology * topoUpper = &geomDetUpper->specificTopology();
 
-  //FIXME::you should put the correct error when the StripCPE is ready
-  //FIXME StripClusterParameterEstimator::LocalValues parameters =  parameterestimator->localParameters(*clustIt,geomDetUnit);
-  MeasurementPoint mpCluOut(upper->center(), upper->column() + 0.5);
-  Local3DPoint localPosCluOut = theGeomDet2->topology().localPosition(mpCluOut);
-  Global3DPoint globalPosCluOut = theGeomDet2->surface().toGlobal(localPosCluOut);
-  Local3DPoint localPosCluOutINN = theGeomDet1->surface().toLocal(globalPosCluOut);
-  MeasurementError meCluOut(1./12,0.0,1./12);
-  LocalError localErrCluOutINN = theGeomDet2->topology().localError(mpCluOut,meCluOut);
+  float pitchXlower = topoLower->pitch().first;
+  float pitchYlower = topoLower->pitch().second;
+  float ixLower = lower->center();
+  float iyLower = lower->column()+0.5; // halfway the column
+
+  LocalPoint lpLower( topoLower->localX(ixLower), topoLower->localY(iyLower), 0 );          // x, y, z
+  LocalError leLower( pow(pitchXlower, 2) / 12, 0, pow(pitchYlower, 2) / 12);               // e2_xx, e2_xy, e2_yy
+
+  float pitchXupper = topoUpper->pitch().first;
+  float pitchYupper = topoUpper->pitch().second;
+  float ixUpper = upper->center();
+  float iyUpper = upper->column()+0.5; // halfway the column
+
+  LocalPoint lpUpper( topoUpper->localX(ixUpper), topoUpper->localY(iyUpper), 0 );          // x, y, z
+  LocalError leUpper( pow(pitchXupper, 2) / 12, 0, pow(pitchYupper, 2) / 12);               // e2_xx, e2_xy, e2_yy
+
+  //moving the upper into the lower s.o.r.
+  Global3DPoint gpUpper = geomDetUpper->surface().toGlobal(lpUpper);
+  Local3DPoint lpUpperInLower = geomDetLower->surface().toLocal(gpUpper);
+
+  Global3DPoint gPositionLower = geomDetLower->surface().toGlobal(lpLower);
+  Global3DPoint gPositionUpper = geomDetUpper->surface().toGlobal(lpUpper);
+
+  LogTrace("VectorHitBuilderAlgorithm") << "A:\t lower local pos " << lpLower << " with error: " << leLower << std::endl;
+  std::cout << "\t lower global pos " << gPositionLower << std::endl;
+  std::cout << "\t upper global pos " << gPositionUpper << std::endl;
+  LogTrace("VectorHitBuilderAlgorithm") << "A:\t upper local pos in the lower sof " << lpUpperInLower << " with error: " << leUpper << std::endl;
 
 
-  //debug
-  //Global3DPoint globalPosCluInn = theGeomDet1->surface().toGlobal(localPosCluInn);
-  //LogTrace("VectorHitBuilderAlgorithm") << "\t upper global pos " << globalPosCluOut;
-  //LogTrace("VectorHitBuilderAlgorithm") << "\t upper local pos " << localPosCluOut;
-
-  //LogTrace("VectorHitBuilderAlgorithm") << "\t lower local pos " << localPosCluInn << " with error: " << localErrCluInn;
-  LogTrace("VectorHitBuilderAlgorithm") << "\t upper local pos in the lower sof " << localPosCluOutINN << " with error: " << localErrCluOutINN;
-
-  bool ok = checkClustersCompatibility(localPosCluInn, localPosCluOutINN, localErrCluInn, localErrCluOutINN);
+  bool ok = checkClustersCompatibility(lpLower, lpUpper, leLower, leUpper);
 
   if(ok){
 
@@ -174,7 +183,7 @@ VectorHit VectorHitBuilderAlgorithm::buildVectorHit(const StackGeomDet * stack,
     double chi22Dzx = 0.0;
     Local3DPoint pos2Dzx;
     Local3DVector dir2Dzx;
-    fit2Dzx(localPosCluInn, localPosCluOutINN, localErrCluInn,localErrCluOutINN, pos2Dzx, dir2Dzx, covMat2Dzx, chi22Dzx);
+    fit2Dzx(lpLower, lpUpperInLower, leLower,leUpper, pos2Dzx, dir2Dzx, covMat2Dzx, chi22Dzx);
     LogTrace("VectorHitBuilderAlgorithm") << "\t  pos2Dzx: " << pos2Dzx;
     LogTrace("VectorHitBuilderAlgorithm") << "\t  dir2Dzx: " << dir2Dzx;
     LogTrace("VectorHitBuilderAlgorithm") << "\t  cov2Dzx: " << covMat2Dzx;
@@ -184,7 +193,7 @@ VectorHit VectorHitBuilderAlgorithm::buildVectorHit(const StackGeomDet * stack,
     double chi22Dzy = 0.0;
     Local3DPoint pos2Dzy;
     Local3DVector dir2Dzy;
-    fit2Dzy(localPosCluInn, localPosCluOutINN, localErrCluInn,localErrCluOutINN, pos2Dzy, dir2Dzy, covMat2Dzy, chi22Dzy);
+    fit2Dzy(lpLower, lpUpperInLower, leLower,leUpper, pos2Dzy, dir2Dzy, covMat2Dzy, chi22Dzy);
     LogTrace("VectorHitBuilderAlgorithm") << "\t  pos2Dzy: " << pos2Dzy;
     LogTrace("VectorHitBuilderAlgorithm") << "\t  dir2Dzy: " << dir2Dzy;
     LogTrace("VectorHitBuilderAlgorithm") << "\t  cov2Dzy: " << covMat2Dzy;
@@ -193,7 +202,6 @@ VectorHit VectorHitBuilderAlgorithm::buildVectorHit(const StackGeomDet * stack,
     OmniClusterRef lowerOmni(lower); 
     OmniClusterRef upperOmni(upper); 
     VectorHit vh = VectorHit(*stack, vh2Dzx, vh2Dzy, lowerOmni, upperOmni);
-    //vh.setDet(*stack);
     return vh;
 
   }
