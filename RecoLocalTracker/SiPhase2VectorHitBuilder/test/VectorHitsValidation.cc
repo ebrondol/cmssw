@@ -118,6 +118,7 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
   int module_type; //1: pixel, 2: strip
   float x_global, y_global, z_global;
   float x_local, y_local, z_local;
+  double curvature, phi;
   int sim_track_id;
   float deltaXVHSimHits, deltaYVHSimHits;
   unsigned int processType(99);
@@ -132,6 +133,8 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
   tree -> Branch("x_local",&x_local,"x_local/F");
   tree -> Branch("y_local",&y_local,"y_local/F");
   tree -> Branch("z_local",&z_local,"z_local/F");
+  tree -> Branch("curvature",&curvature,"curvature/F");
+  tree -> Branch("phi",&phi,"phi/F");
   tree -> Branch("sim_track_id",&sim_track_id,"sim_track_id/I");
   tree -> Branch("deltaXVHSimHits",&deltaXVHSimHits,"deltaXVHSimHits/F");
   tree -> Branch("deltaYVHSimHits",&deltaYVHSimHits,"deltaYVHSimHits/F");
@@ -223,6 +226,9 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
          Global3DVector globalDirVH = vh.globalDirection(geomDet->surface());
          dirVHs.push_back(globalDirVH);
          LogTrace("VectorHitsBuilderValidation") << "global VH direction " << globalDirVH << std::endl;
+
+         curvature = vh.curvatureORphi("curvature");
+         phi = vh.curvatureORphi("phi");
 
          // Fill the position histograms
          trackerLayoutRZ_[0]->SetPoint(nVHsTot, globalPosVH.z(), globalPosVH.perp());
