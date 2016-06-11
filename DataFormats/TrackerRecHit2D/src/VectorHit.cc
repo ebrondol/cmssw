@@ -131,10 +131,11 @@ Global3DVector VectorHit::globalDirection( const Surface& surf ) {
   return g;
 }
 
-double VectorHit::curvature() const {
+double VectorHit::curvatureORphi(std::string curvORphi) const {
 
 std::cout << "VectorHit::curvature" << std::endl;
   double curvature = 0.0;
+  double phi = 0.0;
 
   const StackGeomDet* stackDet = dynamic_cast< const StackGeomDet* >(det());
   const PixelGeomDetUnit* lowerDet = dynamic_cast< const PixelGeomDetUnit* >(stackDet->lowerDet());
@@ -151,7 +152,6 @@ std::cout << "gPositionLower: " << gPositionLower << std::endl;
 std::cout << "gPositionUpper: " << gPositionUpper << std::endl;
 
   double h1 = gPositionLower.x()*gPositionUpper.y() - gPositionUpper.x()*gPositionLower.y();
-std::cout << "h1: " << h1 << std::endl;
   if(h1!=0) {
     double h2 = 2*h1;
     double r12 = pow(gPositionLower.x(),2) + pow(gPositionLower.y(),2);
@@ -161,17 +161,9 @@ std::cout << "h1: " << h1 << std::endl;
                 + gPositionLower.x()*pow(gPositionUpper.y(),2) - gPositionUpper.x()*pow(gPositionLower.y(),2);
     double h5 = pow(gPositionLower.x(),2)*gPositionUpper.y() - pow(gPositionUpper.x(),2)*gPositionLower.y()
               + pow(gPositionLower.y(),2)*gPositionUpper.y() - gPositionLower.y()*pow(gPositionUpper.y(),2);
-std::cout << "h2: " << h2 << std::endl;
-std::cout << "h3: " << h3 << std::endl;
-std::cout << "h4: " << h4 << std::endl;
-std::cout << "h5: " << h5 << std::endl;
-std::cout << "r12: " << r12 << std::endl;
-std::cout << "r22: " << r22 << std::endl;
 
     //radius of circle
-//    rho=(r12*r22*h3)^(1/2)/(2*h1);
-
-    double rho = pow(r12*r22*h3,1/2)/(2*h1);
+    double rho = sqrt(r12*r22*h3)/(2*h1);
     curvature = 1./rho;
 std::cout << "curvature:" << curvature << std::endl;
 
@@ -184,7 +176,7 @@ std::cout << "curvature:" << curvature << std::endl;
     //tangent vector at (x1/y1)
     double xtg = dy1;
     double ytg = -(dx1);
-    double phi = atan2(ytg,xtg);
+    phi = atan2(ytg,xtg);
 std::cout << "phi:" << phi << std::endl;
 
     AlgebraicROOTObject<4,4>::Matrix jacobian;
@@ -197,13 +189,13 @@ std::cout << "phi:" << phi << std::endl;
     jacobian[0][0] = 1.0;    // dx1/dx1 dx1/dy1 dx2/dx1 dy2/dx1
     jacobian[1][1] = 1.0;    //dy1/dx1 dy1/dy1 dy2/dx1 dy2/dx1
     jacobian[2][0] = (h1*(2*gPositionLower.x()*r22*h3 + (2*gPositionLower.x() - 2*gPositionUpper.x())*r12*r22))/(pow(r12*r22*h3,3/2)) 
-                  - (2*gPositionUpper.y())/pow(r12*r22*h3,1/2); // dkappa/dx1
-    jacobian[2][1] = (2*gPositionUpper.x())/pow(r12*r22*h3,1/2) + (h1*(2*gPositionLower.y()*r22*h3 + r12*r22*(2*gPositionLower.y() 
+                  - (2*gPositionUpper.y())/sqrt(r12*r22*h3); // dkappa/dx1
+    jacobian[2][1] = (2*gPositionUpper.x())/sqrt(r12*r22*h3) + (h1*(2*gPositionLower.y()*r22*h3 + r12*r22*(2*gPositionLower.y() 
                   - 2*gPositionUpper.y())))/pow(r12*r22*h3,3/2); // dkappa/dy1
-    jacobian[2][2] = (2*gPositionLower.y())/pow(r12*r22*h3,1/2) + (h1*(2*gPositionUpper.x()*r12*h3 
+    jacobian[2][2] = (2*gPositionLower.y())/sqrt(r12*r22*h3) + (h1*(2*gPositionUpper.x()*r12*h3 
                   - 2*(gPositionLower.x() - gPositionUpper.x())*r12*r22))/pow(r12*r22*h3,3/2); // dkappa/dx2
     jacobian[2][3] = (h1*(2*gPositionUpper.y()*r12*h3 - r12*r22*2*(gPositionLower.y() - gPositionUpper.y())))/pow(r12*r22*h3,3/2)
-                  - (2*gPositionLower.x())/pow(r12*r22*h3,1/2); // dkappa/dy2
+                  - (2*gPositionLower.x())/sqrt(r12*r22*h3); // dkappa/dy2
 
     AlgebraicVector2 M;
     M[0] = (gPositionLower.y() - ycentre)/(pow(gPositionLower.x() - xcentre,2) + pow(gPositionLower.y() - ycentre,2)); // dphi/dxcentre
@@ -229,10 +221,14 @@ std::cout << "K:" << K << std::endl;
 std::cout << "jacobian:" << jacobian << std::endl;
 
   } else {
+std::cout << " straight line!" << std::endl;
     return 0;
   }
   
-  return curvature;
+  if( curvORphi == "curvature" ) return curvature;
+  else if( curvORphi == "phi"  ) return phi;
+  else return 0.0;
+
 }
 
 AlgebraicMatrix VectorHit::projectionMatrix() const {
