@@ -193,7 +193,6 @@ VectorHit VectorHitBuilderAlgorithm::buildVectorHit(const StackGeomDet * stack,
     OmniClusterRef lowerOmni(lower); 
     OmniClusterRef upperOmni(upper); 
     VectorHit vh = VectorHit(*stack, vh2Dzx, vh2Dzy, lowerOmni, upperOmni);
-    vh.curvature();
     return vh;
 
   }
