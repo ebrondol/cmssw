@@ -41,12 +41,10 @@ class VectorHitBuilderAlgorithmBase {
 
   virtual std::vector<VectorHit> buildVectorHits (const StackGeomDet * stack,
                                          edm::Handle< edmNew::DetSetVector<Phase2TrackerCluster1D> > clusters,
-                                         const detset & DSVinner, const detset & DSVouter,
-                                         const GeomDetUnit * theLowerGeomDetUnit,
-                                         const GeomDetUnit * theUpperGeomDetUnit) = 0;
+                                         const detset & DSVinner, const detset & DSVouter) = 0;
 
   void printClusters(const edmNew::DetSetVector<Phase2TrackerCluster1D>& clusters);
-  void printCluster(const GeomDetUnit* geomDetUnit, const Phase2TrackerCluster1D* cluster);
+  void printCluster(const GeomDet* geomDetUnit, const Phase2TrackerCluster1D* cluster);
 
   void loadDetSetVector( std::map< DetId,std::vector<VectorHit> >& theMap, edmNew::DetSetVector<VectorHit>& theCollection ) const ;
 
