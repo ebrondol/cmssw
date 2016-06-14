@@ -68,7 +68,7 @@ def customise_Reco(process,pileup):
     process.MeasurementTracker.Phase2HitMatcher = cms.string('SiPhase2VectorHitMatcher')
 
     # using stacks in phase2 tracking  
-    process.TrackerRecoGeometryESProducer.usePhase2Stacks = False
+    process.TrackerRecoGeometryESProducer.usePhase2Stacks = True
  
     return process
 

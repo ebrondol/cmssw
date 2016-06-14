@@ -133,51 +133,78 @@ Global3DVector VectorHit::globalDirection( const Surface& surf ) {
 
 double VectorHit::curvatureORphi(std::string curvORphi) const {
 
-std::cout << "VectorHit::curvature" << std::endl;
+//std::cout << "VectorHit::curvature" << std::endl;
   double curvature = 0.0;
   double phi = 0.0;
 
   const StackGeomDet* stackDet = dynamic_cast< const StackGeomDet* >(det());
-  const PixelGeomDetUnit* lowerDet = dynamic_cast< const PixelGeomDetUnit* >(stackDet->lowerDet());
-  const PixelGeomDetUnit* upperDet = dynamic_cast< const PixelGeomDetUnit* >(stackDet->upperDet());
+  const PixelGeomDetUnit* geomDetLower = dynamic_cast< const PixelGeomDetUnit* >(stackDet->lowerDet());
+  const PixelGeomDetUnit* geomDetUpper = dynamic_cast< const PixelGeomDetUnit* >(stackDet->upperDet());
 
-  MeasurementPoint mpLower(lowerCluster()->center(), lowerCluster()->column() + 0.5);
-  Local3DPoint lPositionLower  = lowerDet->topology().localPosition(mpLower);
-  Global3DPoint gPositionLower = lowerDet->surface().toGlobal(lPositionLower);
-std::cout << "gPositionLower: " << gPositionLower << std::endl;
+  const PixelTopology * topoLower = &geomDetLower->specificTopology();
+  const PixelTopology * topoUpper = &geomDetUpper->specificTopology();
 
-  MeasurementPoint mpUpper(upperCluster()->center(), upperCluster()->column() + 0.5);
-  Local3DPoint lPositionUpper  = upperDet->topology().localPosition(mpUpper);
-  Global3DPoint gPositionUpper = upperDet->surface().toGlobal(lPositionUpper);
-std::cout << "gPositionUpper: " << gPositionUpper << std::endl;
+  float ixLower = lowerCluster()->center();
+  float iyLower = lowerCluster()->column()+0.5; // halfway the column
+  float ixUpper = upperCluster()->center();
+  float iyUpper = upperCluster()->column()+0.5; // halfway the column
+
+  LocalPoint lpLower( topoLower->localX(ixLower), topoLower->localY(iyLower), 0 );          // x, y, z
+  LocalPoint lpUpper( topoUpper->localX(ixUpper), topoUpper->localY(iyUpper), 0 );          // x, y, z
+
+  Global3DPoint gPositionLower = geomDetLower->surface().toGlobal(lpLower);
+  Global3DPoint gPositionUpper = geomDetUpper->surface().toGlobal(lpUpper);
+
+  //insert lower and upper in the glocal sor
+  if(gPositionLower.perp() > gPositionUpper.perp()){
+    gPositionLower = geomDetUpper->surface().toGlobal(lpUpper);
+    gPositionUpper = geomDetLower->surface().toGlobal(lpLower);
+  }
+if(curvORphi == "curvature") std::cout << "gPositionLower: " << gPositionLower << std::endl;
+if(curvORphi == "curvature") std::cout << "gPositionUpper: " << gPositionUpper << std::endl;
 
   double h1 = gPositionLower.x()*gPositionUpper.y() - gPositionUpper.x()*gPositionLower.y();
+
+  //determine sign of curvature
+  AlgebraicVector2 n1;
+  n1[0] = -gPositionLower.y();
+  n1[1] = gPositionLower.x();
+  AlgebraicVector2 n2;
+  n2[0] = gPositionUpper.x()-gPositionLower.x();
+  n2[1] = gPositionUpper.y()-gPositionLower.y();
+
+  double n3 = n1[0]*n2[0] + n1[1]*n2[1];
+  double signCurv = -copysign(1.0,n3);
+  double phi1 = atan2(gPositionUpper.y()-gPositionLower.y(),gPositionUpper.x()-gPositionLower.x());
+
   if(h1!=0) {
     double h2 = 2*h1;
     double r12 = pow(gPositionLower.x(),2) + pow(gPositionLower.y(),2);
     double r22 = pow(gPositionUpper.x(),2) + pow(gPositionUpper.y(),2);
-    double h3 = r12 + r22 - 2*gPositionLower.x()*gPositionUpper.x() - 2*gPositionLower.y()*gPositionUpper.y();
+    double h3 = (pow(gPositionLower.x(),2) - 2.*gPositionLower.x()*gPositionUpper.x() + pow(gPositionUpper.x(),2) + pow(gPositionLower.y(),2) - 2.*gPositionLower.y()*gPositionUpper.y() + pow(gPositionUpper.y(),2));
     double h4 = - pow(gPositionLower.x(),2)*gPositionUpper.x() + gPositionLower.x()*pow(gPositionUpper.x(),2) 
                 + gPositionLower.x()*pow(gPositionUpper.y(),2) - gPositionUpper.x()*pow(gPositionLower.y(),2);
     double h5 = pow(gPositionLower.x(),2)*gPositionUpper.y() - pow(gPositionUpper.x(),2)*gPositionLower.y()
               + pow(gPositionLower.y(),2)*gPositionUpper.y() - gPositionLower.y()*pow(gPositionUpper.y(),2);
 
     //radius of circle
-    double rho = sqrt(r12*r22*h3)/(2*h1);
+    double rho = sqrt(r12*r22*h3)/(2.*h1);
     curvature = 1./rho;
-std::cout << "curvature:" << curvature << std::endl;
 
     //center of circle
     double xcentre = h5/h2;
     double ycentre = h4/h2;
-    double dx1 = gPositionLower.x() - xcentre;
-    double dy1 = gPositionLower.y() - ycentre;
 
-    //tangent vector at (x1/y1)
-    double xtg = dy1;
-    double ytg = -(dx1);
+    // tangent vector at (0/0)
+    float x0 = 0.0;
+    float y0 = 0.0;
+
+    //double dx1 = gPositionLower.x() - xcentre;
+    //double dy1 = gPositionLower.y() - ycentre;
+
+    double xtg = ycentre;
+    double ytg = -(xcentre);
     phi = atan2(ytg,xtg);
-std::cout << "phi:" << phi << std::endl;
 
     AlgebraicROOTObject<4,4>::Matrix jacobian;
     for(int i = 0; i < 4; i++){
@@ -188,37 +215,52 @@ std::cout << "phi:" << phi << std::endl;
 
     jacobian[0][0] = 1.0;    // dx1/dx1 dx1/dy1 dx2/dx1 dy2/dx1
     jacobian[1][1] = 1.0;    //dy1/dx1 dy1/dy1 dy2/dx1 dy2/dx1
-    jacobian[2][0] = (h1*(2*gPositionLower.x()*r22*h3 + (2*gPositionLower.x() - 2*gPositionUpper.x())*r12*r22))/(pow(r12*r22*h3,3/2)) 
-                  - (2*gPositionUpper.y())/sqrt(r12*r22*h3); // dkappa/dx1
-    jacobian[2][1] = (2*gPositionUpper.x())/sqrt(r12*r22*h3) + (h1*(2*gPositionLower.y()*r22*h3 + r12*r22*(2*gPositionLower.y() 
-                  - 2*gPositionUpper.y())))/pow(r12*r22*h3,3/2); // dkappa/dy1
-    jacobian[2][2] = (2*gPositionLower.y())/sqrt(r12*r22*h3) + (h1*(2*gPositionUpper.x()*r12*h3 
-                  - 2*(gPositionLower.x() - gPositionUpper.x())*r12*r22))/pow(r12*r22*h3,3/2); // dkappa/dx2
-    jacobian[2][3] = (h1*(2*gPositionUpper.y()*r12*h3 - r12*r22*2*(gPositionLower.y() - gPositionUpper.y())))/pow(r12*r22*h3,3/2)
-                  - (2*gPositionLower.x())/sqrt(r12*r22*h3); // dkappa/dy2
+    jacobian[2][0] = (h1*(2.*gPositionLower.x()*r22*h3 + (2.*gPositionLower.x() - 2.*gPositionUpper.x())*r12*r22))/(pow(r12*r22*h3,1.5)) 
+                  - (2.*gPositionUpper.y())/sqrt(r12*r22*h3); // dkappa/dx1
+    jacobian[2][1] = (2.*gPositionUpper.x())/sqrt(r12*r22*h3) + (h1*(2.*gPositionLower.y()*r22*h3 + r12*r22*(2.*gPositionLower.y() 
+                  - 2.*gPositionUpper.y())))/pow(r12*r22*h3,1.5); // dkappa/dy1
+    jacobian[2][2] = (2.*gPositionLower.y())/sqrt(r12*r22*h3) + (h1*(2.*gPositionUpper.x()*r12*h3 
+                  - 2.*(gPositionLower.x() - gPositionUpper.x())*r12*r22))/pow(r12*r22*h3,1.5); // dkappa/dx2
+    jacobian[2][3] = (h1*(2.*gPositionUpper.y()*r12*h3 - r12*r22*2.*(gPositionLower.y() - gPositionUpper.y())))/pow(r12*r22*h3,1.5)
+                  - (2.*gPositionLower.x())/sqrt(r12*r22*h3); // dkappa/dy2
+
+    for(int i = 0; i < 4; i++){
+      jacobian[2][i] = -jacobian[2][i];
+    }
 
     AlgebraicVector2 M;
-    M[0] = (gPositionLower.y() - ycentre)/(pow(gPositionLower.x() - xcentre,2) + pow(gPositionLower.y() - ycentre,2)); // dphi/dxcentre
-    M[1] =-(gPositionLower.x() - xcentre)/(pow(gPositionLower.x() - xcentre,2) + pow(gPositionLower.y() - ycentre,2)); // dphi/dycentre
-std::cout << "M:" << M << std::endl;
+    M[0] = (y0 - ycentre)/pow(rho,2); // dphi/dxcentre
+    M[1] =-(x0 - xcentre)/pow(rho,2); // dphi/dycentre
 
     AlgebraicROOTObject<2,4>::Matrix K;
-    K[0][0]=(2*gPositionLower.x()*gPositionUpper.y())/h2 - (2*gPositionUpper.y()*h5)/pow(h2,2); // dxm/dx1
-    K[0][1]=(2*gPositionUpper.x()*h5)/pow(h2,2) - (pow(gPositionUpper.x(),2) + pow(gPositionUpper.y(),2) - 2*gPositionLower.y()*gPositionUpper.y())/h2; // dxm/dy1
-    K[0][2]=(2*gPositionLower.y()*h5)/pow(h2,2) - (2*gPositionUpper.x()*gPositionLower.y())/h2; // dxm/dx2
-    K[0][3]=(pow(gPositionLower.x(),2) + pow(gPositionLower.y(),2) - 2*gPositionUpper.y()*gPositionLower.y())/h2 - (2*gPositionLower.x()*h5)/pow(h2,2); // dxm/dy2
-    K[1][0]=(pow(gPositionUpper.x(),2) - 2*gPositionLower.x()*gPositionUpper.x() + pow(gPositionUpper.y(),2))/h2 - (2*gPositionUpper.y()*h4)/pow(h2,2); // dym/dx1
-    K[1][1]=(2*gPositionUpper.x()*h4)/pow(h2,2) - (2*gPositionUpper.x()*gPositionLower.y())/h2; // dym/dy1
-    K[1][2]=(2*gPositionLower.y()*h4)/pow(h2,2) - (pow(gPositionLower.x(),2) - 2*gPositionUpper.x()*gPositionLower.x() + pow(gPositionLower.y(),2))/h2; // dym/dx2
-    K[1][3]=(2*gPositionLower.x()*gPositionUpper.y())/h2 - (2*gPositionLower.x()*h4)/pow(h2,2); // dym/dy2
-std::cout << "K:" << K << std::endl;
+    K[0][0]=(2.*gPositionLower.x()*gPositionUpper.y())/h2 - (2.*gPositionUpper.y()*h5)/pow(h2,2); // dxm/dx1
+    K[0][1]=(2.*gPositionUpper.x()*h5)/pow(h2,2) - (pow(gPositionUpper.x(),2) + pow(gPositionUpper.y(),2) - 2.*gPositionLower.y()*gPositionUpper.y())/h2; // dxm/dy1
+    K[0][2]=(2.*gPositionLower.y()*h5)/pow(h2,2) - (2.*gPositionUpper.x()*gPositionLower.y())/h2; // dxm/dx2
+    K[0][3]=(pow(gPositionLower.x(),2) + pow(gPositionLower.y(),2) - 2.*gPositionUpper.y()*gPositionLower.y())/h2 - (2.*gPositionLower.x()*h5)/pow(h2,2); // dxm/dy2
+    K[1][0]=(pow(gPositionUpper.x(),2) - 2.*gPositionLower.x()*gPositionUpper.x() + pow(gPositionUpper.y(),2))/h2 - (2.*gPositionUpper.y()*h4)/pow(h2,2); // dym/dx1
+    K[1][1]=(2.*gPositionUpper.x()*h4)/pow(h2,2) - (2.*gPositionUpper.x()*gPositionLower.y())/h2; // dym/dy1
+    K[1][2]=(2.*gPositionLower.y()*h4)/pow(h2,2) - (pow(gPositionLower.x(),2) - 2.*gPositionUpper.x()*gPositionLower.x() + pow(gPositionLower.y(),2))/h2; // dym/dx2
+    K[1][3]=(2.*gPositionLower.x()*gPositionUpper.y())/h2 - (2.*gPositionLower.x()*h4)/pow(h2,2); // dym/dy2
 
     AlgebraicVector4 N = M*K;
     jacobian[3][0] = N[0]; // dphi/(dx1,dy1,dx2,dy2)
     jacobian[3][1] = N[1]; // dphi/(dx1,dy1,dx2,dy2)
     jacobian[3][2] = N[2]; // dphi/(dx1,dy1,dx2,dy2)
     jacobian[3][3] = N[3]; // dphi/(dx1,dy1,dx2,dy2)
-std::cout << "jacobian:" << jacobian << std::endl;
+
+    if( (signCurv < 0 && curvature > 0 ) || (signCurv > 0 && curvature < 0 )){
+      curvature=-curvature;
+      for(int i = 0; i < 4; i++){
+        jacobian[2][i] = -jacobian[2][i];
+      }
+    }
+
+    // bring phi in the same quadrant as phi1
+    if (abs(phi-phi1) > M_PI/2){
+      phi = phi+M_PI;
+      if (phi>M_PI)
+        phi=phi-2.*M_PI;
+    }
 
   } else {
 std::cout << " straight line!" << std::endl;
