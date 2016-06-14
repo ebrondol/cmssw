@@ -43,7 +43,7 @@ TkStackMeasurementDet::recHits( const TrajectoryStateOnSurface& ts, const Measur
   //VectorHitBuilderAlgorithm* vhalgo = dynamic_cast<VectorHitBuilderAlgorithm *>(algobase);
   LogTrace("MeasurementTracker") << "TkStackMeasurementDet::recHits algo has been set" << std::endl;
   std::vector<VectorHit> vhs;
-  vhs = algo->buildVectorHits(&specificGeomDet(), data.phase2OTData().handle(), lowerDetSet, upperDetSet, specificGeomDet().lowerDet(), specificGeomDet().upperDet());
+  vhs = algo->buildVectorHits(&specificGeomDet(), data.phase2OTData().handle(), lowerDetSet, upperDetSet);
 
   for ( auto vh : vhs ){
     LogTrace("MeasurementTracker") << "TkStackMeasurementDet::rechits adding VectorHits!" << std::endl;

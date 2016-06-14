@@ -331,7 +331,7 @@ def customise_Reco(process,pileup):
     process.ckftracks.remove(process.electronSeedsSeq)
 
     # using stacks in phase2 tracking  
-    process.TrackerRecoGeometryESProducer.usePhase2Stacks = False
+    process.TrackerRecoGeometryESProducer.usePhase2Stacks = True
  
     return process
 
