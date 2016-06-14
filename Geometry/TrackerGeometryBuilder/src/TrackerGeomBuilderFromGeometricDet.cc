@@ -272,7 +272,7 @@ void TrackerGeomBuilderFromGeometricDet::buildGeomDet(TrackerGeometry* tracker){
         //FIXME::ERICA: the plane builder is built in the middle...
         PlaneBuilderForGluedDet::ResultType plane = gluedplaneBuilder.plane(composed);
         composedDetId = theTopo->stack(gduId[i]);
-        StackGeomDet* stackDet = new StackGeomDet(&(*plane),dum,dus,composedDetId);
+        StackGeomDet* stackDet = new StackGeomDet(&(*plane),dus,dum,composedDetId);
         tracker->addDet((GeomDet*) stackDet);
         tracker->addDetId(composedDetId);
 
