@@ -118,7 +118,7 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
   int module_type; //1: pixel, 2: strip
   float x_global, y_global, z_global;
   float x_local, y_local, z_local;
-  double curvature, phi;
+  float curvature, phi;
   int sim_track_id;
   float deltaXVHSimHits, deltaYVHSimHits;
   unsigned int processType(99);
@@ -383,6 +383,7 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
 
 
            nVHsTot++;
+           tree->Fill();
 
         }// vh valid
 
@@ -391,7 +392,6 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
         if (nVHsPS) histogramLayer->second.numberVHsPS->Fill(nVHsPS);
         if (nVHs2S) histogramLayer->second.numberVHs2S->Fill(nVHs2S);
         LogTrace("VectorHitsBuilderValidation") << "nVHsPS for this layer : " << nVHsPS << ", nVHs2S for this layer : " << nVHs2S << std::endl;
-        tree->Fill();
 
     }
 
