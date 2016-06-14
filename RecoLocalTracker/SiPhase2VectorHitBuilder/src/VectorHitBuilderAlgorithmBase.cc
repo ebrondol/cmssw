@@ -78,7 +78,7 @@ void VectorHitBuilderAlgorithmBase::printClusters(const edmNew::DetSetVector<Pha
 }
 
 
-void VectorHitBuilderAlgorithmBase::printCluster(const GeomDetUnit* geomDetUnit, const Phase2TrackerCluster1D* clustIt){
+void VectorHitBuilderAlgorithmBase::printCluster(const GeomDet* geomDetUnit, const Phase2TrackerCluster1D* clustIt){
 
   if (!geomDetUnit) return;
 

@@ -31,12 +31,9 @@ class VectorHitBuilderAlgorithm : public VectorHitBuilderAlgorithmBase {
 
   std::vector<VectorHit> buildVectorHits(const StackGeomDet * stack,
                                          edm::Handle< edmNew::DetSetVector<Phase2TrackerCluster1D> > clusters,
-                                         const detset & DSVinner, const detset & DSVouter,
-                                         const GeomDetUnit * theLowerGeomDetUnit,
-                                         const GeomDetUnit * theUpperGeomDetUnit);
+                                         const detset & DSVinner, const detset & DSVouter);
 
-  VectorHit buildVectorHit(const StackGeomDet* stack, Phase2TrackerCluster1DRef lower, Phase2TrackerCluster1DRef upper, 
-                           const GeomDetUnit * theLowerGeomDetUnit, const GeomDetUnit * theUpperGeomDetUnit);
+  VectorHit buildVectorHit(const StackGeomDet* stack, Phase2TrackerCluster1DRef lower, Phase2TrackerCluster1DRef upper);
 
   // Full I/O in DetSet
   //void buildDetUnit( const edm::DetSetVector<Phase2TrackerCluster1D> & input,
