@@ -32,9 +32,16 @@
 #include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
 #include "Geometry/CommonDetUnit/interface/GeomDetType.h"
 
-//
-// class decleration
-//
+#include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
+#include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
+
+/* This is a copy of the SeedClusterRemover 
+ * for Phase2 Tk upgrade
+ * the parameters overrideTrkQuals, Common, TrackQuality have been removed
+ * (they were considere "dummy")
+ * FIXME:: changing with new phase2 pixel DataFormats!
+ * FIXME:: still to be factorized
+ */
 
 class SeedClusterRemoverPhase2 : public edm::stream::EDProducer<> {
 
@@ -58,6 +65,7 @@ class SeedClusterRemoverPhase2 : public edm::stream::EDProducer<> {
     edm::ProductID pixelSourceProdID, outerTrackerSourceProdID; // ProdIDs refs must point to (for consistency tests)
 
     inline void process(const TrackingRecHit *hit, float chi2, const TrackerGeometry* tg);
+    void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
     template<typename T> 
     std::auto_ptr<edmNew::DetSetVector<T> >
@@ -68,8 +76,6 @@ class SeedClusterRemoverPhase2 : public edm::stream::EDProducer<> {
     void mergeOld(reco::ClusterRemovalInfo::Indices &refs, const reco::ClusterRemovalInfo::Indices &oldRefs) ;
 
     bool clusterWasteSolution_;
-    bool filterTracks_;
-    reco::TrackBase::TrackQuality trackQuality_;
     std::vector<bool> collectedOuterTrackers_;
     std::vector<bool> collectedPixels_;
 };
@@ -78,6 +84,7 @@ class SeedClusterRemoverPhase2 : public edm::stream::EDProducer<> {
 using namespace std;
 using namespace edm;
 using namespace reco;
+
 
 SeedClusterRemoverPhase2::SeedClusterRemoverPhase2(const ParameterSet& iConfig):
     doOuterTracker_(iConfig.existsAs<bool>("doOuterTracker") ? iConfig.getParameter<bool>("doOuterTracker") : true),
@@ -95,12 +102,6 @@ SeedClusterRemoverPhase2::SeedClusterRemoverPhase2(const ParameterSet& iConfig):
     produces<edm::ContainerMask<edmNew::DetSetVector<SiPixelCluster> > >();
     produces<edm::ContainerMask<edmNew::DetSetVector<Phase2TrackerCluster1D> > >();
   }
-  trackQuality_=reco::TrackBase::undefQuality;
-  filterTracks_=false;
-  if (iConfig.exists("TrackQuality")){
-    filterTracks_=true;
-    trackQuality_=reco::TrackBase::qualityByName(iConfig.getParameter<std::string>("TrackQuality"));
-  }
 
   trajectories_ = consumes<TrajectorySeedCollection>(iConfig.getParameter<InputTag>("trajectories"));
   if (doPixel_) pixelClusters_ = consumes<edmNew::DetSetVector<SiPixelCluster> >(iConfig.getParameter<InputTag>("pixelClusters"));
@@ -115,6 +116,16 @@ SeedClusterRemoverPhase2::SeedClusterRemoverPhase2(const ParameterSet& iConfig):
 
 SeedClusterRemoverPhase2::~SeedClusterRemoverPhase2()
 {
+}
+
+void SeedClusterRemoverPhase2::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+  edm::ParameterSetDescription desc;
+  desc.add<edm::InputTag>("trajectories", edm::InputTag("initialStepSeeds"));
+  desc.add<edm::InputTag>("phase2OTClusters", edm::InputTag("siPhase2Clusters"));
+  desc.add<edm::InputTag>("pixelClusters", edm::InputTag("siPixelClusters"));
+  desc.add<bool>("clusterLessSolution", true);
+
+  descriptions.add("seedClusterRemoverPhase2", desc);
 }
 
 void SeedClusterRemoverPhase2::mergeOld(ClusterRemovalInfo::Indices &refs,
