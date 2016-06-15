@@ -176,24 +176,20 @@ if(curvORphi == "curvature") std::cout << "gPositionUpper: " << gPositionUpper <
   double n3 = n1[0]*n2[0] + n1[1]*n2[1];
   double signCurv = -copysign(1.0,n3);
   double phi1 = atan2(gPositionUpper.y()-gPositionLower.y(),gPositionUpper.x()-gPositionLower.x());
-//std::cout << "n1*n2:" << n3 << std::endl;
-//std::cout << "phi1:" << phi << std::endl;
 
   if(h1!=0) {
     double h2 = 2*h1;
     double r12 = pow(gPositionLower.x(),2) + pow(gPositionLower.y(),2);
     double r22 = pow(gPositionUpper.x(),2) + pow(gPositionUpper.y(),2);
-    double h3 = r12 + r22 - 2*gPositionLower.x()*gPositionUpper.x() - 2*gPositionLower.y()*gPositionUpper.y();
+    double h3 = (pow(gPositionLower.x(),2) - 2.*gPositionLower.x()*gPositionUpper.x() + pow(gPositionUpper.x(),2) + pow(gPositionLower.y(),2) - 2.*gPositionLower.y()*gPositionUpper.y() + pow(gPositionUpper.y(),2));
     double h4 = - pow(gPositionLower.x(),2)*gPositionUpper.x() + gPositionLower.x()*pow(gPositionUpper.x(),2) 
                 + gPositionLower.x()*pow(gPositionUpper.y(),2) - gPositionUpper.x()*pow(gPositionLower.y(),2);
     double h5 = pow(gPositionLower.x(),2)*gPositionUpper.y() - pow(gPositionUpper.x(),2)*gPositionLower.y()
               + pow(gPositionLower.y(),2)*gPositionUpper.y() - gPositionLower.y()*pow(gPositionUpper.y(),2);
 
     //radius of circle
-    double rho = sqrt(r12*r22*h3)/(2*h1);
+    double rho = sqrt(r12*r22*h3)/(2.*h1);
     curvature = 1./rho;
-//std::cout << "##curvature:" << curvature << std::endl;
-//std::cout << "## with sign:" << signCurv << std::endl;
 
     //center of circle
     double xcentre = h5/h2;
@@ -209,7 +205,6 @@ if(curvORphi == "curvature") std::cout << "gPositionUpper: " << gPositionUpper <
     double xtg = ycentre;
     double ytg = -(xcentre);
     phi = atan2(ytg,xtg);
-//std::cout << "##phi:" << phi << std::endl;
 
     AlgebraicROOTObject<4,4>::Matrix jacobian;
     for(int i = 0; i < 4; i++){
@@ -220,14 +215,14 @@ if(curvORphi == "curvature") std::cout << "gPositionUpper: " << gPositionUpper <
 
     jacobian[0][0] = 1.0;    // dx1/dx1 dx1/dy1 dx2/dx1 dy2/dx1
     jacobian[1][1] = 1.0;    //dy1/dx1 dy1/dy1 dy2/dx1 dy2/dx1
-    jacobian[2][0] = (h1*(2*gPositionLower.x()*r22*h3 + (2*gPositionLower.x() - 2*gPositionUpper.x())*r12*r22))/(pow(r12*r22*h3,1.5)) 
-                  - (2*gPositionUpper.y())/sqrt(r12*r22*h3); // dkappa/dx1
-    jacobian[2][1] = (2*gPositionUpper.x())/sqrt(r12*r22*h3) + (h1*(2*gPositionLower.y()*r22*h3 + r12*r22*(2*gPositionLower.y() 
-                  - 2*gPositionUpper.y())))/pow(r12*r22*h3,1.5); // dkappa/dy1
-    jacobian[2][2] = (2*gPositionLower.y())/sqrt(r12*r22*h3) + (h1*(2*gPositionUpper.x()*r12*h3 
-                  - 2*(gPositionLower.x() - gPositionUpper.x())*r12*r22))/pow(r12*r22*h3,1.5); // dkappa/dx2
-    jacobian[2][3] = (h1*(2*gPositionUpper.y()*r12*h3 - r12*r22*2*(gPositionLower.y() - gPositionUpper.y())))/pow(r12*r22*h3,1.5)
-                  - (2*gPositionLower.x())/sqrt(r12*r22*h3); // dkappa/dy2
+    jacobian[2][0] = (h1*(2.*gPositionLower.x()*r22*h3 + (2.*gPositionLower.x() - 2.*gPositionUpper.x())*r12*r22))/(pow(r12*r22*h3,1.5)) 
+                  - (2.*gPositionUpper.y())/sqrt(r12*r22*h3); // dkappa/dx1
+    jacobian[2][1] = (2.*gPositionUpper.x())/sqrt(r12*r22*h3) + (h1*(2.*gPositionLower.y()*r22*h3 + r12*r22*(2.*gPositionLower.y() 
+                  - 2.*gPositionUpper.y())))/pow(r12*r22*h3,1.5); // dkappa/dy1
+    jacobian[2][2] = (2.*gPositionLower.y())/sqrt(r12*r22*h3) + (h1*(2.*gPositionUpper.x()*r12*h3 
+                  - 2.*(gPositionLower.x() - gPositionUpper.x())*r12*r22))/pow(r12*r22*h3,1.5); // dkappa/dx2
+    jacobian[2][3] = (h1*(2.*gPositionUpper.y()*r12*h3 - r12*r22*2.*(gPositionLower.y() - gPositionUpper.y())))/pow(r12*r22*h3,1.5)
+                  - (2.*gPositionLower.x())/sqrt(r12*r22*h3); // dkappa/dy2
 
     for(int i = 0; i < 4; i++){
       jacobian[2][i] = -jacobian[2][i];
@@ -236,18 +231,16 @@ if(curvORphi == "curvature") std::cout << "gPositionUpper: " << gPositionUpper <
     AlgebraicVector2 M;
     M[0] = (y0 - ycentre)/pow(rho,2); // dphi/dxcentre
     M[1] =-(x0 - xcentre)/pow(rho,2); // dphi/dycentre
-//std::cout << "M:" << M << std::endl;
 
     AlgebraicROOTObject<2,4>::Matrix K;
-    K[0][0]=(2*gPositionLower.x()*gPositionUpper.y())/h2 - (2*gPositionUpper.y()*h5)/pow(h2,2); // dxm/dx1
-    K[0][1]=(2*gPositionUpper.x()*h5)/pow(h2,2) - (pow(gPositionUpper.x(),2) + pow(gPositionUpper.y(),2) - 2*gPositionLower.y()*gPositionUpper.y())/h2; // dxm/dy1
-    K[0][2]=(2*gPositionLower.y()*h5)/pow(h2,2) - (2*gPositionUpper.x()*gPositionLower.y())/h2; // dxm/dx2
-    K[0][3]=(pow(gPositionLower.x(),2) + pow(gPositionLower.y(),2) - 2*gPositionUpper.y()*gPositionLower.y())/h2 - (2*gPositionLower.x()*h5)/pow(h2,2); // dxm/dy2
-    K[1][0]=(pow(gPositionUpper.x(),2) - 2*gPositionLower.x()*gPositionUpper.x() + pow(gPositionUpper.y(),2))/h2 - (2*gPositionUpper.y()*h4)/pow(h2,2); // dym/dx1
-    K[1][1]=(2*gPositionUpper.x()*h4)/pow(h2,2) - (2*gPositionUpper.x()*gPositionLower.y())/h2; // dym/dy1
-    K[1][2]=(2*gPositionLower.y()*h4)/pow(h2,2) - (pow(gPositionLower.x(),2) - 2*gPositionUpper.x()*gPositionLower.x() + pow(gPositionLower.y(),2))/h2; // dym/dx2
-    K[1][3]=(2*gPositionLower.x()*gPositionUpper.y())/h2 - (2*gPositionLower.x()*h4)/pow(h2,2); // dym/dy2
-//std::cout << "K:" << K << std::endl;
+    K[0][0]=(2.*gPositionLower.x()*gPositionUpper.y())/h2 - (2.*gPositionUpper.y()*h5)/pow(h2,2); // dxm/dx1
+    K[0][1]=(2.*gPositionUpper.x()*h5)/pow(h2,2) - (pow(gPositionUpper.x(),2) + pow(gPositionUpper.y(),2) - 2.*gPositionLower.y()*gPositionUpper.y())/h2; // dxm/dy1
+    K[0][2]=(2.*gPositionLower.y()*h5)/pow(h2,2) - (2.*gPositionUpper.x()*gPositionLower.y())/h2; // dxm/dx2
+    K[0][3]=(pow(gPositionLower.x(),2) + pow(gPositionLower.y(),2) - 2.*gPositionUpper.y()*gPositionLower.y())/h2 - (2.*gPositionLower.x()*h5)/pow(h2,2); // dxm/dy2
+    K[1][0]=(pow(gPositionUpper.x(),2) - 2.*gPositionLower.x()*gPositionUpper.x() + pow(gPositionUpper.y(),2))/h2 - (2.*gPositionUpper.y()*h4)/pow(h2,2); // dym/dx1
+    K[1][1]=(2.*gPositionUpper.x()*h4)/pow(h2,2) - (2.*gPositionUpper.x()*gPositionLower.y())/h2; // dym/dy1
+    K[1][2]=(2.*gPositionLower.y()*h4)/pow(h2,2) - (pow(gPositionLower.x(),2) - 2.*gPositionUpper.x()*gPositionLower.x() + pow(gPositionLower.y(),2))/h2; // dym/dx2
+    K[1][3]=(2.*gPositionLower.x()*gPositionUpper.y())/h2 - (2.*gPositionLower.x()*h4)/pow(h2,2); // dym/dy2
 
     AlgebraicVector4 N = M*K;
     jacobian[3][0] = N[0]; // dphi/(dx1,dy1,dx2,dy2)
@@ -261,17 +254,13 @@ if(curvORphi == "curvature") std::cout << "gPositionUpper: " << gPositionUpper <
         jacobian[2][i] = -jacobian[2][i];
       }
     }
-//std::cout << "curvature:" << curvature << std::endl;
-//std::cout << " with sign:" << signCurv << std::endl;
-//std::cout << "jacobian:" << jacobian << std::endl;
 
     // bring phi in the same quadrant as phi1
     if (abs(phi-phi1) > M_PI/2){
       phi = phi+M_PI;
       if (phi>M_PI)
-        phi=phi-2*M_PI;
+        phi=phi-2.*M_PI;
     }
-//std::cout << "phi:" << phi << std::endl;
 
   } else {
 std::cout << " straight line!" << std::endl;
