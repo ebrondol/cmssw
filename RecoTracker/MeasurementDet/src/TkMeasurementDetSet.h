@@ -6,6 +6,7 @@ class TkStripMeasurementDet;
 class TkStripMeasurementDet;
 class TkPixelMeasurementDet;
 class SiStripRecHitMatcher;
+class VectorHitBuilderEDProducer;
 class StripClusterParameterEstimator;
 class PixelClusterParameterEstimator;
 
@@ -392,8 +393,8 @@ private:
 //FIXME:just temporary solution for phase2 OT that works!
 class Phase2OTMeasurementConditionSet {
 public:
-  Phase2OTMeasurementConditionSet(const PixelClusterParameterEstimator *cpe) :
-    theCPE(cpe) {}
+  Phase2OTMeasurementConditionSet(const VectorHitBuilderEDProducer* ph2matcher, const PixelClusterParameterEstimator *cpe) :
+    thePhase2Matcher(ph2matcher), theCPE(cpe) {}
 
   void init(int size);
 
@@ -403,6 +404,7 @@ public:
     return std::lower_bound(id_.begin()+i,id_.end(),jd)-id_.begin();
   }
 
+  const VectorHitBuilderEDProducer*  matcher() const { return thePhase2Matcher;}
   const PixelClusterParameterEstimator*  pixelCPE() const { return theCPE;}
   bool isActiveThisPeriod(int i) const { return activeThisPeriod_[i]; }
 
@@ -415,6 +417,7 @@ private:
   friend class MeasurementTrackerImpl;
 
   // Globals (not-per-event)
+  const VectorHitBuilderEDProducer* thePhase2Matcher;
   const PixelClusterParameterEstimator* theCPE;
   
   // Locals, per-event

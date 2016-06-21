@@ -81,6 +81,7 @@ MeasurementTrackerImpl::MeasurementTrackerImpl(const edm::ParameterSet&         
 				       const PixelClusterParameterEstimator* pixelCPE,
 				       const StripClusterParameterEstimator* stripCPE,
 				       const SiStripRecHitMatcher*  hitMatcher,
+				       const VectorHitBuilderEDProducer*  ph2hitMatcher,
 				       const TrackerGeometry*  trackerGeom,
 				       const GeometricSearchTracker* geometricSearchTracker,
                                        const SiStripQuality *stripQuality,
@@ -95,7 +96,7 @@ MeasurementTrackerImpl::MeasurementTrackerImpl(const edm::ParameterSet&         
   name_(conf.getParameter<std::string>("ComponentName")),
   theStDetConditions(hitMatcher,stripCPE),
   thePxDetConditions(pixelCPE),
-  thePhase2DetConditions(pixelCPE)
+  thePhase2DetConditions(ph2hitMatcher, pixelCPE)
 {
   this->initialize();
   this->initializeStripStatus(stripQuality, stripQualityFlags, stripQualityDebugFlags);
@@ -306,7 +307,7 @@ void MeasurementTrackerImpl::addStackDet( const StackGeomDet* gd)
 {
   //since the Stack will be composed by PS or 2S, 
   //both cluster parameter estimators are needed? - right now just the thePixelCPE is used.
-  theStackDets.push_back(TkStackMeasurementDet( gd, thePxDetConditions.pixelCPE() ));
+  theStackDets.push_back(TkStackMeasurementDet( gd, thePhase2DetConditions.matcher(), thePxDetConditions.pixelCPE() ));
 }
 
 void MeasurementTrackerImpl::initGluedDet( TkGluedMeasurementDet & det)
