@@ -189,6 +189,7 @@ The link between the subdetectors described in the geometry and the `DetId::subD
 | TEC | `TEC`=6 | 6=`StripSubdetector::TEC` |
 | PixelPhase1Barrel | `PixelPhase1Barrel`=101 | 1=`PixelSubdetector::PixelBarrel` |
 | PixelPhase1EndcapSubDet | `PixelPhase1EndCap`=102 | 2=`PixelSubdetector::PixelEndcap` |
+| PixelPhase2BarrelSubDet | `PixelPhase2Barrel`=201 | 2=`PixelSubdetector::PixelBarrel` |
 | PixelPhase2EndcapSubDet | `PixelPhase2EndCap`=202 | 2=`PixelSubdetector::PixelEndcap` |
 | Phase2OTBarrel | `OTPhase2Barrel`=205 | 5=`StripSubdetector::TOB` |
 | Phase2OTEndcap | `OTPhase2EndCap`=204 | 4=`StripSubdetector::TID` |

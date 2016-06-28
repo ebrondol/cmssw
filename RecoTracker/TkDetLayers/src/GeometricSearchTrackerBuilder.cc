@@ -117,7 +117,7 @@ GeometricSearchTrackerBuilder::build(const GeometricDet* theGeometricTracker,
       }
     }
 
-    if( (*it)->type() == GeometricDet::PixelPhase1Barrel) {
+    if( ((*it)->type() == GeometricDet::PixelPhase1Barrel) || ((*it)->type() == GeometricDet::PixelPhase2Barrel)) {
       vector<const GeometricDet*> thePxlBarGeometricDetLayers = (*it)->components();
       for(vector<const GeometricDet*>::const_iterator it2=thePxlBarGeometricDetLayers.begin();
 	  it2!=thePxlBarGeometricDetLayers.end(); it2++){

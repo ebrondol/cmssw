@@ -24,6 +24,7 @@ std::ostream& operator<<( std::ostream& s, SubDetector m){
   else if ( m == P2OTEC ) return s << "Phase2OTEndcap";
   else if ( m == P1PXB ) return s << "Phase1PixelBarrel";
   else if ( m == P1PXEC ) return s << "Phase1PixelEndcap";
+  else if ( m == P2PXB ) return s << "Phase2PixelBarrel";
   else if ( m == P2PXEC ) return s << "Phase2PixelEndcap";
   else return s << "?";
 }
@@ -49,7 +50,8 @@ bool GeomDetEnumerators::isTrackerStrip(const GeomDetEnumerators::SubDetector su
 bool GeomDetEnumerators::isTrackerPixel(const GeomDetEnumerators::SubDetector subdet)
 {
   return (subdet == PixelBarrel || subdet == PixelEndcap || 
-	  subdet == P1PXB || subdet == P1PXEC || subdet == P2PXEC ||
+	  subdet == P1PXB || subdet == P1PXEC ||
+          subdet == P2PXB || subdet == P2PXEC ||
 	  subdet == P2OTB || subdet == P2OTEC); 
 }
 

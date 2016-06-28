@@ -15,7 +15,7 @@ note: see Baseline_tilted_2016_04_12.cfg for full config files
      </SpecPar>
      <SpecPar name="PixelBarrelSubDetPar">
        <PartSelector path="//PixelBarrel" />
-       <Parameter name="TkDDDStructure" value="PixelPhase1Barrel"/>
+       <Parameter name="TkDDDStructure" value="PixelPhase2Barrel"/>
      </SpecPar>
      <SpecPar name="PixelBarrelLayerPar">
       <PartSelector path="//PixelBarrelLayer0"/>

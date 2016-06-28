@@ -124,8 +124,10 @@ void MeasurementTrackerImpl::initialize()
       addDets(theTrackerGeom->detsPXB(), subIsPixel);
     } else if(tempGeomDetSubDetector == GeomDetEnumerators::SubDetector::P1PXB){
       addDets(theTrackerGeom->detsPXB(), subIsPixel);
+    } else if(tempGeomDetSubDetector == GeomDetEnumerators::SubDetector::P2PXB){
+      addPhase2Dets(theTrackerGeom->detsPXB(), subIsPixel, subIsOT);
     } else {
-      throw MeasurementDetException("MeasurementTracker ERROR: detsPXB are neither contained in PixelBarrel nor in P1PXB");
+      throw MeasurementDetException("MeasurementTracker ERROR: detsPXB are neither contained in PixelBarrel nor in P1PXB nor P2PXB");
     }
   }
 
