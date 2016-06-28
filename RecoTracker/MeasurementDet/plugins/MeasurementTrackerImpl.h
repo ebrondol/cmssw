@@ -131,7 +131,7 @@ public:
 
   void addStripDet( const GeomDet* gd);
   void addPixelDet( const GeomDet* gd);
-  void addPhase2Det( const GeomDet* gd);
+  void addPhase2OTDet( const GeomDet* gd);
 
   void addGluedDet( const GluedGeomDet* gd);
   void addStackDet( const StackGeomDet* gd);
@@ -139,7 +139,8 @@ public:
   void initGluedDet( TkGluedMeasurementDet & det);
   void initStackDet( TkStackMeasurementDet & det);
 
-  void addDets( const TrackingGeometry::DetContainer& dets, bool subIsPixel, bool subIsOT);
+  void addDets( const TrackingGeometry::DetContainer& dets, bool subIsPixel);
+  void addPhase2Dets( const TrackingGeometry::DetContainer& dets, bool subIsPixel, bool subIsOT);
 
   bool checkDets();
 
