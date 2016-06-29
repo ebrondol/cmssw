@@ -280,10 +280,8 @@ void MeasurementTrackerImpl::addDets( const TrackingGeometry::DetContainer& dets
     //Pixel or Strip GeomDetUnit
     if (gdu->isLeaf()) {
       if(subIsPixel) {
-        //std::cout << " Pixel GeomDetUnit " << (**gd).geographicalId().rawId() << std::endl;
         addPixelDet(*gd);
       } else {
-        //std::cout << " Strip GeomDetUnit " << (**gd).geographicalId().rawId() << std::endl;
         addStripDet(*gd);
       }
     } else {
@@ -314,10 +312,8 @@ void MeasurementTrackerImpl::addPhase2Dets( const TrackingGeometry::DetContainer
     if (gdu->isLeaf()) {
       if(subIsPixel) {
         if(!subIsOT) {
-          //std::cout << " Pixel GeomDetUnit " << (**gd).geographicalId().rawId() << std::endl;
           addPixelDet(*gd);
         } else {
-          //std::cout << " OT GeomDetUnit " << (**gd).geographicalId().rawId() << std::endl;
           addPhase2OTDet(*gd);
         }
       } else {
