@@ -473,7 +473,7 @@ generic_position_formula( int size,                //!< Size of this projection.
 #warning "Debug printouts in PixelCPEGeneric.cc has been commented because they cannot be compiled"
   /*   This part is commented because some variables used here are not defined !!
   if (theVerboseLevel > 20) {
-    if ( theDetParam.thePart == GeomDetEnumerators::PixelBarrel || theDetParam.thePart == GeomDetEnumerators::P1PXB ) {
+    if ( theDetParam.thePart == GeomDetEnumerators::PixelBarrel || theDetParam.thePart == GeomDetEnumerators::P1PXB || theDetParam.thePart == GeomDetEnumerators::P2PXB) {
       cout << "\t >>> We are in the Barrel." ;
     } else if ( theDetParam.thePart == GeomDetEnumerators::PixelEndcap || 
 		theDetParam.thePart == GeomDetEnumerators::P1PXEC ||
