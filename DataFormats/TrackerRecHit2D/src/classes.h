@@ -146,6 +146,7 @@ namespace DataFormats_TrackerRecHit2D {
     edm::Wrapper<edmNew::DetSetVector<edm::Ref<edmNew::DetSetVector<Phase2TrackerCluster1D>,Phase2TrackerCluster1D,edmNew::DetSetVector<Phase2TrackerCluster1D>::FindForDetSetVector> > > ph2c_w;
    
    VectorHitCollectionNew vhc1_new;
+   edm::RefProd<VectorHitCollectionNew> vhc1_new2;
    edm::Wrapper<VectorHitCollectionNew> wh1_new;
 
   };

@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 from Configuration.StandardSequences.Eras import eras
 
-process = cms.Process('RECO',eras.Phase2)
+process = cms.Process('vhRECO',eras.Phase2)
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -33,7 +33,8 @@ process.maxEvents = cms.untracked.PSet(
 
 # Input source
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring('file:step2_tilted_newDigis.root'),
+    fileNames = cms.untracked.vstring('file:step2_mu_500events.root'),
+    #fileNames = cms.untracked.vstring('/store/relval/CMSSW_8_1_0_pre7/RelValSingleMuPt10Extended/GEN-SIM-DIGI-RAW/81X_mcRun2_asymptotic_v0_2023tilted-v1/10000/2E7CB262-1534-E611-BB7A-0CC47A78A496.root'),
     secondaryFileNames = cms.untracked.vstring(),
     skipEvents = cms.untracked.uint32(0)
 )
@@ -57,7 +58,7 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
         filterName = cms.untracked.string('')
     ),
     eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
-    fileName = cms.untracked.string('file:step3.root'),
+    fileName = cms.untracked.string('file:step3_1event.root'),
     outputCommands = process.RECOSIMEventContent.outputCommands,
     splitLevel = cms.untracked.int32(0)
 )
