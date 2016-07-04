@@ -27,3 +27,7 @@
   <flags   EDM_PLUGIN="1"/>
   <flags CXXFLAGS="-g3"/>
 </library>
+<library   file="ClustersValidationTGraph.cc" name="ClustersValidationTGraph">
+  <flags   EDM_PLUGIN="1"/>
+  <flags CXXFLAGS="-g3"/>
+</library>
