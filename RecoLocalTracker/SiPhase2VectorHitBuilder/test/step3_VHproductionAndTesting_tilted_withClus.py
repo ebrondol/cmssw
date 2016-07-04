@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 from Configuration.StandardSequences.Eras import eras
 
-process = cms.Process('vhRECO',eras.Phase2)
+process = cms.Process('RECO',eras.Phase2)
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -33,8 +33,8 @@ process.maxEvents = cms.untracked.PSet(
 
 # Input source
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring('file:step2_mu_500events.root'),
-    #fileNames = cms.untracked.vstring('/store/relval/CMSSW_8_1_0_pre7/RelValSingleMuPt10Extended/GEN-SIM-DIGI-RAW/81X_mcRun2_asymptotic_v0_2023tilted-v1/10000/2E7CB262-1534-E611-BB7A-0CC47A78A496.root'),
+    #fileNames = cms.untracked.vstring('file:step2_mu_500events.root'),
+    fileNames = cms.untracked.vstring('/store/relval/CMSSW_8_1_0_pre7/RelValSingleMuPt10Extended/GEN-SIM-DIGI-RAW/81X_mcRun2_asymptotic_v0_2023tilted-v1/10000/2E7CB262-1534-E611-BB7A-0CC47A78A496.root'),
     secondaryFileNames = cms.untracked.vstring(),
     skipEvents = cms.untracked.uint32(0)
 )
@@ -59,32 +59,27 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
     ),
     eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
     fileName = cms.untracked.string('file:step3_1event.root'),
-    outputCommands = cms.untracked.vstring( ('keep *') ),
+    outputCommands = process.RECOSIMEventContent.outputCommands,
     splitLevel = cms.untracked.int32(0)
 )
 
 # debug
-process.MessageLogger = cms.Service("MessageLogger",
-                                    destinations = cms.untracked.vstring("debugVH_tilted"),
-                                    debugModules = cms.untracked.vstring("*"),
-                                    categories = cms.untracked.vstring("VectorHitBuilderEDProducer","VectorHitBuilderAlgorithm","VectorHitsBuilderValidation"),
-                                    debugVH_tilted = cms.untracked.PSet(threshold = cms.untracked.string("DEBUG"),
-                                                                       DEBUG = cms.untracked.PSet(limit = cms.untracked.int32(0)),
-                                                                       default = cms.untracked.PSet(limit = cms.untracked.int32(0)),
-                                                                       VectorHitBuilderEDProducer = cms.untracked.PSet(limit = cms.untracked.int32(-1)),
-                                                                       VectorHitBuilderAlgorithm = cms.untracked.PSet(limit = cms.untracked.int32(-1)),
-                                                                       VectorHitsBuilderValidation = cms.untracked.PSet(limit = cms.untracked.int32(-1))
-                                                                       )
-                                    )
+process.MessageLogger = cms.Service('MessageLogger',
+        debugModules = cms.untracked.vstring('siPhase2Clusters'),
+        destinations = cms.untracked.vstring('cout'),
+        cout = cms.untracked.PSet(
+                threshold = cms.untracked.string('ERROR')
+        )
+)
 
 # Analyzer
-process.analysis = cms.EDAnalyzer('VectorHitsBuilderValidation',
+process.analysis = cms.EDAnalyzer('Phase2TrackerClusterizerValidationTGraph',
     src = cms.string("siPhase2Clusters"),
-    src2 = cms.InputTag("siPhase2VectorHits", "vectorHitsAccepted"),
     links = cms.InputTag("simSiPixelDigis", "Tracker")
 )
+
 process.TFileService = cms.Service('TFileService',
-    fileName = cms.string('file:vh_validation_tilted.root')
+    fileName = cms.string('file:cluster_validation_tilted.root')
 )
 
 
@@ -95,7 +90,7 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 # Path and EndPath definitions
 process.raw2digi_step = cms.Path(process.RawToDigi)
 process.L1Reco_step = cms.Path(process.L1Reco)
-process.trackerlocalreco_step  = cms.Path(process.trackerlocalreco+process.siPhase2VectorHits)
+process.trackerlocalreco_step  = cms.Path(process.trackerlocalreco)
 process.analysis_step = cms.Path(process.analysis)
 process.RECOSIMoutput_step = cms.EndPath(process.RECOSIMoutput)
 

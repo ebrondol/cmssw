@@ -131,10 +131,11 @@ Global3DVector VectorHit::globalDirection( const Surface& surf ) {
   return g;
 }
 
-double VectorHit::curvatureORphi(std::string curvORphi) const {
+std::pair<double,double> VectorHit::curvatureORphi(std::string curvORphi) const {
 
 //std::cout << "VectorHit::curvature" << std::endl;
   double curvature = 0.0;
+  double errorCurvature = 0.0;
   double phi = 0.0;
 
   const StackGeomDet* stackDet = dynamic_cast< const StackGeomDet* >(det());
@@ -155,13 +156,40 @@ double VectorHit::curvatureORphi(std::string curvORphi) const {
   Global3DPoint gPositionLower = geomDetLower->surface().toGlobal(lpLower);
   Global3DPoint gPositionUpper = geomDetUpper->surface().toGlobal(lpUpper);
 
-  //insert lower and upper in the glocal sor
+  //insert lower and upper in the global sor
   if(gPositionLower.perp() > gPositionUpper.perp()){
     gPositionLower = geomDetUpper->surface().toGlobal(lpUpper);
     gPositionUpper = geomDetLower->surface().toGlobal(lpLower);
   }
+
 if(curvORphi == "curvature") std::cout << "gPositionLower: " << gPositionLower << std::endl;
 if(curvORphi == "curvature") std::cout << "gPositionUpper: " << gPositionUpper << std::endl;
+
+  //errors
+  float pitchXlower = topoLower->pitch().first;
+  float pitchYlower = topoLower->pitch().second;
+
+  float pitchXupper = topoUpper->pitch().first;
+  float pitchYupper = topoUpper->pitch().second;
+
+  LocalError leLower( pow(pitchXlower, 2) / 12, 0, pow(pitchYlower, 2) / 12);               // e2_xx, e2_xy, e2_yy
+  LocalError leUpper( pow(pitchXupper, 2) / 12, 0, pow(pitchYupper, 2) / 12);               // e2_xx, e2_xy, e2_yy
+
+  GlobalError gErrorLower( ErrorFrameTransformer().transform( leLower, geomDetLower->surface() ));
+  GlobalError gErrorUpper( ErrorFrameTransformer().transform( leUpper, geomDetUpper->surface() ));
+
+  if(gPositionLower.perp() > gPositionUpper.perp()){
+    gErrorLower = ErrorFrameTransformer().transform( leUpper, geomDetUpper->surface() );
+    gErrorUpper = ErrorFrameTransformer().transform( leLower, geomDetLower->surface() );
+  }
+
+if(curvORphi == "curvature") std::cout << "gErrorLower (xx): " << gErrorLower.cxx() << std::endl;
+if(curvORphi == "curvature") std::cout << "            (yy): " << gErrorLower.cyy() << std::endl;
+if(curvORphi == "curvature") std::cout << "            (yx): " << gErrorLower.cyx() << std::endl;
+if(curvORphi == "curvature") std::cout << "gErrorUpper (xx): " << gErrorUpper.cxx() << std::endl;
+if(curvORphi == "curvature") std::cout << "            (yy): " << gErrorUpper.cyy() << std::endl;
+if(curvORphi == "curvature") std::cout << "            (yx): " << gErrorUpper.cyx() << std::endl;
+
 
   double h1 = gPositionLower.x()*gPositionUpper.y() - gPositionUpper.x()*gPositionLower.y();
 
@@ -248,6 +276,7 @@ if(curvORphi == "curvature") std::cout << "gPositionUpper: " << gPositionUpper <
     jacobian[3][2] = N[2]; // dphi/(dx1,dy1,dx2,dy2)
     jacobian[3][3] = N[3]; // dphi/(dx1,dy1,dx2,dy2)
 
+    //assign correct sign to the curvature errors
     if( (signCurv < 0 && curvature > 0 ) || (signCurv > 0 && curvature < 0 )){
       curvature=-curvature;
       for(int i = 0; i < 4; i++){
@@ -262,14 +291,43 @@ if(curvORphi == "curvature") std::cout << "gPositionUpper: " << gPositionUpper <
         phi=phi-2.*M_PI;
     }
 
+    //computing the curvature error
+    AlgebraicVector4 curvatureJacobian;
+    for(int i = 0; i < 4; i++){
+      curvatureJacobian[i] = jacobian[2][i];
+    }
+
+    AlgebraicROOTObject<4,4>::Matrix gErrors;
+    for(int i = 0; i < 4; i++){
+      for(int j = 0; j < 4; j++){
+        gErrors[i][j] = 0.0;
+      }
+    }
+
+    gErrors[0][0] = gErrorLower.cxx();
+    gErrors[0][1] = gErrorLower.cyx();
+    gErrors[1][0] = gErrorLower.cyx();
+    gErrors[1][1] = gErrorLower.cyy();
+    gErrors[2][2] = gErrorUpper.cxx();
+    gErrors[2][3] = gErrorUpper.cyx();
+    gErrors[3][2] = gErrorUpper.cyx();
+    gErrors[3][3] = gErrorUpper.cyy();
+
+    AlgebraicVector4 temp = curvatureJacobian;
+    temp = temp*gErrors;
+    errorCurvature = temp[0]*curvatureJacobian[0] + temp[1]*curvatureJacobian[1] + temp[2]*curvatureJacobian[2] + temp[3]*curvatureJacobian[3];
+if(curvORphi == "curvature") std::cout << "curvature: " << curvature << std::endl;
+if(curvORphi == "curvature") std::cout << "curvature error: " << errorCurvature << std::endl;
+
+
   } else {
 std::cout << " straight line!" << std::endl;
-    return 0;
+    return std::make_pair(0.0,0.0);
   }
   
-  if( curvORphi == "curvature" ) return curvature;
-  else if( curvORphi == "phi"  ) return phi;
-  else return 0.0;
+  if( curvORphi == "curvature" ) return std::make_pair(curvature,errorCurvature);
+  else if( curvORphi == "phi"  ) return std::make_pair(phi,0.0);
+  else return std::make_pair(0.0,0.0);
 
 }
 
