@@ -117,9 +117,12 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
   int module_number;
   int module_type; //1: pixel, 2: strip
   float x_global, y_global, z_global;
-  float x_local, y_local, z_local;
+  float vh_x_local, vh_y_local;
+  float vh_x_le, vh_y_le;
   float curvature, phi;
   int sim_track_id;
+  float sim_x_local, sim_y_local;
+  float sim_x_global, sim_y_global, sim_z_global;
   float deltaXVHSimHits, deltaYVHSimHits;
   unsigned int processType(99);
 
@@ -130,12 +133,18 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
   tree -> Branch("x_global",&x_global,"x_global/F");
   tree -> Branch("y_global",&y_global,"y_global/F");
   tree -> Branch("z_global",&z_global,"z_global/F");
-  tree -> Branch("x_local",&x_local,"x_local/F");
-  tree -> Branch("y_local",&y_local,"y_local/F");
-  tree -> Branch("z_local",&z_local,"z_local/F");
+  tree -> Branch("vh_x_local",&vh_x_local,"vh_x_local/F");
+  tree -> Branch("vh_y_local",&vh_y_local,"vh_y_local/F");
+  tree -> Branch("vh_x_lError",&vh_x_le,"vh_x_le/F");
+  tree -> Branch("vh_y_lError",&vh_y_le,"vh_y_le/F");
   tree -> Branch("curvature",&curvature,"curvature/F");
   tree -> Branch("phi",&phi,"phi/F");
   tree -> Branch("sim_track_id",&sim_track_id,"sim_track_id/I");
+  tree -> Branch("sim_x_local",&sim_x_local,"sim_x_local/F");
+  tree -> Branch("sim_y_local",&sim_y_local,"sim_y_local/F");
+  tree -> Branch("sim_x_global",&sim_x_global,"sim_x_global/F");
+  tree -> Branch("sim_y_global",&sim_y_global,"sim_y_global/F");
+  tree -> Branch("sim_z_global",&sim_z_global,"sim_z_global/F");
   tree -> Branch("deltaXVHSimHits",&deltaXVHSimHits,"deltaXVHSimHits/F");
   tree -> Branch("deltaYVHSimHits",&deltaYVHSimHits,"deltaYVHSimHits/F");
   tree -> Branch("processType",&processType,"processType/i");
@@ -207,10 +216,14 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
 
          LogDebug("VectorHitsBuilderValidation") << " vh analyzing ..." ;
          Local3DPoint localPosVH = vhIt->localPosition();
-         x_local = localPosVH.x();
-         y_local = localPosVH.y();
-         z_local = localPosVH.z();
+         vh_x_local = localPosVH.x();
+         vh_y_local = localPosVH.y();
          LogTrace("VectorHitsBuilderValidation") << "local VH position " << localPosVH << std::endl;
+
+         LocalError localErrVH = vhIt->localPositionError();
+         vh_x_le = localErrVH.xx();
+         vh_y_le = localErrVH.yy();
+         LogTrace("VectorHitsBuilderValidation") << "local VH error " << localErrVH << std::endl;
 
          Global3DPoint globalPosVH = geomDet->surface().toGlobal(localPosVH);
          x_global = globalPosVH.x();
@@ -227,8 +240,8 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
          dirVHs.push_back(globalDirVH);
          LogTrace("VectorHitsBuilderValidation") << "global VH direction " << globalDirVH << std::endl;
 
-         curvature = vh.curvatureORphi("curvature");
-         phi = vh.curvatureORphi("phi");
+         curvature = vh.curvatureORphi("curvature").first;
+         phi = vh.curvatureORphi("phi").first;
 
          // Fill the position histograms
          trackerLayoutRZ_[0]->SetPoint(nVHsTot, globalPosVH.z(), globalPosVH.perp());
@@ -237,24 +250,27 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
          if (layer < 100) trackerLayoutXYBar_->SetPoint(nVHsTot, globalPosVH.x(), globalPosVH.y());
          else trackerLayoutXYEC_->SetPoint(nVHsTot, globalPosVH.x(), globalPosVH.y());
 
-         histogramLayer->second.localPosXY[0]->SetPoint(nVHsTot, localPosVH.x(), localPosVH.y());
+         histogramLayer->second.localPosXY[0]->SetPoint(nVHsTot, vh_x_local, vh_y_local);
          histogramLayer->second.globalPosXY[0]->SetPoint(nVHsTot, globalPosVH.x(), globalPosVH.y());
 
-         localPosXvsDeltaX_[0]->SetPoint(nVHsTot, localPosVH.x(), localDirVH.x());
-         localPosYvsDeltaY_[0]->SetPoint(nVHsTot, localPosVH.y(), localDirVH.y());
+         localPosXvsDeltaX_[0]->SetPoint(nVHsTot, vh_x_local, localDirVH.x());
+         localPosYvsDeltaY_[0]->SetPoint(nVHsTot, vh_y_local, localDirVH.y());
 
          // Pixel module
-        if (layer == 1 || layer == 2 || layer == 3) {
+         const StackGeomDet* stackDet = dynamic_cast<const StackGeomDet*>(geomDet);
+         const PixelGeomDetUnit* geomDetLower = dynamic_cast< const PixelGeomDetUnit* >(stackDet->lowerDet());
+          const PixelTopology * topoLower = &geomDetLower->specificTopology();
+        if (topoLower->ncolumns() == 32) {
 
            module_type = 1;
            trackerLayoutRZ_[1]->SetPoint(nVHsPSTot, globalPosVH.z(), globalPosVH.perp());
            trackerLayoutXY_[1]->SetPoint(nVHsPSTot, globalPosVH.x(), globalPosVH.y());
 
-           histogramLayer->second.localPosXY[1]->SetPoint(nVHsPSTot, localPosVH.x(), localPosVH.y());
+           histogramLayer->second.localPosXY[1]->SetPoint(nVHsPSTot, vh_x_local, vh_y_local);
            histogramLayer->second.globalPosXY[1]->SetPoint(nVHsPSTot, globalPosVH.x(), globalPosVH.y());
 
-           localPosXvsDeltaX_[1]->SetPoint(nVHsPSTot, localPosVH.x(), localDirVH.x());
-           localPosYvsDeltaY_[1]->SetPoint(nVHsPSTot, localPosVH.y(), localDirVH.y());
+           localPosXvsDeltaX_[1]->SetPoint(nVHsPSTot, vh_x_local, localDirVH.x());
+           localPosYvsDeltaY_[1]->SetPoint(nVHsPSTot, vh_y_local, localDirVH.y());
 
            ++nVHsPS;
            ++nVHsPSTot;
@@ -262,25 +278,24 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
          }
 
          // Strip module
-        else if (layer == 4 || layer == 5 || layer == 6) {
+        else if (topoLower->ncolumns() == 2) {
            module_type = 2;
            trackerLayoutRZ_[2]->SetPoint(nVHs2STot, globalPosVH.z(), globalPosVH.perp());
            trackerLayoutXY_[2]->SetPoint(nVHs2STot, globalPosVH.x(), globalPosVH.y());
 
-           histogramLayer->second.localPosXY[2]->SetPoint(nVHs2STot, localPosVH.x(), localPosVH.y());
+           histogramLayer->second.localPosXY[2]->SetPoint(nVHs2STot, vh_x_local, vh_y_local);
            histogramLayer->second.globalPosXY[2]->SetPoint(nVHs2STot, globalPosVH.x(), globalPosVH.y());
 
-           localPosXvsDeltaX_[2]->SetPoint(nVHs2STot, localPosVH.x(), localDirVH.x());
-           localPosYvsDeltaY_[2]->SetPoint(nVHs2STot, localPosVH.y(), localDirVH.y());
+           localPosXvsDeltaX_[2]->SetPoint(nVHs2STot, vh_x_local, localDirVH.x());
+           localPosYvsDeltaY_[2]->SetPoint(nVHs2STot, vh_y_local, localDirVH.y());
 
            ++nVHs2S;
            ++nVHs2STot;
          }
+         LogTrace("VectorHitsBuilderValidation") << "module type " << module_type << std::endl;
 
          // get the geomDetUnit of the clusters
          LogDebug("VectorHitsBuilderValidation") << "print Clusters into the VH:" << std::endl;
-         const StackGeomDet* stackDet = dynamic_cast<const StackGeomDet*>(geomDet);
-         const GeomDetUnit* geomDetLower = stackDet->lowerDet();
          printCluster(geomDetLower,vhIt->lowerClusterRef());
          const GeomDetUnit* geomDetUpper = stackDet->upperDet();
          printCluster(geomDetUpper,vhIt->upperClusterRef());
@@ -298,8 +313,10 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
            if (trkid.size()==0) continue;
            clusterSimTrackIds.push_back(LowerSimTrackId);
            simTkIds.insert(trkid.begin(),trkid.end());
+           sim_track_id = LowerSimTrackId;
+           LogTrace("VectorHitsBuilderValidation") << "LowerSimTrackId " << LowerSimTrackId << std::endl;
          }
-
+/*
          for (unsigned int istr(0); istr < (*(vhIt->upperClusterRef().cluster_phase2OT())).size(); ++istr) {
            uint32_t channel = Phase2TrackerDigi::pixelToChannel((*(vhIt->upperClusterRef().cluster_phase2OT())).firstRow() + istr, (*(vhIt->upperClusterRef().cluster_phase2OT())).column());
            DetId detIdCluster = geomDetUpper->geographicalId();
@@ -309,7 +326,7 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
            clusterSimTrackIds.push_back(UpperSimTrackId);
            simTkIds.insert(trkid.begin(),trkid.end());
          }
-
+*/
 
            // loop over all simHits
            unsigned int totalSimHits(0);
@@ -325,24 +342,29 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
                if(std::find(clusterSimTrackIds.begin(), clusterSimTrackIds.end(), hitIt->trackId()) != clusterSimTrackIds.end()){
 
                  Local3DPoint localPosHit(hitIt->localPosition());
+                 sim_x_local = localPosHit.x();
+                 sim_y_local = localPosHit.y();
 
-                 sim_track_id = hitIt->trackId();
-                 deltaXVHSimHits = localPosVH.x() - localPosHit.x();
-                 deltaYVHSimHits = localPosVH.y() - localPosHit.y();
+                 deltaXVHSimHits = vh_x_local - sim_x_local;
+                 deltaYVHSimHits = vh_y_local - sim_y_local;
 
+                 Global3DPoint globalPosHit = geomDetLower->surface().toGlobal(localPosHit);
+                 sim_x_global = globalPosHit.x();
+                 sim_y_global = globalPosHit.y();
+                 sim_z_global = globalPosHit.z();
 
-                 histogramLayer->second.deltaXVHSimHits[0]->Fill(localPosVH.x() - localPosHit.x());
-                 histogramLayer->second.deltaYVHSimHits[0]->Fill(localPosVH.y() - localPosHit.y());
+                 histogramLayer->second.deltaXVHSimHits[0]->Fill(vh_x_local - sim_x_local);
+                 histogramLayer->second.deltaYVHSimHits[0]->Fill(vh_y_local - sim_y_local);
 
                  // Pixel module
                 if (layer == 1 || layer == 2 || layer == 3) {
-                     histogramLayer->second.deltaXVHSimHits[1]->Fill(localPosVH.x() - localPosHit.x());
-                     histogramLayer->second.deltaYVHSimHits[1]->Fill(localPosVH.y() - localPosHit.y());
+                     histogramLayer->second.deltaXVHSimHits[1]->Fill(vh_x_local - sim_x_local);
+                     histogramLayer->second.deltaYVHSimHits[1]->Fill(vh_y_local - sim_y_local);
                  }
                  // Strip module
                  else if (layer == 4 || layer == 5 || layer == 6) {
-                     histogramLayer->second.deltaXVHSimHits[2]->Fill(localPosVH.x() - localPosHit.x());
-                     histogramLayer->second.deltaYVHSimHits[2]->Fill(localPosVH.y() - localPosHit.y());
+                     histogramLayer->second.deltaXVHSimHits[2]->Fill(vh_x_local - sim_x_local);
+                     histogramLayer->second.deltaYVHSimHits[2]->Fill(vh_y_local - sim_y_local);
                  }
 
                  ++totalSimHits;
@@ -354,18 +376,18 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
                  processType = hitIt->processType();
 
                  if (simTrackIt->second.vertIndex() == 0 and (processType == 2 || processType == 7 || processType == 9 || processType == 11 || processType == 13 || processType == 15)) {
-                     histogramLayer->second.deltaXVHSimHits_P[0]->Fill(localPosVH.x() - localPosHit.x());
-                     histogramLayer->second.deltaYVHSimHits_P[0]->Fill(localPosVH.y() - localPosHit.y());
+                     histogramLayer->second.deltaXVHSimHits_P[0]->Fill(vh_x_local - sim_x_local);
+                     histogramLayer->second.deltaYVHSimHits_P[0]->Fill(vh_y_local - sim_y_local);
 
                      // Pixel module
                      if (layer == 1 || layer == 2 || layer == 3) {
-                         histogramLayer->second.deltaXVHSimHits_P[1]->Fill(localPosVH.x() - localPosHit.x());
-                         histogramLayer->second.deltaYVHSimHits_P[1]->Fill(localPosVH.y() - localPosHit.y());
+                         histogramLayer->second.deltaXVHSimHits_P[1]->Fill(vh_x_local - sim_x_local);
+                         histogramLayer->second.deltaYVHSimHits_P[1]->Fill(vh_y_local - sim_y_local);
                      }
                      // Strip module
                      else if (layer == 4 || layer == 5 || layer == 6) {
-                         histogramLayer->second.deltaXVHSimHits_P[2]->Fill(localPosVH.x() - localPosHit.x());
-                         histogramLayer->second.deltaYVHSimHits_P[2]->Fill(localPosVH.y() - localPosHit.y());
+                         histogramLayer->second.deltaXVHSimHits_P[2]->Fill(vh_x_local - sim_x_local);
+                         histogramLayer->second.deltaYVHSimHits_P[2]->Fill(vh_y_local - sim_y_local);
                      }
 
                      ++primarySimHits;
