@@ -73,7 +73,7 @@ class VectorHit GCC11_FINAL : public BaseTrackerRecHit {
 
   virtual double chi2() const { return theChi2; }
   virtual int dimension() const override { return theDimension; }
-  double curvatureORphi(std::string curvORphi = "curvature") const ;
+  std::pair<double,double> curvatureORphi(std::string curvORphi = "curvature") const ;
 
   ClusterRef lowerCluster() const { return theLowerCluster.cluster_phase2OT(); }
   ClusterRef upperCluster() const { return theUpperCluster.cluster_phase2OT(); }
