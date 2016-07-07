@@ -42,6 +42,8 @@ void SeedingOTEDProducer::produce(edm::Event& event, const edm::EventSetup& es)
   es.get<CkfComponentsRecord>().get(measurementTrackerHandle);
   edm::Handle<MeasurementTrackerEvent> measurementTrackerEvent;
   event.getByToken(tkMeasEvent,measurementTrackerEvent);
+
+  const DetLayer* barrelOTLayer2 = measurementTrackerHandle->geometricSearchTracker()->tobLayers().at(1);
   layerMeasurements = new LayerMeasurements(*measurementTrackerHandle, *measurementTrackerEvent);
  
   edm::ESHandle<Chi2MeasurementEstimatorBase> est;
@@ -60,30 +62,39 @@ void SeedingOTEDProducer::produce(edm::Event& event, const edm::EventSetup& es)
   edm::Handle< VectorHitCollectionNew > vhs;
   event.getByToken(vhProducer, vhs);
 
-  edm::ESHandle< ClusterParameterEstimator<Phase2TrackerCluster1D> > parameterestimator;
+  edm::ESHandle< Phase2StripCPEGeometric > parameterestimator;
   es.get<TkStripCPERecord>().get(cpe, parameterestimator); 
-//  const StripClusterParameterEstimator &stripcpe(*parameterestimator);
+  const Phase2StripCPEGeometric & cpeOT(*parameterestimator);
 
-  run(vhs);
+  run(vhs, cpeOT, barrelOTLayer2);
 
   std::cout << "SeedingOT::produce() end" << std::endl;
 
 }
 
-void SeedingOTEDProducer::run(edm::Handle< VectorHitCollectionNew > VHs){
+void SeedingOTEDProducer::run(edm::Handle< VectorHitCollectionNew > VHs, 
+                              const Phase2StripCPEGeometric & cpe,
+                              const DetLayer* layerSearch){
 
   const VectorHitCollectionNew& input = *VHs;
 
   //seeds are built in the L3 of the OT
-  VectorHitCollectionNew VHseeds;
+  std::vector<VectorHit> VHseeds;
   if (input.size() > 0 ) {  
     std::cout << "initial VH collection size = " << input.size() << std::endl;
     for (auto DSViter : input) {
       std::cout << "the ID from the DSViter = " << DSViter.id() << std::endl; 
       std::cout << "the Layer is " << checkLayer(DSViter.id()) << std::endl; 
-//      if(checkLayer(DSViter.id()) == 3)
-//        VHseeds.push_back(**DSViter);
+      if(checkLayer(DSViter.id()) == 3){
+        for(auto vh : DSViter)
+          VHseeds.push_back(vh);
+      }
     }
+  }
+
+
+  for(auto seeds : VHseeds){
+
   }
 
   return;
