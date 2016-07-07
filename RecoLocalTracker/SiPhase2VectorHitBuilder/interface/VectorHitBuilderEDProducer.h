@@ -20,7 +20,7 @@ class VectorHitBuilderEDProducer : public edm::EDProducer
 
   explicit VectorHitBuilderEDProducer(const edm::ParameterSet&);
   virtual ~VectorHitBuilderEDProducer();
-  virtual void produce(edm::Event&, const edm::EventSetup&);
+  virtual void produce(edm::Event&, const edm::EventSetup&) override;
   void setupAlgorithm(edm::ParameterSet const& conf);
   void run(edm::Handle< edmNew::DetSetVector<Phase2TrackerCluster1D> > clusters,
            edmNew::DetSetVector<Phase2TrackerCluster1D>& clustersAcc, edmNew::DetSetVector<Phase2TrackerCluster1D>& clustersRej,
