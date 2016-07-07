@@ -29,7 +29,9 @@ class SeedingOTEDProducer : public edm::EDProducer
 
   static void fillDescriptions(edm::ConfigurationDescriptions&);
 
-  void run(edm::Handle< VectorHitCollectionNew > VHs);
+  void run(edm::Handle< VectorHitCollectionNew > VHs, 
+           const Phase2StripCPEGeometric & cpe,
+           const DetLayer* layerSearch);
   unsigned int checkLayer( unsigned int iidd );
 
  private:
