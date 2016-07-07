@@ -7,7 +7,6 @@
 
 SiPhase2RecHitMatcherESProducer::SiPhase2RecHitMatcherESProducer(const edm::ParameterSet & p) 
 {
-  std::cout << "ci siamo! :SiPhase2RecHitMatcherESProduce" << std::endl;
   name = p.getParameter<std::string>("ComponentName");
   pset_ = p;
   setWhatProduced(this,name);
@@ -18,7 +17,6 @@ produce(const TkPhase2OTCPERecord & iRecord)
 { 
   if( name == "SiPhase2VectorHitMatcher" ){
     matcher_  = std::make_shared<VectorHitBuilderEDProducer>(pset_);
-//    matcher_  = std::shared_ptr<VectorHitBuilderEDProducer>(new VectorHitBuilderEDProducer(pset_));
 
     edm::ESHandle<TrackerGeometry> tGeomHandle;
     edm::ESHandle<TrackerTopology> tTopoHandle;
