@@ -20,8 +20,11 @@
 <use   name="RecoLocalTracker/SiPixelRecHits"/>
 <use   name="RecoLocalTracker/SiStripRecHitConverter"/>
 <use   name="RecoLocalTracker/SiPhase2VectorHitBuilder"/>
+<use   name="RecoLocalTracker/Phase2TrackerRecHits"/>
 <use   name="RecoTracker/TransientTrackingRecHit"/>
 <use   name="TrackingTools/TrajectoryState"/>
 <use   name="TrackingTools/TransientTrackingRecHit"/>
+<use   name="TrackingTools/KalmanUpdators"/>
 <use   name="RecoTracker/TkDetLayers"/>
+<use   name="RecoTracker/Record"/>
 
