@@ -1,6 +1,5 @@
 #include "DataFormats/TrackerRecHit2D/interface/VectorHit.h"
 #include "Geometry/TrackerGeometryBuilder/interface/StackGeomDet.h"
-#include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
 
 VectorHit::VectorHit(const VectorHit& vh):
   BaseTrackerRecHit(*vh.det(), trackerHitRTTI::vector),
@@ -125,66 +124,77 @@ AlgebraicVector VectorHit::parameters() const {
 
 }
 
-Global3DVector VectorHit::globalDelta() {
+Global3DPoint VectorHit::lowerGlobalPos() const {
+  const StackGeomDet* stackDet = dynamic_cast< const StackGeomDet* >(det());
+  const PixelGeomDetUnit* geomDetLower = dynamic_cast< const PixelGeomDetUnit* >(stackDet->lowerDet());
+  return phase2clusterGlobalPos(geomDetLower, lowerCluster());
+}
+
+Global3DPoint VectorHit::upperGlobalPos() const {
+  const StackGeomDet* stackDet = dynamic_cast< const StackGeomDet* >(det());
+  const PixelGeomDetUnit* geomDetUpper = dynamic_cast< const PixelGeomDetUnit* >(stackDet->upperDet());
+  return phase2clusterGlobalPos(geomDetUpper, upperCluster());
+}
+
+Global3DPoint VectorHit::phase2clusterGlobalPos(const PixelGeomDetUnit* geomDet, ClusterRef cluster) const {
+  const PixelTopology * topo = &geomDet->specificTopology();
+  float ix = cluster->center();
+  float iy = cluster->column()+0.5; // halfway the column
+  LocalPoint lp( topo->localX(ix), topo->localY(iy), 0 );          // x, y, z
+  Global3DPoint gp = geomDet->surface().toGlobal(lp);
+  return gp;
+}
+
+GlobalError VectorHit::lowerGlobalPosErr() const {
+  const StackGeomDet* stackDet = dynamic_cast< const StackGeomDet* >(det());
+  const PixelGeomDetUnit* geomDetLower = dynamic_cast< const PixelGeomDetUnit* >(stackDet->lowerDet());
+  return phase2clusterGlobalPosErr(geomDetLower);
+}
+
+GlobalError VectorHit::upperGlobalPosErr() const {
+  const StackGeomDet* stackDet = dynamic_cast< const StackGeomDet* >(det());
+  const PixelGeomDetUnit* geomDetUpper = dynamic_cast< const PixelGeomDetUnit* >(stackDet->upperDet());
+  return phase2clusterGlobalPosErr(geomDetUpper);
+}
+
+GlobalError VectorHit::phase2clusterGlobalPosErr(const PixelGeomDetUnit* geomDet) const {
+  const PixelTopology * topo = &geomDet->specificTopology();
+  float pitchX = topo->pitch().first;
+  float pitchY = topo->pitch().second;
+  LocalError le( pow(pitchX, 2) / 12, 0, pow(pitchY, 2) / 12);               // e2_xx, e2_xy, e2_yy
+  GlobalError ge( ErrorFrameTransformer().transform( le, geomDet->surface() ));
+  return ge;
+}
+
+Global3DVector VectorHit::globalDelta() const {
   Local3DVector theLocalDelta = LocalVector(theDirection.x()*theDirection.z(), theDirection.y()*theDirection.z(), theDirection.z());
   Global3DVector g = det()->surface().toGlobal(theLocalDelta);
   return g;
 }
 
-Global3DVector VectorHit::globalDirection() {
+Global3DVector VectorHit::globalDirection() const {
   return  (det()->surface().toGlobal(localDirection()));
 }
 
 std::pair<double,double> VectorHit::curvatureORphi(std::string curvORphi) const {
 
-//std::cout << "VectorHit::curvature" << std::endl;
   double curvature = 0.0;
   double errorCurvature = 0.0;
   double phi = 0.0;
 
-  const StackGeomDet* stackDet = dynamic_cast< const StackGeomDet* >(det());
-  const PixelGeomDetUnit* geomDetLower = dynamic_cast< const PixelGeomDetUnit* >(stackDet->lowerDet());
-  const PixelGeomDetUnit* geomDetUpper = dynamic_cast< const PixelGeomDetUnit* >(stackDet->upperDet());
+  //global pos and errors
+  Global3DPoint gPositionLower = lowerGlobalPos();
+  Global3DPoint gPositionUpper = upperGlobalPos();
 
-  const PixelTopology * topoLower = &geomDetLower->specificTopology();
-  const PixelTopology * topoUpper = &geomDetUpper->specificTopology();
-
-  float ixLower = lowerCluster()->center();
-  float iyLower = lowerCluster()->column()+0.5; // halfway the column
-  float ixUpper = upperCluster()->center();
-  float iyUpper = upperCluster()->column()+0.5; // halfway the column
-
-  LocalPoint lpLower( topoLower->localX(ixLower), topoLower->localY(iyLower), 0 );          // x, y, z
-  LocalPoint lpUpper( topoUpper->localX(ixUpper), topoUpper->localY(iyUpper), 0 );          // x, y, z
-
-  Global3DPoint gPositionLower = geomDetLower->surface().toGlobal(lpLower);
-  Global3DPoint gPositionUpper = geomDetUpper->surface().toGlobal(lpUpper);
+  GlobalError gErrorLower = lowerGlobalPosErr();
+  GlobalError gErrorUpper = upperGlobalPosErr();
 
   //insert lower and upper in the global sor
   if(gPositionLower.perp() > gPositionUpper.perp()){
-    gPositionLower = geomDetUpper->surface().toGlobal(lpUpper);
-    gPositionUpper = geomDetLower->surface().toGlobal(lpLower);
-  }
-
-if(curvORphi == "curvature") std::cout << "gPositionLower: " << gPositionLower << std::endl;
-if(curvORphi == "curvature") std::cout << "gPositionUpper: " << gPositionUpper << std::endl;
-
-  //errors
-  float pitchXlower = topoLower->pitch().first;
-  float pitchYlower = topoLower->pitch().second;
-
-  float pitchXupper = topoUpper->pitch().first;
-  float pitchYupper = topoUpper->pitch().second;
-
-  LocalError leLower( pow(pitchXlower, 2) / 12, 0, pow(pitchYlower, 2) / 12);               // e2_xx, e2_xy, e2_yy
-  LocalError leUpper( pow(pitchXupper, 2) / 12, 0, pow(pitchYupper, 2) / 12);               // e2_xx, e2_xy, e2_yy
-
-  GlobalError gErrorLower( ErrorFrameTransformer().transform( leLower, geomDetLower->surface() ));
-  GlobalError gErrorUpper( ErrorFrameTransformer().transform( leUpper, geomDetUpper->surface() ));
-
-  if(gPositionLower.perp() > gPositionUpper.perp()){
-    gErrorLower = ErrorFrameTransformer().transform( leUpper, geomDetUpper->surface() );
-    gErrorUpper = ErrorFrameTransformer().transform( leLower, geomDetLower->surface() );
+    gPositionLower = upperGlobalPos();
+    gPositionUpper = lowerGlobalPos();
+    gErrorLower = upperGlobalPosErr();
+    gErrorUpper = lowerGlobalPosErr();
   }
 
   double h1 = gPositionLower.x()*gPositionUpper.y() - gPositionUpper.x()*gPositionLower.y();
@@ -409,12 +419,16 @@ AlgebraicSymMatrix VectorHit::parametersError() const {
 
 std::ostream& operator<<(std::ostream& os, const VectorHit& vh) {
 
-  os << " DetId: " << vh.geographicalId() << "\n" <<
-        " Pos: " << vh.localPosition() << "\n" <<
-        " Dir: " << vh.localDirection() << "\n" <<
-        " Cov: " << vh.parametersError() << "\n" <<
-        " Dim: " << vh.dimension() << "\n" <<
-        " chi2/ndof: " << vh.chi2() << "/" << vh.degreesOfFreedom();
+  os << " VectorHit create in the DetId#: " << vh.geographicalId() << "\n" <<
+        " Vectorhit local position      : " << vh.localPosition() << "\n" <<
+        " Vectorhit local direction     : " << vh.localDirection() << "\n" <<
+        " Vectorhit global direction    : " << vh.globalDirection() << "\n" <<
+        " Vectorhit global delta        : " << vh.globalDelta() << "\n" <<
+        //" Cov: " << vh.parametersError() << "\n" <<
+        //" Dim: " << vh.dimension() << "\n" <<
+        //" chi2/ndof: " << vh.chi2() << "/" << vh.degreesOfFreedom() << "\n" <<
+        " Lower cluster global position : " << vh.lowerGlobalPos() << "\n" <<
+        " Upper cluster global position : " << vh.upperGlobalPos();
 
   return os;
 }

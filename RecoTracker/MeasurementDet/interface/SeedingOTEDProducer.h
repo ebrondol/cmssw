@@ -12,7 +12,6 @@
 #include "DataFormats/TrackerRecHit2D/interface/VectorHit.h"
 #include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 #include "TrackingTools/MeasurementDet/interface/LayerMeasurements.h"
-#include "RecoLocalTracker/Phase2TrackerRecHits/interface/Phase2StripCPEGeometric.h"
 
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -30,9 +29,10 @@ class SeedingOTEDProducer : public edm::EDProducer
   static void fillDescriptions(edm::ConfigurationDescriptions&);
 
   void run(edm::Handle< VectorHitCollectionNew > VHs, 
-           const Phase2StripCPEGeometric & cpe,
            const DetLayer* layerSearch);
   unsigned int checkLayer( unsigned int iidd );
+  std::vector<VectorHit> collectVHsInput( edm::Handle< VectorHitCollectionNew > VHs );
+  AlgebraicSymMatrix assign44To55(AlgebraicSymMatrix mat44);
 
  private:
 
@@ -43,7 +43,7 @@ class SeedingOTEDProducer : public edm::EDProducer
   const Propagator* propagator;
   const MagneticField* magField;
   const edm::EDGetTokenT<MeasurementTrackerEvent> tkMeasEvent;
-  std::string cpe;
+
 };
 
 #endif

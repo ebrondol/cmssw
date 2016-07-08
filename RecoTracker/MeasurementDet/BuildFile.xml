@@ -25,6 +25,7 @@
 <use   name="TrackingTools/TrajectoryState"/>
 <use   name="TrackingTools/TransientTrackingRecHit"/>
 <use   name="TrackingTools/KalmanUpdators"/>
+<use   name="TrackingTools/MeasurementDet"/>
 <use   name="RecoTracker/TkDetLayers"/>
 <use   name="RecoTracker/Record"/>
 
