@@ -125,10 +125,14 @@ AlgebraicVector VectorHit::parameters() const {
 
 }
 
-Global3DVector VectorHit::globalDirection( const Surface& surf ) {
+Global3DVector VectorHit::globalDelta() {
   Local3DVector theLocalDelta = LocalVector(theDirection.x()*theDirection.z(), theDirection.y()*theDirection.z(), theDirection.z());
-  Global3DVector g = surf.toGlobal(theLocalDelta);
+  Global3DVector g = det()->surface().toGlobal(theLocalDelta);
   return g;
+}
+
+Global3DVector VectorHit::globalDirection() {
+  return  (det()->surface().toGlobal(localDirection()));
 }
 
 std::pair<double,double> VectorHit::curvatureORphi(std::string curvORphi) const {
@@ -183,14 +187,6 @@ if(curvORphi == "curvature") std::cout << "gPositionUpper: " << gPositionUpper <
     gErrorUpper = ErrorFrameTransformer().transform( leLower, geomDetLower->surface() );
   }
 
-if(curvORphi == "curvature") std::cout << "gErrorLower (xx): " << gErrorLower.cxx() << std::endl;
-if(curvORphi == "curvature") std::cout << "            (yy): " << gErrorLower.cyy() << std::endl;
-if(curvORphi == "curvature") std::cout << "            (yx): " << gErrorLower.cyx() << std::endl;
-if(curvORphi == "curvature") std::cout << "gErrorUpper (xx): " << gErrorUpper.cxx() << std::endl;
-if(curvORphi == "curvature") std::cout << "            (yy): " << gErrorUpper.cyy() << std::endl;
-if(curvORphi == "curvature") std::cout << "            (yx): " << gErrorUpper.cyx() << std::endl;
-
-
   double h1 = gPositionLower.x()*gPositionUpper.y() - gPositionUpper.x()*gPositionLower.y();
 
   //determine sign of curvature
@@ -223,15 +219,13 @@ if(curvORphi == "curvature") std::cout << "            (yx): " << gErrorUpper.cy
     double xcentre = h5/h2;
     double ycentre = h4/h2;
 
-    // tangent vector at (0/0)
-    float x0 = 0.0;
-    float y0 = 0.0;
+    //to compute phi at the cluster points
+    double xtg = gPositionLower.y() - ycentre;
+    double ytg = -( gPositionLower.x() - xcentre);
 
-    //double dx1 = gPositionLower.x() - xcentre;
-    //double dy1 = gPositionLower.y() - ycentre;
-
-    double xtg = ycentre;
-    double ytg = -(xcentre);
+    //to compute phi at the origin
+    //double xtg = ycentre;
+    //double ytg = -(xcentre);
     phi = atan2(ytg,xtg);
 
     AlgebraicROOTObject<4,4>::Matrix jacobian;
@@ -257,8 +251,14 @@ if(curvORphi == "curvature") std::cout << "            (yx): " << gErrorUpper.cy
     }
 
     AlgebraicVector2 M;
-    M[0] = (y0 - ycentre)/pow(rho,2); // dphi/dxcentre
-    M[1] =-(x0 - xcentre)/pow(rho,2); // dphi/dycentre
+    //to compute phi at the cluster points
+    M[0] = (gPositionLower.y() - ycentre)/pow(rho,2); // dphi/dxcentre
+    M[1] =-(gPositionLower.x() - xcentre)/pow(rho,2); // dphi/dycentre
+    //to compute phi at the origin
+    //float x0 = 0.0;
+    //float y0 = 0.0;
+    //M[0] = (y0 - ycentre)/pow(rho,2); // dphi/dxcentre
+    //M[1] =-(x0 - xcentre)/pow(rho,2); // dphi/dycentre
 
     AlgebraicROOTObject<2,4>::Matrix K;
     K[0][0]=(2.*gPositionLower.x()*gPositionUpper.y())/h2 - (2.*gPositionUpper.y()*h5)/pow(h2,2); // dxm/dx1
@@ -329,6 +329,23 @@ std::cout << " straight line!" << std::endl;
   else if( curvORphi == "phi"  ) return std::make_pair(phi,0.0);
   else return std::make_pair(0.0,0.0);
 
+}
+
+float VectorHit::transverseMomentum(const MagneticField* magField){
+
+  GlobalPoint center(0.0, 0.0, 0.0);
+  float magnT = magField->inTesla(center).mag();
+  double rho = 1./curvatureORphi("curvature").first;
+  return (0.003*magnT*rho);
+
+}
+
+float VectorHit::momentum(const MagneticField* magField){
+  return transverseMomentum(magField)/(1.*cos(theta()));
+}
+
+float VectorHit::theta(){
+  return globalDirection().theta();
 }
 
 AlgebraicMatrix VectorHit::projectionMatrix() const {
