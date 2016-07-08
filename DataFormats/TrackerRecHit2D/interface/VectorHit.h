@@ -19,8 +19,8 @@
 
 #include "DataFormats/Phase2TrackerCluster/interface/Phase2TrackerCluster1D.h"
 #include "DataFormats/GeometryVector/interface/LocalVector.h"
+#include "MagneticField/Engine/interface/MagneticField.h"
 
-#include "DataFormats/GeometrySurface/interface/Surface.h"
 #include "DataFormats/TrackingRecHit/interface/KfComponentsHolder.h"
 
 class VectorHit GCC11_FINAL : public BaseTrackerRecHit {
@@ -70,10 +70,14 @@ class VectorHit GCC11_FINAL : public BaseTrackerRecHit {
   AlgebraicSymMatrix parametersError() const override ;
   LocalError localPositionError() const GCC11_FINAL ;
   virtual LocalError localDirectionError() const ;
+  Global3DVector globalDirection();
 
   virtual double chi2() const { return theChi2; }
   virtual int dimension() const override { return theDimension; }
+
   std::pair<double,double> curvatureORphi(std::string curvORphi = "curvature") const ;
+  float transverseMomentum(const MagneticField* magField);
+  float momentum(const MagneticField* magField);
 
   ClusterRef lowerCluster() const { return theLowerCluster.cluster_phase2OT(); }
   ClusterRef upperCluster() const { return theUpperCluster.cluster_phase2OT(); }
@@ -85,8 +89,9 @@ class VectorHit GCC11_FINAL : public BaseTrackerRecHit {
   virtual OmniClusterRef const & firstClusterRef() const GCC11_FINAL { return theLowerCluster;}
   ClusterRef cluster()  const { return theLowerCluster.cluster_phase2OT(); }
 
-  //ERICA:change name! This method returns the delta (not the direction) in global coordinates
-  Global3DVector globalDirection( const Surface& surf );
+  //This method returns the delta in global coordinates
+  Global3DVector globalDelta();
+  float theta();
 
   /// The projection matrix relates the trajectory state parameters to the segment parameters().
   virtual AlgebraicMatrix projectionMatrix() const override;
