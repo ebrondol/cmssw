@@ -236,7 +236,7 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
          LogTrace("VectorHitsBuilderValidation") << "local VH direction " << localDirVH << std::endl;
 
          VectorHit vh = *vhIt;
-         Global3DVector globalDirVH = vh.globalDirection(geomDet->surface());
+         Global3DVector globalDirVH = vh.globalDelta();
          dirVHs.push_back(globalDirVH);
          LogTrace("VectorHitsBuilderValidation") << "global VH direction " << globalDirVH << std::endl;
 
