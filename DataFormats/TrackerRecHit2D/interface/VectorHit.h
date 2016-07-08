@@ -19,6 +19,7 @@
 
 #include "DataFormats/Phase2TrackerCluster/interface/Phase2TrackerCluster1D.h"
 #include "DataFormats/GeometryVector/interface/LocalVector.h"
+#include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
 #include "MagneticField/Engine/interface/MagneticField.h"
 
 #include "DataFormats/TrackingRecHit/interface/KfComponentsHolder.h"
@@ -70,7 +71,7 @@ class VectorHit GCC11_FINAL : public BaseTrackerRecHit {
   AlgebraicSymMatrix parametersError() const override ;
   LocalError localPositionError() const GCC11_FINAL ;
   virtual LocalError localDirectionError() const ;
-  Global3DVector globalDirection();
+  Global3DVector globalDirection() const;
 
   virtual double chi2() const { return theChi2; }
   virtual int dimension() const override { return theDimension; }
@@ -83,6 +84,15 @@ class VectorHit GCC11_FINAL : public BaseTrackerRecHit {
   ClusterRef upperCluster() const { return theUpperCluster.cluster_phase2OT(); }
   OmniClusterRef const lowerClusterRef() const { return theLowerCluster; }
   OmniClusterRef const upperClusterRef() const { return theUpperCluster; }
+
+  //FIXME::to update with a proper CPE maybe...
+  Global3DPoint lowerGlobalPos() const ;
+  Global3DPoint upperGlobalPos() const ;
+  Global3DPoint phase2clusterGlobalPos(const PixelGeomDetUnit* geomDet, ClusterRef cluster) const;
+  GlobalError lowerGlobalPosErr() const ;
+  GlobalError upperGlobalPosErr() const ;
+  GlobalError phase2clusterGlobalPosErr(const PixelGeomDetUnit* geomDet) const;
+
   virtual bool isPhase2() const override { return true; }
 
   //FIXME: I have always two clusters in a VH
@@ -90,7 +100,7 @@ class VectorHit GCC11_FINAL : public BaseTrackerRecHit {
   ClusterRef cluster()  const { return theLowerCluster.cluster_phase2OT(); }
 
   //This method returns the delta in global coordinates
-  Global3DVector globalDelta();
+  Global3DVector globalDelta() const;
   float theta();
 
   /// The projection matrix relates the trajectory state parameters to the segment parameters().
