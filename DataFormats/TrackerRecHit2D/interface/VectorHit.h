@@ -19,6 +19,7 @@
 
 #include "DataFormats/Phase2TrackerCluster/interface/Phase2TrackerCluster1D.h"
 #include "DataFormats/GeometryVector/interface/LocalVector.h"
+#include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
 #include "MagneticField/Engine/interface/MagneticField.h"
 
 #include "DataFormats/TrackingRecHit/interface/KfComponentsHolder.h"
@@ -83,6 +84,15 @@ class VectorHit GCC11_FINAL : public BaseTrackerRecHit {
   ClusterRef upperCluster() const { return theUpperCluster.cluster_phase2OT(); }
   OmniClusterRef const lowerClusterRef() const { return theLowerCluster; }
   OmniClusterRef const upperClusterRef() const { return theUpperCluster; }
+
+  //FIXME::to update with a proper CPE maybe...
+  Global3DPoint lowerGlobalPos() const ;
+  Global3DPoint upperGlobalPos() const ;
+  Global3DPoint phase2clusterGlobalPos(const PixelGeomDetUnit* geomDet, ClusterRef cluster) const;
+  GlobalError lowerGlobalPosErr() const ;
+  GlobalError upperGlobalPosErr() const ;
+  GlobalError phase2clusterGlobalPosErr(const PixelGeomDetUnit* geomDet) const;
+
   virtual bool isPhase2() const override { return true; }
 
   //FIXME: I have always two clusters in a VH
