@@ -71,7 +71,7 @@ class VectorHit GCC11_FINAL : public BaseTrackerRecHit {
   AlgebraicSymMatrix parametersError() const override ;
   LocalError localPositionError() const GCC11_FINAL ;
   virtual LocalError localDirectionError() const ;
-  Global3DVector globalDirection();
+  Global3DVector globalDirection() const;
 
   virtual double chi2() const { return theChi2; }
   virtual int dimension() const override { return theDimension; }
@@ -100,7 +100,7 @@ class VectorHit GCC11_FINAL : public BaseTrackerRecHit {
   ClusterRef cluster()  const { return theLowerCluster.cluster_phase2OT(); }
 
   //This method returns the delta in global coordinates
-  Global3DVector globalDelta();
+  Global3DVector globalDelta() const;
   float theta();
 
   /// The projection matrix relates the trajectory state parameters to the segment parameters().
