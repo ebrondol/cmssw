@@ -73,7 +73,9 @@ void SeedingOTEDProducer::produce(edm::Event& event, const edm::EventSetup& es)
 void SeedingOTEDProducer::run(edm::Handle< VectorHitCollectionNew > VHs, 
                               const DetLayer* layerSearch){
 
+  std::cout << "-----------------------------" << std::endl;
   std::vector<VectorHit> VHseeds = collectVHsInput(VHs);
+  std::cout << "-----------------------------" << std::endl;
   std::cout << "VH seeds = " << VHseeds.size() << std::endl;
 
   for(auto seed : VHseeds){
@@ -81,10 +83,8 @@ void SeedingOTEDProducer::run(edm::Handle< VectorHitCollectionNew > VHs,
     std::cout << "\tbuilding a seed for the VH: " << seed << std::endl;
     int charge = 1;
     LocalTrajectoryParameters ltpar(seed.localPosition(), seed.localDirection(), charge);
-    float pT = seed.transverseMomentum(magField);
-    std::cout << "\tpT of the vh : " << pT << std::endl;
+    //float pT = seed.transverseMomentum(magField);
     float p = seed.momentum(magField);
-    std::cout << "\tp of the vh : " << p << std::endl;
     float x = seed.localPosition().x();
     float y = seed.localPosition().y();
     float dx = seed.localDirection().x();
@@ -92,17 +92,27 @@ void SeedingOTEDProducer::run(edm::Handle< VectorHitCollectionNew > VHs,
     LocalTrajectoryParameters ltpar2(1./p, dx, dy, x, y, charge);
     AlgebraicSymMatrix mat = assign44To55(seed.parametersError());
     //FIXME::set the error on 1/p
-    //mat[4][4] = seed.curvatureORphi("curvature").second;
-    std::cout << "\tmat : " << mat << std::endl;
+    mat[4][4] = 1000;
+    std::cout << "\tltraj : " << 1./p <<","<< dx <<","<< dy <<","<< x <<","<< y <<","<< charge << std::endl;
+    std::cout << "\tmat   : " << mat << std::endl;
     LocalTrajectoryError lterr(asSMatrix<5>(mat));
     const TrajectoryStateOnSurface tsos(ltpar, lterr, seed.det()->surface(), magField);
     std::vector<TrajectoryMeasurement> tmp = layerMeasurements->measurements(*layerSearch, tsos, *propagator, *estimator);
     std::cout << "\tvh compatibles: " << tmp.size() << std::endl;
-//    for(auto tm : tmp)
-//      auto hitPossible = tob6TM.recHit();
+    LayerMeasurements::SimpleHitContainer hits;
+    layerMeasurements->recHits(hits, *layerSearch, tsos, *propagator, *estimator);
+    std::cout << "\tvhits compatibles: " << hits.size() << std::endl;
+    //std::vector<TrajectoryMeasurementGroup> tmpG = layerMeasurements->groupedMeasurements(*layerSearch, tsos, *propagator, *estimator);
+    //std::cout << "\tvh grouped compatibles: " << tmpG.size() << std::endl;
+    for(auto tm : tmp){
+      auto hitPossible = tm.recHit();
+      std::cout << "\t VH >> " << hitPossible << std::endl;
+    }
+    std::cout << "-----" << std::endl;
 
 
   }
+  std::cout << "-----------------------------" << std::endl;
 
   return;
 }
@@ -125,8 +135,16 @@ std::vector<VectorHit> SeedingOTEDProducer::collectVHsInput( edm::Handle< Vector
     std::cout << "initial VH collection size = " << input.size() << std::endl;
     for (auto DSViter : input) {
       if(checkLayer(DSViter.id()) == 3){
-        for(auto vh : DSViter)
+        for(auto vh : DSViter){
+          std::cout << " VH in layer 3 >> " << vh << std::endl;
           VHs_layer3.push_back(vh);
+        }
+      }
+
+      //just debugging for layer 2
+      if(checkLayer(DSViter.id()) == 2){
+        for(auto vh : DSViter)
+          std::cout << " VH in layer 2 >> " << vh << std::endl;
       }
     }
   }
