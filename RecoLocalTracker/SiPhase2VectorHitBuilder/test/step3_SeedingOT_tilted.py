@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 from Configuration.StandardSequences.Eras import eras
 
-process = cms.Process('vhRECO',eras.Phase2)
+process = cms.Process('vhRECO',eras.Phase2C1)
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -10,7 +10,7 @@ process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('SimGeneral.MixingModule.mixNoPU_cfi')
-process.load('Configuration.Geometry.GeometryExtended2023tiltedReco_cff')
+process.load('Configuration.Geometry.GeometryExtended2023D1Reco_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.RawToDigi_cff')
 process.load('Configuration.StandardSequences.L1Reco_cff')
@@ -85,7 +85,7 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 # Path and EndPath definitions
 process.raw2digi_step = cms.Path(process.RawToDigi)
 process.L1Reco_step = cms.Path(process.L1Reco)
-process.trackerlocalreco_step  = cms.Path(process.trackerlocalreco+process.siPhase2VectorHits)
+process.trackerlocalreco_step  = cms.Path(process.trackerlocalreco+process.siPixelClusters+process.siPhase2VectorHits)
 process.seedingOT_step  = cms.Path(process.MeasurementTrackerEvent+process.phase2SeedingOTEDProducer)
 process.analysis_step = cms.Path(process.analysis)
 process.RECOSIMoutput_step = cms.EndPath(process.RECOSIMoutput)
