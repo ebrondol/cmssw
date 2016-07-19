@@ -166,19 +166,18 @@ GlobalError VectorHit::phase2clusterGlobalPosErr(const PixelGeomDetUnit* geomDet
   return ge;
 }
 
-Global3DVector VectorHit::globalDelta() {
+Global3DVector VectorHit::globalDelta() const {
   Local3DVector theLocalDelta = LocalVector(theDirection.x()*theDirection.z(), theDirection.y()*theDirection.z(), theDirection.z());
   Global3DVector g = det()->surface().toGlobal(theLocalDelta);
   return g;
 }
 
-Global3DVector VectorHit::globalDirection() {
+Global3DVector VectorHit::globalDirection() const {
   return  (det()->surface().toGlobal(localDirection()));
 }
 
 std::pair<double,double> VectorHit::curvatureORphi(std::string curvORphi) const {
 
-//std::cout << "VectorHit::curvature" << std::endl;
   double curvature = 0.0;
   double errorCurvature = 0.0;
   double phi = 0.0;
@@ -197,9 +196,6 @@ std::pair<double,double> VectorHit::curvatureORphi(std::string curvORphi) const 
     gErrorLower = upperGlobalPosErr();
     gErrorUpper = lowerGlobalPosErr();
   }
-
-if(curvORphi == "curvature") std::cout << "gPositionLower: " << gPositionLower << std::endl;
-if(curvORphi == "curvature") std::cout << "gPositionUpper: " << gPositionUpper << std::endl;
 
   double h1 = gPositionLower.x()*gPositionUpper.y() - gPositionUpper.x()*gPositionLower.y();
 
@@ -423,14 +419,16 @@ AlgebraicSymMatrix VectorHit::parametersError() const {
 
 std::ostream& operator<<(std::ostream& os, const VectorHit& vh) {
 
-  os << " DetId: " << vh.geographicalId() << "\n" <<
-        " Pos: " << vh.localPosition() << "\n" <<
-        " Dir: " << vh.localDirection() << "\n" <<
-        " Cov: " << vh.parametersError() << "\n" <<
-        " Dim: " << vh.dimension() << "\n" <<
-        " chi2/ndof: " << vh.chi2() << "/" << vh.degreesOfFreedom() << "\n" <<
-        " Lower cluster global position: " << vh.lowerGlobalPos() << "\n" <<
-        " Upper cluster global position: " << vh.upperGlobalPos();
+  os << " VectorHit create in the DetId#: " << vh.geographicalId() << "\n" <<
+        " Vectorhit local position      : " << vh.localPosition() << "\n" <<
+        " Vectorhit local direction     : " << vh.localDirection() << "\n" <<
+        " Vectorhit global direction    : " << vh.globalDirection() << "\n" <<
+        " Vectorhit global delta        : " << vh.globalDelta() << "\n" <<
+        //" Cov: " << vh.parametersError() << "\n" <<
+        //" Dim: " << vh.dimension() << "\n" <<
+        //" chi2/ndof: " << vh.chi2() << "/" << vh.degreesOfFreedom() << "\n" <<
+        " Lower cluster global position : " << vh.lowerGlobalPos() << "\n" <<
+        " Upper cluster global position : " << vh.upperGlobalPos();
 
   return os;
 }
