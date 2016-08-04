@@ -81,10 +81,9 @@ def customise_Reco(process,pileup):
             getattr(process,b).outputCommands.append('keep *_phase2ITPixelClusters_*_*')
 
 
-    #use with latest pixel geometry
-    process.ClusterShapeHitFilterESProducer.PixelShapeFile = cms.string('RecoPixelVertexing/PixelLowPtUtilities/data/pixelShape_Phase1Tk.par')
-
     if not eras.trackingPhase2PU140.isChosen():
+      #use with latest pixel geometry
+      process.ClusterShapeHitFilterESProducer.PixelShapeFile = cms.string('RecoPixelVertexing/PixelLowPtUtilities/data/pixelShape_Phase1Tk.par')
       # Need this line to stop error about missing siPixelDigis.
       process.MeasurementTrackerEvent.inactivePixelDetectorLabels = cms.VInputTag()
 
