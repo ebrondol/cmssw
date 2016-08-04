@@ -145,18 +145,18 @@ def customise_Reco(process,pileup):
       process.muons1stStep.TrackerKinkFinderParameters.TrackerRecHitBuilder=cms.string('WithTrackAngle')
       process.regionalCosmicTracks.TTRHBuilder=cms.string('WithTrackAngle')
       process.cosmicsVetoTracksRaw.TTRHBuilder=cms.string('WithTrackAngle')
-
-    # End of pixel template needed section
+      # End of pixel template needed section
     
-    process.regionalCosmicTrackerSeedingLayers.layerList  = cms.vstring('BPix9+BPix8')  # Optimize later
-    process.regionalCosmicTrackerSeedingLayers.BPix = cms.PSet(
-        HitProducer = cms.string('siPixelRecHits'),
-        hitErrorRZ = cms.double(0.006),
-        useErrorsFromParam = cms.bool(True),
-        TTRHBuilder = cms.string('TTRHBuilderWithoutAngle4PixelPairs'),
-        skipClusters = cms.InputTag("pixelPairStepClusters"),
-        hitErrorRPhi = cms.double(0.0027)
-    )
+      process.regionalCosmicTrackerSeedingLayers.layerList  = cms.vstring('BPix9+BPix8')  # Optimize later
+      process.regionalCosmicTrackerSeedingLayers.BPix = cms.PSet(
+          HitProducer = cms.string('siPixelRecHits'),
+          hitErrorRZ = cms.double(0.006),
+          useErrorsFromParam = cms.bool(True),
+          TTRHBuilder = cms.string('TTRHBuilderWithoutAngle4PixelPairs'),
+          skipClusters = cms.InputTag("pixelPairStepClusters"),
+          hitErrorRPhi = cms.double(0.0027)
+      )
+
     # Make pixelTracks use quadruplets
     process.pixelTracks.SeedMergerPSet = cms.PSet(
         layerList = cms.PSet(refToPSet_ = cms.string('PixelSeedMergerQuadruplets')),
@@ -169,16 +169,17 @@ def customise_Reco(process,pileup):
     process.pixelTracks.FilterPSet.tipMax = cms.double(0.05)
     process.pixelTracks.RegionFactoryPSet.RegionPSet.originRadius =  cms.double(0.02)
 
-    process.preDuplicateMergingDisplacedTracks.inputClassifiers.remove("muonSeededTracksInOutClassifier")
-    process.preDuplicateMergingDisplacedTracks.trackProducers.remove("muonSeededTracksInOut")
+    if not eras.trackingPhase2PU140.isChosen():
+      process.preDuplicateMergingDisplacedTracks.inputClassifiers.remove("muonSeededTracksInOutClassifier")
+      process.preDuplicateMergingDisplacedTracks.trackProducers.remove("muonSeededTracksInOut")
 
-    # STILL TO DO (when the ph2 PF will be included):
-    # Particle flow needs to know that the eta range has increased, for
-    # when linking tracks to HF clusters
-#    process=customise_PFlow.customise_extendedTrackerBarrel( process )
+      # STILL TO DO (when the ph2 PF will be included):
+      # Particle flow needs to know that the eta range has increased, for
+      # when linking tracks to HF clusters
+      #    process=customise_PFlow.customise_extendedTrackerBarrel( process )
 
-    process.MeasurementTrackerEvent.Phase2TrackerCluster1DProducer = cms.string('siPhase2Clusters')
-    process.MeasurementTrackerEvent.stripClusterProducer = cms.string('')
+      process.MeasurementTrackerEvent.Phase2TrackerCluster1DProducer = cms.string('siPhase2Clusters')
+      process.MeasurementTrackerEvent.stripClusterProducer = cms.string('')
  
     return process
 

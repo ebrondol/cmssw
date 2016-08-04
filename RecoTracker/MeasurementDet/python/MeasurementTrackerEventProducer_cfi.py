@@ -21,7 +21,9 @@ eras.phase1Pixel.toModify(MeasurementTrackerEvent, # FIXME
 # This customization will be removed once we have phase2 pixel digis
 # Need this line to stop error about missing siPixelDigis
 eras.phase2_tracker.toModify(MeasurementTrackerEvent, # FIXME
-    inactivePixelDetectorLabels = []
+    inactivePixelDetectorLabels = [],
+    Phase2TrackerCluster1DProducer = cms.string('siPhase2Clusters'),
+    stripClusterProducer = ''
 )
 
 MeasurementTrackerEventPreSplitting = MeasurementTrackerEvent.clone(
