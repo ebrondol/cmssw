@@ -83,8 +83,10 @@ def customise_Reco(process,pileup):
 
     #use with latest pixel geometry
     process.ClusterShapeHitFilterESProducer.PixelShapeFile = cms.string('RecoPixelVertexing/PixelLowPtUtilities/data/pixelShape_Phase1Tk.par')
-    # Need this line to stop error about missing siPixelDigis.
-    process.MeasurementTrackerEvent.inactivePixelDetectorLabels = cms.VInputTag()
+
+    if not eras.trackingPhase2PU140.isChosen():
+      # Need this line to stop error about missing siPixelDigis.
+      process.MeasurementTrackerEvent.inactivePixelDetectorLabels = cms.VInputTag()
 
     process.InitialStepPreSplitting.remove(process.siPixelClusters)
 
