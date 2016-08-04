@@ -120,18 +120,19 @@ def customise_Reco(process,pileup):
     process.globalreco_tracking.replace(process.standalonemuontracking,
                                         process.standalonemuontracking+process.recopixelvertexing)
 
-    # PixelCPEGeneric #
-    process.PixelCPEGenericESProducer.useLAWidthFromDB = cms.bool(False)
+    # FIXME::Erica : not clear to me how to port this to era
     process.PixelCPEGenericESProducer.Upgrade = cms.bool(True)
-    process.PixelCPEGenericESProducer.UseErrorsFromTemplates = cms.bool(False)
-    process.PixelCPEGenericESProducer.LoadTemplatesFromDB = cms.bool(False)
-    process.PixelCPEGenericESProducer.TruncatePixelCharge = cms.bool(False)
-    process.PixelCPEGenericESProducer.IrradiationBiasCorrection = False
-    process.PixelCPEGenericESProducer.DoCosmics = False
-    process.templates.DoLorentz = cms.bool(False)
-    process.templates.LoadTemplatesFromDB = cms.bool(False)
-
     if not eras.trackingPhase2PU140.isChosen():
+      # PixelCPEGeneric #
+      process.PixelCPEGenericESProducer.useLAWidthFromDB = cms.bool(False)
+      process.PixelCPEGenericESProducer.UseErrorsFromTemplates = cms.bool(False)
+      process.PixelCPEGenericESProducer.LoadTemplatesFromDB = cms.bool(False)
+      process.PixelCPEGenericESProducer.TruncatePixelCharge = cms.bool(False)
+      process.PixelCPEGenericESProducer.IrradiationBiasCorrection = False
+      process.PixelCPEGenericESProducer.DoCosmics = False
+      process.templates.DoLorentz = cms.bool(False)
+      process.templates.LoadTemplatesFromDB = cms.bool(False)
+
       # CPE for other steps
       process.siPixelRecHits.CPE = cms.string('PixelCPEGeneric')
       # Turn of template use in tracking (iterative steps handled inside their configs)
