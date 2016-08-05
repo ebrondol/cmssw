@@ -31,7 +31,7 @@ eras.phase1Pixel.toModify(siPixelClusters, # FIXME
     MissCalibrate = False
 )
 
-## Need these until phase2 pixel templates are used
-#eras.phase2_tracker.toModify(siPixelClusters, # FIXME
-#    src = cms.InputTag('simSiPixelDigis', "Pixel")
-#)
+# Need these until phase2 pixel templates are used
+eras.phase2_tracker.toModify(siPixelClusters, # FIXME
+    src = cms.InputTag('simSiPixelDigis', "Pixel")
+)
