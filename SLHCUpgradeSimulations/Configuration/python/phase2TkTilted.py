@@ -69,8 +69,6 @@ def customise_Reco(process,pileup):
       process.load('SimTracker.SiPhase2Digitizer.phase2TrackerClusterizer_cfi')
       # insert new InnerTracker pixel clusterizer
       process.load("RecoLocalTracker.Phase2ITPixelClusterizer.Phase2ITPixelClusterizer_cfi")
-
-    if not eras.trackingPhase2PU140.isChosen():
       process.phase2ITPixelClusters.src = cms.InputTag('simSiPixelDigis', "Pixel")
       process.phase2ITPixelClusters.MissCalibrate = cms.untracked.bool(False)
 
@@ -126,10 +124,8 @@ def customise_Reco(process,pileup):
       process.globalreco_tracking.replace(process.standalonemuontracking,
                                           process.standalonemuontracking+process.recopixelvertexing)
 
-    # FIXME::Erica : not clear to me how to port this to era
-    process.PixelCPEGenericESProducer.Upgrade = cms.bool(True)
-    if not eras.trackingPhase2PU140.isChosen():
       # PixelCPEGeneric #
+      process.PixelCPEGenericESProducer.Upgrade = cms.bool(True)
       process.PixelCPEGenericESProducer.useLAWidthFromDB = cms.bool(False)
       process.PixelCPEGenericESProducer.UseErrorsFromTemplates = cms.bool(False)
       process.PixelCPEGenericESProducer.LoadTemplatesFromDB = cms.bool(False)

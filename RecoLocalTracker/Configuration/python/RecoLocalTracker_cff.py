@@ -22,7 +22,6 @@ from RecoLocalTracker.Phase2ITPixelClusterizer.Phase2ITPixelClusterizer_cfi impo
 
 from Configuration.StandardSequences.Eras import eras
 eras.phase2_tracker.toReplaceWith(pixeltrackerlocalreco,
-#  cms.Sequence(siPhase2Clusters+phase2ITPixelClusters+siPixelClustersPreSplitting+siPixelRecHitsPreSplitting)
   cms.Sequence(
           siPhase2Clusters +
           phase2ITPixelClusters +
