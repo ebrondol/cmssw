@@ -69,8 +69,9 @@ def customise_Reco(process,pileup):
 
     # insert new InnerTracker pixel clusterizer
     process.load("RecoLocalTracker.Phase2ITPixelClusterizer.Phase2ITPixelClusterizer_cfi")
-    process.phase2ITPixelClusters.src = cms.InputTag('simSiPixelDigis', "Pixel")
-    process.phase2ITPixelClusters.MissCalibrate = cms.untracked.bool(False)
+    if not eras.trackingPhase2PU140.isChosen():
+      process.phase2ITPixelClusters.src = cms.InputTag('simSiPixelDigis', "Pixel")
+      process.phase2ITPixelClusters.MissCalibrate = cms.untracked.bool(False)
 
     # keep new clusters
     alist=['RAWSIM','FEVTDEBUG','FEVTDEBUGHLT','GENRAW','RAWSIMHLT','FEVT','RECOSIM']
