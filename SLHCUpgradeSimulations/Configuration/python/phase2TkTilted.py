@@ -72,13 +72,13 @@ def customise_Reco(process,pileup):
       process.phase2ITPixelClusters.src = cms.InputTag('simSiPixelDigis', "Pixel")
       process.phase2ITPixelClusters.MissCalibrate = cms.untracked.bool(False)
 
-    # keep new clusters
-    alist=['RAWSIM','FEVTDEBUG','FEVTDEBUGHLT','GENRAW','RAWSIMHLT','FEVT','RECOSIM']
-    for a in alist:
-        b=a+'output'
-        if hasattr(process,b):
-            getattr(process,b).outputCommands.append('keep *_siPhase2Clusters_*_*')
-            getattr(process,b).outputCommands.append('keep *_phase2ITPixelClusters_*_*')
+      # keep new clusters
+      alist=['RAWSIM','FEVTDEBUG','FEVTDEBUGHLT','GENRAW','RAWSIMHLT','FEVT','RECOSIM']
+      for a in alist:
+          b=a+'output'
+          if hasattr(process,b):
+              getattr(process,b).outputCommands.append('keep *_siPhase2Clusters_*_*')
+              getattr(process,b).outputCommands.append('keep *_phase2ITPixelClusters_*_*')
 
 
     if not eras.trackingPhase2PU140.isChosen():
