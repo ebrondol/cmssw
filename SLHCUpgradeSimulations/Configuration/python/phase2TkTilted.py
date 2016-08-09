@@ -115,7 +115,7 @@ def customise_Reco(process,pileup):
       )
       process.globalreco_tracking.replace(process.MeasurementTrackerEventPreSplitting, process.MeasurementTrackerEvent)
       process.globalreco_tracking.replace(process.siPixelClusterShapeCachePreSplitting, process.siPixelClusterShapeCache)
-    process.clusterSummaryProducer.pixelClusters = "siPixelClusters"
+      process.clusterSummaryProducer.pixelClusters = "siPixelClusters"
 
     if not eras.trackingPhase2PU140.isChosen():
       # As in the phase1 tracking reconstruction,
