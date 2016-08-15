@@ -9,6 +9,7 @@
 
 #include "RecoLocalTracker/ClusterParameterEstimator/interface/StripClusterParameterEstimator.h"
 #include "RecoLocalTracker/ClusterParameterEstimator/interface/PixelClusterParameterEstimator.h"
+#include "RecoLocalTracker/Phase2TrackerRecHits/interface/Phase2StripCPEGeometric.h"
 #include "RecoLocalTracker/SiStripRecHitConverter/interface/SiStripRecHitMatcher.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "RecoTracker/TkDetLayers/interface/GeometricSearchTracker.h"
@@ -48,6 +49,7 @@ MeasurementTrackerESProducer::produce(const CkfComponentsRecord& iRecord)
 { 
   std::string pixelCPEName = pset_.getParameter<std::string>("PixelCPE");
   std::string stripCPEName = pset_.getParameter<std::string>("StripCPE");
+  std::string phase2TrackerCPEName = pset_.getParameter<std::string>("Phase2StripCPE");
   std::string matcherName  = pset_.getParameter<std::string>("HitMatcher");
 
   // ========= SiPixelQuality related tasks =============
@@ -115,6 +117,7 @@ MeasurementTrackerESProducer::produce(const CkfComponentsRecord& iRecord)
   
   edm::ESHandle<PixelClusterParameterEstimator> pixelCPE;
   edm::ESHandle<StripClusterParameterEstimator> stripCPE;
+  edm::ESHandle<Phase2StripCPEGeometric> phase2TrackerCPE;
   edm::ESHandle<SiStripRecHitMatcher>           hitMatcher;
   edm::ESHandle<TrackerGeometry>                trackerGeom;
   edm::ESHandle<GeometricSearchTracker>         geometricSearchTracker;
@@ -122,6 +125,7 @@ MeasurementTrackerESProducer::produce(const CkfComponentsRecord& iRecord)
   
   iRecord.getRecord<TkPixelCPERecord>().get(pixelCPEName,pixelCPE);
   iRecord.getRecord<TkStripCPERecord>().get(stripCPEName,stripCPE);
+  iRecord.getRecord<TkPhase2OTCPERecord>().get(phase2TrackerCPEName,phase2TrackerCPE);
   iRecord.getRecord<TkStripCPERecord>().get(matcherName,hitMatcher);
   iRecord.getRecord<TrackerDigiGeometryRecord>().get(trackerGeom);
   iRecord.getRecord<TrackerRecoGeometryRecord>().get(geometricSearchTracker);
