@@ -64,6 +64,8 @@ def customise_RawToDigi(process):
     return process
 
 def customise_Reco(process,pileup):
+    process.load('RecoLocalTracker.SiPhase2VectorHitBuilder.SiPhase2RecHitMatcher_cfi')
+    process.MeasurementTracker.Phase2HitMatcher = cms.string('SiPhase2VectorHitMatcher')
 
     # using stacks in phase2 tracking  
     process.TrackerRecoGeometryESProducer.usePhase2Stacks = True

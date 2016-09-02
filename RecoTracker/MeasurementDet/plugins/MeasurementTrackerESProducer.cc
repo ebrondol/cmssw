@@ -44,6 +44,12 @@ MeasurementTrackerESProducer::MeasurementTrackerESProducer(const edm::ParameterS
   matcherName  = p.getParameter<std::string>("HitMatcher");
 
   //FIXME:: just temporary solution for phase2!
+  phase2matcherName = "";
+  if (p.existsAs<std::string>("Phase2HitMatcher")) {
+    phase2matcherName  = pset_.getParameter<std::string>("Phase2HitMatcher");
+    std::cout << phase2matcherName << std::endl;
+  }
+
   phase2TrackerCPEName = "";
   if (p.existsAs<std::string>("Phase2StripCPE")) {
     phase2TrackerCPEName = p.getParameter<std::string>("Phase2StripCPE");
@@ -159,6 +165,7 @@ MeasurementTrackerESProducer::produce(const CkfComponentsRecord& iRecord)
 							          pixelCPE.product(),
 							          stripCPE.product(),
 							          hitMatcher.product(),
+							          ph2hitMatcher.product(),
 							          trackerGeom.product(),
 							          geometricSearchTracker.product(),
 							          ptr_stripQuality,
