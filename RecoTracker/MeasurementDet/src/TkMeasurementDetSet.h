@@ -395,7 +395,6 @@ private:
 //FIXME:just temporary solution for phase2 OT that works!
 class Phase2OTMeasurementConditionSet {
 public:
-<<<<<<< HEAD
   Phase2OTMeasurementConditionSet(const VectorHitBuilderEDProducer* ph2matcher, const ClusterParameterEstimator<Phase2TrackerCluster1D> *cpe) :
     thePhase2Matcher(ph2matcher), theCPE(cpe) {}
 
@@ -420,8 +419,8 @@ private:
   friend class MeasurementTrackerImpl;
 
   // Globals (not-per-event)
-  const ClusterParameterEstimator<Phase2TrackerCluster1D>* theCPE;
   const VectorHitBuilderEDProducer* thePhase2Matcher;
+  const ClusterParameterEstimator<Phase2TrackerCluster1D>* theCPE;
   
   // Locals, per-event
   std::vector<unsigned int> id_;
