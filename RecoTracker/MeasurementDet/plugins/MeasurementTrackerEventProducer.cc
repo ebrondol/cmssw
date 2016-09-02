@@ -60,7 +60,7 @@ MeasurementTrackerEventProducer::produce(edm::Event &iEvent, const edm::EventSet
     updateStrips(iEvent, *stripData, stripClustersToSkip);
     updatePixels(iEvent, *pixelData, pixelClustersToSkip);
     updatePhase2OT(iEvent, *phase2OTData);
-    updateStacks(iEvent, *phase2OTData);
+    //updateStacks(iEvent, *phase2OTData);
 
     // put into MTE
     // put into event
@@ -229,6 +229,7 @@ MeasurementTrackerEventProducer::updateStrips( const edm::Event& event, StMeasur
 void 
 MeasurementTrackerEventProducer::updatePhase2OT( const edm::Event& event, Phase2OTMeasurementDetSet & thePh2OTDets ) const {
 
+  thePh2OTDets.setEmpty();
 
   // Phase2OT Clusters
   if ( isPhase2 ) {
