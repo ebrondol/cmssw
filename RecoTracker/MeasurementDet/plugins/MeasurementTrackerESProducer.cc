@@ -46,8 +46,7 @@ MeasurementTrackerESProducer::MeasurementTrackerESProducer(const edm::ParameterS
   //FIXME:: just temporary solution for phase2!
   phase2matcherName = "";
   if (p.existsAs<std::string>("Phase2HitMatcher")) {
-    phase2matcherName  = pset_.getParameter<std::string>("Phase2HitMatcher");
-    std::cout << phase2matcherName << std::endl;
+    phase2matcherName = p.getParameter<std::string>("Phase2HitMatcher");
   }
 
   phase2TrackerCPEName = "";
