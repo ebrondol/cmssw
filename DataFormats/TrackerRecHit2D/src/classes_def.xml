@@ -183,6 +183,7 @@
   <class name="edmNew::DetSetVector<edm::Ref<edmNew::DetSetVector<Phase2TrackerCluster1D>,Phase2TrackerCluster1D,edmNew::DetSetVector<Phase2TrackerCluster1D>::FindForDetSetVector> >"/>
   <class name="edm::Wrapper<edmNew::DetSetVector<edm::Ref<edmNew::DetSetVector<Phase2TrackerCluster1D>,Phase2TrackerCluster1D,edmNew::DetSetVector<Phase2TrackerCluster1D>::FindForDetSetVector> > >"/>
   <class name="edmNew::DetSetVector<VectorHit> "/>
+  <class name="std::vector<VectorHit> "/>
   <class name="edm::RefProd<VectorHitCollectionNew>"/>
   <class name="edm::Wrapper< edmNew::DetSetVector<VectorHit> >"/>
 
