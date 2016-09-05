@@ -85,7 +85,7 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 # Path and EndPath definitions
 process.raw2digi_step = cms.Path(process.RawToDigi)
 process.L1Reco_step = cms.Path(process.L1Reco)
-process.trackerlocalreco_step  = cms.Path(process.trackerlocalreco+process.siPhase2VectorHits)
+process.trackerlocalreco_step  = cms.Path(process.trackerlocalreco+process.siPixelClusters+process.siPhase2VectorHits)
 process.seedingOT_step  = cms.Path(process.MeasurementTrackerEvent+process.phase2SeedingOTEDProducer)
 process.analysis_step = cms.Path(process.analysis)
 process.RECOSIMoutput_step = cms.EndPath(process.RECOSIMoutput)
