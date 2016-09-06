@@ -9,6 +9,8 @@
 
 #include "FWCore/Framework/interface/EDProducer.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+
+#include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "DataFormats/TrackerRecHit2D/interface/VectorHit.h"
 #include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 #include "TrackingTools/MeasurementDet/interface/LayerMeasurements.h"
@@ -43,7 +45,7 @@ class SeedingOTEDProducer : public edm::EDProducer
   const Propagator* propagator;
   const MagneticField* magField;
   const edm::EDGetTokenT<MeasurementTrackerEvent> tkMeasEvent;
-
+  edm::EDGetTokenT<reco::BeamSpot> beamSpot;
 };
 
 #endif
