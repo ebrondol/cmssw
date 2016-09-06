@@ -33,7 +33,7 @@ process.maxEvents = cms.untracked.PSet(
 
 # Input source
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring('file:step2_mu_500events.root'),
+    fileNames = cms.untracked.vstring('file:step2_SingleMuPt10_500events.root'),
     #fileNames = cms.untracked.vstring('/store/relval/CMSSW_8_1_0_pre7/RelValSingleMuPt10Extended/GEN-SIM-DIGI-RAW/81X_mcRun2_asymptotic_v0_2023tilted-v1/10000/2E7CB262-1534-E611-BB7A-0CC47A78A496.root'),
     secondaryFileNames = cms.untracked.vstring(),
     skipEvents = cms.untracked.uint32(0)
@@ -82,11 +82,27 @@ process.load('RecoLocalTracker.Phase2TrackerRecHits.Phase2StripCPEGeometricESPro
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 
+
+# debug
+process.MessageLogger = cms.Service("MessageLogger",
+                                    destinations = cms.untracked.vstring("debugVH_tilted"),
+                                    debugModules = cms.untracked.vstring("*"),
+                                    categories = cms.untracked.vstring("VectorHitBuilderEDProducer","VectorHitBuilderAlgorithm","VectorHitsBuilderValidation"),
+                                    debugVH_tilted = cms.untracked.PSet(threshold = cms.untracked.string("DEBUG"),
+                                                                       DEBUG = cms.untracked.PSet(limit = cms.untracked.int32(0)),
+                                                                       default = cms.untracked.PSet(limit = cms.untracked.int32(0)),
+                                                                       VectorHitBuilderEDProducer = cms.untracked.PSet(limit = cms.untracked.int32(-1)),
+                                                                       VectorHitBuilderAlgorithm = cms.untracked.PSet(limit = cms.untracked.int32(-1)),
+                                                                       VectorHitsBuilderValidation = cms.untracked.PSet(limit = cms.untracked.int32(-1))
+                                                                       )
+                                    )
+
+
 # Path and EndPath definitions
 process.raw2digi_step = cms.Path(process.RawToDigi)
 process.L1Reco_step = cms.Path(process.L1Reco)
 process.trackerlocalreco_step  = cms.Path(process.trackerlocalreco+process.siPixelClusters+process.siPhase2VectorHits)
-process.seedingOT_step  = cms.Path(process.MeasurementTrackerEvent+process.phase2SeedingOTEDProducer)
+process.seedingOT_step  = cms.Path(process.MeasurementTrackerEvent+process.offlineBeamSpot+process.phase2SeedingOTEDProducer)
 process.analysis_step = cms.Path(process.analysis)
 process.RECOSIMoutput_step = cms.EndPath(process.RECOSIMoutput)
 

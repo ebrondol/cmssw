@@ -15,6 +15,7 @@ SeedingOTEDProducer::SeedingOTEDProducer(edm::ParameterSet const& conf):
   tkMeasEvent( consumes<MeasurementTrackerEvent>(conf.getParameter<edm::InputTag>("trackerEvent")) )
 {
   vhProducer = consumes< VectorHitCollectionNew >(edm::InputTag(conf.getParameter<edm::InputTag>("src")));
+  beamSpot = consumes< reco::BeamSpot >(conf.getParameter<edm::InputTag>("beamSpotLabel"));
   produces< VectorHitCollectionNew >();
 }
     
@@ -25,6 +26,7 @@ void SeedingOTEDProducer::fillDescriptions(edm::ConfigurationDescriptions& descr
   edm::ParameterSetDescription desc;
   desc.add<edm::InputTag>("src", edm::InputTag("siPhase2VectorHits","vectorHitsAccepted"));
   desc.add<edm::InputTag>("trackerEvent", edm::InputTag("MeasurementTrackerEvent"));
+  desc.add<edm::InputTag>("beamSpotLabel", edm::InputTag("offlineBeamSpot"));
   descriptions.add("SeedingOTEDProducer", desc);
 }
     
@@ -55,6 +57,12 @@ void SeedingOTEDProducer::produce(edm::Event& event, const edm::EventSetup& es)
   edm::ESHandle<MagneticField> magFieldHandle;
   es.get<IdealMagneticFieldRecord>().get(magFieldHandle);
   magField = magFieldHandle.product();
+
+  edm::Handle<reco::BeamSpot> beamSpotH;
+  event.getByToken(beamSpot, beamSpotH);
+  if (beamSpotH.isValid()) {
+    std::cout << "BeamSpot Position: " << *(beamSpotH.product());
+  }
 
   // Get the vector hits
   edm::Handle< VectorHitCollectionNew > vhs;
@@ -89,24 +97,54 @@ void SeedingOTEDProducer::run(edm::Handle< VectorHitCollectionNew > VHs,
     float y = seed.localPosition().y();
     float dx = seed.localDirection().x();
     float dy = seed.localDirection().y(); 
+
+    // having fun with theta
+    std::cout << "\tvh theta : " << seed.theta() << std::endl;
+    std::cout << "\tvh eta : " << seed.globalDirection().eta() << std::endl;
+    Global3DVector gv(seed.globalPosition().x(), seed.globalPosition().y(), seed.globalPosition().z());
+    std::cout << "\tgv : " << gv << std::endl;
+    std::cout << "\tgv theta : " << gv.theta() << std::endl;
+    std::cout << "\tgv eta : " << gv.eta() << std::endl;
+    // gv transform to local (lv)
+    const Local3DVector lv( seed.det()->surface().toLocal( gv ) );
+    std::cout << "\tlv : " << lv << std::endl;
+    // replace dy with second component of the lv renormalized to the z component
+    dy = lv.y()/lv.z(); 
+
     LocalTrajectoryParameters ltpar2(1./p, dx, dy, x, y, charge);
     AlgebraicSymMatrix mat = assign44To55(seed.parametersError());
     //FIXME::set the error on 1/p
-    mat[4][4] = 1000;
+    mat[0][0] = 1000;
     std::cout << "\tltraj : " << 1./p <<","<< dx <<","<< dy <<","<< x <<","<< y <<","<< charge << std::endl;
     std::cout << "\tmat   : " << mat << std::endl;
+
+    //building tsos
     LocalTrajectoryError lterr(asSMatrix<5>(mat));
-    const TrajectoryStateOnSurface tsos(ltpar, lterr, seed.det()->surface(), magField);
-    std::vector<TrajectoryMeasurement> tmp = layerMeasurements->measurements(*layerSearch, tsos, *propagator, *estimator);
+    const TrajectoryStateOnSurface tsos(ltpar2, lterr, seed.det()->surface(), magField);
+    std::cout << "tsos    : " << tsos << std::endl;
+
+    //set the direction of the propagator
+    Propagator* theTmpPropagator = &*propagator->clone();
+    if (tsos.globalPosition().y()<0 ) theTmpPropagator->setPropagationDirection(oppositeToMomentum);
+    else                              theTmpPropagator->setPropagationDirection(alongMomentum);
+    if(theTmpPropagator->propagationDirection() == alongMomentum)
+      std::cout << "propagator along Momentum" << std::endl;
+    if(theTmpPropagator->propagationDirection() == oppositeToMomentum)
+      std::cout << "propagator opposite To Momentum" << std::endl;
+
+    std::cout << "-----------------------------" << std::endl;
+    std::vector<TrajectoryMeasurement> tmp = layerMeasurements->measurements(*layerSearch, tsos, *theTmpPropagator, *estimator);
     std::cout << "\tvh compatibles: " << tmp.size() << std::endl;
+    std::cout << "-----------------------------" << std::endl;
     LayerMeasurements::SimpleHitContainer hits;
-    layerMeasurements->recHits(hits, *layerSearch, tsos, *propagator, *estimator);
+    layerMeasurements->recHits(hits, *layerSearch, tsos, *theTmpPropagator, *estimator);
     std::cout << "\tvhits compatibles: " << hits.size() << std::endl;
+    std::cout << "-----------------------------" << std::endl;
     //std::vector<TrajectoryMeasurementGroup> tmpG = layerMeasurements->groupedMeasurements(*layerSearch, tsos, *propagator, *estimator);
     //std::cout << "\tvh grouped compatibles: " << tmpG.size() << std::endl;
     for(auto tm : tmp){
       auto hitPossible = tm.recHit();
-      std::cout << "\t VH >> " << hitPossible << std::endl;
+      std::cout << "\t VH >> " << &*hitPossible << std::endl;
     }
     std::cout << "-----" << std::endl;
 
@@ -159,9 +197,9 @@ AlgebraicSymMatrix SeedingOTEDProducer::assign44To55(AlgebraicSymMatrix mat44){
     assert("Wrong dimension! This should be a 4x4 matrix!");
 
   AlgebraicSymMatrix result(5,0);
-  for(int i = 0; i < 4; i++){
-    for(int j = 0; j < 4; j++){
-      result[i][j] = mat44[i][j];
+  for(int i = 1; i < 5; i++){
+    for(int j = 1; j < 5; j++){
+      result[i][j] = mat44[i-1][j-1];
     }
   }
   return result;
