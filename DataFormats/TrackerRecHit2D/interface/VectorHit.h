@@ -124,10 +124,10 @@ class VectorHit GCC11_FINAL : public BaseTrackerRecHit {
   LocalVector theDirection;
 
   // the covariance matrix, has the following meaning
-  // mat[0][0]=sigma (dx/dz)
-  // mat[1][1]=sigma (dy/dz)
-  // mat[2][2]=sigma (x)
-  // mat[3][3]=sigma (y)
+  // mat[0][0]=var(dx/dz)
+  // mat[1][1]=var(dy/dz)
+  // mat[2][2]=var(x)
+  // mat[3][3]=var(y)
   // mat[0][2]=cov(dx/dz,x)
   // mat[1][3]=cov(dy/dz,y)
   AlgebraicSymMatrix theCovMatrix;
