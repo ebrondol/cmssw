@@ -15,6 +15,7 @@ SeedingOTEDProducer::SeedingOTEDProducer(edm::ParameterSet const& conf):
   tkMeasEvent( consumes<MeasurementTrackerEvent>(conf.getParameter<edm::InputTag>("trackerEvent")) )
 {
   vhProducer = consumes< VectorHitCollectionNew >(edm::InputTag(conf.getParameter<edm::InputTag>("src")));
+  beamSpot = consumes< reco::BeamSpot >(conf.getParameter<edm::InputTag>("beamSpotLabel"));
   produces< VectorHitCollectionNew >();
 }
     
@@ -25,6 +26,7 @@ void SeedingOTEDProducer::fillDescriptions(edm::ConfigurationDescriptions& descr
   edm::ParameterSetDescription desc;
   desc.add<edm::InputTag>("src", edm::InputTag("siPhase2VectorHits","vectorHitsAccepted"));
   desc.add<edm::InputTag>("trackerEvent", edm::InputTag("MeasurementTrackerEvent"));
+  desc.add<edm::InputTag>("beamSpotLabel", edm::InputTag("offlineBeamSpot"));
   descriptions.add("SeedingOTEDProducer", desc);
 }
     
@@ -55,6 +57,12 @@ void SeedingOTEDProducer::produce(edm::Event& event, const edm::EventSetup& es)
   edm::ESHandle<MagneticField> magFieldHandle;
   es.get<IdealMagneticFieldRecord>().get(magFieldHandle);
   magField = magFieldHandle.product();
+
+  edm::Handle<reco::BeamSpot> beamSpotH;
+  event.getByToken(beamSpot, beamSpotH);
+  if (beamSpotH.isValid()) {
+    std::cout << "BeamSpot Position: " << *(beamSpotH.product());
+  }
 
   // Get the vector hits
   edm::Handle< VectorHitCollectionNew > vhs;
@@ -93,15 +101,27 @@ void SeedingOTEDProducer::run(edm::Handle< VectorHitCollectionNew > VHs,
     AlgebraicSymMatrix mat = assign44To55(seed.parametersError());
     //FIXME::set the error on 1/p
     mat[4][4] = 1000;
+
+    //theta
+    std::cout << "\tvh theta : " << seed.theta() << std::endl;
+    std::cout << "\tvh eta : " << seed.globalDirection().eta() << std::endl;
+    Global3DVector gv(seed.globalPosition().x(), seed.globalPosition().y(), seed.globalPosition().z());
+    std::cout << "\tgv : " << gv << std::endl;
+    std::cout << "\tgv theta : " << gv.theta() << std::endl;
+    std::cout << "\tgv eta : " << gv.eta() << std::endl;
+
     std::cout << "\tltraj : " << 1./p <<","<< dx <<","<< dy <<","<< x <<","<< y <<","<< charge << std::endl;
     std::cout << "\tmat   : " << mat << std::endl;
     LocalTrajectoryError lterr(asSMatrix<5>(mat));
     const TrajectoryStateOnSurface tsos(ltpar, lterr, seed.det()->surface(), magField);
+    std::cout << "-----------------------------" << std::endl;
     std::vector<TrajectoryMeasurement> tmp = layerMeasurements->measurements(*layerSearch, tsos, *propagator, *estimator);
     std::cout << "\tvh compatibles: " << tmp.size() << std::endl;
+    std::cout << "-----------------------------" << std::endl;
     LayerMeasurements::SimpleHitContainer hits;
     layerMeasurements->recHits(hits, *layerSearch, tsos, *propagator, *estimator);
     std::cout << "\tvhits compatibles: " << hits.size() << std::endl;
+    std::cout << "-----------------------------" << std::endl;
     //std::vector<TrajectoryMeasurementGroup> tmpG = layerMeasurements->groupedMeasurements(*layerSearch, tsos, *propagator, *estimator);
     //std::cout << "\tvh grouped compatibles: " << tmpG.size() << std::endl;
     for(auto tm : tmp){
