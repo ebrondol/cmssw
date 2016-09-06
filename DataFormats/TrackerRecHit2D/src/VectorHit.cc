@@ -37,7 +37,8 @@ VectorHit::VectorHit(const GeomDet& idet, const VectorHit2D& vh2Dzx, const Vecto
 {
   thePosition = LocalPoint(vh2Dzx.localPosition().x(), vh2Dzy.localPosition().x(), 0.);
 
-  theDirection = LocalVector(vh2Dzx.localDirection().x(), vh2Dzy.localDirection().x(), vh2Dzy.localDirection().z());
+  theDirection = LocalVector(vh2Dzx.localDirection().x(), vh2Dzy.localDirection().x(), 1.);
+  //theDirection = LocalVector(vh2Dzx.localDirection().x(), vh2Dzy.localDirection().x(), vh2Dzy.localDirection().z());
   //theDirection = theDirection.unit();
 
   //building the cov matrix 4x4 starting from the 2x2
@@ -45,10 +46,10 @@ VectorHit::VectorHit(const GeomDet& idet, const VectorHit2D& vh2Dzx, const Vecto
   AlgebraicSymMatrix22 covMatZY = vh2Dzy.covMatrix();
 
   theCovMatrix=AlgebraicSymMatrix(4);
-  theCovMatrix[0][0] = covMatZX[0][0];   // sigma (dx/dz)
-  theCovMatrix[1][1] = covMatZY[0][0];   // sigma (dy/dz)
-  theCovMatrix[2][2] = covMatZX[1][1];   // sigma (x)
-  theCovMatrix[3][3] = covMatZY[1][1];   // sigma (y)
+  theCovMatrix[0][0] = covMatZX[0][0];   // var(dx/dz)
+  theCovMatrix[1][1] = covMatZY[0][0];   // var(dy/dz)
+  theCovMatrix[2][2] = covMatZX[1][1];   // var(x)
+  theCovMatrix[3][3] = covMatZY[1][1];   // var(y)
   theCovMatrix[0][2] = covMatZX[0][1];   // cov(dx/dz,x)
   theCovMatrix[1][3] = covMatZY[0][1];   // cov(dy/dz,y)
 
@@ -423,7 +424,7 @@ std::ostream& operator<<(std::ostream& os, const VectorHit& vh) {
         " Vectorhit local position      : " << vh.localPosition() << "\n" <<
         " Vectorhit local direction     : " << vh.localDirection() << "\n" <<
         " Vectorhit global direction    : " << vh.globalDirection() << "\n" <<
-        " Vectorhit global delta        : " << vh.globalDelta() << "\n" <<
+        //" Vectorhit theta               : " << vh.theta() << "\n" <<
         //" Cov: " << vh.parametersError() << "\n" <<
         //" Dim: " << vh.dimension() << "\n" <<
         //" chi2/ndof: " << vh.chi2() << "/" << vh.degreesOfFreedom() << "\n" <<
