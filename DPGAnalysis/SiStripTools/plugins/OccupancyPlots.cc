@@ -150,13 +150,15 @@ OccupancyPlots::OccupancyPlots(const edm::ParameterSet& iConfig):
   m_yavedrphi = m_rhm.makeTProfile("yavedrphi","Average y unit vector drphi",6000,0.5,6000.5);
 
   std::vector<edm::ParameterSet> wantedsubdets_ps = iConfig.getParameter<std::vector<edm::ParameterSet> >("wantedSubDets");
+  LogTrace("OccupancyPlots") << "wantedsubdets_ps size" << wantedsubdets_ps.size();
 
   for(std::vector<edm::ParameterSet>::const_iterator wsdps = wantedsubdets_ps.begin();wsdps!=wantedsubdets_ps.end();++wsdps) {
 
     unsigned int detsel = wsdps->getParameter<unsigned int>("detSelection");
     std::vector<std::string> selstr = wsdps->getUntrackedParameter<std::vector<std::string> >("selection");
     m_wantedsubdets[detsel]=DetIdSelector(selstr);
-
+    for( auto sel : selstr) 
+      LogTrace("OccupancyPlots") << "Selection >>" << sel;
   }
 
 
