@@ -13,6 +13,7 @@
 #include "DataFormats/TrackerRecHit2D/interface/ProjectedSiStripRecHit2D.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiStripMatchedRecHit2D.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiTrackerMultiRecHit.h"
+#include "DataFormats/TrackerRecHit2D/interface/Phase2TrackerRecHit1D.h"
 #include "DataFormats/SiStripCluster/interface/SiStripCluster.h"
 #include "DataFormats/Alignment/interface/AlignmentClusterFlag.h"
 #include "DataFormats/Alignment/interface/AliClusterValueMap.h"
@@ -488,9 +489,13 @@ bool AlignmentTrackSelector::isHit2D(const TrackingRecHit &hit) const
   } else {
     const DetId detId(hit.geographicalId());
     if (detId.det() == DetId::Tracker) {
+      const std::type_info &hit_type = typeid(hit);
       if (detId.subdetId() == kBPIX || detId.subdetId() == kFPIX) {
         return true; // pixel is always 2D
-      } else { // should be SiStrip now
+      } else { // should be SiStrip or Phase2 OT now
+        if (hit_type == typeid(Phase2TrackerRecHit1D)) {
+          return false;
+        }
 	const SiStripDetId stripId(detId);
 	if (stripId.stereo()) return countStereoHitAs2D_; // stereo modules
         else if (dynamic_cast<const SiStripRecHit1D*>(&hit)
@@ -532,9 +537,13 @@ bool AlignmentTrackSelector::isOkCharge(const TrackingRecHit* hit) const
     return true; // might add some requirement...
   }
 
-  // We are in SiStrip now, so test normal hit:
+  // We are in SiStrip or Phase2 OT now, so test normal hit:
   const std::type_info &type = typeid(*hit);
-  
+
+  //to check/fix
+  if (type == typeid(Phase2TrackerRecHit1D)) {  
+    return true;
+  }
 
   if (type == typeid(SiStripRecHit2D)) {
     const SiStripRecHit2D *stripHit2D = dynamic_cast<const SiStripRecHit2D*>(hit);
