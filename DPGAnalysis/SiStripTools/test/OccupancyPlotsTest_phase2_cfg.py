@@ -40,7 +40,7 @@ process.options = cms.untracked.PSet(
 process.load("FWCore.MessageService.MessageLogger_cfi")
 
 process.MessageLogger.destinations.extend(cms.vstring("detids"))
-process.MessageLogger.categories.extend(cms.vstring("GeometricDetBuilding","DuplicateHitFinder","BuildingTrackerDetId",
+process.MessageLogger.categories.extend(cms.vstring("GeometricDetBuilding","DuplicateHitFinder","BuildingTrackerDetId","AlignmentTrackSelector",
                                                     "SubDetectorGeometricDetType","BuildingGeomDetUnits","LookingForFirstStrip",
                                                     "BuildingSubDetTypeMap","SubDetTypeMapContent","NumberOfLayers","IsThereTest"))
 process.MessageLogger.cout.placeholder = cms.untracked.bool(False)
@@ -54,6 +54,9 @@ process.MessageLogger.detids = cms.untracked.PSet(
         limit = cms.untracked.int32(0)
         ),
     BuildingTrackerDetId = cms.untracked.PSet(
+        limit = cms.untracked.int32(100000000)
+        ),
+    AlignmentTrackSelector = cms.untracked.PSet(
         limit = cms.untracked.int32(100000000)
         ),
     GeometricDetBuilding = cms.untracked.PSet(
@@ -163,7 +166,7 @@ process.p2clusmultprod = cms.EDProducer("SiPhase2TrackerCluster1DMultiplicityPro
                                         wantedSubDets = cms.VPSet()
                                         )
 process.p2clusmultprod.wantedSubDets.extend(OccupancyPlotsPixelWantedSubDets)
-#process.p2clusmultprodontrack=process.p2clusmultprod.clone(clusterdigiCollection = cms.InputTag("generalTracks"))
+process.p2clusmultprodontrack=process.p2clusmultprod.clone(clusterdigiCollection = cms.InputTag("AlignmentTrackSelector"))
 
 #occupancy pixels
 process.spclusoccuprod = cms.EDProducer("SiPixelClusterMultiplicityProducer",
@@ -185,11 +188,10 @@ process.p2clusoccuprod = cms.EDProducer("SiPhase2TrackerCluster1DMultiplicityPro
                                         wantedSubDets = cms.VPSet()
                                         )
 process.p2clusoccuprod.wantedSubDets.extend(OccupancyPlotsPixelWantedSubDets)
-#process.p2clusoccuprodontrack=process.p2clusoccuprod.clone(clusterdigiCollection = cms.InputTag("generalTracks"))
+process.p2clusoccuprodontrack=process.p2clusoccuprod.clone(clusterdigiCollection = cms.InputTag("AlignmentTrackSelector"))
 
-process.seqMultProd = cms.Sequence(#process.ssclusmultprod + process.ssclusoccuprod +
-                                   process.p2clusmultprod + process.p2clusoccuprod +
-#                                   process.p2clusmultprodontrack + process.p2clusoccuprodontrack +
+process.seqMultProd = cms.Sequence(process.p2clusmultprod + process.p2clusoccuprod +
+                                   process.p2clusmultprodontrack + process.p2clusoccuprodontrack +
                                    process.spclusmultprod + process.spclusoccuprod +
                                    process.spclusmultprodontrack + process.spclusoccuprodontrack +
                                    process.spclusmultprodxy + process.spclusoccuprodxy +
@@ -228,10 +230,10 @@ process.phase2occupancyplots.wantedSubDets = process.spclusmultprod.wantedSubDet
 process.phase2occupancyplots.multiplicityMaps = cms.VInputTag(cms.InputTag("p2clusmultprod"))
 process.phase2occupancyplots.occupancyMaps = cms.VInputTag(cms.InputTag("p2clusoccuprod"))
 
-#process.phase2occupancyplotsontrack = process.occupancyplots.clone()
-#process.phase2occupancyplotsontrack.wantedSubDets = process.spclusmultprodontrack.wantedSubDets
-#process.phase2occupancyplotsontrack.multiplicityMaps = cms.VInputTag(cms.InputTag("p2clusmultprodontrack"))
-#process.phase2occupancyplotsontrack.occupancyMaps = cms.VInputTag(cms.InputTag("p2clusoccuprodontrack"))
+process.phase2occupancyplotsontrack = process.occupancyplots.clone()
+process.phase2occupancyplotsontrack.wantedSubDets = process.spclusmultprodontrack.wantedSubDets
+process.phase2occupancyplotsontrack.multiplicityMaps = cms.VInputTag(cms.InputTag("p2clusmultprodontrack"))
+process.phase2occupancyplotsontrack.occupancyMaps = cms.VInputTag(cms.InputTag("p2clusoccuprodontrack"))
 
 #process.alloccupancyplots = process.occupancyplots.clone()
 #process.alloccupancyplots.wantedSubDets = cms.VPSet()
@@ -261,7 +263,7 @@ process.seqAnalyzers = cms.Sequence(
 #    process.occupancyplots +
     process.pixeloccupancyplots + process.pixeloccupancyplotsontrack +
     process.pixeloccupancyxyplots + process.pixeloccupancyxyplotsontrack +
-    process.phase2occupancyplots #+ process.phase2occupancyplotsontrack
+    process.phase2occupancyplots + process.phase2occupancyplotsontrack
 )
 
 #-------------------------------------------------------------------------------------------
@@ -288,11 +290,7 @@ process.load("DPGAnalysis.SiStripTools.duplicaterechits_cfi")
 
 #----GlobalTag ------------------------
 
-#process.load("Configuration.StandardSequences.GeometryDB_cff")
-#process.load('Configuration.Geometry.GeometryExtendedPhase2TkBE5DPixel10DReco_cff')
 process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
-#process.load("Configuration.Geometry.GeometryExtendedPhaseIPixelReco_cff")
-#process.load("Configuration.Geometry.GeometryExtendedPhaseIPixel_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 
 if options.geometry == "tilted" :
