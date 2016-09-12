@@ -327,8 +327,8 @@ std::pair<double,double> VectorHit::curvatureORphi(std::string curvORphi) const 
     AlgebraicVector4 temp = curvatureJacobian;
     temp = temp*gErrors;
     errorCurvature = temp[0]*curvatureJacobian[0] + temp[1]*curvatureJacobian[1] + temp[2]*curvatureJacobian[2] + temp[3]*curvatureJacobian[3];
-if(curvORphi == "curvature") std::cout << "curvature: " << curvature << std::endl;
-if(curvORphi == "curvature") std::cout << "curvature error: " << errorCurvature << std::endl;
+    //if(curvORphi == "curvature") std::cout << "curvature: " << curvature << std::endl;
+    //if(curvORphi == "curvature") std::cout << "curvature error: " << errorCurvature << std::endl;
 
 
   } else {
