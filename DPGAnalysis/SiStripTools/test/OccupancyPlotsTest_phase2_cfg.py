@@ -165,7 +165,7 @@ process.p2clusmultprod = cms.EDProducer("SiPhase2TrackerCluster1DMultiplicityPro
                                         clusterdigiCollection = cms.InputTag("siPhase2Clusters"),
                                         wantedSubDets = cms.VPSet()
                                         )
-process.p2clusmultprod.wantedSubDets.extend(OccupancyPlotsPixelWantedSubDets)
+process.p2clusmultprod.wantedSubDets.extend(OccupancyPlotsOuterTrackerWantedSubDets)
 process.p2clusmultprodontrack=process.p2clusmultprod.clone(clusterdigiCollection = cms.InputTag("AlignmentTrackSelector"))
 
 #occupancy pixels
@@ -187,7 +187,7 @@ process.p2clusoccuprod = cms.EDProducer("SiPhase2TrackerCluster1DMultiplicityPro
                                         withClusterSize = cms.untracked.bool(True),
                                         wantedSubDets = cms.VPSet()
                                         )
-process.p2clusoccuprod.wantedSubDets.extend(OccupancyPlotsPixelWantedSubDets)
+process.p2clusoccuprod.wantedSubDets.extend(OccupancyPlotsOuterTrackerWantedSubDets)
 process.p2clusoccuprodontrack=process.p2clusoccuprod.clone(clusterdigiCollection = cms.InputTag("AlignmentTrackSelector"))
 
 process.seqMultProd = cms.Sequence(process.p2clusmultprod + process.p2clusoccuprod +
@@ -235,12 +235,19 @@ process.phase2occupancyplotsontrack.wantedSubDets = process.spclusmultprodontrac
 process.phase2occupancyplotsontrack.multiplicityMaps = cms.VInputTag(cms.InputTag("p2clusmultprodontrack"))
 process.phase2occupancyplotsontrack.occupancyMaps = cms.VInputTag(cms.InputTag("p2clusoccuprodontrack"))
 
-#process.alloccupancyplots = process.occupancyplots.clone()
-#process.alloccupancyplots.wantedSubDets = cms.VPSet()
-#process.alloccupancyplots.wantedSubDets.extend(OccupancyPlotsPixelWantedSubDets)
-#process.alloccupancyplots.wantedSubDets.extend(OccupancyPlotsStripWantedSubDets)
-#process.alloccupancyplots.multiplicityMaps = cms.VInputTag(cms.InputTag("spclusmultprod"),cms.InputTag("ssclusmultprod"))
-#process.alloccupancyplots.occupancyMaps = cms.VInputTag(cms.InputTag("spclusoccuprod"),cms.InputTag("ssclusoccuprod"))
+process.alloccupancyplots = process.occupancyplots.clone()
+process.alloccupancyplots.wantedSubDets = cms.VPSet()
+process.alloccupancyplots.wantedSubDets.extend(OccupancyPlotsPixelWantedSubDets)
+process.alloccupancyplots.wantedSubDets.extend(OccupancyPlotsOuterTrackerWantedSubDets)
+process.alloccupancyplots.multiplicityMaps = cms.VInputTag(cms.InputTag("spclusmultprod"),cms.InputTag("p2clusmultprod"))
+process.alloccupancyplots.occupancyMaps = cms.VInputTag(cms.InputTag("spclusoccuprod"),cms.InputTag("p2clusoccuprod"))
+
+process.alloccupancyplotsontrack = process.occupancyplots.clone()
+process.alloccupancyplotsontrack.wantedSubDets = cms.VPSet()
+process.alloccupancyplotsontrack.wantedSubDets.extend(OccupancyPlotsPixelWantedSubDets)
+process.alloccupancyplotsontrack.wantedSubDets.extend(OccupancyPlotsOuterTrackerWantedSubDets)
+process.alloccupancyplotsontrack.multiplicityMaps = cms.VInputTag(cms.InputTag("spclusmultprodontrack"),cms.InputTag("p2clusmultprodontrack"))
+process.alloccupancyplotsontrack.occupancyMaps = cms.VInputTag(cms.InputTag("spclusoccuprodontrack"),cms.InputTag("p2clusoccuprodontrack"))
 
 
 #process.load("TrackingPFG.Utilities.bxlumianalyzer_cfi")
@@ -263,7 +270,8 @@ process.seqAnalyzers = cms.Sequence(
 #    process.occupancyplots +
     process.pixeloccupancyplots + process.pixeloccupancyplotsontrack +
     process.pixeloccupancyxyplots + process.pixeloccupancyxyplotsontrack +
-    process.phase2occupancyplots + process.phase2occupancyplotsontrack
+    process.phase2occupancyplots + process.phase2occupancyplotsontrack +
+    process.alloccupancyplots + process.alloccupancyplotsontrack
 )
 
 #-------------------------------------------------------------------------------------------
