@@ -106,6 +106,14 @@ private:
   TProfile** m_xavedz;
   TProfile** m_xavedrphi;
 
+  TProfile** m_corner1r;
+  TProfile** m_corner1z;
+  TProfile** m_corner2r;
+  TProfile** m_corner2z;
+  TProfile** m_corner3r;
+  TProfile** m_corner3z;
+  TProfile** m_corner4r;
+  TProfile** m_corner4z;
 
 };
 
@@ -138,6 +146,15 @@ OccupancyPlots::OccupancyPlots(const edm::ParameterSet& iConfig):
   m_avez = m_rhm.makeTProfile("avez","Average Module z coordinate",6000,0.5,6000.5);
   m_avex = m_rhm.makeTProfile("avex","Average Module x coordinate",6000,0.5,6000.5);
   m_avey = m_rhm.makeTProfile("avey","Average Module y coordinate",6000,0.5,6000.5);
+
+  m_corner1r = m_rhm.makeTProfile("corner1r","Corner#1 of module - r coordinate",6000,0.5,6000.5);
+  m_corner1z = m_rhm.makeTProfile("corner1z","Corner#1 of module - z coordinate",6000,0.5,6000.5);
+  m_corner2r = m_rhm.makeTProfile("corner2r","Corner#2 of module - r coordinate",6000,0.5,6000.5);
+  m_corner2z = m_rhm.makeTProfile("corner2z","Corner#2 of module - z coordinate",6000,0.5,6000.5);
+  m_corner3r = m_rhm.makeTProfile("corner3r","Corner#3 of module - r coordinate",6000,0.5,6000.5);
+  m_corner3z = m_rhm.makeTProfile("corner3z","Corner#3 of module - z coordinate",6000,0.5,6000.5);
+  m_corner4r = m_rhm.makeTProfile("corner4r","Corner#4 of module - r coordinate",6000,0.5,6000.5);
+  m_corner4z = m_rhm.makeTProfile("corner4z","Corner#4 of module - z coordinate",6000,0.5,6000.5);
 
   m_zavedr = m_rhm.makeTProfile("zavedr","Average z unit vector dr",6000,0.5,6000.5);
   m_zavedz = m_rhm.makeTProfile("zavedz","Average z unit vector dz",6000,0.5,6000.5);
@@ -247,6 +264,9 @@ OccupancyPlots::endRun(const edm::Run& iRun, const edm::EventSetup& iSetup) {
   LogTrace("IsThereTest") << " is there P2OTB: " << trkgeo->isThere(GeomDetEnumerators::P2OTB);
   LogTrace("IsThereTest") << " is there P2OTEC: " << trkgeo->isThere(GeomDetEnumerators::P2OTEC);
 
+  edm::ESHandle< TrackerTopology > tTopoHandle;
+  iSetup.get< TrackerTopologyRcd >().get(tTopoHandle);
+  const TrackerTopology* tTopo(tTopoHandle.product());
 
   const Local2DPoint center(0.,0.);
   const Local3DPoint locz(0.,0.,1.);
@@ -270,6 +290,17 @@ OccupancyPlots::endRun(const edm::Run& iRun, const edm::EventSetup& iSetup) {
     GlobalVector dz = zpos - position;
     GlobalVector dx = xpos - position;
     GlobalVector dy = ypos - position;
+    float thick = trkgeo->idToDet(*det)->surface().bounds().thickness();
+    float length = trkgeo->idToDet(*det)->surface().bounds().length();
+    float width = trkgeo->idToDet(*det)->surface().bounds().width();
+    float corners_1z = trkgeo->idToDet(*det)->toGlobal(LocalPoint( center.x()+width/2., center.y()+length/2 )).z();
+    float corners_1r = trkgeo->idToDet(*det)->toGlobal(LocalPoint( center.x()+width/2., center.y()+length/2 )).perp();
+    float corners_2z = trkgeo->idToDet(*det)->toGlobal(LocalPoint( center.x()-width/2., center.y()+length/2. )).z();
+    float corners_2r = trkgeo->idToDet(*det)->toGlobal(LocalPoint( center.x()-width/2., center.y()+length/2. )).perp();
+    float corners_3z = trkgeo->idToDet(*det)->toGlobal(LocalPoint( center.x()-width/2., center.y()-length/2. )).z();
+    float corners_3r = trkgeo->idToDet(*det)->toGlobal(LocalPoint( center.x()-width/2., center.y()-length/2. )).perp();
+    float corners_4z = trkgeo->idToDet(*det)->toGlobal(LocalPoint( center.x()+width/2., center.y()-length/2. )).z();
+    float corners_4r = trkgeo->idToDet(*det)->toGlobal(LocalPoint( center.x()+width/2., center.y()-length/2. )).perp();
 
     double dzdr = posvect.perp()>0 ? (dz.x()*posvect.x()+dz.y()*posvect.y())/posvect.perp() : 0. ;
     double dxdr = posvect.perp()>0 ? (dx.x()*posvect.x()+dx.y()*posvect.y())/posvect.perp() : 0. ;
@@ -297,6 +328,15 @@ OccupancyPlots::endRun(const edm::Run& iRun, const edm::EventSetup& iSetup) {
 	 if(m_yavedr && *m_yavedr) (*m_yavedr)->Fill(sel->first,dydr);
 	 if(m_yavedz && *m_yavedz) (*m_yavedz)->Fill(sel->first,dy.z());
 	 if(m_yavedrphi && *m_yavedrphi) (*m_yavedrphi)->Fill(sel->first,dydrphi);
+       
+         if(m_corner1r && *m_corner1r) (*m_corner1r)->Fill(sel->first,corners_1r);
+         if(m_corner1z && *m_corner1z) (*m_corner1z)->Fill(sel->first,corners_1z);
+         if(m_corner2r && *m_corner2r) (*m_corner2r)->Fill(sel->first,corners_2r);
+         if(m_corner2z && *m_corner2z) (*m_corner2z)->Fill(sel->first,corners_2z);
+         if(m_corner3r && *m_corner3r) (*m_corner3r)->Fill(sel->first,corners_3r);
+         if(m_corner3z && *m_corner3z) (*m_corner3z)->Fill(sel->first,corners_3z);
+         if(m_corner4r && *m_corner4r) (*m_corner4r)->Fill(sel->first,corners_4r);
+         if(m_corner4z && *m_corner4z) (*m_corner4z)->Fill(sel->first,corners_4z);
        }
      }
   }
