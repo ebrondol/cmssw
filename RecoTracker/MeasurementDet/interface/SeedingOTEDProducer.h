@@ -13,11 +13,14 @@
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "DataFormats/TrackerRecHit2D/interface/VectorHit.h"
 #include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
+#include "RecoTracker/MeasurementDet/interface/MeasurementTracker.h"
 #include "TrackingTools/MeasurementDet/interface/LayerMeasurements.h"
 
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/Framework/interface/EventSetup.h"
+
+class TrajectoryStateUpdator;
 
 class SeedingOTEDProducer : public edm::EDProducer
 {
@@ -30,22 +33,32 @@ class SeedingOTEDProducer : public edm::EDProducer
 
   static void fillDescriptions(edm::ConfigurationDescriptions&);
 
-  void run(edm::Handle< VectorHitCollectionNew > VHs, 
-           const DetLayer* layerSearch);
+  void run( edm::Handle< VectorHitCollectionNew > );
   unsigned int checkLayer( unsigned int iidd );
-  std::vector<VectorHit> collectVHsInput( edm::Handle< VectorHitCollectionNew > VHs );
-  AlgebraicSymMatrix assign44To55(AlgebraicSymMatrix mat44);
+  std::vector<VectorHit> collectVHsOnLayer( edm::Handle< VectorHitCollectionNew >, unsigned int );
+  void printVHsOnLayer( edm::Handle< VectorHitCollectionNew >, unsigned int );
+  const TrajectoryStateOnSurface buildInitialTSOS( VectorHit& );
+  AlgebraicSymMatrix assign44To55( AlgebraicSymMatrix );
+
+  struct isInvalid {
+    bool operator()(const TrajectoryMeasurement& measurement) {
+      return ( ((measurement).recHit() == 0) || !((measurement).recHit()->isValid()) || !((measurement).updatedState().isValid()) ); 
+    }
+  };
 
  private:
 
   edm::EDGetTokenT< VectorHitCollectionNew > vhProducer;
   const TrackerTopology* tkTopo;
+  const MeasurementTracker* measurementTracker;
   const LayerMeasurements* layerMeasurements;
   const MeasurementEstimator* estimator;
   const Propagator* propagator;
   const MagneticField* magField;
+  const TrajectoryStateUpdator* theUpdator;
   const edm::EDGetTokenT<MeasurementTrackerEvent> tkMeasEvent;
   edm::EDGetTokenT<reco::BeamSpot> beamSpot;
+  std::string updatorName;
 };
 
 #endif
