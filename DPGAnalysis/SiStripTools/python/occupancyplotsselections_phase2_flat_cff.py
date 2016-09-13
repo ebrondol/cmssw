@@ -1,7 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 
 OccupancyPlotsPixelWantedSubDets = cms.VPSet ()
-OccupancyPlotsPixelWantedSubDetsGeneral = cms.VPSet (
+OccupancyPlotsOuterTrackerWantedSubDets = cms.VPSet ()
+OccupancyPlotsWantedSubDetsGeneral = cms.VPSet (
     #Barrel : 10 layers
     cms.PSet(detSelection=cms.uint32(101),detLabel=cms.string("PXB_Layer01"),selection=cms.untracked.vstring("0x1ef00000-0x12100000")),
     cms.PSet(detSelection=cms.uint32(102),detLabel=cms.string("PXB_Layer02"),selection=cms.untracked.vstring("0x1ef00000-0x12200000")),
@@ -4000,11 +4001,12 @@ OccupancyPlotsTIDWantedSubDets.extend(OccupancyPlotsTIDWantedSubDetsm)
 OccupancyPlotsTIDWantedSubDets.extend(OccupancyPlotsTIDWantedSubDetsp)
 
 #total
-OccupancyPlotsPixelWantedSubDets.extend(OccupancyPlotsPixelWantedSubDetsGeneral)
+OccupancyPlotsPixelWantedSubDets.extend(OccupancyPlotsWantedSubDetsGeneral)
 OccupancyPlotsPixelWantedSubDets.extend(OccupancyPlotsPXBWantedSubDets)
 OccupancyPlotsPixelWantedSubDets.extend(OccupancyPlotsPXFWantedSubDets)
-OccupancyPlotsPixelWantedSubDets.extend(OccupancyPlotsTOBWantedSubDets)
-OccupancyPlotsPixelWantedSubDets.extend(OccupancyPlotsTIDWantedSubDets)
+OccupancyPlotsOuterTrackerWantedSubDets.extend(OccupancyPlotsWantedSubDetsGeneral)
+OccupancyPlotsOuterTrackerWantedSubDets.extend(OccupancyPlotsTOBWantedSubDets)
+OccupancyPlotsOuterTrackerWantedSubDets.extend(OccupancyPlotsTIDWantedSubDets)
 
 #total detailed
 OccupancyPlotsPXFDetailedWantedSubDets = cms.VPSet()
