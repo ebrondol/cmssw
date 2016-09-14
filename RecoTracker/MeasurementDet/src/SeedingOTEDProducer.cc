@@ -15,10 +15,10 @@
 
 SeedingOTEDProducer::SeedingOTEDProducer(edm::ParameterSet const& conf):
   theUpdator(nullptr),
-  tkMeasEvent( consumes<MeasurementTrackerEvent>(conf.getParameter<edm::InputTag>("trackerEvent")) )
+  tkMeasEventToken( consumes<MeasurementTrackerEvent>(conf.getParameter<edm::InputTag>("trackerEvent")) )
 {
-  vhProducer = consumes< VectorHitCollectionNew >(edm::InputTag(conf.getParameter<edm::InputTag>("src")));
-  beamSpot = consumes< reco::BeamSpot >(conf.getParameter<edm::InputTag>("beamSpotLabel"));
+  vhProducerToken = consumes< VectorHitCollectionNew >(edm::InputTag(conf.getParameter<edm::InputTag>("src")));
+  beamSpotToken = consumes< reco::BeamSpot >(conf.getParameter<edm::InputTag>("beamSpotLabel"));
   updatorName = conf.getParameter<std::string>("updator");
   produces< VectorHitCollectionNew >();
 }
@@ -47,7 +47,7 @@ void SeedingOTEDProducer::produce(edm::Event& event, const edm::EventSetup& es)
   es.get<CkfComponentsRecord>().get(measurementTrackerHandle);
   measurementTracker = measurementTrackerHandle.product();
   edm::Handle<MeasurementTrackerEvent> measurementTrackerEvent;
-  event.getByToken(tkMeasEvent,measurementTrackerEvent);
+  event.getByToken(tkMeasEventToken,measurementTrackerEvent);
 
   layerMeasurements = new LayerMeasurements(*measurementTrackerHandle, *measurementTrackerEvent);
  
@@ -68,14 +68,15 @@ void SeedingOTEDProducer::produce(edm::Event& event, const edm::EventSetup& es)
   theUpdator = updatorHandle.product();
 
   edm::Handle<reco::BeamSpot> beamSpotH;
-  event.getByToken(beamSpot, beamSpotH);
+  event.getByToken(beamSpotToken, beamSpotH);
   if (beamSpotH.isValid()) {
     std::cout << "BeamSpot Position: " << *(beamSpotH.product());
+    beamSpot = beamSpotH.product();
   }
 
   // Get the vector hits
   edm::Handle< VectorHitCollectionNew > vhs;
-  event.getByToken(vhProducer, vhs);
+  event.getByToken(vhProducerToken, vhs);
 /*
   edm::ESHandle< ClusterParameterEstimator<Phase2TrackerCluster1D> > parameterestimator;
   es.get<TkStripCPERecord>().get(cpe, parameterestimator); 
@@ -95,7 +96,7 @@ void SeedingOTEDProducer::run( edm::Handle< VectorHitCollectionNew > VHs ){
   printVHsOnLayer(VHs,1);
   std::cout << "-----------------------------" << std::endl;
   //seeds are built in the L3 of the OT
-  const DetLayer* barrelOTLayer2 = measurementTracker->geometricSearchTracker()->tobLayers().at(1);
+  const BarrelDetLayer* barrelOTLayer2 = measurementTracker->geometricSearchTracker()->tobLayers().at(1);
   std::vector<VectorHit> VHseeds = collectVHsOnLayer(VHs,3);
   std::cout << "-----------------------------" << std::endl;
   std::cout << "VH seeds = " << VHseeds.size() << std::endl;
@@ -136,22 +137,31 @@ void SeedingOTEDProducer::run( edm::Handle< VectorHitCollectionNew > VHs ){
     const DetLayer* barrelOTLayer1 = measurementTracker->geometricSearchTracker()->tobLayers().at(0);
 
     for(auto tm : tmp){
-      const VectorHit* vhit = dynamic_cast<const VectorHit*>(tm.recHit().get());
-      //if (vhit->isValid()) 
-        std::cout << "\t VH valid >> " << (*vhit) << std::endl;
-      //else
-        //std::cout << "\t VH invalid. " << std::endl;
+      const TrackingRecHit* hit = tm.recHit().get();
+      const VectorHit* vhit = dynamic_cast<const VectorHit*>(hit);
+      std::cout << "\t VH valid >> " << (*vhit) << std::endl;
 
-      TrajectoryStateOnSurface updatedTSOS = theUpdator->update(initialTSOS,*(tm.recHit().get()));
-      std::cout << "updatedTSOS    : " << updatedTSOS << std::endl;
+      //propagate to the L2 and update the TSOS
+      std::pair<bool, TrajectoryStateOnSurface> updatedTSOS = propagateAndUpdate(initialTSOS, *theTmpPropagator, *hit);
+      if(!updatedTSOS.first) continue;
+      std::cout << "updatedTSOS  : " << updatedTSOS.second << std::endl;
+      std::cout << "chi2 VH/updatedTSOS  : " << estimator->estimate(updatedTSOS.second, *hit).second << std::endl;
 
-      std::vector<TrajectoryMeasurement> tmpL1 = layerMeasurements->measurements(*barrelOTLayer1, updatedTSOS, *theTmpPropagator, *estimator);
-      std::cout << "\tvh compatibles: " << tmpL1.size() << std::endl;
+      std::vector<TrajectoryMeasurement> tmpL1 = layerMeasurements->measurements(*barrelOTLayer1, updatedTSOS.second, *theTmpPropagator, *estimator);
+      std::cout << "\tvh compatibles on L1: " << tmpL1.size() << std::endl;
       std::vector<TrajectoryMeasurement>::iterator tmpL1end = std::remove_if(tmpL1.begin(), tmpL1.end(), isInvalid());
       tmpL1.erase(tmpL1end, tmpL1.end());
-      std::cout << "\tvh compatibles(without invalidHit): " << tmpL1.size() << std::endl;
+      std::cout << "\tvh compatibles on L1(without invalidHit): " << tmpL1.size() << std::endl;
+      for(auto tmL1 : tmpL1){
+        const TrackingRecHit* hitL1 = tmL1.recHit().get();
+        const VectorHit* vhitL1 = dynamic_cast<const VectorHit*>(hitL1);
+        std::cout << "\t VH valid >> " << (*vhitL1) << std::endl;
+        std::pair<bool, TrajectoryStateOnSurface> updatedTSOSL1 = propagateAndUpdate(updatedTSOS.second, *theTmpPropagator, *hitL1);
+        std::cout << "updatedTSOS  on L1   : " << updatedTSOSL1.second << std::endl;
+        std::cout << "chi2 VH/updatedTSOS  : " << estimator->estimate(updatedTSOSL1.second, *hitL1).second << std::endl;
+      }
+      std::cout << "-----" << std::endl;
     }
-    std::cout << "-----" << std::endl;
 
 
   }
@@ -204,8 +214,8 @@ void SeedingOTEDProducer::printVHsOnLayer( edm::Handle< VectorHitCollectionNew >
 
 const TrajectoryStateOnSurface SeedingOTEDProducer::buildInitialTSOS( VectorHit& vHit ){
 
+  //FIXME::charge is fine 1 every two times!!
   int charge = 1;
-  LocalTrajectoryParameters ltpar(vHit.localPosition(), vHit.localDirection(), charge);
   //float pT = vHit.transverseMomentum(magField);
   float p = vHit.momentum(magField);
   float x = vHit.localPosition().x();
@@ -214,11 +224,11 @@ const TrajectoryStateOnSurface SeedingOTEDProducer::buildInitialTSOS( VectorHit&
   float dy = vHit.localDirection().y(); 
 
   // having fun with theta
-  //std::cout << "\tvh theta : " << vHit.theta() << std::endl;
-  //std::cout << "\tvh eta : " << vHit.globalDirection().eta() << std::endl;
   Global3DVector gv(vHit.globalPosition().x(), vHit.globalPosition().y(), vHit.globalPosition().z());
+  float theta = gv.theta();
   //std::cout << "\tgv : " << gv << std::endl;
-  //std::cout << "\tgv theta : " << gv.theta() << std::endl;
+  std::cout << "\tgv theta : " << theta << std::endl;
+  std::cout << "\tgv theta error : " << computeGlobalThetaError(vHit, beamSpot->sigmaZ()) << std::endl;
   //std::cout << "\tgv eta : " << gv.eta() << std::endl;
   // gv transform to local (lv)
   const Local3DVector lv( vHit.det()->surface().toLocal( gv ) );
@@ -229,7 +239,7 @@ const TrajectoryStateOnSurface SeedingOTEDProducer::buildInitialTSOS( VectorHit&
   LocalTrajectoryParameters ltpar2(1./p, dx, dy, x, y, charge);
   AlgebraicSymMatrix mat = assign44To55(vHit.parametersError());
   //FIXME::set the error on 1/p
-  mat[0][0] = 1000;
+  mat[0][0] = pow(computeInverseMomentumError(vHit, theta,magField,beamSpot->sigmaZ()),2);
   //std::cout << "\tltraj : " << 1./p <<","<< dx <<","<< dy <<","<< x <<","<< y <<","<< charge << std::endl;
   //std::cout << "\tmat   : " << mat << std::endl;
 
@@ -252,4 +262,30 @@ AlgebraicSymMatrix SeedingOTEDProducer::assign44To55( AlgebraicSymMatrix mat44 )
     }
   }
   return result;
+}
+
+std::pair<bool, TrajectoryStateOnSurface> SeedingOTEDProducer::propagateAndUpdate(const TrajectoryStateOnSurface initialTSOS, const Propagator& prop, const TrackingRecHit& hit){
+  TrajectoryStateOnSurface propTSOS = prop.propagate( initialTSOS, hit.det()->surface());
+  TrajectoryStateOnSurface updatedTSOS = theUpdator->update(propTSOS,hit);
+  if unlikely(!updatedTSOS.isValid()) return std::make_pair( false, updatedTSOS);
+  return std::make_pair( true, updatedTSOS);
+}
+
+float SeedingOTEDProducer::computeGlobalThetaError(const VectorHit& vh, const double sigmaZ_beamSpot){
+
+  double derivative = vh.globalPosition().perp()/(pow(vh.globalPosition().z(),2)+pow(vh.globalPosition().perp(),2));
+  double derivative2 = pow(derivative,2);
+  return pow( derivative2*vh.lowerGlobalPosErr().czz()+derivative2*pow(sigmaZ_beamSpot,2), 0.5);
+
+}
+
+float SeedingOTEDProducer::computeInverseMomentumError(VectorHit& vh, const float globalTheta, const MagneticField* magField, const double sigmaZ_beamSpot){
+
+  //for pT > 2GeV, 1/pT has sigma = 1/sqrt(12)
+  float varianceInverseTransvMomentum = 1./12;
+  double derivativeTheta2 = pow(sin(globalTheta)/vh.transverseMomentum(magField),2);
+  double derivativeInverseTransvMomentum2 = pow(cos(globalTheta),2);
+  float thetaError = computeGlobalThetaError(vh, sigmaZ_beamSpot);
+  return pow(derivativeTheta2*pow(thetaError,2)+derivativeInverseTransvMomentum2*varianceInverseTransvMomentum,0.5);
+
 }
