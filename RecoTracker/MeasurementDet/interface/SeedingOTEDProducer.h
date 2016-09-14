@@ -39,6 +39,9 @@ class SeedingOTEDProducer : public edm::EDProducer
   void printVHsOnLayer( edm::Handle< VectorHitCollectionNew >, unsigned int );
   const TrajectoryStateOnSurface buildInitialTSOS( VectorHit& );
   AlgebraicSymMatrix assign44To55( AlgebraicSymMatrix );
+  std::pair<bool, TrajectoryStateOnSurface> propagateAndUpdate(const TrajectoryStateOnSurface initialTSOS, const Propagator&, const TrackingRecHit& hit);
+  float computeGlobalThetaError(const VectorHit& vh, const double sigmaZ_beamSpot);
+  float computeInverseMomentumError(VectorHit& vh, const float globalTheta, const MagneticField* magField, const double sigmaZ_beamSpot);
 
   struct isInvalid {
     bool operator()(const TrajectoryMeasurement& measurement) {
@@ -48,7 +51,7 @@ class SeedingOTEDProducer : public edm::EDProducer
 
  private:
 
-  edm::EDGetTokenT< VectorHitCollectionNew > vhProducer;
+  edm::EDGetTokenT< VectorHitCollectionNew > vhProducerToken;
   const TrackerTopology* tkTopo;
   const MeasurementTracker* measurementTracker;
   const LayerMeasurements* layerMeasurements;
@@ -56,8 +59,9 @@ class SeedingOTEDProducer : public edm::EDProducer
   const Propagator* propagator;
   const MagneticField* magField;
   const TrajectoryStateUpdator* theUpdator;
-  const edm::EDGetTokenT<MeasurementTrackerEvent> tkMeasEvent;
-  edm::EDGetTokenT<reco::BeamSpot> beamSpot;
+  const edm::EDGetTokenT<MeasurementTrackerEvent> tkMeasEventToken;
+  edm::EDGetTokenT<reco::BeamSpot> beamSpotToken;
+  const reco::BeamSpot* beamSpot;
   std::string updatorName;
 };
 
