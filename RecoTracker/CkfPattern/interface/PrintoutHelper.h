@@ -54,6 +54,10 @@ std::string PrintoutHelper::dumpCandidate( const Candidate & traj,bool showError
       buffer <<"on detId: "<<last.recHit()->geographicalId().rawId()<<"\n";  
       buffer <<"gp: "<<last.recHit()->globalPosition()<<"\n";
     }
+
+    for(auto hit : traj.measurements()){
+      buffer<< "measurement : " << hit.recHit()->geographicalId().rawId() << std::endl;
+    }
   }
   else{
       buffer<<" no measurement. \n";}

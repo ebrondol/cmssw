@@ -14,7 +14,6 @@ VectorHitBuilderAlgorithmBase::VectorHitBuilderAlgorithmBase(const edm::Paramete
 
 void VectorHitBuilderAlgorithmBase::initialize(const edm::EventSetup& es)
 {
-  std::cout << "sono entrato proprio dove volevo" << std::endl;
   //FIXME:ask Vincenzo
   /*
   uint32_t tk_cache_id = es.get<TrackerDigiGeometryRecord>().cacheIdentifier();
@@ -72,8 +71,7 @@ void VectorHitBuilderAlgorithmBase::printClusters(const edmNew::DetSetVector<Pha
 
     }
   }
-  //LogDebug("VectorHitBuilder") << " Number of input clusters: " << nCluster << std::endl;
-  std::cout << " Number of input clusters: " << nCluster << std::endl;
+  LogDebug("VectorHitBuilder") << " Number of input clusters: " << nCluster << std::endl;
 
 }
 
