@@ -13,6 +13,7 @@
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "DataFormats/TrackerRecHit2D/interface/VectorHit.h"
 #include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
+#include "DataFormats/TrajectorySeed/interface/TrajectorySeedCollection.h"
 #include "RecoTracker/MeasurementDet/interface/MeasurementTracker.h"
 #include "TrackingTools/MeasurementDet/interface/LayerMeasurements.h"
 
@@ -33,7 +34,7 @@ class SeedingOTEDProducer : public edm::EDProducer
 
   static void fillDescriptions(edm::ConfigurationDescriptions&);
 
-  void run( edm::Handle< VectorHitCollectionNew > );
+  TrajectorySeedCollection run( edm::Handle< VectorHitCollectionNew > );
   unsigned int checkLayer( unsigned int iidd );
   std::vector<VectorHit> collectVHsOnLayer( edm::Handle< VectorHitCollectionNew >, unsigned int );
   void printVHsOnLayer( edm::Handle< VectorHitCollectionNew >, unsigned int );
@@ -42,6 +43,8 @@ class SeedingOTEDProducer : public edm::EDProducer
   std::pair<bool, TrajectoryStateOnSurface> propagateAndUpdate(const TrajectoryStateOnSurface initialTSOS, const Propagator&, const TrackingRecHit& hit);
   float computeGlobalThetaError(const VectorHit& vh, const double sigmaZ_beamSpot);
   float computeInverseMomentumError(VectorHit& vh, const float globalTheta, const MagneticField* magField, const double sigmaZ_beamSpot);
+
+  TrajectorySeed createSeed(const TrajectoryStateOnSurface& tsos, const edm::OwnVector<TrackingRecHit>& container, const DetId& id) const ;
 
   struct isInvalid {
     bool operator()(const TrajectoryMeasurement& measurement) {
