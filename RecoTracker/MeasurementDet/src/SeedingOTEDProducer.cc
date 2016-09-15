@@ -10,7 +10,9 @@
 #include "TrackingTools/PatternTools/interface/TrajectoryStateUpdator.h"
 
 #include "DataFormats/TrajectoryState/interface/LocalTrajectoryParameters.h"
+#include "TrackingTools/TrajectoryState/interface/TrajectoryStateTransform.h"
 #include "TrackingTools/MeasurementDet/interface/TrajectoryMeasurementGroup.h"
+
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 SeedingOTEDProducer::SeedingOTEDProducer(edm::ParameterSet const& conf):
@@ -20,7 +22,7 @@ SeedingOTEDProducer::SeedingOTEDProducer(edm::ParameterSet const& conf):
   vhProducerToken = consumes< VectorHitCollectionNew >(edm::InputTag(conf.getParameter<edm::InputTag>("src")));
   beamSpotToken = consumes< reco::BeamSpot >(conf.getParameter<edm::InputTag>("beamSpotLabel"));
   updatorName = conf.getParameter<std::string>("updator");
-  produces< VectorHitCollectionNew >();
+  produces<TrajectorySeedCollection>();
 }
     
 SeedingOTEDProducer::~SeedingOTEDProducer() {
@@ -38,6 +40,7 @@ void SeedingOTEDProducer::fillDescriptions(edm::ConfigurationDescriptions& descr
 void SeedingOTEDProducer::produce(edm::Event& event, const edm::EventSetup& es)
 {
   std::cout << "SeedingOT::produce() begin" << std::endl;
+  std::auto_ptr<TrajectorySeedCollection> seedsWithVHs(new TrajectorySeedCollection());
 
   edm::ESHandle<TrackerTopology> tTopoHandle;
   es.get<TrackerTopologyRcd>().get(tTopoHandle);
@@ -82,13 +85,21 @@ void SeedingOTEDProducer::produce(edm::Event& event, const edm::EventSetup& es)
   es.get<TkStripCPERecord>().get(cpe, parameterestimator); 
   const Phase2StripCPEGeometric & cpeOT(*parameterestimator);
 */
-  run(vhs);
+  TrajectorySeedCollection const& tempSeeds = run(vhs);
+  for( TrajectorySeedCollection::const_iterator qIt = tempSeeds.begin(); qIt < tempSeeds.end(); ++qIt ) {
+    seedsWithVHs->push_back( *qIt );
+  }
+
+  seedsWithVHs->shrink_to_fit();
+  event.put(seedsWithVHs);
 
   std::cout << "SeedingOT::produce() end" << std::endl;
 
 }
 
-void SeedingOTEDProducer::run( edm::Handle< VectorHitCollectionNew > VHs ){
+TrajectorySeedCollection SeedingOTEDProducer::run( edm::Handle< VectorHitCollectionNew > VHs ){
+
+  TrajectorySeedCollection result;
 
   std::cout << "-----------------------------" << std::endl;
   printVHsOnLayer(VHs,3);
@@ -119,55 +130,79 @@ void SeedingOTEDProducer::run( edm::Handle< VectorHitCollectionNew > VHs ){
 
     //find vHits in layer 2
     std::cout << "-----------------------------" << std::endl;
-    std::vector<TrajectoryMeasurement> tmp = layerMeasurements->measurements(*barrelOTLayer2, initialTSOS, *theTmpPropagator, *estimator);
-    std::cout << "\tvh compatibles: " << tmp.size() << std::endl;
+    std::vector<TrajectoryMeasurement> measurementsL2 = layerMeasurements->measurements(*barrelOTLayer2, initialTSOS, *theTmpPropagator, *estimator);
+    std::cout << "\tvh compatibles: " << measurementsL2.size() << std::endl;
 
     //other options
     //LayerMeasurements::SimpleHitContainer hits;
     //layerMeasurements->recHits(hits, *barrelOTLayer2, initialTSOS, *theTmpPropagator, *estimator);
     //std::cout << "\tvhits compatibles: " << hits.size() << std::endl;
-    //auto && tmpG = layerMeasurements->groupedMeasurements(*barrelOTLayer2, initialTSOS, *theTmpPropagator, *estimator);
-    //std::cout << "\tvh grouped compatibles: " << tmpG.size() << std::endl;
+    //auto && measurementsL2G = layerMeasurements->groupedMeasurements(*barrelOTLayer2, initialTSOS, *theTmpPropagator, *estimator);
+    //std::cout << "\tvh grouped compatibles: " << measurementsL2G.size() << std::endl;
 
-    std::vector<TrajectoryMeasurement>::iterator tmpend = std::remove_if(tmp.begin(), tmp.end(), isInvalid());
-    tmp.erase(tmpend, tmp.end());
-    std::cout << "\tvh compatibles(without invalidHit): " << tmp.size() << std::endl;
+    std::vector<TrajectoryMeasurement>::iterator measurementsL2end = std::remove_if(measurementsL2.begin(), measurementsL2.end(), isInvalid());
+    measurementsL2.erase(measurementsL2end, measurementsL2.end());
+    std::cout << "\tvh compatibles(without invalidHit): " << measurementsL2.size() << std::endl;
     std::cout << "-----------------------------" << std::endl;
 
-    const DetLayer* barrelOTLayer1 = measurementTracker->geometricSearchTracker()->tobLayers().at(0);
+    if(!measurementsL2.empty()){
+      //not sure if building it everytime takes time/memory
+      const DetLayer* barrelOTLayer1 = measurementTracker->geometricSearchTracker()->tobLayers().at(0);
+  
+      for(auto mL2 : measurementsL2){
+ 
+        const TrackingRecHit* hit = mL2.recHit().get();
+        const VectorHit* vhit = dynamic_cast<const VectorHit*>(hit);
+        std::cout << "\t VH valid >> " << (*vhit) << std::endl;
+  
+        //propagate to the L2 and update the TSOS
+        std::pair<bool, TrajectoryStateOnSurface> updatedTSOS = propagateAndUpdate(initialTSOS, *theTmpPropagator, *hit);
+        if(!updatedTSOS.first) continue;
+        std::cout << "updatedTSOS  : " << updatedTSOS.second << std::endl;
+        std::cout << "chi2 VH/updatedTSOS  : " << estimator->estimate(updatedTSOS.second, *hit).second << std::endl;
+  
+        std::vector<TrajectoryMeasurement> measurementsL1 = layerMeasurements->measurements(*barrelOTLayer1, updatedTSOS.second, *theTmpPropagator, *estimator);
+        std::cout << "\tvh compatibles on L1: " << measurementsL1.size() << std::endl;
+        std::vector<TrajectoryMeasurement>::iterator measurementsL1end = std::remove_if(measurementsL1.begin(), measurementsL1.end(), isInvalid());
+        measurementsL1.erase(measurementsL1end, measurementsL1.end());
+        std::cout << "\tvh compatibles on L1(without invalidHit): " << measurementsL1.size() << std::endl;
 
-    for(auto tm : tmp){
-      const TrackingRecHit* hit = tm.recHit().get();
-      const VectorHit* vhit = dynamic_cast<const VectorHit*>(hit);
-      std::cout << "\t VH valid >> " << (*vhit) << std::endl;
+        if(!measurementsL1.empty()){
 
-      //propagate to the L2 and update the TSOS
-      std::pair<bool, TrajectoryStateOnSurface> updatedTSOS = propagateAndUpdate(initialTSOS, *theTmpPropagator, *hit);
-      if(!updatedTSOS.first) continue;
-      std::cout << "updatedTSOS  : " << updatedTSOS.second << std::endl;
-      std::cout << "chi2 VH/updatedTSOS  : " << estimator->estimate(updatedTSOS.second, *hit).second << std::endl;
+          for(auto mL1 : measurementsL1){
+            const TrackingRecHit* hitL1 = mL1.recHit().get();
+            const VectorHit* vhitL1 = dynamic_cast<const VectorHit*>(hitL1);
+            std::cout << "\t VH valid >> " << (*vhitL1) << std::endl;
+            std::pair<bool, TrajectoryStateOnSurface> updatedTSOSL1 = propagateAndUpdate(updatedTSOS.second, *theTmpPropagator, *hitL1);
+            std::cout << "updatedTSOS  on L1   : " << updatedTSOSL1.second << std::endl;
+            std::cout << "chi2 VH/updatedTSOS  : " << estimator->estimate(updatedTSOSL1.second, *hitL1).second << std::endl;
 
-      std::vector<TrajectoryMeasurement> tmpL1 = layerMeasurements->measurements(*barrelOTLayer1, updatedTSOS.second, *theTmpPropagator, *estimator);
-      std::cout << "\tvh compatibles on L1: " << tmpL1.size() << std::endl;
-      std::vector<TrajectoryMeasurement>::iterator tmpL1end = std::remove_if(tmpL1.begin(), tmpL1.end(), isInvalid());
-      tmpL1.erase(tmpL1end, tmpL1.end());
-      std::cout << "\tvh compatibles on L1(without invalidHit): " << tmpL1.size() << std::endl;
-      for(auto tmL1 : tmpL1){
-        const TrackingRecHit* hitL1 = tmL1.recHit().get();
-        const VectorHit* vhitL1 = dynamic_cast<const VectorHit*>(hitL1);
-        std::cout << "\t VH valid >> " << (*vhitL1) << std::endl;
-        std::pair<bool, TrajectoryStateOnSurface> updatedTSOSL1 = propagateAndUpdate(updatedTSOS.second, *theTmpPropagator, *hitL1);
-        std::cout << "updatedTSOS  on L1   : " << updatedTSOSL1.second << std::endl;
-        std::cout << "chi2 VH/updatedTSOS  : " << estimator->estimate(updatedTSOSL1.second, *hitL1).second << std::endl;
+
+            if( updatedTSOSL1.first ){
+            // passSelection(updatedTSOS) :
+            // http://cmslxr.fnal.gov/lxr/source/FastSimulation/Muons/plugins/FastTSGFromPropagation.cc?v=CMSSW_8_1_X_2016-09-04-2300#0474
+              edm::OwnVector<TrackingRecHit> container;
+              container.push_back(seed.clone());
+              container.push_back(hit->clone());
+              container.push_back(hitL1->clone());
+              std::cout << "-------> hits found in this seed: " << container.size() << std::endl;
+              TrajectorySeed ts = createSeed(updatedTSOS.second, container, hitL1->geographicalId());
+              result.push_back(ts);
+            }
+          }
+
+        }
+  
+        std::cout << "-----" << std::endl;
       }
-      std::cout << "-----" << std::endl;
     }
-
 
   }
   std::cout << "-----------------------------" << std::endl;
+  std::cout << "------- seeds found: " << result.size() << " ------" << std::endl;
+  std::cout << "-----------------------------" << std::endl;
 
-  return;
+  return result;
 }
 
 unsigned int SeedingOTEDProducer::checkLayer( unsigned int iidd ){
@@ -287,5 +322,12 @@ float SeedingOTEDProducer::computeInverseMomentumError(VectorHit& vh, const floa
   double derivativeInverseTransvMomentum2 = pow(cos(globalTheta),2);
   float thetaError = computeGlobalThetaError(vh, sigmaZ_beamSpot);
   return pow(derivativeTheta2*pow(thetaError,2)+derivativeInverseTransvMomentum2*varianceInverseTransvMomentum,0.5);
+
+}
+
+TrajectorySeed SeedingOTEDProducer::createSeed(const TrajectoryStateOnSurface& tsos, const edm::OwnVector<TrackingRecHit>& container, const DetId& id) const {
+
+  PTrajectoryStateOnDet seedTSOS = trajectoryStateTransform::persistentState(tsos,id.rawId());
+  return TrajectorySeed(seedTSOS,container,oppositeToMomentum);
 
 }
