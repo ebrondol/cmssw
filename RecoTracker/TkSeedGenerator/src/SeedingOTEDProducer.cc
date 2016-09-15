@@ -1,4 +1,4 @@
-#include "RecoTracker/MeasurementDet/interface/SeedingOTEDProducer.h"
+#include "RecoTracker/TkSeedGenerator/interface/SeedingOTEDProducer.h"
 #include "FWCore/Framework/interface/Event.h"
 
 #include "Geometry/Records/interface/TrackerTopologyRcd.h"
@@ -40,7 +40,7 @@ void SeedingOTEDProducer::fillDescriptions(edm::ConfigurationDescriptions& descr
 void SeedingOTEDProducer::produce(edm::Event& event, const edm::EventSetup& es)
 {
   std::cout << "SeedingOT::produce() begin" << std::endl;
-  std::auto_ptr<TrajectorySeedCollection> seedsWithVHs(new TrajectorySeedCollection());
+  std::unique_ptr<TrajectorySeedCollection> seedsWithVHs(new TrajectorySeedCollection());
 
   edm::ESHandle<TrackerTopology> tTopoHandle;
   es.get<TrackerTopologyRcd>().get(tTopoHandle);
@@ -91,7 +91,7 @@ void SeedingOTEDProducer::produce(edm::Event& event, const edm::EventSetup& es)
   }
 
   seedsWithVHs->shrink_to_fit();
-  event.put(seedsWithVHs);
+  event.put(std::move(seedsWithVHs));
 
   std::cout << "SeedingOT::produce() end" << std::endl;
 
