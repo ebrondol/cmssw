@@ -1,4 +1,4 @@
-#include "RecoTracker/MeasurementDet/interface/SeedingOTEDProducer.h"
+#include "RecoTracker/TkSeedGenerator/interface/SeedingOTEDProducer.h"
 #include "FWCore/Framework/interface/Event.h"
 
 #include "Geometry/Records/interface/TrackerTopologyRcd.h"
