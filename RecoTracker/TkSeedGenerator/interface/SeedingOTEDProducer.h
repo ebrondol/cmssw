@@ -4,8 +4,8 @@
 // date: July, 2016
 //---------------------------------------------------------------------------
 
-#ifndef RecoTracker_MeasurementDet_SeedingOTEDProducer_h
-#define RecoTracker_MeasurementDet_SeedingOTEDProducer_h
+#ifndef RecoTracker_TkSeedGenerator_SeedingOTEDProducer_h
+#define RecoTracker_TkSeedGenerator_SeedingOTEDProducer_h
 
 #include "FWCore/Framework/interface/EDProducer.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
