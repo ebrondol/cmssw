@@ -47,7 +47,7 @@ class Phase2OTEndcapLayer final : public RingedForwardLayer {
   //  bool isCompatible( const TrajectoryStateOnSurface& ms,
   //	     const MeasurementEstimator& est) const;
 
-  std::array<int,3> findThreeClosest( const GlobalPoint[NOTECRINGS] ) const __attribute__ ((hot));
+  std::array<int,3> findThreeClosest( std::vector<GlobalPoint> ) const __attribute__ ((hot));
   
   bool overlapInR( const TrajectoryStateOnSurface& tsos, int i, double ymax) const __attribute__ ((hot));
   
@@ -61,10 +61,10 @@ class Phase2OTEndcapLayer final : public RingedForwardLayer {
  private:
   std::vector<GeomDet const*> theBasicComps;
   mutable std::atomic<std::vector<const GeometricSearchDet*>*> theComponents;
-  const Phase2OTEndcapRing* theComps[NOTECRINGS];
+  std::vector<const Phase2OTEndcapRing*> theComps;
   struct RingPar { float theRingR, thetaRingMin, thetaRingMax;};
-  RingPar ringPars[NOTECRINGS];
-
+  std::vector<RingPar> ringPars;
+  int theRingSize;
 };
 
 
