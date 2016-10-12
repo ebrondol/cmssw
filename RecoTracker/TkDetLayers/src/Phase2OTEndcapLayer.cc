@@ -59,7 +59,7 @@ Phase2OTEndcapLayer::Phase2OTEndcapLayer(vector<const Phase2OTEndcapRing*>& ring
   theRingSize = rings.size();
   std::cout << "theRingSize " << theRingSize << std::endl;
   if ( theRingSize != NOTECRINGS){
-    std::cout << "Number of rings in Phase2 OT EC layer is not equal to NOTECRINGS !!";
+    std::cout << "Number of rings in Phase2 OT EC layer is not equal to NOTECRINGS !!" << std::endl;
   }
   setSurface( computeDisk( rings ) );
 
@@ -72,7 +72,7 @@ Phase2OTEndcapLayer::Phase2OTEndcapLayer(vector<const Phase2OTEndcapRing*>& ring
   }
 
  
-  std::cout << "==== DEBUG Phase2OTEndcapLayer =====" <<std::endl; 
+  LogDebug("TkDetLayers") << "==== DEBUG Phase2OTEndcapLayer =====" ;
   LogDebug("TkDetLayers") << "==== DEBUG Phase2OTEndcapLayer =====" ; 
   LogDebug("TkDetLayers") << "r,zed pos  , thickness, innerR, outerR: " 
 			  << this->position().perp() << " , "
@@ -146,8 +146,6 @@ Phase2OTEndcapLayer::groupedCompatibleDetsV( const TrajectoryStateOnSurface& sta
   for (int i=0; i<theRingSize; i++) {
     if(i % 2 == 0) ringOrder.at(i) = 0;
   }
-  for(auto i : ringOrder)
-    std::cout << i << std::endl;
   auto index = [&ringIndices,& ringOrder](int i) { return ringOrder[ringIndices[i]];};
 
   std::vector<DetGroup> closestResult;
