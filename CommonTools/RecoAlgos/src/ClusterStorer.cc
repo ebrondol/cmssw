@@ -122,24 +122,19 @@ namespace helper {
     while (it != end) {
       RIT it2 = it;
       uint32_t detid = it->detid();
-std::cout << "here1 " << detid << std::endl;      
       // first isolate all clusters on the same detid
       while ( (it2 != end) && (it2->detid() == detid)) {  ++it2; }
       // now [it, it2] bracket one detid
-std::cout << "here2 " << std::endl;      
       
       // then prepare to copy the clusters
       typename edmNew::DetSetVector<ClusterType>::FastFiller filler(dsvToFill, detid);
-std::cout << "here3a " << std::endl;      
       typename HitType::ClusterRef lastRef, newRef;
-std::cout << "here3b " << std::endl;      
       for ( ; it != it2; ++it) { // loop on the detid
 	// first check if we need to clone the hit
 	if (it->clusterRef() != lastRef) { 
 	  lastRef = it->clusterRef();
 	  // clone cluster
 	  filler.push_back( *lastRef );  
-std::cout << "here4 " << std::endl;      
 	  // make new ref
 	  newRef = typename HitType::ClusterRef( refprod, clusters++ );
 	} 
