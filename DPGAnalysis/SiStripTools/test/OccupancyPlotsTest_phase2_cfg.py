@@ -42,7 +42,7 @@ process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.destinations.extend(cms.vstring("detids"))
 process.MessageLogger.categories.extend(cms.vstring("GeometricDetBuilding","DuplicateHitFinder","BuildingTrackerDetId","AlignmentTrackSelector",
                                                     "SubDetectorGeometricDetType","BuildingGeomDetUnits","LookingForFirstStrip",
-                                                    "BuildingSubDetTypeMap","SubDetTypeMapContent","NumberOfLayers","IsThereTest"))
+                                                    "BuildingSubDetTypeMap","SubDetTypeMapContent","NumberOfLayers","IsThereTest","OccupancyPlots"))
 process.MessageLogger.cout.placeholder = cms.untracked.bool(False)
 process.MessageLogger.cout.threshold = cms.untracked.string("INFO")
 process.MessageLogger.debugModules = cms.untracked.vstring("*")
@@ -81,6 +81,9 @@ process.MessageLogger.detids = cms.untracked.PSet(
         limit = cms.untracked.int32(100000000)
         ),
     IsThereTest = cms.untracked.PSet(
+        limit = cms.untracked.int32(100000000)
+        ),
+    OccupancyPlots = cms.untracked.PSet(
         limit = cms.untracked.int32(100000000)
         ),
     threshold = cms.untracked.string("DEBUG")
@@ -134,6 +137,8 @@ if options.geometry == "flat" :
   from DPGAnalysis.SiStripTools.occupancyplotsselections_phase2_flat_cff import *
 if options.geometry == "tilted" :
   from DPGAnalysis.SiStripTools.occupancyplotsselections_phase2_tilted_cff import *
+if options.geometry == "tilted4021" :
+  from DPGAnalysis.SiStripTools.occupancyplotsselections_phase2_tilted4021_cff import *
 
 #process.ssclusmultprod = cms.EDProducer("SiStripClusterMultiplicityProducer",
 #                                        clusterdigiCollection = cms.InputTag("siStripClusters"),
@@ -204,6 +209,9 @@ if options.geometry == "flat" :
   process.occupancyplots.file = cms.untracked.FileInPath("SLHCUpgradeSimulations/Geometry/data/PhaseII/Flat/PixelSkimmedGeometry.txt")
 if options.geometry == "tilted" :
   process.occupancyplots.file = cms.untracked.FileInPath("SLHCUpgradeSimulations/Geometry/data/PhaseII/Tilted/PixelSkimmedGeometry.txt")
+if options.geometry == "tilted4021" :
+  process.occupancyplots.file = cms.untracked.FileInPath("SLHCUpgradeSimulations/Geometry/data/PhaseII/Tilted/PixelSkimmedGeometry4021.txt")
+process.occupancyplots.checkWithLabels = cms.bool(True)
 
 process.pixeloccupancyplots = process.occupancyplots.clone()
 process.pixeloccupancyplots.wantedSubDets = process.spclusmultprod.wantedSubDets
@@ -305,6 +313,8 @@ if options.geometry == "tilted" :
   process.load('Configuration.Geometry.GeometryExtended2023D1Reco_cff')
 if options.geometry == "flat" :
   process.load('Configuration.Geometry.GeometryExtended2023D2Reco_cff')
+if options.geometry == "tilted4021" :
+  process.load('Configuration.Geometry.GeometryExtended2023D4Reco_cff')
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
@@ -340,8 +350,8 @@ process.p0 = cms.Path(
     process.seqHLTSelection +
     process.seqProducers +
     process.seqAnalyzers +
-    process.trackcount +
-    process.duplicaterechits 
+    process.trackcount 
+#    process.duplicaterechits 
     )
 
 

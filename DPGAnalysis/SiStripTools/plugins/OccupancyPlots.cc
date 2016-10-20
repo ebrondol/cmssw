@@ -81,10 +81,12 @@ private:
 
   std::vector<edm::EDGetTokenT<std::map<unsigned int, int> > > m_multiplicityMapTokens;
   std::vector<edm::EDGetTokenT<std::map<unsigned int, int> > > m_occupancyMapTokens;
+  bool checkLabels_;
   edm::FileInPath m_fp;
 
   RunHistogramManager m_rhm;
   std::map<unsigned int,DetIdSelector> m_wantedsubdets;
+  std::map<unsigned int,DetIdSelector> m_wantedsubdetslbl;
 
   TProfile** m_avemultiplicity;
   TProfile** m_aveoccupancy;
@@ -115,6 +117,21 @@ private:
   TProfile** m_corner4r;
   TProfile** m_corner4z;
 
+  //this are created with labels - check
+  TProfile** m2_averadius;
+  TProfile** m2_avez;
+  TProfile** m2_avex;
+  TProfile** m2_avey;
+  TProfile** m2_zavedr;
+  TProfile** m2_zavedz;
+  TProfile** m2_zavedrphi;
+  TProfile** m2_yavedr;
+  TProfile** m2_yavedz;
+  TProfile** m2_yavedrphi;
+  TProfile** m2_xavedr;
+  TProfile** m2_xavedz;
+  TProfile** m2_xavedrphi;
+
 };
 
 //
@@ -131,8 +148,9 @@ private:
 OccupancyPlots::OccupancyPlots(const edm::ParameterSet& iConfig):
   m_multiplicityMapTokens(edm::vector_transform(iConfig.getParameter<std::vector<edm::InputTag> >("multiplicityMaps"), [this](edm::InputTag const & tag){return consumes<std::map<unsigned int, int> >(tag);})),
   m_occupancyMapTokens(edm::vector_transform(iConfig.getParameter<std::vector<edm::InputTag> >("occupancyMaps"), [this](edm::InputTag const & tag){return consumes<std::map<unsigned int, int> >(tag);})),
+  checkLabels_(iConfig.getParameter<bool>("checkWithLabels")),
   m_fp(iConfig.getUntrackedParameter<edm::FileInPath>("file",edm::FileInPath("CalibTracker/SiPixelESProducers/data/PixelSkimmedGeometry.txt"))),
-  m_rhm(consumesCollector()), m_wantedsubdets()
+  m_rhm(consumesCollector()), m_wantedsubdets(), m_wantedsubdetslbl()
 {
    //now do what ever initialization is needed
 
@@ -166,6 +184,21 @@ OccupancyPlots::OccupancyPlots(const edm::ParameterSet& iConfig):
   m_yavedz = m_rhm.makeTProfile("yavedz","Average y unit vector dz",6000,0.5,6000.5);
   m_yavedrphi = m_rhm.makeTProfile("yavedrphi","Average y unit vector drphi",6000,0.5,6000.5);
 
+  m2_averadius = m_rhm.makeTProfile("averadius2","Average2 Module Radius",6000,0.5,6000.5);
+  m2_avez = m_rhm.makeTProfile("avez2","Average2 Module z coordinate",6000,0.5,6000.5);
+  m2_avex = m_rhm.makeTProfile("avex2","Average2 Module x coordinate",6000,0.5,6000.5);
+  m2_avey = m_rhm.makeTProfile("avey2","Average2 Module y coordinate",6000,0.5,6000.5);
+
+  m2_zavedr = m_rhm.makeTProfile("zavedr2","Average2 z unit vector dr",6000,0.5,6000.5);
+  m2_zavedz = m_rhm.makeTProfile("zavedz2","Average2 z unit vector dz",6000,0.5,6000.5);
+  m2_zavedrphi = m_rhm.makeTProfile("zavedrphi2","Average2 z unit vector drphi",6000,0.5,6000.5);
+  m2_xavedr = m_rhm.makeTProfile("xavedr2","Average2 x unit vector dr",6000,0.5,6000.5);
+  m2_xavedz = m_rhm.makeTProfile("xavedz2","Average2 x unit vctor dz",6000,0.5,6000.5);
+  m2_xavedrphi = m_rhm.makeTProfile("xavedrphi2","Average2 Module x unit vector drphi",6000,0.5,6000.5);
+  m2_yavedr = m_rhm.makeTProfile("yavedr2","Average2 y unit vector dr",6000,0.5,6000.5);
+  m2_yavedz = m_rhm.makeTProfile("yavedz2","Average2 y unit vector dz",6000,0.5,6000.5);
+  m2_yavedrphi = m_rhm.makeTProfile("yavedrphi2","Average2 y unit vector drphi",6000,0.5,6000.5);
+
   std::vector<edm::ParameterSet> wantedsubdets_ps = iConfig.getParameter<std::vector<edm::ParameterSet> >("wantedSubDets");
   LogTrace("OccupancyPlots") << "wantedsubdets_ps size" << wantedsubdets_ps.size();
 
@@ -173,9 +206,17 @@ OccupancyPlots::OccupancyPlots(const edm::ParameterSet& iConfig):
 
     unsigned int detsel = wsdps->getParameter<unsigned int>("detSelection");
     std::vector<std::string> selstr = wsdps->getUntrackedParameter<std::vector<std::string> >("selection");
-    m_wantedsubdets[detsel]=DetIdSelector(selstr);
+    std::string sellbl = wsdps->getParameter<std::string>("detLabel");
+
+    LogTrace("OccupancyPlots") << "Label     >>" << sellbl;
     for( auto sel : selstr) 
       LogTrace("OccupancyPlots") << "Selection >>" << sel;
+
+
+    m_wantedsubdets[detsel]=DetIdSelector(selstr);
+    if(checkLabels_)  m_wantedsubdetslbl[detsel] = DetIdSelector(sellbl, "words");
+
+    LogTrace("OccupancyPlots") << ">>>>>>>>>" ;
   }
 
 
@@ -281,6 +322,7 @@ OccupancyPlots::endRun(const edm::Run& iRun, const edm::EventSetup& iSetup) {
     if(det->det()!=DetId::Tracker) continue;
 
     edm::LogInfo("DetIdFromGeometry") << det->rawId();
+    edm::LogInfo("OccupancyPlots") << ">>>>>" << tTopo->print(det->rawId());
 
     GlobalPoint position = trkgeo->idToDet(*det)->toGlobal(center);
     GlobalPoint zpos = trkgeo->idToDet(*det)->toGlobal(locz);
@@ -313,7 +355,7 @@ OccupancyPlots::endRun(const edm::Run& iRun, const edm::EventSetup& iSetup) {
      for(std::map<unsigned int,DetIdSelector>::const_iterator sel=m_wantedsubdets.begin();sel!=m_wantedsubdets.end();++sel) {
 
        if(sel->second.isSelected(*det)) {
-	 edm::LogInfo("SelectedDetId") << sel->first;
+	 edm::LogInfo("OccupancyPlots") << sel->first << " is selected with bits";
 	 // average positions
 	 if(m_averadius && *m_averadius) (*m_averadius)->Fill(sel->first,position.perp());
 	 if(m_avez && *m_avez) (*m_avez)->Fill(sel->first,position.z());
@@ -337,9 +379,10 @@ OccupancyPlots::endRun(const edm::Run& iRun, const edm::EventSetup& iSetup) {
          if(m_corner3z && *m_corner3z) (*m_corner3z)->Fill(sel->first,corners_3z);
          if(m_corner4r && *m_corner4r) (*m_corner4r)->Fill(sel->first,corners_4r);
          if(m_corner4z && *m_corner4z) (*m_corner4z)->Fill(sel->first,corners_4z);
+       } else {
+         //LogTrace("OccupancyPlots") << sel->first << " is NOT selected with bits";
        }
      }
-  }
 
   // counting the number of channels per module subset
 
@@ -347,6 +390,43 @@ OccupancyPlots::endRun(const edm::Run& iRun, const edm::EventSetup& iSetup) {
 
   if(m_nchannels_ideal && *m_nchannels_ideal) (*m_nchannels_ideal)->Reset();
   if(m_nchannels_real && *m_nchannels_real) (*m_nchannels_real)->Reset();
+
+     for(std::map<unsigned int,DetIdSelector>::const_iterator sel=m_wantedsubdetslbl.begin();sel!=m_wantedsubdetslbl.end();++sel) {
+
+       if(sel->second.isSelectedByWords(*det, tTopo)) {
+         edm::LogInfo("OccupancyPlots") << sel->first << " is selected with labels";
+         // average positions
+         if(m2_averadius && *m2_averadius) (*m2_averadius)->Fill(sel->first,position.perp());
+         if(m2_avez && *m2_avez) (*m2_avez)->Fill(sel->first,position.z());
+         if(m2_avex && *m2_avex) (*m2_avex)->Fill(sel->first,position.x());
+         if(m2_avey && *m2_avey) (*m2_avey)->Fill(sel->first,position.y());
+         if(m2_zavedr && *m2_zavedr) (*m2_zavedr)->Fill(sel->first,dzdr);
+         if(m2_zavedz && *m2_zavedz) (*m2_zavedz)->Fill(sel->first,dz.z());
+         if(m2_zavedrphi && *m2_zavedrphi) (*m2_zavedrphi)->Fill(sel->first,dzdrphi);
+         if(m2_xavedr && *m2_xavedr) (*m2_xavedr)->Fill(sel->first,dxdr);
+         if(m2_xavedz && *m2_xavedz) (*m2_xavedz)->Fill(sel->first,dx.z());
+         if(m2_xavedrphi && *m2_xavedrphi) (*m2_xavedrphi)->Fill(sel->first,dxdrphi);
+         if(m2_yavedr && *m2_yavedr) (*m2_yavedr)->Fill(sel->first,dydr);
+         if(m2_yavedz && *m2_yavedz) (*m2_yavedz)->Fill(sel->first,dy.z());
+         if(m2_yavedrphi && *m2_yavedrphi) (*m2_yavedrphi)->Fill(sel->first,dydrphi); 
+ 
+       } else {
+         //LogTrace("OccupancyPlots") << sel->first << " is NOT selected with labels";
+       }
+
+     }
+
+    if(checkLabels_ && (*m_averadius)->Integral() != (*m2_averadius)->Integral()){
+      edm::LogError("OccupancyPlots") << "The selection is different with Labels and Bits:\n"  
+                      << (*m_averadius)->Integral() << " dets selected with bits\n"
+                      << (*m2_averadius)->Integral() << " dets selected with label";
+      return;
+    }
+
+  }
+  
+  edm::LogInfo("OccupancyPlots") << (*m_averadius)->Integral() << " dets selected with bits";
+  if (checkLabels_)  edm::LogInfo("OccupancyPlots") << (*m2_averadius)->Integral() << " dets selected with label";
 
   edm::ESHandle<SiStripQuality> quality;
   iSetup.get<SiStripQualityRcd>().get("",quality);

@@ -61,7 +61,7 @@ std::pair<float,float> phase2bin(int i) {
   float dz=-1; float dr=-1;
 
   if(i > 1000 && i < 1040) { dz=3.33;dr=0.4;}
-  if(i > 1040 && i < 1130) { dr=3.33;dz=0.4;}
+  if(i > 1040 && i < 1140) { dr=3.33;dz=0.4;}
   
   if(i > 2000 && i < 2550) { dz=2.5;dr=0.1;}
   if(i > 2550 && i < 3000) { dz=5.0;dr=0.1;}
@@ -317,7 +317,7 @@ void PlotOccupancyMapPhase2(TFile* ff, const char* module, const float min, cons
   size = &phase2bin;
 
   std::vector<SubDetParams> vsub;
-  SubDetParams ppix={"BPIX+FPIX",1000,1090}; vsub.push_back(ppix);
+  SubDetParams ppix={"BPIX+FPIX",1000,1140}; vsub.push_back(ppix);
   SubDetParams ptob={"TOB",2000,2900}; vsub.push_back(ptob);
   SubDetParams ptecm={"TEC-",3100,3300}; vsub.push_back(ptecm);
   SubDetParams ptecp={"TEC+",4100,4300}; vsub.push_back(ptecp);
@@ -363,7 +363,7 @@ void PlotOnTrackOccupancyPhase2(TFile* ff, const char* module, const char* ontrk
   size = &phase2bin;
 
   std::vector<SubDetParams> vsub;
-  SubDetParams ppix={"BPIX+FPIX",1000,1090}; vsub.push_back(ppix);
+  SubDetParams ppix={"BPIX+FPIX",1000,1140}; vsub.push_back(ppix);
   SubDetParams ptob={"TOB",2000,2900}; vsub.push_back(ptob);
   SubDetParams ptecm={"TEC-",3100,3300}; vsub.push_back(ptecm);
   SubDetParams ptecp={"TEC+",4100,4300}; vsub.push_back(ptecp);
