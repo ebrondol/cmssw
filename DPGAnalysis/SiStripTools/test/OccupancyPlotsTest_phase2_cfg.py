@@ -1,3 +1,11 @@
+# DPG tool to run with:
+# - Tilted + Phase1 Pixel Geometry
+#   cmsRun DPGAnalysis/SiStripTools/test/OccupancyPlotsTest_phase2_cfg.py print globalTag=auto:phase2_realistic inputFiles=file:step3.root triggerPath="*" geometry="tilted" 
+# - Flat + Phase1 Pixel Geometry
+#   cmsRun DPGAnalysis/SiStripTools/test/OccupancyPlotsTest_phase2_cfg.py print globalTag=auto:phase2_realistic inputFiles=file:step3.root triggerPath="*" geometry="flat"
+# - Tilted + Phase2 Pixel Geometry
+#   cmsRun DPGAnalysis/SiStripTools/test/OccupancyPlotsTest_phase2_cfg.py print globalTag=auto:phase2_realistic inputFiles=file:step3.root triggerPath="*" geometry="tilted4021"
+
 import FWCore.ParameterSet.Config as cms
 import FWCore.ParameterSet.VarParsing as VarParsing
 from Configuration.StandardSequences.Eras import eras
