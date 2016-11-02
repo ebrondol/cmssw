@@ -1,4 +1,4 @@
-#include "Phase2OTEndcapLayer.h"
+#include "Phase2PixelEndcapLayer.h"
 
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
@@ -19,10 +19,10 @@ using namespace std;
 typedef GeometricSearchDet::DetWithState DetWithState;
 
 //hopefully is never called!
-const std::vector<const GeometricSearchDet*>& Phase2OTEndcapLayer::components() const{
+const std::vector<const GeometricSearchDet*>& Phase2PixelEndcapLayer::components() const{
   if (not theComponents) {
     auto temp = std::make_unique<std::vector<const GeometricSearchDet*>>();
-    temp->reserve(15);   // This number is just an upper bound
+    temp->reserve(NOTECRINGS);
     for ( auto c: theComps) temp->push_back(c);
     std::vector<const GeometricSearchDet*>* expected = nullptr;
     if(theComponents.compare_exchange_strong(expected,temp.get())) {
@@ -35,7 +35,7 @@ const std::vector<const GeometricSearchDet*>& Phase2OTEndcapLayer::components() 
 
 
 void
-Phase2OTEndcapLayer::fillRingPars(int i) {
+Phase2PixelEndcapLayer::fillRingPars(int i) {
   const BoundDisk& ringDisk = static_cast<const BoundDisk&>(theComps[i]->surface());
   float ringMinZ = std::abs( ringDisk.position().z()) - ringDisk.bounds().thickness()/2.;
   float ringMaxZ = std::abs( ringDisk.position().z()) + ringDisk.bounds().thickness()/2.; 
@@ -48,15 +48,19 @@ Phase2OTEndcapLayer::fillRingPars(int i) {
 }
 
 
-Phase2OTEndcapLayer::Phase2OTEndcapLayer(vector<const Phase2OTEndcapRing*>& rings):
+Phase2PixelEndcapLayer::Phase2PixelEndcapLayer(vector<const Phase2OTEndcapRing*>& rings):
   RingedForwardLayer(true),
   theComponents{nullptr}
 {
   //They should be already R-ordered. TO BE CHECKED!!
   //sort( theRings.begin(), theRings.end(), DetLessR());
 
+//  if ( rings.size() != NOTECRINGS) throw DetLayerException("Number of rings in Phase2 OT EC layer is not equal to NOTECRINGS !!");
   theRingSize = rings.size();
-  LogDebug("TkDetLayers") << "Number of rings in Phase2 OT EC layer is " << theRingSize << std::endl;
+  std::cout << "theRingSize " << theRingSize << std::endl;
+  if ( theRingSize != NOTECRINGS){
+    std::cout << "Number of rings in Phase2 OT EC layer is not equal to NOTECRINGS !!" << std::endl;
+  }
   setSurface( computeDisk( rings ) );
 
   for(unsigned int i=0; i!=rings.size(); ++i) {
@@ -68,7 +72,7 @@ Phase2OTEndcapLayer::Phase2OTEndcapLayer(vector<const Phase2OTEndcapRing*>& ring
   }
 
  
-  LogDebug("TkDetLayers") << "==== DEBUG Phase2OTEndcapLayer =====" ; 
+  LogDebug("TkDetLayers") << "==== DEBUG Phase2PixelEndcapLayer =====" ; 
   LogDebug("TkDetLayers") << "r,zed pos  , thickness, innerR, outerR: " 
 			  << this->position().perp() << " , "
 			  << this->position().z() << " , "
@@ -79,7 +83,7 @@ Phase2OTEndcapLayer::Phase2OTEndcapLayer(vector<const Phase2OTEndcapRing*>& ring
 
 
 BoundDisk* 
-Phase2OTEndcapLayer::computeDisk( const vector<const Phase2OTEndcapRing*>& rings) const
+Phase2PixelEndcapLayer::computeDisk( const vector<const Phase2OTEndcapRing*>& rings) const
 {
   float theRmin = rings.front()->specificSurface().innerRadius();
   float theRmax = rings.front()->specificSurface().outerRadius();
@@ -109,7 +113,7 @@ Phase2OTEndcapLayer::computeDisk( const vector<const Phase2OTEndcapRing*>& rings
 }
 
 
-Phase2OTEndcapLayer::~Phase2OTEndcapLayer(){
+Phase2PixelEndcapLayer::~Phase2PixelEndcapLayer(){
   for (auto c : theComps) delete c;
 
   delete theComponents.load();
@@ -118,7 +122,7 @@ Phase2OTEndcapLayer::~Phase2OTEndcapLayer(){
   
 
 void
-Phase2OTEndcapLayer::groupedCompatibleDetsV( const TrajectoryStateOnSurface& startingState,
+Phase2PixelEndcapLayer::groupedCompatibleDetsV( const TrajectoryStateOnSurface& startingState,
 				 const Propagator& prop,
 				 const MeasurementEstimator& est,
 				 std::vector<DetGroup> & result) const
@@ -148,11 +152,6 @@ Phase2OTEndcapLayer::groupedCompatibleDetsV( const TrajectoryStateOnSurface& sta
       throw DetLayerException("Rings in Endcap Layer have same z position, no idea how to order them!");
     }
   }
-//#ifdef __INTEL_COMPILER
-//  const int ringOrder[NOTECRINGS]{0,1,0,1,0,1,0,1,0,1,0,1,0,1,0};
-//#else
-//  constexpr int ringOrder[NOTECRINGS]{0,1,0,1,0,1,0,1,0,1,0,1,0,1,0};
-//#endif
 
   auto index = [&ringIndices,& ringOrder](int i) { return ringOrder[ringIndices[i]];};
 
@@ -253,7 +252,7 @@ Phase2OTEndcapLayer::groupedCompatibleDetsV( const TrajectoryStateOnSurface& sta
 
 
 std::array<int,3> 
-Phase2OTEndcapLayer::ringIndicesByCrossingProximity(const TrajectoryStateOnSurface& startingState,
+Phase2PixelEndcapLayer::ringIndicesByCrossingProximity(const TrajectoryStateOnSurface& startingState,
 					 const Propagator& prop ) const
 {
   typedef HelixForwardPlaneCrossing Crossing; 
@@ -270,7 +269,6 @@ Phase2OTEndcapLayer::ringIndicesByCrossingProximity(const TrajectoryStateOnSurfa
   Crossing myXing(  startPos, startDir, rho, propDir );
 
   std::vector<GlobalPoint> ringCrossings;
-  ringCrossings.reserve(theRingSize);
   // vector<GlobalVector>  ringXDirections;
 
   for (int i = 0; i < theRingSize ; i++ ) {
@@ -298,7 +296,7 @@ Phase2OTEndcapLayer::ringIndicesByCrossingProximity(const TrajectoryStateOnSurfa
 
 
 float 
-Phase2OTEndcapLayer::computeWindowSize( const GeomDet* det, 
+Phase2PixelEndcapLayer::computeWindowSize( const GeomDet* det, 
 			     const TrajectoryStateOnSurface& tsos, 
 			     const MeasurementEstimator& est) const
 {
@@ -309,7 +307,7 @@ Phase2OTEndcapLayer::computeWindowSize( const GeomDet* det,
 }
 
 std::array<int,3>
-Phase2OTEndcapLayer::findThreeClosest(std::vector<GlobalPoint> ringCrossing ) const
+Phase2PixelEndcapLayer::findThreeClosest(std::vector<GlobalPoint> ringCrossing ) const
 {
   std::array<int,3> theBins={{-1,-1,-1}};
   theBins[0] = 0;
@@ -346,7 +344,7 @@ Phase2OTEndcapLayer::findThreeClosest(std::vector<GlobalPoint> ringCrossing ) co
 }
 
 bool
-Phase2OTEndcapLayer::overlapInR( const TrajectoryStateOnSurface& tsos, int index, double ymax ) const 
+Phase2PixelEndcapLayer::overlapInR( const TrajectoryStateOnSurface& tsos, int index, double ymax ) const 
 {
   // assume "fixed theta window", i.e. margin in local y = r is changing linearly with z
   float tsRadius = tsos.globalPosition().perp();
