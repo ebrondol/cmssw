@@ -75,6 +75,7 @@ namespace helper {
   {
     pixelClusterRecords_.clear();
     stripClusterRecords_.clear();
+    phase2OTClusterRecords_.clear();
   }
   
   // -------------------------------------------------------------
@@ -82,7 +83,9 @@ namespace helper {
   processAllClusters(edmNew::DetSetVector<SiPixelCluster> &pixelDsvToFill,
 		     edm::RefProd<edmNew::DetSetVector<SiPixelCluster> > refPixelClusters,
 		     edmNew::DetSetVector<SiStripCluster> &stripDsvToFill,
-		     edm::RefProd<edmNew::DetSetVector<SiStripCluster> > refStripClusters)
+		     edm::RefProd<edmNew::DetSetVector<SiStripCluster> > refStripClusters,
+                     edmNew::DetSetVector<Phase2TrackerCluster1D> &phase2OTDsvToFill,
+                     edm::RefProd<edmNew::DetSetVector<Phase2TrackerCluster1D> > refPhase2OTClusters)
   {
     if (!pixelClusterRecords_.empty()) {
       this->processClusters<SiPixelRecHit, SiPixelCluster>
@@ -96,6 +99,10 @@ namespace helper {
       // is specialised such that 'RecHitType' is not used...
       this->processClusters<SiStripRecHit2D, SiStripCluster>
 	(stripClusterRecords_, stripDsvToFill, refStripClusters);
+    }
+    if (!phase2OTClusterRecords_.empty()) {
+      this->processClusters<Phase2TrackerRecHit1D, Phase2TrackerCluster1D>
+	(phase2OTClusterRecords_, phase2OTDsvToFill, refPhase2OTClusters);
     }
   }
   
@@ -115,7 +122,6 @@ namespace helper {
     while (it != end) {
       RIT it2 = it;
       uint32_t detid = it->detid();
-      
       // first isolate all clusters on the same detid
       while ( (it2 != end) && (it2->detid() == detid)) {  ++it2; }
       // now [it, it2] bracket one detid
