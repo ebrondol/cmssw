@@ -358,8 +358,8 @@ process.p0 = cms.Path(
     process.seqHLTSelection +
     process.seqProducers +
     process.seqAnalyzers +
-    process.trackcount 
-#    process.duplicaterechits 
+    process.trackcount +
+    process.duplicaterechits 
     )
 
 
