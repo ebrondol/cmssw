@@ -33,10 +33,10 @@ void VectorHitBuilderEDProducer::produce(edm::Event& event, const edm::EventSetu
   event.getByToken( clusterProducer, clustersHandle);
 
   // create the final output collection
-  std::auto_ptr< edmNew::DetSetVector< Phase2TrackerCluster1D > > outputClustersAccepted( new edmNew::DetSetVector< Phase2TrackerCluster1D > );
-  std::auto_ptr< edmNew::DetSetVector< Phase2TrackerCluster1D > > outputClustersRejected( new edmNew::DetSetVector< Phase2TrackerCluster1D > );
-  std::auto_ptr< VectorHitCollectionNew > outputVHAccepted( new VectorHitCollectionNew() );
-  std::auto_ptr< VectorHitCollectionNew > outputVHRejected( new VectorHitCollectionNew() );
+  std::unique_ptr< edmNew::DetSetVector< Phase2TrackerCluster1D > > outputClustersAccepted( new edmNew::DetSetVector< Phase2TrackerCluster1D > );
+  std::unique_ptr< edmNew::DetSetVector< Phase2TrackerCluster1D > > outputClustersRejected( new edmNew::DetSetVector< Phase2TrackerCluster1D > );
+  std::unique_ptr< VectorHitCollectionNew > outputVHAccepted( new VectorHitCollectionNew() );
+  std::unique_ptr< VectorHitCollectionNew > outputVHRejected( new VectorHitCollectionNew() );
 
   if(readytobuild)  stubsBuilder->initialize(es);
   else edm::LogError("VectorHitBuilderEDProducer") << "Impossible initialization of builder!!";
@@ -67,10 +67,10 @@ void VectorHitBuilderEDProducer::produce(edm::Event& event, const edm::EventSetu
   }
 */
   // write output to file
-  event.put( outputClustersAccepted, "ClustersAccepted" );
-  event.put( outputClustersRejected, "ClustersRejected" );
-  event.put( outputVHAccepted, offlinestubsTag + "Accepted" );
-  event.put( outputVHRejected, offlinestubsTag + "Rejected" );
+  event.put( std::move(outputClustersAccepted), "ClustersAccepted" );
+  event.put( std::move(outputClustersRejected), "ClustersRejected" );
+  event.put( std::move(outputVHAccepted), offlinestubsTag + "Accepted" );
+  event.put( std::move(outputVHRejected), offlinestubsTag + "Rejected" );
 
 //  LogDebug("VectorHitBuilderEDProducer") << " Executing " << algoTag << " resulted in " << numberOfVectorHits << ".";
   LogDebug("VectorHitBuilderEDProducer") << "found\n" << numberOfVectorHits << " .\n" ;
