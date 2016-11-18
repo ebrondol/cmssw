@@ -73,8 +73,43 @@ BaseTrackerRecHit::getKfComponents2D( KfComponentsHolder & holder ) const
    holder.measuredErrors<2>() = holder.tsosLocalErrors().Sub<AlgebraicSymMatrix22>( 3, 3 );
 
 }
+/*
+void 
+BaseTrackerRecHit::getKfComponents4D( KfComponentsHolder & holder ) const {
 
- // obsolete (for what tracker is concerned...) interface
+  //if (!hasPositionAndError()) throwExceptionUninitialized("getKfComponents");
+  AlgebraicVector4 & pars = holder.params<4>();
+  pars[0] = theDirection.x();
+  pars[1] = theDirection.y();
+  pars[2] = thePosition.x();
+  pars[3] = thePosition.y();
+
+  AlgebraicSymMatrix44 & errs = holder.errors<4>();
+  for(int i = 0; i < 4; i++){
+    for(int j = 0; j < 4; j++){
+      errs(i,j) = theCovMatrix[i][j];
+    }
+  }
+
+  AlgebraicMatrix45 & proj = holder.projection<4>();
+  proj(0,1) = 1;
+  proj(1,2) = 1;
+  proj(2,3) = 1;
+  proj(3,4) = 1;
+
+  ProjectMatrix<double,5,4>  & pf = holder.projFunc<4>();
+  pf.index[0] = 1;
+  pf.index[1] = 2;
+  pf.index[2] = 3;
+  pf.index[3] = 4;
+  holder.doUseProjFunc();
+
+  holder.measuredParams<4>() = AlgebraicVector4( & holder.tsosLocalParameters().At(1), 4 );
+  holder.measuredParams<4>() = AlgebraicVector4( & holder.tsosLocalParameters().At(1), 4 );
+
+}
+*/
+// obsolete (for what tracker is concerned...) interface
 AlgebraicVector BaseTrackerRecHit::parameters() const {
   obsolete();
   return AlgebraicVector();

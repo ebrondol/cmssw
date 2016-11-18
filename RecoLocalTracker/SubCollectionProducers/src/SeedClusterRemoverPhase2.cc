@@ -11,6 +11,7 @@
 #include "DataFormats/TrackerRecHit2D/interface/Phase2TrackerRecHit1D.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHit.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHitCollection.h"
+#include "DataFormats/TrackerRecHit2D/interface/VectorHit.h"
 
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/DetSetVector.h"
@@ -215,7 +216,37 @@ void SeedClusterRemoverPhase2::process(const TrackingRecHit *hit, float chi2, co
     OTs[cluster.key()] = false;
     assert(collectedOuterTrackers_.size() > cluster.key());
     if (!clusterWasteSolution_) collectedOuterTrackers_[cluster.key()]=true;
+
+  } else if (hitType == typeid(VectorHit)) {
+
+    if(!doOuterTracker_) return;
+
+    const VectorHit *vhit = static_cast<const VectorHit*>(hit);
+    LogDebug("SeedClusterRemoverPhase2") << "Plain VectorHit in det " << detid.rawId();
+
+    //lower cluster
+    Phase2TrackerRecHit1D::CluRef cluster = vhit->lowerCluster();
+    if (cluster.id() != outerTrackerSourceProdID) throw cms::Exception("Inconsistent Data") <<
+      "SeedClusterRemoverPhase2: strip cluster ref from Product ID = " << cluster.id() <<
+      " does not match with source cluster collection (ID = " << outerTrackerSourceProdID << ")\n.";
   
+    assert(cluster.id() == outerTrackerSourceProdID);
+
+    OTs[cluster.key()] = false;
+    assert(collectedOuterTrackers_.size() > cluster.key());
+    if (!clusterWasteSolution_) collectedOuterTrackers_[cluster.key()]=true;
+
+    // upper cluster 
+    cluster = vhit->upperCluster();
+    if (cluster.id() != outerTrackerSourceProdID) throw cms::Exception("Inconsistent Data") <<
+      "SeedClusterRemoverPhase2: strip cluster ref from Product ID = " << cluster.id() <<
+      " does not match with source cluster collection (ID = " << outerTrackerSourceProdID << ")\n.";
+  
+    assert(cluster.id() == outerTrackerSourceProdID);
+
+    OTs[cluster.key()] = false;
+    assert(collectedOuterTrackers_.size() > cluster.key());
+    if (!clusterWasteSolution_) collectedOuterTrackers_[cluster.key()]=true;
   } else throw cms::Exception("NOT IMPLEMENTED") << "I received a hit that was neither SiPixelRecHit nor Phase2TrackerRecHit1D but " << hitType.name() << " on detid " << detid.rawId() << "\n";
 
   
