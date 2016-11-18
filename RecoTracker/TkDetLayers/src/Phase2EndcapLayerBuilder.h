@@ -17,7 +17,7 @@ class Phase2EndcapLayerBuilder {
   Phase2EndcapLayerBuilder(){};
   Phase2EndcapLayer* build(const GeometricDet* aPhase2EndcapLayer,
 			   const TrackerGeometry* theGeomDetGeometry,
-                           const bool isOuterTracker) __attribute__ ((cold));
+                           const bool useBrothers) __attribute__ ((cold));
 
    
 };

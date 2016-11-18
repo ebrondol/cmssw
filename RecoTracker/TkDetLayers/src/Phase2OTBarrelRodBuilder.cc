@@ -6,18 +6,18 @@ using namespace std;
 
 Phase2OTBarrelRod* Phase2OTBarrelRodBuilder::build(const GeometricDet* thePhase2OTBarrelRod,
 						   const TrackerGeometry* theGeomDetGeometry,
-						   const bool usePhase2Stacks)
+						   const bool useBrothers)
 {  
   vector<const GeometricDet*> allGeometricDets = thePhase2OTBarrelRod->components();
 //  vector<const GeometricDet*> compGeometricDets;
   LogDebug("TkDetLayers") << "Phase2OTBarrelRodBuilder with #Modules: " << allGeometricDets.size() << std::endl;
-  LogDebug("TkDetLayers") << "                        usePhase2Stacks: " << usePhase2Stacks << std::endl;
+  LogDebug("TkDetLayers") << "                           useBrothers: " << useBrothers << std::endl;
 
   vector<const GeomDet*> innerGeomDets;
   vector<const GeomDet*> outerGeomDets;
   double meanR = 0;
 
-  if(usePhase2Stacks){  
+  if(!useBrothers){  
   
     for(vector<const GeometricDet*>::const_iterator compGeometricDets=allGeometricDets.begin(); compGeometricDets!=allGeometricDets.end();compGeometricDets++){
       //LogTrace("TkDetLayers") << " compGeometricDets.positionBounds().perp() " << (*compGeometricDets)->positionBounds().perp() << std::endl;

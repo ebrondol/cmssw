@@ -8,7 +8,7 @@ using namespace edm;
 
 Phase2OTBarrelLayer* Phase2OTBarrelLayerBuilder::build(const GeometricDet* aPhase2OTBarrelLayer,
 						       const TrackerGeometry* theGeomDetGeometry,
-						       const bool usePhase2Stacks)
+						       const bool useBrothers)
 {
   // This builder is very similar to TOBLayer one. Most of the code should be put in a 
   // common place.
@@ -48,11 +48,11 @@ Phase2OTBarrelLayer* Phase2OTBarrelLayerBuilder::build(const GeometricDet* aPhas
   for(unsigned int index=0; index!=theGeometricDetRods.size(); index++){    
     if(theGeometricDetRods[index]->positionBounds().perp() < meanR)
       theInnerRods.push_back(myPhase2OTBarrelRodBuilder.build(theGeometricDetRods[index],
-						              theGeomDetGeometry, usePhase2Stacks) );
+						              theGeomDetGeometry, useBrothers) );
 
     if(theGeometricDetRods[index]->positionBounds().perp() > meanR)
       theOuterRods.push_back(myPhase2OTBarrelRodBuilder.build(theGeometricDetRods[index],
-							      theGeomDetGeometry, usePhase2Stacks) );       
+							      theGeomDetGeometry, useBrothers) );
 
   }
   
@@ -71,9 +71,9 @@ Phase2OTBarrelLayer* Phase2OTBarrelLayerBuilder::build(const GeometricDet* aPhas
   for(vector<const GeometricDet*>::const_iterator it=theGeometricDetRings.begin();
       it!=theGeometricDetRings.end();it++){
     if((*it)->positionBounds().z() < centralZ)
-      theNegativeRings.push_back(myPhase2OTEndcapRingBuilder.build( *it,theGeomDetGeometry,usePhase2Stacks ));
+      theNegativeRings.push_back(myPhase2EndcapRingBuilder.build( *it,theGeomDetGeometry,useBrothers ));
     if((*it)->positionBounds().z() > centralZ)
-      thePositiveRings.push_back(myPhase2OTEndcapRingBuilder.build( *it,theGeomDetGeometry,usePhase2Stacks ));
+      thePositiveRings.push_back(myPhase2EndcapRingBuilder.build( *it,theGeomDetGeometry,useBrothers ));
   }
 
   return new Phase2OTtiltedBarrelLayer(theInnerRods,theOuterRods,theNegativeRings,thePositiveRings);
