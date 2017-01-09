@@ -71,9 +71,9 @@ Phase2OTBarrelLayer* Phase2OTBarrelLayerBuilder::build(const GeometricDet* aPhas
   for(vector<const GeometricDet*>::const_iterator it=theGeometricDetRings.begin();
       it!=theGeometricDetRings.end();it++){
     if((*it)->positionBounds().z() < centralZ)
-      theNegativeRings.push_back(myPhase2OTEndcapRingBuilder.build( *it,theGeomDetGeometry,usePhase2Stacks ));
+      theNegativeRings.push_back(myPhase2EndcapRingBuilder.build( *it,theGeomDetGeometry,usePhase2Stacks ));
     if((*it)->positionBounds().z() > centralZ)
-      thePositiveRings.push_back(myPhase2OTEndcapRingBuilder.build( *it,theGeomDetGeometry,usePhase2Stacks ));
+      thePositiveRings.push_back(myPhase2EndcapRingBuilder.build( *it,theGeomDetGeometry,usePhase2Stacks ));
   }
 
   return new Phase2OTtiltedBarrelLayer(theInnerRods,theOuterRods,theNegativeRings,thePositiveRings);

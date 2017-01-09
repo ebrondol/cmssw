@@ -154,9 +154,9 @@ GeometricSearchTrackerBuilder::build(const GeometricDet* theGeometricTracker,
       for(vector<const GeometricDet*>::const_iterator it2=theTIDGeometricDetLayers.begin();
 	  it2!=theTIDGeometricDetLayers.end(); it2++){
 	if((*it2)->positionBounds().z() < 0)
-	  theNegTIDLayers.push_back( aPhase2OTEndcapLayerBuilder.build(*it2,theGeomDetGeometry,usePhase2Stacks) );
+	  theNegTIDLayers.push_back( aPhase2EndcapLayerBuilder.build(*it2,theGeomDetGeometry,usePhase2Stacks) );
 	if((*it2)->positionBounds().z() > 0)
-	  thePosTIDLayers.push_back( aPhase2OTEndcapLayerBuilder.build(*it2,theGeomDetGeometry,usePhase2Stacks) );
+	  thePosTIDLayers.push_back( aPhase2EndcapLayerBuilder.build(*it2,theGeomDetGeometry,usePhase2Stacks) );
       }
     }
 
