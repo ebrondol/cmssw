@@ -17,7 +17,7 @@ class Phase2OTBarrelLayerBuilder {
   Phase2OTBarrelLayerBuilder(){};
   Phase2OTBarrelLayer* build(const GeometricDet* aPhase2OTBarrelLayer,
 			     const TrackerGeometry* theGeomDetGeometry,
-			     const bool usePhase2Stacks = false) __attribute__ ((cold));
+			     const bool useBrothers = true) __attribute__ ((cold));
 
   
 };
