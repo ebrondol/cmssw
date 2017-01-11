@@ -160,7 +160,8 @@ Phase2EndcapRing::groupedCompatibleDetsV( const TrajectoryStateOnSurface& tsos,
 					  crossings.closestIndex(), crossingSide);
 
   //due to propagator problems, when we add single pt sub modules, we should order them in z (endcap)
-  sort(result.begin(),result.end(),DetGroupElementZLess());
+  if(!theFrontDetBrothers.empty() && !theBackDetBrothers.empty())
+    sort(result.begin(),result.end(),DetGroupElementZLess());
 
 #ifdef EDM_ML_DEBUG
   for (auto&  grp : result) {
