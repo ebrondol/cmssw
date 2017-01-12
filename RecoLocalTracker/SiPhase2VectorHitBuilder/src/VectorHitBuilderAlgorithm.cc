@@ -13,7 +13,6 @@ void VectorHitBuilderAlgorithm::run(edm::Handle< edmNew::DetSetVector<Phase2Trac
                                     edmNew::DetSetVector<Phase2TrackerCluster1D>& clustersRej)
 {
 
-
   LogDebug("VectorHitBuilderAlgorithm") << "Run VectorHitBuilderAlgorithm ... \n" ;
   const  edmNew::DetSetVector<Phase2TrackerCluster1D>* ClustersPhase2Collection = clusters.product();
 
@@ -89,10 +88,7 @@ std::vector<VectorHit> VectorHitBuilderAlgorithm::buildVectorHits(const StackGeo
                                                                   const detset & theUpperDetSet)
 {
 
-  LogTrace("VectorHitBuilderAlgorithm") << "theLowerDetSet : " << theLowerDetSet.size();
-  LogTrace("VectorHitBuilderAlgorithm") << "theUpperDetSet : " << theUpperDetSet.size();
   std::vector<VectorHit> result;
-
 
   for ( const_iterator cil = theLowerDetSet.begin(); cil != theLowerDetSet.end(); ++ cil ) {
 
