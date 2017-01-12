@@ -102,47 +102,53 @@ TrajectorySeedCollection SeedingOTEDProducer::run( edm::Handle< VectorHitCollect
   TrajectorySeedCollection result;
 
   std::cout << "-----------------------------" << std::endl;
-  printVHsOnLayer(VHs,3);
-  printVHsOnLayer(VHs,2);
   printVHsOnLayer(VHs,1);
+  printVHsOnLayer(VHs,2);
+  printVHsOnLayer(VHs,3);
+  printVHsOnLayer(VHs,4);
+  printVHsOnLayer(VHs,5);
+  printVHsOnLayer(VHs,6);
   std::cout << "-----------------------------" << std::endl;
+
   //seeds are built in the L3 of the OT
   const BarrelDetLayer* barrelOTLayer2 = measurementTracker->geometricSearchTracker()->tobLayers().at(1);
   std::vector<VectorHit> VHseeds = collectVHsOnLayer(VHs,3);
-  std::cout << "-----------------------------" << std::endl;
   std::cout << "VH seeds = " << VHseeds.size() << std::endl;
 
   for(auto seed : VHseeds){
 
     //building a tsos out of a VectorHit
-    std::cout << "\tbuilding a seed for the VH: " << seed << std::endl;
+    std::cout << "\t1a) Building a seed for the VH: " << seed << std::endl;
     const TrajectoryStateOnSurface initialTSOS = buildInitialTSOS(seed);
-    std::cout << "initialTSOS    : " << initialTSOS << std::endl;
+    std::cout << "\t    initialTSOS    : " << initialTSOS << std::endl;
 
     //set the direction of the propagator
+    std::cout << "\t1b) Set the propagator direction: " << std::endl;
     Propagator* theTmpPropagator = &*propagator->clone();
-    if (initialTSOS.globalPosition().y()<0 ) theTmpPropagator->setPropagationDirection(oppositeToMomentum);
-    else                              theTmpPropagator->setPropagationDirection(alongMomentum);
+    theTmpPropagator->setPropagationDirection(oppositeToMomentum);
     if(theTmpPropagator->propagationDirection() == alongMomentum)
-      std::cout << "propagator along Momentum" << std::endl;
+      std::cout << "\t    propagator along Momentum" << std::endl;
     if(theTmpPropagator->propagationDirection() == oppositeToMomentum)
-      std::cout << "propagator opposite To Momentum" << std::endl;
+      std::cout << "\t    propagator opposite To Momentum" << std::endl;
 
     //find vHits in layer 2
     std::cout << "-----------------------------" << std::endl;
+    std::cout << "\t1c) Search/find hit in layer 2: " << std::endl;
     std::vector<TrajectoryMeasurement> measurementsL2 = layerMeasurements->measurements(*barrelOTLayer2, initialTSOS, *theTmpPropagator, *estimator);
-    std::cout << "\tvh compatibles: " << measurementsL2.size() << std::endl;
+    std::cout << "\t    vh compatibles on L2: " << measurementsL2.size() << std::endl;
 
+/*
     //other options
     //LayerMeasurements::SimpleHitContainer hits;
     //layerMeasurements->recHits(hits, *barrelOTLayer2, initialTSOS, *theTmpPropagator, *estimator);
     //std::cout << "\tvhits compatibles: " << hits.size() << std::endl;
     //auto && measurementsL2G = layerMeasurements->groupedMeasurements(*barrelOTLayer2, initialTSOS, *theTmpPropagator, *estimator);
     //std::cout << "\tvh grouped compatibles: " << measurementsL2G.size() << std::endl;
+*/
 
     std::vector<TrajectoryMeasurement>::iterator measurementsL2end = std::remove_if(measurementsL2.begin(), measurementsL2.end(), isInvalid());
     measurementsL2.erase(measurementsL2end, measurementsL2.end());
-    std::cout << "\tvh compatibles(without invalidHit): " << measurementsL2.size() << std::endl;
+    std::cout << "\t    vh compatibles on L2(without invalidHit): " << measurementsL2.size() << std::endl;
     std::cout << "-----------------------------" << std::endl;
 
     if(!measurementsL2.empty()){
@@ -150,45 +156,81 @@ TrajectorySeedCollection SeedingOTEDProducer::run( edm::Handle< VectorHitCollect
       const DetLayer* barrelOTLayer1 = measurementTracker->geometricSearchTracker()->tobLayers().at(0);
   
       for(auto mL2 : measurementsL2){
+
+        std::cout << "\t2a) Check the propagator direction: " << std::endl;
+        if(theTmpPropagator->propagationDirection() == alongMomentum){
+          theTmpPropagator->setPropagationDirection(oppositeToMomentum);
+          std::cout << "\t    set propagator opposite To Momentum" << std::endl;
+        } else {
+          std::cout << "\t    propagator is in opposite momentum" << std::endl;
+        }
  
-        const TrackingRecHit* hit = mL2.recHit().get();
-        const VectorHit* vhit = dynamic_cast<const VectorHit*>(hit);
-        std::cout << "\t VH valid >> " << (*vhit) << std::endl;
+        const TrackingRecHit* hitL2 = mL2.recHit().get();
+        std::cout << "\t2b) and the VH on layer 2: " << std::endl;
+        const VectorHit* vhit = dynamic_cast<const VectorHit*>(hitL2);
+        std::cout << "\t    vh is valid >> " << (*vhit) << std::endl;
   
         //propagate to the L2 and update the TSOS
-        std::pair<bool, TrajectoryStateOnSurface> updatedTSOS = propagateAndUpdate(initialTSOS, *theTmpPropagator, *hit);
+        std::cout << "\t2c) Propagation and update on L2: " << std::endl;
+        std::pair<bool, TrajectoryStateOnSurface> updatedTSOS = propagateAndUpdate(initialTSOS, *theTmpPropagator, *hitL2);
         if(!updatedTSOS.first) continue;
-        std::cout << "updatedTSOS  : " << updatedTSOS.second << std::endl;
-        std::cout << "chi2 VH/updatedTSOS  : " << estimator->estimate(updatedTSOS.second, *hit).second << std::endl;
+        std::cout << "\t    updatedTSOS is valid  : " << updatedTSOS.second << std::endl;
+        std::cout << "\t    chi2 VH/updatedTSOS  : " << estimator->estimate(updatedTSOS.second, *hitL2).second << std::endl;
   
+        //searching possible VHs in L1
+        std::cout << "\t2d) Search/find hit in layer 1: " << std::endl;
         std::vector<TrajectoryMeasurement> measurementsL1 = layerMeasurements->measurements(*barrelOTLayer1, updatedTSOS.second, *theTmpPropagator, *estimator);
-        std::cout << "\tvh compatibles on L1: " << measurementsL1.size() << std::endl;
+        std::cout << "\t    vh compatibles on L1: " << measurementsL1.size() << std::endl;
         std::vector<TrajectoryMeasurement>::iterator measurementsL1end = std::remove_if(measurementsL1.begin(), measurementsL1.end(), isInvalid());
         measurementsL1.erase(measurementsL1end, measurementsL1.end());
-        std::cout << "\tvh compatibles on L1(without invalidHit): " << measurementsL1.size() << std::endl;
+        std::cout << "\t    vh compatibles on L1(without invalidHit): " << measurementsL1.size() << std::endl;
+        std::cout << "-----------------------------" << std::endl;
 
         if(!measurementsL1.empty()){
 
           for(auto mL1 : measurementsL1){
+            std::cout << "\t3a) Check the propagator direction: " << std::endl;
+            if(theTmpPropagator->propagationDirection() == alongMomentum){
+              theTmpPropagator->setPropagationDirection(oppositeToMomentum);
+              std::cout << "\t    set propagator opposite To Momentum" << std::endl;
+            } else {
+              std::cout << "\t    propagator is in opposite momentum" << std::endl;
+            }
             const TrackingRecHit* hitL1 = mL1.recHit().get();
+            std::cout << "\t3b) and the VH on layer 1: " << std::endl;
             const VectorHit* vhitL1 = dynamic_cast<const VectorHit*>(hitL1);
-            std::cout << "\t VH valid >> " << (*vhitL1) << std::endl;
+            std::cout << "\t   vh is valid >> " << (*vhitL1) << std::endl;
+
+            //propagate to the L1 and update the TSOS
+            std::cout << "\t3c) Propagation and update on L1: " << std::endl;
             std::pair<bool, TrajectoryStateOnSurface> updatedTSOSL1 = propagateAndUpdate(updatedTSOS.second, *theTmpPropagator, *hitL1);
-            std::cout << "updatedTSOS  on L1   : " << updatedTSOSL1.second << std::endl;
-            std::cout << "chi2 VH/updatedTSOS  : " << estimator->estimate(updatedTSOSL1.second, *hitL1).second << std::endl;
+            if(!updatedTSOSL1.first) continue;
+            std::cout << "\t    updatedTSOS  on L1   : " << updatedTSOSL1.second << std::endl;
+            std::cout << "\t    chi2 VH/updatedTSOS  : " << estimator->estimate(updatedTSOSL1.second, *hitL1).second << std::endl;
 
 
-            if( updatedTSOSL1.first ){
+            std::cout << "\t3d) Creation of the Seed: " << std::endl;
             // passSelection(updatedTSOS) :
             // http://cmslxr.fnal.gov/lxr/source/FastSimulation/Muons/plugins/FastTSGFromPropagation.cc?v=CMSSW_8_1_X_2016-09-04-2300#0474
-              edm::OwnVector<TrackingRecHit> container;
-              container.push_back(seed.clone());
-              container.push_back(hit->clone());
-              container.push_back(hitL1->clone());
-              std::cout << "-------> hits found in this seed: " << container.size() << std::endl;
-              TrajectorySeed ts = createSeed(updatedTSOS.second, container, hitL1->geographicalId());
-              result.push_back(ts);
+            edm::OwnVector<TrackingRecHit> container;
+            container.push_back(hitL1->clone());
+            container.push_back(hitL2->clone());
+            container.push_back(seed.clone());
+
+            //building trajectory inside-out
+            std::cout << "\t3e) Building trajectory inside-out: " << std::endl;
+            theTmpPropagator->setPropagationDirection(alongMomentum);
+            if(theTmpPropagator->propagationDirection() == alongMomentum){
+              std::cout << "\t    propagator along To Momentum" << std::endl;
+            } else {
+              std::cout << "\t    propagator WTF" << std::endl;
             }
+            std::pair<bool, TrajectoryStateOnSurface> updatedTSOSL2_final = propagateAndUpdate(updatedTSOSL1.second, *theTmpPropagator, *hitL2);
+            std::pair<bool, TrajectoryStateOnSurface> updatedTSOSL3_final = propagateAndUpdate(updatedTSOSL2_final.second, *theTmpPropagator, seed);
+            std::cout << "\tupdatedTSOS final on L3   : " << updatedTSOSL3_final.second << std::endl;
+            TrajectorySeed ts = createSeed(updatedTSOSL3_final.second, container, seed.geographicalId());
+//            TrajectorySeed ts = createSeed(updatedTSOS.second, container, seed.geographicalId());
+            result.push_back(ts);
           }
 
         }
@@ -219,7 +261,7 @@ std::vector<VectorHit> SeedingOTEDProducer::collectVHsOnLayer( edm::Handle< Vect
   const VectorHitCollectionNew& input = *VHs;
   std::vector<VectorHit> VHsOnLayer;
   if (input.size() > 0 ) {  
-    std::cout << "initial VH collection size = " << input.size() << std::endl;
+    //std::cout << "initial VH collection size = " << input.size() << std::endl;
     for (auto DSViter : input) {
       if(checkLayer(DSViter.id()) == layerNumber){
         for(auto vh : DSViter){
@@ -229,7 +271,7 @@ std::vector<VectorHit> SeedingOTEDProducer::collectVHsOnLayer( edm::Handle< Vect
     }
   }
 
-  std::cout << "VH in layer " << layerNumber << " collection size = " << VHsOnLayer.size() << std::endl;
+  //std::cout << "VH in layer " << layerNumber << " collection size = " << VHsOnLayer.size() << std::endl;
 
   return VHsOnLayer;
 }
@@ -262,8 +304,8 @@ const TrajectoryStateOnSurface SeedingOTEDProducer::buildInitialTSOS( VectorHit&
   Global3DVector gv(vHit.globalPosition().x(), vHit.globalPosition().y(), vHit.globalPosition().z());
   float theta = gv.theta();
   //std::cout << "\tgv : " << gv << std::endl;
-  std::cout << "\tgv theta : " << theta << std::endl;
-  std::cout << "\tgv theta error : " << computeGlobalThetaError(vHit, beamSpot->sigmaZ()) << std::endl;
+  //std::cout << "\tgv theta : " << theta << std::endl;
+  //std::cout << "\tgv theta error : " << computeGlobalThetaError(vHit, beamSpot->sigmaZ()) << std::endl;
   //std::cout << "\tgv eta : " << gv.eta() << std::endl;
   // gv transform to local (lv)
   const Local3DVector lv( vHit.det()->surface().toLocal( gv ) );
@@ -302,6 +344,7 @@ AlgebraicSymMatrix SeedingOTEDProducer::assign44To55( AlgebraicSymMatrix mat44 )
 std::pair<bool, TrajectoryStateOnSurface> SeedingOTEDProducer::propagateAndUpdate(const TrajectoryStateOnSurface initialTSOS, const Propagator& prop, const TrackingRecHit& hit){
   TrajectoryStateOnSurface propTSOS = prop.propagate( initialTSOS, hit.det()->surface());
   TrajectoryStateOnSurface updatedTSOS = theUpdator->update(propTSOS,hit);
+  //std::cout << "updatedTSOS  : " << updatedTSOS << std::endl;
   if unlikely(!updatedTSOS.isValid()) return std::make_pair( false, updatedTSOS);
   return std::make_pair( true, updatedTSOS);
 }
@@ -325,9 +368,51 @@ float SeedingOTEDProducer::computeInverseMomentumError(VectorHit& vh, const floa
 
 }
 
-TrajectorySeed SeedingOTEDProducer::createSeed(const TrajectoryStateOnSurface& tsos, const edm::OwnVector<TrackingRecHit>& container, const DetId& id) const {
+TrajectorySeed SeedingOTEDProducer::createSeed(const TrajectoryStateOnSurface& tsos, const edm::OwnVector<TrackingRecHit>& container, const DetId& id) {
+/*
+  //I have already propagator and updator
+  //const Propagator*  propagator = &(*propagatorHandle);
+  //KFUpdator  updator;
 
-  PTrajectoryStateOnDet seedTSOS = trajectoryStateTransform::persistentState(tsos,id.rawId());
-  return TrajectorySeed(seedTSOS,container,oppositeToMomentum);
+  // Now update initial state track using information from seed hits.
+
+  TrajectoryStateOnSurface updatedState;
+  edm::OwnVector<TrackingRecHit> seedHits;
+
+  for ( unsigned int iHit = 1; iHit < container.size(); iHit++) {
+
+    std::pair<bool, TrajectoryStateOnSurface> state;
+    if(iHit==1)
+      state = propagateAndUpdate(tsos, *propagator, container[iHit]);
+    else
+      state = propagateAndUpdate(updatedState, *propagator, container[iHit]);
+    //std::cout << "-------> new state >> " << state.second << std::endl;
+    if(state.first)
+      updatedState = state.second;
+*/
+/*
+    TrajectoryStateOnSurface state = (iHit==1) ? propagator->propagate(tsos, container[iHit].det()->surface()) : propagator->propagate(updatedState, container[iHit].det()->surface());
+
+    std::cout << "-------> new state >> " << state << std::endl;
+
+    if (!state.isValid()) return TrajectorySeed();
+
+    //SeedingHitSet::ConstRecHitPointer   tth = hits[iHit]; 
+    //std::unique_ptr<BaseTrackerRecHit> newtth(refitHit( tth, state));
+    //if (!checkHit(state,&*newtth)) return;
+  
+    std::cout << "-------> updated state >> " << state << std::endl;
+    updatedState =  theUpdator->update(state, container[iHit]);
+    if (!updatedState.isValid()) return TrajectorySeed();
+
+    //seedHits.push_back(newtth.release());
+*/  
+//  } 
+
+  //if(!hit) return;
+
+  PTrajectoryStateOnDet seedTSOS = trajectoryStateTransform::persistentState(tsos, id.rawId());
+  return TrajectorySeed(seedTSOS,container,alongMomentum);
+  //if ( !filter || filter->compatible(seed)) seedCollection.push_back(std::move(seed));
 
 }
