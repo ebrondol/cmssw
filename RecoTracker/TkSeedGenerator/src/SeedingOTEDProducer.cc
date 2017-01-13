@@ -115,11 +115,11 @@ TrajectorySeedCollection SeedingOTEDProducer::run( edm::Handle< VectorHitCollect
   std::vector<VectorHit> VHseeds = collectVHsOnLayer(VHs,3);
   std::cout << "VH seeds = " << VHseeds.size() << std::endl;
 
-  for(auto seed : VHseeds){
+  for(auto hitL3 : VHseeds){
 
     //building a tsos out of a VectorHit
-    std::cout << "\t1a) Building a seed for the VH: " << seed << std::endl;
-    const TrajectoryStateOnSurface initialTSOS = buildInitialTSOS(seed);
+    std::cout << "\t1a) Building a seed for the VH: " << hitL3 << std::endl;
+    const TrajectoryStateOnSurface initialTSOS = buildInitialTSOS(hitL3);
     std::cout << "\t    initialTSOS    : " << initialTSOS << std::endl;
 
     //set the direction of the propagator
@@ -215,7 +215,7 @@ TrajectorySeedCollection SeedingOTEDProducer::run( edm::Handle< VectorHitCollect
             edm::OwnVector<TrackingRecHit> container;
             container.push_back(hitL1->clone());
             container.push_back(hitL2->clone());
-            container.push_back(seed.clone());
+            container.push_back(hitL3.clone());
 
             //building trajectory inside-out
             std::cout << "\t3e) Building trajectory inside-out: " << std::endl;
@@ -225,11 +225,16 @@ TrajectorySeedCollection SeedingOTEDProducer::run( edm::Handle< VectorHitCollect
             } else {
               std::cout << "\t    propagator WTF" << std::endl;
             }
-            std::pair<bool, TrajectoryStateOnSurface> updatedTSOSL2_final = propagateAndUpdate(updatedTSOSL1.second, *theTmpPropagator, *hitL2);
-            std::pair<bool, TrajectoryStateOnSurface> updatedTSOSL3_final = propagateAndUpdate(updatedTSOSL2_final.second, *theTmpPropagator, seed);
-            std::cout << "\tupdatedTSOS final on L3   : " << updatedTSOSL3_final.second << std::endl;
-            TrajectorySeed ts = createSeed(updatedTSOSL3_final.second, container, seed.geographicalId());
-//            TrajectorySeed ts = createSeed(updatedTSOS.second, container, seed.geographicalId());
+
+            updatedTSOSL1.second.rescaleError(100);
+            std::cout << "\t    updatedTSOS  on L1   : " << updatedTSOSL1.second << std::endl;
+
+            TrajectoryStateOnSurface updatedTSOSL1_final = theUpdator->update(updatedTSOSL1.second,*hitL1);
+            if unlikely(!updatedTSOSL1_final.isValid()) continue;
+            std::pair<bool, TrajectoryStateOnSurface> updatedTSOSL2_final = propagateAndUpdate(updatedTSOSL1_final, *theTmpPropagator, *hitL2);
+            std::pair<bool, TrajectoryStateOnSurface> updatedTSOSL3_final = propagateAndUpdate(updatedTSOSL2_final.second, *theTmpPropagator, hitL3);
+            std::cout << "\t    updatedTSOS final on L3   : " << updatedTSOSL3_final.second << std::endl;
+            TrajectorySeed ts = createSeed(updatedTSOSL3_final.second, container, hitL3.geographicalId());
             result.push_back(ts);
           }
 
