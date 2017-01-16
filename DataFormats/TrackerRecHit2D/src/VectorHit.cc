@@ -352,7 +352,7 @@ float VectorHit::transverseMomentum(const MagneticField* magField){
 }
 
 float VectorHit::momentum(const MagneticField* magField){
-  return transverseMomentum(magField)/(1.*cos(theta()));
+  return transverseMomentum(magField)/(1.*sin(theta()));
 }
 
 float VectorHit::theta(){
