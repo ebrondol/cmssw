@@ -135,16 +135,6 @@ namespace DataFormats_TrackerRecHit2D {
 
       edm::Ref<vector<vector<edm::Ref<edm::OwnVector<FastTrackerRecHit,edm::ClonePolicy<FastTrackerRecHit> >,FastTrackerRecHit,edm::refhelper::FindUsingAdvance<edm::OwnVector<FastTrackerRecHit,edm::ClonePolicy<FastTrackerRecHit> >,FastTrackerRecHit> > > >,vector<edm::Ref<edm::OwnVector<FastTrackerRecHit,edm::ClonePolicy<FastTrackerRecHit> >,FastTrackerRecHit,edm::refhelper::FindUsingAdvance<edm::OwnVector<FastTrackerRecHit,edm::ClonePolicy<FastTrackerRecHit> >,FastTrackerRecHit> > >,edm::refhelper::FindUsingAdvance<vector<vector<edm::Ref<edm::OwnVector<FastTrackerRecHit,edm::ClonePolicy<FastTrackerRecHit> >,FastTrackerRecHit,edm::refhelper::FindUsingAdvance<edm::OwnVector<FastTrackerRecHit,edm::ClonePolicy<FastTrackerRecHit> >,FastTrackerRecHit> > > >,vector<edm::Ref<edm::OwnVector<FastTrackerRecHit,edm::ClonePolicy<FastTrackerRecHit> >,FastTrackerRecHit,edm::refhelper::FindUsingAdvance<edm::OwnVector<FastTrackerRecHit,edm::ClonePolicy<FastTrackerRecHit> >,FastTrackerRecHit> > > > > fastSimTrackerRecHitCombinationRef;
 
-    edm::Wrapper< Phase2TrackerRecHit1D > cl0;
-    edm::Wrapper< std::vector< Phase2TrackerRecHit1D > > cl1;
-    edm::Wrapper< edmNew::DetSet< Phase2TrackerRecHit1D > > cl2;
-    edm::Wrapper< std::vector< edmNew::DetSet< Phase2TrackerRecHit1D > > > cl3;
-    edm::Wrapper< Phase2TrackerRecHit1DCollectionNew > cl4;
-
-    edm::Ref<edmNew::DetSetVector<Phase2TrackerCluster1D>,Phase2TrackerCluster1D,edmNew::DetSetVector<Phase2TrackerCluster1D>::FindForDetSetVector> ph2c_f;
-    edmNew::DetSetVector<edm::Ref<edmNew::DetSetVector<Phase2TrackerCluster1D>,Phase2TrackerCluster1D,edmNew::DetSetVector<Phase2TrackerCluster1D>::FindForDetSetVector> > ph2c_fv;
-    edm::Wrapper<edmNew::DetSetVector<edm::Ref<edmNew::DetSetVector<Phase2TrackerCluster1D>,Phase2TrackerCluster1D,edmNew::DetSetVector<Phase2TrackerCluster1D>::FindForDetSetVector> > > ph2c_w;
-   
    VectorHitCollectionNew vhc1_new;
    edm::RefProd<VectorHitCollectionNew> vhc1_new2;
    edm::Wrapper<VectorHitCollectionNew> wh1_new;

@@ -100,6 +100,7 @@ class VectorHitsBuilderValidation : public edm::EDAnalyzer {
         //SiPixelVectorHitBuilderAlgorithmBase *algo;
         const TrackerGeometry* tkGeom;
         const TrackerTopology* tkTopo;
+        const MagneticField* magField;
 
         TTree* tree;
         TGraph* trackerLayoutRZ_[3];
