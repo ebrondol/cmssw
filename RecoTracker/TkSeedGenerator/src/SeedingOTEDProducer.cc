@@ -110,17 +110,27 @@ TrajectorySeedCollection SeedingOTEDProducer::run( edm::Handle< VectorHitCollect
   printVHsOnLayer(VHs,6);
   std::cout << "-----------------------------" << std::endl;
 
+  //check if all the first three layers have VHs
+  std::vector<VectorHit> VHseedsL1 = collectVHsOnLayer(VHs,1);
+  std::vector<VectorHit> VHseedsL2 = collectVHsOnLayer(VHs,2);
+  std::vector<VectorHit> VHseedsL3 = collectVHsOnLayer(VHs,3);
+  if(VHseedsL1.empty() || VHseedsL2.empty() || VHseedsL3.empty()){
+    std::cout << "------- seeds found: " << result.size() << " ------" << std::endl;
+    std::cout << "- L1 or L2 or L3 are empty! -" << std::endl;
+    std::cout << "-----------------------------" << std::endl;
+    return result;
+  }
+  
   //seeds are built in the L3 of the OT
   const BarrelDetLayer* barrelOTLayer2 = measurementTracker->geometricSearchTracker()->tobLayers().at(1);
-  std::vector<VectorHit> VHseeds = collectVHsOnLayer(VHs,3);
-  std::cout << "VH seeds = " << VHseeds.size() << std::endl;
+  std::cout << "VH seeds = " << VHseedsL3.size() << std::endl;
 
   //the search propag directiondepend on the sign of signZ*signPz, while the building is always the contrary
   Propagator* searchingPropagator = &*propagator->clone();
   Propagator* buildingPropagator = &*propagator->clone();
   buildingPropagator->setPropagationDirection(alongMomentum);
 
-  for(auto hitL3 : VHseeds){
+  for(auto hitL3 : VHseedsL3){
 
     //building a tsos out of a VectorHit
     std::cout << "\t1a) Building a seed for the VH: " << hitL3 << std::endl;
