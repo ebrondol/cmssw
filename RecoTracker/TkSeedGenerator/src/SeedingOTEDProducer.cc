@@ -110,17 +110,27 @@ TrajectorySeedCollection SeedingOTEDProducer::run( edm::Handle< VectorHitCollect
   printVHsOnLayer(VHs,6);
   std::cout << "-----------------------------" << std::endl;
 
+  //check if all the first three layers have VHs
+  std::vector<VectorHit> VHseedsL1 = collectVHsOnLayer(VHs,1);
+  std::vector<VectorHit> VHseedsL2 = collectVHsOnLayer(VHs,2);
+  std::vector<VectorHit> VHseedsL3 = collectVHsOnLayer(VHs,3);
+  if(VHseedsL1.empty() || VHseedsL2.empty() || VHseedsL3.empty()){
+    std::cout << "------- seeds found: " << result.size() << " ------" << std::endl;
+    std::cout << "- L1 or L2 or L3 are empty! -" << std::endl;
+    std::cout << "-----------------------------" << std::endl;
+    return result;
+  }
+  
   //seeds are built in the L3 of the OT
   const BarrelDetLayer* barrelOTLayer2 = measurementTracker->geometricSearchTracker()->tobLayers().at(1);
-  std::vector<VectorHit> VHseeds = collectVHsOnLayer(VHs,3);
-  std::cout << "VH seeds = " << VHseeds.size() << std::endl;
+  std::cout << "VH seeds = " << VHseedsL3.size() << std::endl;
 
   //the search propag directiondepend on the sign of signZ*signPz, while the building is always the contrary
   Propagator* searchingPropagator = &*propagator->clone();
   Propagator* buildingPropagator = &*propagator->clone();
   buildingPropagator->setPropagationDirection(alongMomentum);
 
-  for(auto hitL3 : VHseeds){
+  for(auto hitL3 : VHseedsL3){
 
     //building a tsos out of a VectorHit
     std::cout << "\t1a) Building a seed for the VH: " << hitL3 << std::endl;
@@ -244,7 +254,7 @@ TrajectorySeedCollection SeedingOTEDProducer::run( edm::Handle< VectorHitCollect
             std::pair<bool, TrajectoryStateOnSurface> updatedTSOSL2_final = propagateAndUpdate(updatedTSOSL1_final, *buildingPropagator, *hitL2);
             std::pair<bool, TrajectoryStateOnSurface> updatedTSOSL3_final = propagateAndUpdate(updatedTSOSL2_final.second, *buildingPropagator, hitL3);
             std::cout << "\t    updatedTSOS final on L3   : " << updatedTSOSL3_final.second << std::endl;
-            TrajectorySeed ts = createSeed(updatedTSOSL3_final.second, container, hitL3.geographicalId());
+            TrajectorySeed ts = createSeed(updatedTSOSL3_final.second, container, hitL3.geographicalId(),*buildingPropagator);
             result.push_back(ts);
           }
 
@@ -384,7 +394,7 @@ float SeedingOTEDProducer::computeInverseMomentumError(VectorHit& vh, const floa
 
 }
 
-TrajectorySeed SeedingOTEDProducer::createSeed(const TrajectoryStateOnSurface& tsos, const edm::OwnVector<TrackingRecHit>& container, const DetId& id) {
+TrajectorySeed SeedingOTEDProducer::createSeed(const TrajectoryStateOnSurface& tsos, const edm::OwnVector<TrackingRecHit>& container, const DetId& id, const Propagator& prop) {
 /*
   //I have already propagator and updator
   //const Propagator*  propagator = &(*propagatorHandle);
@@ -428,7 +438,7 @@ TrajectorySeed SeedingOTEDProducer::createSeed(const TrajectoryStateOnSurface& t
   //if(!hit) return;
 
   PTrajectoryStateOnDet seedTSOS = trajectoryStateTransform::persistentState(tsos, id.rawId());
-  return TrajectorySeed(seedTSOS,container,alongMomentum);
+  return TrajectorySeed(seedTSOS,container,prop.propagationDirection());
   //if ( !filter || filter->compatible(seed)) seedCollection.push_back(std::move(seed));
 
 }
