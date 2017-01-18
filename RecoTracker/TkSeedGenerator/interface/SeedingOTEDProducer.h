@@ -44,7 +44,7 @@ class SeedingOTEDProducer : public edm::EDProducer
   float computeGlobalThetaError(const VectorHit& vh, const double sigmaZ_beamSpot);
   float computeInverseMomentumError(VectorHit& vh, const float globalTheta, const MagneticField* magField, const double sigmaZ_beamSpot);
 
-  TrajectorySeed createSeed(const TrajectoryStateOnSurface& tsos, const edm::OwnVector<TrackingRecHit>& container, const DetId& id) ;
+  TrajectorySeed createSeed(const TrajectoryStateOnSurface& tsos, const edm::OwnVector<TrackingRecHit>& container, const DetId& id, const Propagator& prop);
 
   struct isInvalid {
     bool operator()(const TrajectoryMeasurement& measurement) {
