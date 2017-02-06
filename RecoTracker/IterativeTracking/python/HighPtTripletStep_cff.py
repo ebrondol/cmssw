@@ -96,7 +96,13 @@ highPtTripletStepTrajectoryFilterBase = _highPtTripletStepTrajectoryFilterBase.c
     minGoodStripCharge = dict(refToPSet_ = 'SiStripClusterChargeCutLoose')
 )
 trackingPhase1PU70.toReplaceWith(highPtTripletStepTrajectoryFilterBase, _highPtTripletStepTrajectoryFilterBase)
-trackingPhase2PU140.toReplaceWith(highPtTripletStepTrajectoryFilterBase, _highPtTripletStepTrajectoryFilterBase)
+_highPtTripletStepTrajectoryFilterBasePhase2 = _TrajectoryFilter_cff.CkfBaseTrajectoryFilter_block.clone(
+    minimumNumberOfHits = 3,
+    minPt = 0.2,
+    seedExtension = 1,
+    #pixelSeedExtension = True,
+)
+trackingPhase2PU140.toReplaceWith(highPtTripletStepTrajectoryFilterBase, _highPtTripletStepTrajectoryFilterBasePhase2)
 highPtTripletStepTrajectoryFilter = _TrajectoryFilter_cff.CompositeTrajectoryFilter_block.clone(
     filters = [cms.PSet(refToPSet_ = cms.string('highPtTripletStepTrajectoryFilterBase'))]
 )

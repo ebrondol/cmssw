@@ -96,7 +96,13 @@ _tracker_apv_vfp30_2016.toModify(lowPtTripletStepStandardTrajectoryFilter, maxCC
 from Configuration.Eras.Modifier_trackingLowPU_cff import trackingLowPU
 trackingLowPU.toReplaceWith(lowPtTripletStepStandardTrajectoryFilter, _lowPtTripletStepStandardTrajectoryFilterBase)
 trackingPhase1PU70.toReplaceWith(lowPtTripletStepStandardTrajectoryFilter, _lowPtTripletStepStandardTrajectoryFilterBase)
-trackingPhase2PU140.toReplaceWith(lowPtTripletStepStandardTrajectoryFilter, _lowPtTripletStepStandardTrajectoryFilterBase)
+_lowPtTripletStepStandardTrajectoryFilterBasePhase2 = _TrajectoryFilter_cff.CkfBaseTrajectoryFilter_block.clone(
+    minimumNumberOfHits = 3,
+    minPt = 0.075,
+    seedExtension = 1,
+    #pixelSeedExtension = True,
+)
+trackingPhase2PU140.toReplaceWith(lowPtTripletStepStandardTrajectoryFilter, _lowPtTripletStepStandardTrajectoryFilterBasePhase2)
 
 from RecoPixelVertexing.PixelLowPtUtilities.ClusterShapeTrajectoryFilter_cfi import *
 # Composite filter
