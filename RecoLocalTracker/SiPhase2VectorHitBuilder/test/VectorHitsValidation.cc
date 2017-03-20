@@ -1,6 +1,7 @@
 #include "RecoLocalTracker/SiPhase2VectorHitBuilder/test/VectorHitsValidation.h"
 #include "Geometry/TrackerGeometryBuilder/interface/StackGeomDet.h"
 #include "DataFormats/Phase2TrackerDigi/interface/Phase2TrackerDigi.h"
+#include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 
 VectorHitsBuilderValidation::VectorHitsBuilderValidation(const edm::ParameterSet& conf) {
 //    srcClu_(conf.getParameter< edm::InputTag >("src")),
@@ -111,6 +112,10 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
   eventSetup.get< TrackerTopologyRcd >().get(tTopoHandle);
   tkTopo = tTopoHandle.product();
 
+  edm::ESHandle< MagneticField > magFieldHandle;
+  eventSetup.get< IdealMagneticFieldRecord >().get(magFieldHandle);
+  magField = magFieldHandle.product();
+
   //set up for tree
   int eventNum;
   int layer;
@@ -121,13 +126,16 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
   float vh_x_local, vh_y_local;
   float vh_x_le, vh_y_le;
   float curvature, phi;
+  float QOverPT, QOverP;
   int sim_track_id;
   float sim_x_local, sim_y_local;
   float sim_x_global, sim_y_global, sim_z_global;
   float low_x_global, low_y_global, low_z_global;
   float upp_x_global, upp_y_global, upp_z_global;
-  float low_xx_global_err, low_yy_global_err, low_xy_global_err;
-  float upp_xx_global_err, upp_yy_global_err, upp_xy_global_err;
+  float low_xx_global_err, low_yy_global_err, low_zz_global_err;
+  float low_xy_global_err, low_zx_global_err, low_zy_global_err;
+  float upp_xx_global_err, upp_yy_global_err, upp_zz_global_err;
+  float upp_xy_global_err, upp_zx_global_err, upp_zy_global_err;
   float deltaXVHSimHits, deltaYVHSimHits;
   unsigned int processType(99);
 
@@ -145,6 +153,8 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
   tree -> Branch("vh_y_lError",&vh_y_le,"vh_y_le/F");
   tree -> Branch("curvature",&curvature,"curvature/F");
   tree -> Branch("phi",&phi,"phi/F");
+  tree -> Branch("QOverP",&QOverP,"QOverP/F");
+  tree -> Branch("QOverPT",&QOverPT,"QOverPT/F");
   tree -> Branch("sim_track_id",&sim_track_id,"sim_track_id/I");
   tree -> Branch("sim_x_local",&sim_x_local,"sim_x_local/F");
   tree -> Branch("sim_y_local",&sim_y_local,"sim_y_local/F");
@@ -156,13 +166,19 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
   tree -> Branch("low_z_global",&low_z_global,"low_z_global/F");
   tree -> Branch("low_xx_global_err",&low_xx_global_err,"low_xx_global_err/F");
   tree -> Branch("low_yy_global_err",&low_yy_global_err,"low_yy_global_err/F");
+  tree -> Branch("low_zz_global_err",&low_zz_global_err,"low_zz_global_err/F");
   tree -> Branch("low_xy_global_err",&low_xy_global_err,"low_xy_global_err/F");
+  tree -> Branch("low_zx_global_err",&low_zx_global_err,"low_zx_global_err/F");
+  tree -> Branch("low_zy_global_err",&low_zy_global_err,"low_zy_global_err/F");
   tree -> Branch("upp_x_global",&upp_x_global,"upp_x_global/F");
   tree -> Branch("upp_y_global",&upp_y_global,"upp_y_global/F");
   tree -> Branch("upp_z_global",&upp_z_global,"upp_z_global/F");
   tree -> Branch("upp_xx_global_err",&upp_xx_global_err,"upp_xx_global_err/F");
   tree -> Branch("upp_yy_global_err",&upp_yy_global_err,"upp_yy_global_err/F");
+  tree -> Branch("upp_zz_global_err",&upp_zz_global_err,"upp_zz_global_err/F");
   tree -> Branch("upp_xy_global_err",&upp_xy_global_err,"upp_xy_global_err/F");
+  tree -> Branch("upp_zx_global_err",&upp_zx_global_err,"upp_zx_global_err/F");
+  tree -> Branch("upp_zy_global_err",&upp_zy_global_err,"upp_zy_global_err/F");
   tree -> Branch("deltaXVHSimHits",&deltaXVHSimHits,"deltaXVHSimHits/F");
   tree -> Branch("deltaYVHSimHits",&deltaYVHSimHits,"deltaYVHSimHits/F");
   tree -> Branch("processType",&processType,"processType/i");
@@ -262,6 +278,8 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
 
          curvature = vh.curvatureORphi("curvature").first;
          phi = vh.curvatureORphi("phi").first;
+         QOverPT = vh.transverseMomentum(magField);
+         QOverP = vh.momentum(magField);
 
          // Fill the position histograms
          trackerLayoutRZ_[0]->SetPoint(nVHsTot, globalPosVH.z(), globalPosVH.perp());
@@ -324,10 +342,17 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
 
          low_xx_global_err = vhIt->lowerGlobalPosErr().cxx();
          low_yy_global_err = vhIt->lowerGlobalPosErr().cyy();
+         low_zz_global_err = vhIt->lowerGlobalPosErr().czz();
          low_xy_global_err = vhIt->lowerGlobalPosErr().cyx();
+         low_zx_global_err = vhIt->lowerGlobalPosErr().czx();
+         low_zy_global_err = vhIt->lowerGlobalPosErr().czy();
+
          upp_xx_global_err = vhIt->upperGlobalPosErr().cxx();
          upp_yy_global_err = vhIt->upperGlobalPosErr().cyy();
+         upp_zz_global_err = vhIt->upperGlobalPosErr().czz();
          upp_xy_global_err = vhIt->upperGlobalPosErr().cyx();
+         upp_zx_global_err = vhIt->upperGlobalPosErr().czx();
+         upp_zy_global_err = vhIt->upperGlobalPosErr().czy();
 
          LogDebug("VectorHitsBuilderValidation") << "print Clusters into the VH:" << std::endl;
          printCluster(geomDetLower,vhIt->lowerClusterRef());
