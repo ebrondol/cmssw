@@ -198,7 +198,7 @@ namespace {
 	else if (cluster.isPhase2()) collectedPhase2OTs[cluster.key()]=true;
 
         // Phase 2 OT is defined as Pixel detector (for now)
-        const type_info &hitType = typeid(hit);
+        const auto &hitType = typeid(hit);
         if (hitType == typeid(VectorHit)) {
           auto const & vectorHit = reinterpret_cast<VectorHit const&>(hit);
           auto const & lowCluster = vectorHit.lowerClusterRef();
