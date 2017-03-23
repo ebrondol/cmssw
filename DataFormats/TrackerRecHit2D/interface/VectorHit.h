@@ -24,6 +24,8 @@
 
 #include "DataFormats/TrackingRecHit/interface/KfComponentsHolder.h"
 
+#include "TkCloner.h"
+
 class VectorHit GCC11_FINAL : public BaseTrackerRecHit {
 
   public:
@@ -119,6 +121,13 @@ class VectorHit GCC11_FINAL : public BaseTrackerRecHit {
   void setCovMatrix(AlgebraicSymMatrix mat) { theCovMatrix = mat; }
 
  private:
+  // double dispatch
+  virtual VectorHit * clone(TkCloner const& cloner, TrajectoryStateOnSurface const& tsos) const override {
+    return cloner(*this,tsos).release();
+  }
+  virtual  RecHitPointer cloneSH(TkCloner const& cloner, TrajectoryStateOnSurface const& tsos) const override {
+    return cloner.makeShared(*this,tsos);
+  }
 
   LocalPoint thePosition;
   LocalVector theDirection;
@@ -149,7 +158,7 @@ inline bool operator<( const VectorHit& one, const VectorHit& other) {
 
 std::ostream& operator<<(std::ostream& os, const VectorHit& vh);
 
-typedef edm::DetSetVector<VectorHit> VectorHitCollection;
-typedef edmNew::DetSetVector<VectorHit> VectorHitCollectionNew;
+typedef edmNew::DetSetVector<VectorHit> VectorHitCollection;
+typedef VectorHitCollection             VectorHitCollectionNew;
 
 #endif
