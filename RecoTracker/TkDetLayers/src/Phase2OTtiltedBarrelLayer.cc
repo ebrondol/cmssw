@@ -97,6 +97,7 @@ Phase2OTtiltedBarrelLayer::groupedCompatibleDetsV( const TrajectoryStateOnSurfac
   vector<DetGroup> closestResultNeg;
   vector<DetGroup> closestResultPos;
   Phase2OTBarrelLayer::groupedCompatibleDetsV(tsos, prop, est, closestResultRods);
+  LogDebug("TkDetLayers") << "groupedCompatibleDetsV >> result rods    :" << closestResultRods.size();
   if(tsos.globalPosition().z()<0){
     for(auto& ring : theNegativeRingsComps){
       ring->groupedCompatibleDetsV(tsos, prop, est, closestResultNeg);
@@ -106,6 +107,9 @@ Phase2OTtiltedBarrelLayer::groupedCompatibleDetsV( const TrajectoryStateOnSurfac
       ring->groupedCompatibleDetsV(tsos, prop, est, closestResultPos);
     }
   }
+  LogDebug("TkDetLayers") << "groupedCompatibleDetsV >> result rings negative :" << closestResultNeg.size();
+  LogDebug("TkDetLayers") << "groupedCompatibleDetsV >> result rings positive :" << closestResultPos.size();
+
   result.assign(closestResultRods.begin(),closestResultRods.end());
   result.insert(result.end(),closestResultPos.begin(),closestResultPos.end());
   result.insert(result.end(),closestResultNeg.begin(),closestResultNeg.end());
