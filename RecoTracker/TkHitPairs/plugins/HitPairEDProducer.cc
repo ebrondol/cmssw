@@ -114,6 +114,7 @@ namespace {
 
     void produce(const SeedingLayerSetsHits& layers, const edm::OwnVector<TrackingRegion>& regions, const bool clusterCheckOk,
                  edm::Event& iEvent, const edm::EventSetup& iSetup) override {
+      LogDebug("HitPairEDProducer") << "Doublets::produce" << std::endl;
       auto seedingHitSetsProducer = T_SeedingHitSets(&localRA_);
       auto intermediateHitDoubletsProducer = T_IntermediateHitDoublets(&layers);
 

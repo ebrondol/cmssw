@@ -30,11 +30,13 @@ HitExtractorSTRP::HitExtractorSTRP(GeomDetEnumerators::SubDetector subdet, Seedi
   theLayerSubDet(subdet), theSide(side), theIdLayer(idLayer),
   minAbsZ(0), theMinRing(1), theMaxRing(0),
   hasMatchedHits(false), hasRPhiHits(false), hasStereoHits(false),
+  hasVectorHits(false),
   hasRingSelector(false), hasSimpleRphiHitsCleaner(true)
 { minGoodCharge=iminGoodCharge; if (minGoodCharge>0) skipClusters=true; }
 
 void HitExtractorSTRP::useSkipClusters_(const edm::InputTag & m, edm::ConsumesCollector& iC) {
   theSkipClusters = iC.consumes<SkipClustersCollection>(m);
+  theSkipPhase2Clusters = iC.consumes<SkipPhase2ClustersCollection>(m);
 }
 
 void HitExtractorSTRP::useRingSelector(int minRing, int maxRing) 
@@ -101,42 +103,58 @@ void HitExtractorSTRP::cleanedOfClusters( const TkTransientTrackingRecHitBuilder
 					  const edm::Event& ev, HitExtractor::Hits & hits,
 					  bool matched,
 					  unsigned int cleanFrom) const{
-  LogDebug("HitExtractorPIX")<<"getting: "<<hits.size()<<" in input.";
-  edm::Handle<SkipClustersCollection> stripClusterMask;
-  if (maskCluster) ev.getByToken(theSkipClusters,stripClusterMask);
   unsigned int skipped=0;
   unsigned int projected=0;
-  for (unsigned int iH=cleanFrom;iH<hits.size();++iH){
-     assert(hits[iH]->isValid());
-    auto id = hits[iH]->geographicalId();
-    if (matched) {
-      bool replace; ProjectedSiStripRecHit2D * replaceMe; std::tie(replace,replaceMe) = skipThis(ttrhBuilder, *hits[iH],stripClusterMask);
-      if (replace) {
-	if (!replaceMe) {
-	  LogDebug("HitExtractorSTRP")<<"skipping a matched hit on :"<<hits[iH]->geographicalId().rawId();
-	  skipped++;
-	} else projected++;
-	hits[iH].reset(replaceMe);
-	if (replaceMe==nullptr) assert(hits[iH].empty());
-	else assert(hits[iH].isOwn());
+  if(hasMatchedHits || hasRPhiHits || hasStereoHits){
+    LogTrace("HitExtractorSTRP")<<"getting "<<hits.size()<<" strip hit in input.";
+    edm::Handle<SkipClustersCollection> stripClusterMask;
+    if (maskCluster) ev.getByToken(theSkipClusters,stripClusterMask);
+    for (unsigned int iH=cleanFrom;iH<hits.size();++iH){
+      assert(hits[iH]->isValid());
+      auto id = hits[iH]->geographicalId();
+      if (matched) {
+        bool replace; ProjectedSiStripRecHit2D * replaceMe; std::tie(replace,replaceMe) = skipThis(ttrhBuilder, *hits[iH],stripClusterMask);
+        if (replace) {
+  	if (!replaceMe) {
+  	  LogTrace("HitExtractorSTRP")<<"skipping a matched hit on :"<<hits[iH]->geographicalId().rawId();
+  	  skipped++;
+  	} else { projected++; }
+  	hits[iH].reset(replaceMe);
+  	if (replaceMe==nullptr) assert(hits[iH].empty());
+  	else assert(hits[iH].isOwn());
+        }
+      }
+      else if (skipThis(id, hits[iH]->firstClusterRef(),stripClusterMask)){
+        LogTrace("HitExtractorSTRP")<<"skipping a hit on :"<<hits[iH]->geographicalId().rawId()<<" key: ";
+        skipped++;
+        hits[iH].reset();
       }
     }
-    else if (skipThis(id, hits[iH]->firstClusterRef(),stripClusterMask)){
-      LogDebug("HitExtractorSTRP")<<"skipping a hit on :"<<hits[iH]->geographicalId().rawId()<<" key: ";
-      skipped++;
-      hits[iH].reset();
+  }
+  if(hasVectorHits){
+    LogTrace("HitExtractorSTRP")<<"getting "<<hits.size()<<" vector hit in input.";
+    edm::Handle<SkipPhase2ClustersCollection> ph2ClusterMask;
+    if (maskCluster) ev.getByToken(theSkipPhase2Clusters,ph2ClusterMask);
+    for (unsigned int iH=cleanFrom;iH<hits.size();++iH){
+      assert(hits[iH]->isValid());
+      if (maskCluster && (ph2ClusterMask->mask(hits[iH]->firstClusterRef().key())) ){
+        LogTrace("HitExtractorSTRP")<<"skipping a hit on :"<<hits[iH]->geographicalId().rawId()<<" key: "<<hits[iH]->firstClusterRef().key();
+        skipped++;
+        hits[iH].reset();
+      }
     }
   }
-    //  remove empty elements...
+
+  //  remove empty elements...
   auto last = std::remove_if(hits.begin()+cleanFrom,hits.end(),[]( HitPointer const & p) {return p.empty();});
   hits.resize(last-hits.begin());
 
-  // std::cout << "HitExtractorSTRP " <<"skipped :"<<skipped<<" strip rechits because of clusters and projected: "<<projected << std::endl;
-  LogDebug("HitExtractorSTRP")<<"skipped :"<<skipped<<" strip rechits because of clusters and projected: "<<projected;
+  LogTrace("HitExtractorSTRP")<<"skipped :"<<skipped<<" rechits because of clusters and projected: "<<projected;
 }
 
 HitExtractor::Hits HitExtractorSTRP::hits(const TkTransientTrackingRecHitBuilder &ttrhBuilder, const edm::Event& ev, const edm::EventSetup& es) const
 {
+  LogDebug("HitExtractorSTRP")<<"HitExtractorSTRP::hits";
   HitExtractor::Hits result;
   unsigned int cleanFrom=0;
 
@@ -149,6 +167,7 @@ HitExtractor::Hits HitExtractorSTRP::hits(const TkTransientTrackingRecHitBuilder
   // TIB
   //
   if (theLayerSubDet == GeomDetEnumerators::TIB) {
+    LogTrace("HitExtractorSTRP")<<"Getting hits into the TIB";
     if (hasMatchedHits) {
       edm::Handle<SiStripMatchedRecHit2DCollection> matchedHits;
       ev.getByToken( theMatchedHits, matchedHits);
@@ -184,6 +203,7 @@ HitExtractor::Hits HitExtractorSTRP::hits(const TkTransientTrackingRecHitBuilder
   // TID
   //
   else if (theLayerSubDet == GeomDetEnumerators::TID) {
+    LogTrace("HitExtractorSTRP")<<"Getting hits into the TID";
       if (hasMatchedHits) {
           edm::Handle<SiStripMatchedRecHit2DCollection> matchedHits;
           ev.getByToken( theMatchedHits, matchedHits);
@@ -227,11 +247,21 @@ HitExtractor::Hits HitExtractorSTRP::hits(const TkTransientTrackingRecHitBuilder
           }
 	  if (skipClusters) cleanedOfClusters(ttrhBuilder, ev,result,false,cleanFrom);
       }
+    if (hasVectorHits) {
+      LogTrace("HitExtractorSTRP")<<"Getting vector hits for IdLayer " << theIdLayer;
+      edm::Handle<VectorHitCollectionNew> vectorHits;
+      ev.getByToken( theVectorHits, vectorHits);
+      //FIXME: check the skipClusters with VHits
+      if (skipClusters) cleanFrom=result.size();
+      range2SeedingHits( *vectorHits, result, tTopo->tobDetIdLayerComparator(theIdLayer));
+      if (skipClusters) cleanedOfClusters(ttrhBuilder, ev,result,false,cleanFrom);
+    }
   }
   //
   // TOB
   //
   else if (theLayerSubDet == GeomDetEnumerators::TOB) {
+    LogTrace("HitExtractorSTRP")<<"Getting hits into the TOB";
     if (hasMatchedHits) {
       edm::Handle<SiStripMatchedRecHit2DCollection> matchedHits;
       ev.getByToken( theMatchedHits, matchedHits);
@@ -271,12 +301,23 @@ HitExtractor::Hits HitExtractorSTRP::hits(const TkTransientTrackingRecHitBuilder
       range2SeedingHits( *stereoHits, result, tTopo->tobDetIdLayerComparator(theIdLayer));
       if (skipClusters) cleanedOfClusters(ttrhBuilder, ev,result,false,cleanFrom);
     }
+    if (hasVectorHits) {
+      LogTrace("HitExtractorSTRP")<<"Getting vector hits for IdLayer " << theIdLayer;
+      edm::Handle<VectorHitCollectionNew> vectorHits;
+      ev.getByToken( theVectorHits, vectorHits);
+      //FIXME: check the skipClusters with VHits
+      if (skipClusters) cleanFrom=result.size();
+      range2SeedingHits( *vectorHits, result, tTopo->tobDetIdLayerComparator(theIdLayer));
+      if (skipClusters) cleanedOfClusters(ttrhBuilder, ev,result,false,cleanFrom);
+    }
+
   }
 
   //
   // TEC
   //
   else if (theLayerSubDet == GeomDetEnumerators::TEC) {
+    LogTrace("HitExtractorSTRP")<<"Getting hits into the TEC";
       if (hasMatchedHits) {
           edm::Handle<SiStripMatchedRecHit2DCollection> matchedHits;
           ev.getByToken( theMatchedHits, matchedHits);
@@ -323,8 +364,7 @@ HitExtractor::Hits HitExtractorSTRP::hits(const TkTransientTrackingRecHitBuilder
       }
   }
 
-  LogDebug("HitExtractorSTRP")<<" giving: "<<result.size()<<" out";
-  // std::cout << "HitExtractorSTRP "<<" giving: "<<result.size() << " for charge cut " << minGoodCharge << std::endl;
+  LogDebug("HitExtractorSTRP")<<" giving: "<<result.size()<<" out for charge cut " << minGoodCharge;
   return result;
 }
 
