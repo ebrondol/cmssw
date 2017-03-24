@@ -135,6 +135,9 @@ SeedingLayerSetsBuilder::LayerSpec::LayerSpec(unsigned short index, const std::s
     if (cfgLayer.exists("stereoRecHits")) {
       extr->useStereoHits(cfgLayer.getParameter<edm::InputTag>("stereoRecHits"), iC);
     }
+    if (cfgLayer.exists("vectorRecHits")) {
+      extr->useVectorHits(cfgLayer.getParameter<edm::InputTag>("vectorRecHits"), iC);
+    }
     if (cfgLayer.exists("useRingSlector") && cfgLayer.getParameter<bool>("useRingSlector")) {
       extr->useRingSelector(cfgLayer.getParameter<int>("minRing"),
                                  cfgLayer.getParameter<int>("maxRing"));
@@ -166,7 +169,7 @@ SeedingLayerSetsBuilder::LayerSpec::~LayerSpec() {}
 std::string SeedingLayerSetsBuilder::LayerSpec::print(const std::vector<std::string>& names) const
 {
   std::ostringstream str;
-  str << "Layer="<<names[nameIndex]<<", hitBldr: "<<hitBuilder;
+  LogDebug("SeedingLayerSetsBuilder") << "Layer="<<names[nameIndex]<<", hitBldr: "<<hitBuilder;
 
   str << ", useRingSelector: ";
   HitExtractorSTRP *ext = nullptr;
@@ -185,6 +188,7 @@ SeedingLayerSetsBuilder::SeedingLayerSetsBuilder(const edm::ParameterSet & cfg, 
 {}
 SeedingLayerSetsBuilder::SeedingLayerSetsBuilder(const edm::ParameterSet & cfg, edm::ConsumesCollector& iC)
 {
+  LogDebug("SeedingLayerSetsBuilder") << "SeedingLayerSetsBuilder::SeedingLayerSetsBuilder";
   std::vector<std::string> namesPset = cfg.getParameter<std::vector<std::string> >("layerList");
   std::vector<std::vector<std::string> > layerNamesInSets = this->layerNamesInSets(namesPset);
 
