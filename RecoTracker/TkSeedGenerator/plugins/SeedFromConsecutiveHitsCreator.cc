@@ -60,6 +60,7 @@ void SeedFromConsecutiveHitsCreator::init(const TrackingRegion & iregion,
 
 void SeedFromConsecutiveHitsCreator::makeSeed(TrajectorySeedCollection & seedCollection,
 					      const SeedingHitSet & hits) {
+  LogTrace("SeedCreatorFromRegionHitsEDProducer") << "SeedFromConsecutiveHitsCreator::makeSeed with " << hits.size() << " hits." ;
   if ( hits.size() < 2) return;
 
   GlobalTrajectoryParameters kine;
@@ -162,6 +163,7 @@ void SeedFromConsecutiveHitsCreator::buildSeed(
     const SeedingHitSet & hits,
     const FreeTrajectoryState & fts) const
 {
+  LogTrace("SeedCreatorFromRegionHitsEDProducer") << "SeedFromConsecutiveHitsCreator::buildSeed ";
   const Propagator*  propagator = &(*propagatorHandle);
   
   // get updator

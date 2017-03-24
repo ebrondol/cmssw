@@ -92,10 +92,14 @@ HitDoublets HitPairGeneratorFromLayerPair::doublets( const TrackingRegion& regio
 
   const RecHitsSortedInPhi & innerHitsMap = layerCache(innerLayer, region, iSetup);
   if (innerHitsMap.empty()) return HitDoublets(innerHitsMap,innerHitsMap);
+  LogTrace("HitPairGeneratorFromLayerPair") << "innerHitsMap sorted in Phi not empty with size " << innerHitsMap.size();
 
   const RecHitsSortedInPhi& outerHitsMap = layerCache(outerLayer, region, iSetup);
   if (outerHitsMap.empty()) return HitDoublets(innerHitsMap,outerHitsMap);
-  HitDoublets result(innerHitsMap,outerHitsMap); result.reserve(std::max(innerHitsMap.size(),outerHitsMap.size()));
+  LogTrace("HitPairGeneratorFromLayerPair") << "outerHitsMap sorted in Phi not empty with size " << outerHitsMap.size();
+  HitDoublets result(innerHitsMap,outerHitsMap); 
+  result.reserve(std::max(innerHitsMap.size(),outerHitsMap.size()));
+
   doublets(region,
 	   *innerLayer.detLayer(),*outerLayer.detLayer(),
 	   innerHitsMap,outerHitsMap,iSetup,theMaxElement,result);
@@ -117,10 +121,11 @@ void HitPairGeneratorFromLayerPair::doublets(const TrackingRegion& region,
   typedef RecHitsSortedInPhi::Hit Hit;
   InnerDeltaPhi deltaPhi(outerHitDetLayer, innerHitDetLayer, region, iSetup);
 
-  // std::cout << "layers " << theInnerLayer.detLayer()->seqNum()  << " " << outerLayer.detLayer()->seqNum() << std::endl;
+  LogDebug("HitPairGeneratorFromLayerPair") << "layers " << innerHitDetLayer.seqNum()  << " " << outerHitDetLayer.seqNum() << std::endl;
 
   // constexpr float nSigmaRZ = std::sqrt(12.f);
   constexpr float nSigmaPhi = 3.f;
+  LogTrace("HitPairGeneratorFromLayerPair") << outerHitsMap.theHits.size() <<" outer hits";
   for (int io = 0; io!=int(outerHitsMap.theHits.size()); ++io) {
     if (!deltaPhi.prefilter(outerHitsMap.x[io],outerHitsMap.y[io])) continue;
     Hit const & ohit =  outerHitsMap.theHits[io].hit();
@@ -142,9 +147,11 @@ void HitPairGeneratorFromLayerPair::doublets(const TrackingRegion& region,
     Kernels<HitZCheck,HitRCheck,HitEtaCheck> kernels;
 
     auto innerRange = innerHitsMap.doubleRange(phiRange.min(), phiRange.max());
-    LogDebug("HitPairGeneratorFromLayerPair")<<
-      "preparing for combination of: "<< innerRange[1]-innerRange[0]+innerRange[3]-innerRange[2]
-				      <<" inner and: "<< outerHitsMap.theHits.size()<<" outter";
+    LogTrace("HitPairGeneratorFromLayerPair") << " DoubleRange in the innerHitsMap " << innerRange[0] << "," << innerRange[1] << "," << innerRange[2] << "," << innerRange[3];
+    //LogTrace("HitPairGeneratorFromLayerPair") << 
+    //  "preparing for combination of: "<< innerRange[1]-innerRange[0]+innerRange[3]-innerRange[2]
+    //				      <<" inner and: "<< outerHitsMap.theHits.size()<<" outer";
+
     for(int j=0; j<3; j+=2) {
       auto b = innerRange[j]; auto e=innerRange[j+1];
       bool ok[e-b];
