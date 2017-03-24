@@ -1,4 +1,5 @@
 #include "TBLayer.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 #include "LayerCrossingSide.h"
 #include "DetGroupMerger.h"
@@ -19,8 +20,12 @@ TBLayer::groupedCompatibleDetsV( const TrajectoryStateOnSurface& tsos,
 				 const Propagator& prop,
 				 const MeasurementEstimator& est,
 				 std::vector<DetGroup> & result) const {
+  LogDebug("TBLayer") << "TBLayer::groupedCompatibleDetsV" ;
   SubLayerCrossings  crossings; 
   crossings = computeCrossings( tsos, prop.propagationDirection());
+  if(crossings.isValid()) LogDebug("TBLayer") << "crossing is valid" ;
+  else LogDebug("TBLayer") << "crossing is invalid" ;
+
   if(! crossings.isValid()) return;
   
   std::vector<DetGroup> closestResult;
@@ -50,18 +55,27 @@ TBLayer::groupedCompatibleDetsV( const TrajectoryStateOnSurface& tsos,
 SubLayerCrossings TBLayer::computeCrossings( const TrajectoryStateOnSurface& startingState,
 						      PropagationDirection propDir) const
 {
+  LogDebug("TBLayer") << "TBLayer::computeCrossings" ;
+  if(propDir == alongMomentum)
+    LogDebug("TBLayer") << "\t    propagator along Momentum" ;
+  if(propDir == oppositeToMomentum)
+    LogDebug("TBLayer") << "\t    propagator opposite To Momentum" ;
+
   GlobalPoint startPos( startingState.globalPosition());
   GlobalVector startDir( startingState.globalMomentum());
   double rho( startingState.transverseCurvature());
+  LogDebug("TBLayer") << "rho: " << rho ;
 
   HelixBarrelCylinderCrossing innerCrossing( startPos, startDir, rho,
 					     propDir,*theInnerCylinder,
 					     HelixBarrelCylinderCrossing::onlyPos);
+  if (innerCrossing.hasSolution()) LogDebug("TBLayer") << "innercrossing has a solution" ;
   if (!innerCrossing.hasSolution()) return SubLayerCrossings(); 
 
   HelixBarrelCylinderCrossing outerCrossing( startPos, startDir, rho,
 					     propDir,*theOuterCylinder,
 					     HelixBarrelCylinderCrossing::onlyPos);
+  if (outerCrossing.hasSolution()) LogDebug("TBLayer") << "outercrossing has a solution" ;
   if (!outerCrossing.hasSolution()) return SubLayerCrossings();
 
 
