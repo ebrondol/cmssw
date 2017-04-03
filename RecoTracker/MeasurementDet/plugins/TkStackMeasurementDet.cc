@@ -70,6 +70,7 @@ bool TkStackMeasurementDet::measurements( const TrajectoryStateOnSurface& stateO
 
   for (auto && hit : allHits) {
     std::pair<bool,double> diffEst = est.estimate( stateOnThisDet, *hit);
+    LogTrace("MeasurementTracker")<< "State on this Det: " << stateOnThisDet ;
     LogDebug("MeasurementTracker")<< "New vh added with chi2: " << diffEst.second ;
     if ( diffEst.first)
       result.add(std::move(hit), diffEst.second);

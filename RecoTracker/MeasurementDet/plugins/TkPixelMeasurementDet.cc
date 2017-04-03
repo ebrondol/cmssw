@@ -92,6 +92,7 @@ TkPixelMeasurementDet::recHits( const TrajectoryStateOnSurface& ts, const Measur
 TkPixelMeasurementDet::RecHitContainer 
 TkPixelMeasurementDet::compHits( const TrajectoryStateOnSurface& ts, const MeasurementTrackerEvent & data, float xl, float yl  ) const
 {
+  LogDebug("MeasurementTracker")<<"TkPixelMeasurementDet::recHits";
   RecHitContainer result;
   if (isEmpty(data.pixelData())== true ) return result;
   if (isActive(data) == false) return result;
@@ -141,6 +142,7 @@ TkPixelMeasurementDet::compHits( const TrajectoryStateOnSurface& ts, const Measu
      if(data.pixelClustersToSkip().empty() or (not data.pixelClustersToSkip()[index]) ) {
        SiPixelClusterRef cluster = detSet.makeRefTo( data.pixelData().handle(), ci );
        result.push_back( buildRecHit( cluster, ts.localParameters() ) );
+       LogTrace("MeasurementTracker") << "TkPixelMeasurementDet::rechits adding PixelHits in detId " << fastGeomDet().geographicalId().rawId() << std::endl;
      }else{   
        LogDebug("TkPixelMeasurementDet")<<"skipping this cluster from last iteration on "<<fastGeomDet().geographicalId().rawId()<<" key: "<<index;
      }
