@@ -102,7 +102,8 @@ trackingLowPU.toModify(pixelLessStepSeedLayers,
 from Configuration.Eras.Modifier_trackingPhase2PU140_cff import trackingPhase2PU140
 trackingPhase2PU140.toModify(pixelLessStepSeedLayers,
     layerList = [
-        'TOB1+TOB2',
+        'TOB1+TOB2'#, 'TOB1+TOB3',
+        #'TID1_pos+TID2_pos', 'TID1_neg+TID2_neg'
     ],
     TOB = cms.PSet(
          TTRHBuilder    = cms.string('WithTrackAngle'), 
@@ -111,7 +112,15 @@ trackingPhase2PU140.toModify(pixelLessStepSeedLayers,
          skipClusters   = cms.InputTag('pixelLessStepClusters')
     ),
     TIB = None,
-    TID = None,
+    TID = cms.PSet(
+         TTRHBuilder    = cms.string('WithTrackAngle'), 
+         clusterChargeCut = cms.PSet(refToPSet_ = cms.string('SiStripClusterChargeCutNone')),
+         vectorRecHits = cms.InputTag("siPhase2VectorHits", 'vectorHitsAccepted'),
+         skipClusters   = cms.InputTag('pixelLessStepClusters'),
+         useRingSlector = cms.bool(True),
+         minRing = cms.int32(1),
+         maxRing = cms.int32(6)
+    ),
     TEC = None,
     MTIB = None,
     MTID = None,
@@ -216,6 +225,7 @@ pixelLessStepTrajectoryFilter = _pixelLessStepTrajectoryFilterBase.clone(
 )
 trackingLowPU.toReplaceWith(pixelLessStepTrajectoryFilter, _pixelLessStepTrajectoryFilterBase)
 trackingPhase2PU140.toReplaceWith(pixelLessStepTrajectoryFilter, _pixelLessStepTrajectoryFilterBase)
+trackingPhase2PU140.toModify(pixelLessStepTrajectoryFilter, minimumNumberOfHits = 4, maxLostHits = 1)
 
 import RecoTracker.MeasurementDet.Chi2ChargeMeasurementEstimator_cfi
 pixelLessStepChi2Est = RecoTracker.MeasurementDet.Chi2ChargeMeasurementEstimator_cfi.Chi2ChargeMeasurementEstimator.clone(
@@ -228,7 +238,8 @@ trackingLowPU.toModify(pixelLessStepChi2Est,
     clusterChargeCut = dict(refToPSet_ = 'SiStripClusterChargeCutTiny')
 )
 trackingPhase2PU140.toModify(pixelLessStepChi2Est,
-    clusterChargeCut = dict(refToPSet_ = 'SiStripClusterChargeCutNone')
+    clusterChargeCut = dict(refToPSet_ = 'SiStripClusterChargeCutNone'),
+    MaxChi2 = cms.double(30.0)
 )
 
 # TRACK BUILDING
@@ -356,7 +367,50 @@ pixelLessStepSelector = RecoTracker.FinalTrackSelectors.multiTrackSelector_cfi.m
 ) #end of clone
 trackingPhase2PU140.toModify(pixelLessStepSelector, 
     GBRForestLabel = None, 
-)
+    useAnyMVA = cms.bool(False),
+    trackSelectors= cms.VPSet(
+        RecoTracker.FinalTrackSelectors.multiTrackSelector_cfi.looseMTS.clone(
+            name = 'pixelLessStepLoose',
+            chi2n_par = 1.0,
+            res_par = ( 0.003, 0.001 ),
+            minNumberLayers = 0,
+            maxNumberLostLayers = 1,
+            minNumber3DLayers = 0,
+            d0_par1 = ( 0.9, 4.0 ),
+            dz_par1 = ( 0.9, 4.0 ),
+            d0_par2 = ( 1.0, 4.0 ),
+            dz_par2 = ( 1.0, 4.0 )
+        ),
+        RecoTracker.FinalTrackSelectors.multiTrackSelector_cfi.tightMTS.clone(
+            name = 'pixelLessStepTight',
+            preFilterName = 'pixelLessStepLoose',
+            chi2n_par = 0.35,
+            res_par = ( 0.003, 0.001 ),
+            minNumberLayers = 4,
+            maxNumberLostLayers = 0,
+            minNumber3DLayers = 3,
+            d0_par1 = ( 1.1, 4.0 ),
+            dz_par1 = ( 1.1, 4.0 ),
+            d0_par2 = ( 1.1, 4.0 ),
+            dz_par2 = ( 1.1, 4.0 )
+        ),
+        RecoTracker.FinalTrackSelectors.multiTrackSelector_cfi.highpurityMTS.clone(
+            name = 'QualityMasks',
+            preFilterName = 'pixelLessStepTight',
+            chi2n_par = 0.2,
+            res_par = ( 0.003, 0.001 ),
+            minNumberLayers = 4,
+            maxNumberLostLayers = 0,
+            minNumber3DLayers = 3,
+            d0_par1 = ( 0.9, 4.0 ),
+            dz_par1 = ( 0.9, 4.0 ),
+            d0_par2 = ( 0.9, 4.0 ),
+            dz_par2 = ( 0.9, 4.0 )
+        ),
+    ),
+    vertices = cms.InputTag("pixelVertices")#end of vpset
+) 
+
 trackingPhase2PU140.toModify(pixelLessStepSelector.trackSelectors[2], name = 'pixelLessStep')
 
 PixelLessStep = cms.Sequence(pixelLessStepClusters*
