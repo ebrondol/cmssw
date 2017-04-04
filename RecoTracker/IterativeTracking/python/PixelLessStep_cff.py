@@ -100,8 +100,8 @@ trackingLowPU.toModify(pixelLessStepSeedLayers,
 from Configuration.Eras.Modifier_trackingPhase2PU140_cff import trackingPhase2PU140
 trackingPhase2PU140.toModify(pixelLessStepSeedLayers,
     layerList = [
-        'TOB1+TOB2'#, 'TOB1+TOB3',
-        #'TID1_pos+TID2_pos', 'TID1_neg+TID2_neg'
+        'TOB1+TOB2',# 'TOB1+TOB3',
+        'TID1_pos+TID2_pos', 'TID1_neg+TID2_neg'
     ],
     TOB = cms.PSet(
          TTRHBuilder    = cms.string('WithTrackAngle'), 
@@ -115,9 +115,9 @@ trackingPhase2PU140.toModify(pixelLessStepSeedLayers,
          clusterChargeCut = cms.PSet(refToPSet_ = cms.string('SiStripClusterChargeCutNone')),
          vectorRecHits = cms.InputTag("siPhase2VectorHits", 'vectorHitsAccepted'),
          skipClusters   = cms.InputTag('pixelLessStepClusters'),
-         useRingSlector = cms.bool(True),
-         minRing = cms.int32(1),
-         maxRing = cms.int32(6)
+#         useRingSlector = cms.bool(True),
+#         minRing = cms.int32(1),
+#         maxRing = cms.int32(6)
     ),
     TEC = None,
     MTIB = None,
