@@ -145,6 +145,7 @@ MeasurementTrackerEventProducer::updatePixels( const edm::Event& event, PxMeasur
        for (edmNew::DetSetVector<SiPixelCluster>::const_iterator it = pixelCollection->begin(), ed = pixelCollection->end(); it != ed; ++it) {
          edmNew::DetSet<SiPixelCluster> set(*it);
          unsigned int id = set.id();
+         LogTrace("MeasurementTracker")<<"getting px cluster with id " << id;
          while ( id != thePxDets.id(i)) { 
              ++i;
              if (endDet==i) throw "we have a problem!!!!";
@@ -199,7 +200,7 @@ MeasurementTrackerEventProducer::updateStrips( const edm::Event& event, StMeasur
     if (selfUpdateSkipClusters_){
       edm::Handle<edm::ContainerMask<edmNew::DetSetVector<SiStripCluster> > > stripClusterMask;
       //and get the collection of pixel ref to skip
-      LogDebug("MeasurementTracker")<<"getting strp refs to skip";
+      LogTrace("MeasurementTracker")<<"getting strp refs to skip";
       event.getByToken(theStripClusterMask,stripClusterMask);
       if (stripClusterMask.failedToGet())  edm::LogError("MeasurementTracker")<<"not getting the strip clusters to skip";
       if (stripClusterMask->refProd().id()!=clusterHandle.id()){
@@ -248,6 +249,7 @@ MeasurementTrackerEventProducer::updatePhase2OT( const edm::Event& event, Phase2
   
         edmNew::DetSet<Phase2TrackerCluster1D> set(*it);
         unsigned int id = set.id();
+         LogTrace("MeasurementTracker")<<"getting ph2 ot cluster with id " << id;
         while ( id != thePh2OTDets.id(i)) {
             ++i;
             if (endDet==i) throw "we have a problem!!!!";
