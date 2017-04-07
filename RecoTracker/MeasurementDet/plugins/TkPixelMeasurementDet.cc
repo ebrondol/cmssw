@@ -80,12 +80,6 @@ TkPixelMeasurementDet::recHits( const TrajectoryStateOnSurface& ts, const Measur
      begin = &(data.pixelData().handle()->data().front());
   }
 
-  if(data.pixelClustersToSkip().empty())
-    LogTrace("MeasurementTracker")<<" data.pixelClustersToSkip empty";
-  else
-    LogTrace("MeasurementTracker")<<" I can access to data.pixelClustersToSkip";
-
-
   const detset & detSet = data.pixelData().detSet(index());
   LogTrace("MeasurementTracker")<<" DetSets set with sizes:" << detSet.size();
   result.reserve(detSet.size());
