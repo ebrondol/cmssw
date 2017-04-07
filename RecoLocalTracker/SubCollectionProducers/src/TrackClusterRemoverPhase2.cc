@@ -189,7 +189,9 @@ namespace {
       const auto & tms = tj.measurements();
       for (auto const & tm :  tms) {
 	auto const & hit = *tm.recHit();
+        LogTrace("TrackClusterRemoverPhase2")<<"hit in the det " << hit.geographicalId().rawId();
 	if (!hit.isValid()) continue; 
+        LogTrace("TrackClusterRemoverPhase2")<<"hit has estimate " << tm.estimate() << " when the limit is " << maxChi2_;
 	if ( tm.estimate() > maxChi2_ ) continue; // skip outliers
         auto const & thit = reinterpret_cast<BaseTrackerRecHit const&>(hit);
         auto const & cluster = thit.firstClusterRef();
@@ -203,8 +205,11 @@ namespace {
           auto const & vectorHit = reinterpret_cast<VectorHit const&>(hit);
           auto const & lowCluster = vectorHit.lowerClusterRef();
           auto const & uppCluster = vectorHit.upperClusterRef();
+          LogTrace("TrackClusterRemoverPhase2")<<"masking a VHit with lowCluster key: " << lowCluster.key() << " and upper key: " << uppCluster.key();
 	  if (lowCluster.isPhase2()) collectedPhase2OTs[lowCluster.key()]=true;
 	  if (uppCluster.isPhase2()) collectedPhase2OTs[uppCluster.key()]=true;
+        } else {
+          LogTrace("TrackClusterRemoverPhase2")<<"it is not a VHits.";
         } 
       }
 
