@@ -34,20 +34,51 @@ TkStackMeasurementDet::recHits( const TrajectoryStateOnSurface& ts, const Measur
   if (isActive(data) == false) return result;
   LogTrace("MeasurementTracker")<<" and is active";
 
-  const detset & lowerDetSet = data.phase2OTData().detSet(lowerDet()->index());
-  const detset & upperDetSet = data.phase2OTData().detSet(upperDet()->index());
-  LogTrace("MeasurementTracker")<<" DetSets set with sizes:" << lowerDetSet.size() << " and " << upperDetSet.size() << "!";
-  result.reserve(lowerDetSet.size()>upperDetSet.size() ? lowerDetSet.size() : upperDetSet.size());
+
+  const Phase2TrackerCluster1D* begin=0;
+  if (0 != data.phase2OTData().handle()->data().size()) {
+     begin = &(data.phase2OTData().handle()->data().front());
+  }
 
   VectorHitBuilderAlgorithmBase * algo = theMatcher->algo() ;
   //VectorHitBuilderAlgorithm* vhalgo = dynamic_cast<VectorHitBuilderAlgorithm *>(algobase);
   LogTrace("MeasurementTracker") << "TkStackMeasurementDet::recHits algo has been set" << std::endl;
-  std::vector<VectorHit> vhs;
-  vhs = algo->buildVectorHits(&specificGeomDet(), data.phase2OTData().handle(), lowerDetSet, upperDetSet);
 
-  for ( auto vh : vhs ){
-    LogTrace("MeasurementTracker") << "TkStackMeasurementDet::rechits adding VectorHits!" << std::endl;
-    result.push_back( std::make_shared<VectorHit>( vh ));
+  const detset & lowerDetSet = data.phase2OTData().detSet(lowerDet()->index());
+  const detset & upperDetSet = data.phase2OTData().detSet(upperDet()->index());
+
+  LogTrace("MeasurementTracker")<<" DetSets set with sizes:" << lowerDetSet.size() << " and " << upperDetSet.size() << "!";
+  result.reserve(lowerDetSet.size()>upperDetSet.size() ? lowerDetSet.size() : upperDetSet.size());
+
+
+  for ( const_iterator cil = lowerDetSet.begin(); cil != lowerDetSet.end(); ++ cil ) {
+
+    if (cil < begin){
+      edm::LogError("IndexMisMatch")<<"TkStackMeasurementDet cannot create hit because of index mismatch.";
+      return result;
+    }
+    unsigned int indexl = cil-begin;
+    LogTrace("MeasurementTracker")<<" index cluster lower" << indexl << " on detId " << fastGeomDet().geographicalId().rawId();
+
+    for ( const_iterator ciu = upperDetSet.begin(); ciu != upperDetSet.end(); ++ ciu ) {
+
+      unsigned int indexu = ciu-begin;
+      if (ciu < begin){
+        edm::LogError("IndexMisMatch")<<"TkStackMeasurementDet cannot create hit because of index mismatch.";
+        return result;
+      }
+      LogTrace("VectorHitBuilderAlgorithm")<<" index cluster upper " << indexu;
+
+      if(data.phase2OTClustersToSkip().empty() or ((not data.phase2OTClustersToSkip()[indexl]) and (not data.phase2OTClustersToSkip()[indexu])) ) {
+        Phase2TrackerCluster1DRef clusterLower = edmNew::makeRefTo( data.phase2OTData().handle(), cil );
+        Phase2TrackerCluster1DRef clusterUpper = edmNew::makeRefTo( data.phase2OTData().handle(), ciu );
+        //ERICA:I would have prefer to keep buildVectorHits ...
+        VectorHit vh = algo->buildVectorHit( &specificGeomDet(), clusterLower, clusterUpper);
+        LogTrace("MeasurementTracker") << "TkStackMeasurementDet::rechits adding VectorHits!" << std::endl;
+        result.push_back( std::make_shared<VectorHit>( vh ));
+      }
+    }
+
   }
 
   return result;
@@ -70,7 +101,7 @@ bool TkStackMeasurementDet::measurements( const TrajectoryStateOnSurface& stateO
 
   for (auto && hit : allHits) {
     std::pair<bool,double> diffEst = est.estimate( stateOnThisDet, *hit);
-    LogTrace("MeasurementTracker")<< "State on this Det: " << stateOnThisDet ;
+    //LogTrace("MeasurementTracker")<< "State on this Det: " << stateOnThisDet ;
     LogDebug("MeasurementTracker")<< "New vh added with chi2: " << diffEst.second ;
     if ( diffEst.first)
       result.add(std::move(hit), diffEst.second);
