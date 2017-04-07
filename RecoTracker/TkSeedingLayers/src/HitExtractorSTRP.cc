@@ -136,9 +136,15 @@ void HitExtractorSTRP::cleanedOfClusters( const TkTransientTrackingRecHitBuilder
     edm::Handle<SkipPhase2ClustersCollection> ph2ClusterMask;
     if (maskCluster) ev.getByToken(theSkipPhase2Clusters,ph2ClusterMask);
     for (unsigned int iH=cleanFrom;iH<hits.size();++iH){
+      LogTrace("HitExtractorSTRP")<<"analizing hit on :"<<hits[iH]->geographicalId().rawId();
       assert(hits[iH]->isValid());
-      if (maskCluster && (ph2ClusterMask->mask(hits[iH]->firstClusterRef().key())) ){
-        LogTrace("HitExtractorSTRP")<<"skipping a hit on :"<<hits[iH]->geographicalId().rawId()<<" key: "<<hits[iH]->firstClusterRef().key();
+      const VectorHit & vhit = dynamic_cast<VectorHit const&>(*hits[iH]);
+      LogTrace("HitExtractorSTRP")<<" key lower: "<<vhit.lowerClusterRef().key() << " and key upper: " <<  vhit.upperClusterRef().key();
+      LogTrace("HitExtractorSTRP")<<" key lower: "<<hits[iH]->firstClusterRef().key() ;
+
+      //FIXME:: introduce a "projected" version later?
+      if (maskCluster && (ph2ClusterMask->mask(vhit.lowerClusterRef().key()) || ph2ClusterMask->mask(vhit.upperClusterRef().key())) ){
+        LogTrace("HitExtractorSTRP")<<"skipping a vector hit on :"<<hits[iH]->geographicalId().rawId()<<" key lower: "<<vhit.lowerClusterRef().key() << " and key upper: " <<  vhit.upperClusterRef().key();
         skipped++;
         hits[iH].reset();
       }
@@ -270,6 +276,7 @@ HitExtractor::Hits HitExtractorSTRP::hits(const TkTransientTrackingRecHitBuilder
           result.emplace_back(*hit);
         }
       }
+      LogTrace("HitExtractorSTRP")<<"result size value:" << result.size();
       if (skipClusters) cleanedOfClusters(ttrhBuilder, ev,result,false,cleanFrom);
     }
   }
