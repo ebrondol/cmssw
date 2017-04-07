@@ -35,8 +35,11 @@ bool TkPixelMeasurementDet::measurements( const TrajectoryStateOnSurface& stateO
   
   auto oldSize = result.size();
   MeasurementDet::RecHitContainer && allHits = recHits(stateOnThisDet, data);
+  LogTrace("MeasurementTracker")<< "New hits: " << allHits.size() ;
   for (auto && hit : allHits) {
     std::pair<bool,double> diffEst = est.estimate( stateOnThisDet, *hit);
+    LogTrace("MeasurementTracker")<< "State on this Det: " << stateOnThisDet ;
+    LogTrace("MeasurementTracker")<< "New hit added with chi2: " << diffEst.second ;
     if ( diffEst.first)
       result.add(std::move(hit), diffEst.second);
   }
@@ -46,6 +49,7 @@ bool TkPixelMeasurementDet::measurements( const TrajectoryStateOnSurface& stateO
   // create a TrajectoryMeasurement with an invalid RecHit and zero estimate
   bool inac = hasBadComponents(stateOnThisDet, data);
   result.add(inac ? theInactiveHit : theMissingHit, 0.F);
+  LogDebug("MeasurementTracker")<< "adding missing hit";
   return inac;
 
 }
@@ -55,6 +59,7 @@ TrackingRecHit::RecHitPointer
 TkPixelMeasurementDet::buildRecHit( const SiPixelClusterRef & cluster,
 				    const LocalTrajectoryParameters & ltp) const
 {
+  LogTrace("MeasurementTracker")<< "Build rechit" ;
   const GeomDetUnit& gdu( specificGeomDet());
 
   auto && params = cpe()->getParameters( * cluster, gdu, ltp );
@@ -67,25 +72,39 @@ TkPixelMeasurementDet::recHits( const TrajectoryStateOnSurface& ts, const Measur
   LogDebug("MeasurementTracker")<<"TkPixelMeasurementDet::recHits";
   RecHitContainer result;
   if (isEmpty(data.pixelData())== true ) return result;
+  LogTrace("MeasurementTracker")<<" is not empty";
   if (isActive(data) == false) return result;
+  LogTrace("MeasurementTracker")<<" and is active";
   const SiPixelCluster* begin=0;
   if (0 != data.pixelData().handle()->data().size()) {
      begin = &(data.pixelData().handle()->data().front());
   }
+
+  if(data.pixelClustersToSkip().empty())
+    LogTrace("MeasurementTracker")<<" data.pixelClustersToSkip empty";
+  else
+    LogTrace("MeasurementTracker")<<" I can access to data.pixelClustersToSkip";
+
+
   const detset & detSet = data.pixelData().detSet(index());
+  LogTrace("MeasurementTracker")<<" DetSets set with sizes:" << detSet.size();
   result.reserve(detSet.size());
   for ( const_iterator ci = detSet.begin(); ci != detSet.end(); ++ ci ) {
+    LogTrace("MeasurementTracker")<<" in the loop" ;
     
     if (ci < begin){
       edm::LogError("IndexMisMatch")<<"TkPixelMeasurementDet cannot create hit because of index mismatch.";
       return result;
     }
      unsigned int index = ci-begin;
+    LogTrace("MeasurementTracker")<<" in the loop2 and ci: " << ci << " and begin: " << begin ;
      if (!data.pixelClustersToSkip().empty() &&  index>=data.pixelClustersToSkip().size()){
        edm::LogError("IndexMisMatch")<<"TkPixelMeasurementDet cannot create hit because of index mismatch. i.e "<<index<<" >= "<<data.pixelClustersToSkip().size();
        return result;
      }
+    LogTrace("MeasurementTracker")<<" in the loop3 with index " << index << " on detId " << fastGeomDet().geographicalId().rawId();
      if(data.pixelClustersToSkip().empty() or (not data.pixelClustersToSkip()[index]) ) {
+       LogTrace("MeasurementTracker")<<" in the loop4" ;
        SiPixelClusterRef cluster = detSet.makeRefTo( data.pixelData().handle(), ci );
        result.push_back( buildRecHit( cluster, ts.localParameters() ) );
        LogTrace("MeasurementTracker") << "TkPixelMeasurementDet::rechits adding PixelHits in detId " << fastGeomDet().geographicalId().rawId() << std::endl;
