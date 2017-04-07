@@ -203,8 +203,11 @@ namespace {
           auto const & vectorHit = reinterpret_cast<VectorHit const&>(hit);
           auto const & lowCluster = vectorHit.lowerClusterRef();
           auto const & uppCluster = vectorHit.upperClusterRef();
+          LogTrace("TrackClusterRemoverPhase2")<<"masking a VHit with lowCluster key: " << lowCluster.key() << " and upper key: " << uppCluster.key();
 	  if (lowCluster.isPhase2()) collectedPhase2OTs[lowCluster.key()]=true;
 	  if (uppCluster.isPhase2()) collectedPhase2OTs[uppCluster.key()]=true;
+        } else {
+          LogTrace("TrackClusterRemoverPhase2")<<"it is not a VHits.";
         } 
       }
 

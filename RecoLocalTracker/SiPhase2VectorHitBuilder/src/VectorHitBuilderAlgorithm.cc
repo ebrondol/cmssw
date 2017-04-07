@@ -85,26 +85,32 @@ bool VectorHitBuilderAlgorithm::checkClustersCompatibility(Local3DPoint& poslowe
 std::vector<VectorHit> VectorHitBuilderAlgorithm::buildVectorHits(const StackGeomDet * stack, 
                                                                   edm::Handle< edmNew::DetSetVector<Phase2TrackerCluster1D> > clusters, 
                                                                   const detset & theLowerDetSet, 
-                                                                  const detset & theUpperDetSet)
+                                                                  const detset & theUpperDetSet,
+                                                                  const std::vector<bool>& phase2OTClustersToSkip)
 {
 
   std::vector<VectorHit> result;
 
+
   for ( const_iterator cil = theLowerDetSet.begin(); cil != theLowerDetSet.end(); ++ cil ) {
+      //possibility to introducing the skipping of the clusters
+      //if(phase2OTClustersToSkip.empty() or (not phase2OTClustersToSkip[cil]) ) {
 
-    Phase2TrackerCluster1DRef clusterLower = edmNew::makeRefTo( clusters, cil );
+      Phase2TrackerCluster1DRef clusterLower = edmNew::makeRefTo( clusters, cil );
 
-    for ( const_iterator ciu = theUpperDetSet.begin(); ciu != theUpperDetSet.end(); ++ ciu ) {
+      for ( const_iterator ciu = theUpperDetSet.begin(); ciu != theUpperDetSet.end(); ++ ciu ) {
 
-      Phase2TrackerCluster1DRef clusterUpper = edmNew::makeRefTo( clusters, ciu );
-      VectorHit vh = buildVectorHit( stack, clusterLower, clusterUpper);
-      LogTrace("VectorHitBuilderAlgorithm") << "-> Vectorhit " << vh ;
-      LogTrace("VectorHitBuilderAlgorithm") << std::endl;
-      //protection: the VH can also be empty!!
+        LogTrace("VectorHitBuilderAlgorithm")<<" in the loop for upper clusters with index " << ciu << " on detId " << stack->geographicalId().rawId();
 
-      if (vh.isValid()){
-        result.push_back(vh);
-      }
+        Phase2TrackerCluster1DRef clusterUpper = edmNew::makeRefTo( clusters, ciu );
+        VectorHit vh = buildVectorHit( stack, clusterLower, clusterUpper);
+        LogTrace("VectorHitBuilderAlgorithm") << "-> Vectorhit " << vh ;
+        LogTrace("VectorHitBuilderAlgorithm") << std::endl;
+        //protection: the VH can also be empty!!
+
+        if (vh.isValid()){
+          result.push_back(vh);
+        }
 
     }
   }
