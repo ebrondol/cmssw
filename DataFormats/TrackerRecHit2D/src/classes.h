@@ -13,6 +13,7 @@
 #include "DataFormats/Common/interface/RefProd.h" 
 #include "DataFormats/SiStripCluster/interface/SiStripCluster.h" 
 #include "DataFormats/Common/interface/DetSetVector.h" 
+#include "DataFormats/Common/interface/DetSetVectorNew.h"
 #include "DataFormats/Common/interface/Wrapper.h"
 #include "DataFormats/Common/interface/Ref.h"
 #include "DataFormats/Common/interface/RefVector.h"
@@ -27,6 +28,7 @@
 #include "DataFormats/TrackerRecHit2D/interface/FastTrackerRecHitCollection.h"
 #include "DataFormats/TrackerRecHit2D/interface/Phase2TrackerRecHit1D.h"
 #include "DataFormats/TrackerRecHit2D/interface/BaseTrackerRecHit.h"
+#include "DataFormats/TrackerRecHit2D/interface/VectorHit.h"
 #include <vector>
 
 namespace DataFormats_TrackerRecHit2D {
@@ -133,11 +135,9 @@ namespace DataFormats_TrackerRecHit2D {
 
       edm::Ref<vector<vector<edm::Ref<edm::OwnVector<FastTrackerRecHit,edm::ClonePolicy<FastTrackerRecHit> >,FastTrackerRecHit,edm::refhelper::FindUsingAdvance<edm::OwnVector<FastTrackerRecHit,edm::ClonePolicy<FastTrackerRecHit> >,FastTrackerRecHit> > > >,vector<edm::Ref<edm::OwnVector<FastTrackerRecHit,edm::ClonePolicy<FastTrackerRecHit> >,FastTrackerRecHit,edm::refhelper::FindUsingAdvance<edm::OwnVector<FastTrackerRecHit,edm::ClonePolicy<FastTrackerRecHit> >,FastTrackerRecHit> > >,edm::refhelper::FindUsingAdvance<vector<vector<edm::Ref<edm::OwnVector<FastTrackerRecHit,edm::ClonePolicy<FastTrackerRecHit> >,FastTrackerRecHit,edm::refhelper::FindUsingAdvance<edm::OwnVector<FastTrackerRecHit,edm::ClonePolicy<FastTrackerRecHit> >,FastTrackerRecHit> > > >,vector<edm::Ref<edm::OwnVector<FastTrackerRecHit,edm::ClonePolicy<FastTrackerRecHit> >,FastTrackerRecHit,edm::refhelper::FindUsingAdvance<edm::OwnVector<FastTrackerRecHit,edm::ClonePolicy<FastTrackerRecHit> >,FastTrackerRecHit> > > > > fastSimTrackerRecHitCombinationRef;
 
-        edm::Wrapper< Phase2TrackerRecHit1D > cl0;
-        edm::Wrapper< std::vector< Phase2TrackerRecHit1D > > cl1;
-        edm::Wrapper< edmNew::DetSet< Phase2TrackerRecHit1D > > cl2;
-        edm::Wrapper< std::vector< edmNew::DetSet< Phase2TrackerRecHit1D > > > cl3;
-        edm::Wrapper< Phase2TrackerRecHit1DCollectionNew > cl4;
+   VectorHitCollectionNew vhc1_new;
+   edm::RefProd<VectorHitCollectionNew> vhc1_new2;
+   edm::Wrapper<VectorHitCollectionNew> wh1_new;
 
   };
 }

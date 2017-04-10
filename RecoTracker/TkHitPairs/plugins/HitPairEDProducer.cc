@@ -114,6 +114,7 @@ namespace {
 
     void produce(const SeedingLayerSetsHits& layers, const edm::OwnVector<TrackingRegion>& regions, const bool clusterCheckOk,
                  edm::Event& iEvent, const edm::EventSetup& iSetup) override {
+      LogDebug("HitPairEDProducer") << "Doublets::produce" << std::endl;
       auto seedingHitSetsProducer = T_SeedingHitSets(&localRA_);
       auto intermediateHitDoubletsProducer = T_IntermediateHitDoublets(&layers);
 
@@ -136,7 +137,13 @@ namespace {
 
         for(SeedingLayerSetsHits::SeedingLayerSet layerSet: layerPairs) {
           auto doublets = generator_.doublets(region, iEvent, iSetup, layerSet, *hitCachePtr);
+
           LogTrace("HitPairEDProducer") << " created " << doublets.size() << " doublets for layers " << layerSet[0].index() << "," << layerSet[1].index();
+          for(unsigned int i = 0; i < doublets.size(); ++i){
+            LogTrace("HitPairEDProducer") << " \thit in inner layer " << doublets.hit(i,HitDoublets::layer::inner)->geographicalId().rawId();
+            LogTrace("HitPairEDProducer") << " \thit in outer layer " << doublets.hit(i,HitDoublets::layer::outer)->geographicalId().rawId();
+          }
+
           if(doublets.empty()) continue; // don't bother if no pairs from these layers
           seedingHitSetsProducer.fill(std::get<1>(hitCachePtr_filler_shs), doublets);
           intermediateHitDoubletsProducer.fill(std::get<1>(hitCachePtr_filler_ihd), layerSet, std::move(doublets));

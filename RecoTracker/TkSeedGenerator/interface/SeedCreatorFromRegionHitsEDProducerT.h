@@ -64,11 +64,13 @@ void SeedCreatorFromRegionHitsEDProducerT<T_SeedCreator>::fillDescriptions(edm::
 
 template <typename T_SeedCreator>
 void SeedCreatorFromRegionHitsEDProducerT<T_SeedCreator>::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  LogDebug("SeedCreatorFromRegionHitsEDProducer") << "SeedCreatorFromRegionHitsEDProducerT::produce" ;
   edm::Handle<RegionsSeedingHitSets> hseedingHitSets;
   iEvent.getByToken(seedingHitSetsToken_, hseedingHitSets);
   const auto& seedingHitSets = *hseedingHitSets;
 
   auto seeds = std::make_unique<TrajectorySeedCollection>();
+  LogTrace("SeedCreatorFromRegionHitsEDProducer") << "Seeding hits size " << seedingHitSets.size() ;
   seeds->reserve(seedingHitSets.size());
 
   if(comparitor_)
@@ -77,12 +79,20 @@ void SeedCreatorFromRegionHitsEDProducerT<T_SeedCreator>::produce(edm::Event& iE
   for(const auto& regionSeedingHitSets: seedingHitSets) {
     const TrackingRegion& region = regionSeedingHitSets.region();
     seedCreator_.init(region, iSetup, comparitor_.get());
+    LogTrace("SeedCreatorFromRegionHitsEDProducer") << "Seed creator initialization and looping into regionSeedingHitSets " ;
 
     for(const SeedingHitSet& hits: regionSeedingHitSets) {
       // TODO: do we really need a comparitor at this point? It is
       // used in triplet and quadruplet generators, as well as inside
       // seedCreator.
+      if(comparitor_){
+        if(comparitor_->compatible(hits)){
+          LogTrace("SeedCreatorFromRegionHitsEDProducer") << "comparitor is ok" ;
+        }
+      }
+
       if(!comparitor_ || comparitor_->compatible(hits)) {
+        LogTrace("SeedCreatorFromRegionHitsEDProducer") << "makeSeed!" ;
         seedCreator_.makeSeed(*seeds, hits);
       }
     }
