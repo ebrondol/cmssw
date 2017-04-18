@@ -29,6 +29,7 @@ namespace helper
       selStandAloneTracksHits_( new TrackingRecHitCollection ),     
       selStripClusters_( new edmNew::DetSetVector<SiStripCluster> ),
       selPixelClusters_( new edmNew::DetSetVector<SiPixelCluster> ),
+      selPhase2OTClusters_( new edmNew::DetSetVector<Phase2TrackerCluster1D> ),
       rMuons_(),
       rTracks_(), rTrackExtras_(), rHits_(),
       rGBTracks_(), rGBTrackExtras_(), rGBHits_(),
@@ -213,6 +214,7 @@ namespace helper
       if (cloneClusters()) {
           evt.put(std::move(selStripClusters_));
           evt.put(std::move(selPixelClusters_));
+          evt.put(std::move(selPhase2OTClusters_));
       }
       return h; 
      
