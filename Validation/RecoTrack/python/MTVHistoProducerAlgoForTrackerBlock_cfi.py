@@ -103,24 +103,24 @@ MTVHistoProducerAlgoForTrackerBlock = cms.PSet(
 
     #
     #parameters for resolution plots
-    ptRes_rangeMin = cms.double(-0.1),
-    ptRes_rangeMax = cms.double(0.1),
+    ptRes_rangeMin = cms.double(-0.5),
+    ptRes_rangeMax = cms.double(0.5),
     ptRes_nbin = cms.int32(100),                                   
 
     phiRes_rangeMin = cms.double(-0.01),
     phiRes_rangeMax = cms.double(0.01),
     phiRes_nbin = cms.int32(300),                                   
 
-    cotThetaRes_rangeMin = cms.double(-0.02),
-    cotThetaRes_rangeMax = cms.double(+0.02),
+    cotThetaRes_rangeMin = cms.double(-0.1),
+    cotThetaRes_rangeMax = cms.double(+0.1),
     cotThetaRes_nbin = cms.int32(300),                                   
 
     dxyRes_rangeMin = cms.double(-0.1),
     dxyRes_rangeMax = cms.double(0.1),
     dxyRes_nbin = cms.int32(500),                                   
 
-    dzRes_rangeMin = cms.double(-0.05),
-    dzRes_rangeMax = cms.double(+0.05),
+    dzRes_rangeMin = cms.double(-0.4),
+    dzRes_rangeMax = cms.double(+0.4),
     dzRes_nbin = cms.int32(150),                                   
 
 
