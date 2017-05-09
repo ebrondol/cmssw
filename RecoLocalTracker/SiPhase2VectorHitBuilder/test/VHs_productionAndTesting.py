@@ -25,13 +25,12 @@ process.load('RecoLocalTracker.SiPhase2VectorHitBuilder.SiPhase2VectorHitBuilder
 
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1)
+    input = cms.untracked.int32(10)
 )
 
 # Input source
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring('file:21207_10events/step2.root'),
-    #fileNames = cms.untracked.vstring('/store/relval/CMSSW_8_1_0_pre7/RelValSingleMuPt10Extended/GEN-SIM-DIGI-RAW/81X_mcRun2_asymptotic_v0_2023tilted-v1/10000/2E7CB262-1534-E611-BB7A-0CC47A78A496.root'),
+    fileNames = cms.untracked.vstring('/store/relval/CMSSW_9_1_0_pre1/RelValSingleMuPt10Extended/GEN-SIM-DIGI-RAW/90X_upgrade2023_realistic_v9_D4Timing-v1/00000/161D8583-1719-E711-BA42-0CC47A7C346E.root'),
     secondaryFileNames = cms.untracked.vstring(),
     skipEvents = cms.untracked.uint32(0)
 )
@@ -81,7 +80,7 @@ process.analysis = cms.EDAnalyzer('VectorHitsBuilderValidation',
     links = cms.InputTag("simSiPixelDigis", "Tracker")
 )
 process.TFileService = cms.Service('TFileService',
-    fileName = cms.string('file:vh_validation_tilted.root')
+    fileName = cms.string('file:VHs_validation.root')
 )
 
 
@@ -98,11 +97,4 @@ process.RECOSIMoutput_step = cms.EndPath(process.RECOSIMoutput)
 
 # Schedule definition
 process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.trackerlocalreco_step,process.RECOSIMoutput_step, process.analysis_step)
-#process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.trackerlocalreco_step,process.RECOSIMoutput_step)
-#process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.reconstruction_step,process.prevalidation_step,process.validation_step,process.dqmoffline_step,process.FEVTDEBUGHLToutput_step,process.DQMoutput_step)
-
-# customisation of the process.
-
-
-# End of customisation functions
 
