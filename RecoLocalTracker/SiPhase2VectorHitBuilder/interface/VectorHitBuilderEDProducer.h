@@ -7,13 +7,13 @@
 #ifndef RecoLocalTracker_SiPhase2VectorHitBuilder_VectorHitBuilderEDProducer_h
 #define RecoLocalTracker_SiPhase2VectorHitBuilder_VectorHitBuilderEDProducer_h
 
-#include "FWCore/Framework/interface/EDProducer.h"
+#include "FWCore/Framework/interface/stream/EDProducer.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "RecoLocalTracker/SiPhase2VectorHitBuilder/interface/VectorHitBuilderAlgorithmBase.h"
 #include "DataFormats/Phase2TrackerCluster/interface/Phase2TrackerCluster1D.h"
 #include "DataFormats/TrackerRecHit2D/interface/VectorHit.h"
 
-class VectorHitBuilderEDProducer : public edm::EDProducer
+class VectorHitBuilderEDProducer : public edm::stream::EDProducer<>
 {
 
  public:
