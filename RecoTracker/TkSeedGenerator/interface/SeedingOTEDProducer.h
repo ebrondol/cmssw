@@ -7,7 +7,7 @@
 #ifndef RecoTracker_TkSeedGenerator_SeedingOTEDProducer_h
 #define RecoTracker_TkSeedGenerator_SeedingOTEDProducer_h
 
-#include "FWCore/Framework/interface/EDProducer.h"
+#include "FWCore/Framework/interface/stream/EDProducer.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
@@ -23,7 +23,7 @@
 
 class TrajectoryStateUpdator;
 
-class SeedingOTEDProducer : public edm::EDProducer
+class SeedingOTEDProducer : public edm::stream::EDProducer<>
 {
 
  public:
