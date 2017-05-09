@@ -233,7 +233,6 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
 
     LogDebug("VectorHitsBuilderValidation") << "Layer: " << layer << "  det id" << rawid << std::endl;
 
-
     // Get the geometry of the tracker
     const GeomDet* geomDet(tkGeom->idToDet(detId));
     if (!geomDet) break;
@@ -297,9 +296,10 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
          // Pixel module
          const StackGeomDet* stackDet = dynamic_cast<const StackGeomDet*>(geomDet);
          const PixelGeomDetUnit* geomDetLower = dynamic_cast< const PixelGeomDetUnit* >(stackDet->lowerDet());
-          const PixelTopology * topoLower = &geomDetLower->specificTopology();
-        if (topoLower->ncolumns() == 32) {
 
+         TrackerGeometry::ModuleType mType = tkGeom->getDetectorType(stackDet->lowerDet()->geographicalId());
+         module_type = 0;
+         if (mType == TrackerGeometry::ModuleType::Ph2PSP) {
            module_type = 1;
            trackerLayoutRZ_[1]->SetPoint(nVHsPSTot, globalPosVH.z(), globalPosVH.perp());
            trackerLayoutXY_[1]->SetPoint(nVHsPSTot, globalPosVH.x(), globalPosVH.y());
@@ -312,11 +312,10 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
 
            ++nVHsPS;
            ++nVHsPSTot;
-
          }
 
          // Strip module
-        else if (topoLower->ncolumns() == 2) {
+         else if (mType == TrackerGeometry::ModuleType::Ph2SS) {
            module_type = 2;
            trackerLayoutRZ_[2]->SetPoint(nVHs2STot, globalPosVH.z(), globalPosVH.perp());
            trackerLayoutXY_[2]->SetPoint(nVHs2STot, globalPosVH.x(), globalPosVH.y());
@@ -329,6 +328,8 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
 
            ++nVHs2S;
            ++nVHs2STot;
+         } else if (mType == TrackerGeometry::ModuleType::Ph2PSS) {
+           edm::LogError("VectorHitsBuilderValidation") << "module type " << module_type << " should never happen!";
          }
          LogTrace("VectorHitsBuilderValidation") << "module type " << module_type << std::endl;
 
