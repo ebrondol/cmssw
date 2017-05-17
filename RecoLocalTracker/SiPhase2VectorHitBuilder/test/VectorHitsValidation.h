@@ -39,6 +39,7 @@
 #include "DataFormats/TrackerRecHit2D/interface/OmniClusterRef.h"
 
 #include <TH1F.h>
+#include <TH2D.h>
 #include <TGraph.h>
 #include <THStack.h>
 #include <TCanvas.h>
@@ -64,6 +65,10 @@ struct VHHistos {
     TH1F* totalSimHits;
     TH1F* primarySimHits;
     TH1F* otherSimHits;
+
+    TH1F* curvature;
+    TH1F* width;
+    TH1F* deltaXlocal;
 };
 
 class VectorHitsBuilderValidation : public edm::EDAnalyzer {
@@ -85,14 +90,19 @@ class VectorHitsBuilderValidation : public edm::EDAnalyzer {
         std::map< unsigned int, VHHistos >::iterator createLayerHistograms(unsigned int);
         void CreateVHsXYGraph( const std::vector<Global3DPoint>,const  std::vector<Global3DVector> );
         void CreateVHsRZGraph( const std::vector<Global3DPoint>,const  std::vector<Global3DVector> );
+        void CreateWindowCorrGraph();
+
         unsigned int getLayerNumber(const DetId&);
         unsigned int getModuleNumber(const DetId& detid);
         void printCluster(const GeomDetUnit* geomDetUnit, const OmniClusterRef cluster);
-        std::vector< std::pair<uint32_t, EncodedEventId> > getSimTrackId(const edm::Handle< edm::DetSetVector< PixelDigiSimLink > >&, const DetId&, uint32_t) const;
-        unsigned int getSimTrackId(const edm::Handle< edm::DetSetVector< PixelDigiSimLink > >& pixelSimLinks, const DetId& detId, unsigned int channel) ;
+
+        bool isTrue(const VectorHit vh, const edm::Handle< edm::DetSetVector< PixelDigiSimLink > >& siphase2SimLinks, DetId& detId) const;
+        std::vector< std::pair<uint32_t, EncodedEventId> > getSimTrackIds(const edm::Handle< edm::DetSetVector< PixelDigiSimLink > >&, const DetId&, uint32_t) const;
+        unsigned int getSimTrackId(const edm::Handle< edm::DetSetVector< PixelDigiSimLink > >& pixelSimLinks, const DetId& detId, unsigned int channel) const;
 
         edm::EDGetTokenT< edmNew::DetSetVector<Phase2TrackerCluster1D> > srcClu_;
-        edm::EDGetTokenT< VectorHitCollectionNew > srcVH_;
+        edm::EDGetTokenT< VectorHitCollectionNew > VHacc_;
+        edm::EDGetTokenT< VectorHitCollectionNew > VHrej_;
         edm::EDGetTokenT< edm::DetSetVector<PixelDigiSimLink> > siphase2OTSimLinksToken_;
         edm::EDGetTokenT< edm::PSimHitContainer > simHitsToken_;
         edm::EDGetTokenT< edm::SimTrackContainer> simTracksToken_;
@@ -112,6 +122,14 @@ class VectorHitsBuilderValidation : public edm::EDAnalyzer {
         TCanvas* VHXY_;
         TCanvas* VHRZ_;
         std::vector<TArrow*> arrowVHs;
+
+        TH2D* ParallaxCorrectionRZ_;
+        TH1F* VHaccLayer_;
+        TH1F* VHrejLayer_;
+        TH1F* VHaccTrueLayer_;
+        TH1F* VHrejTrueLayer_;
+        TH1F* VHaccTrueLayer_ratio;
+        TH1F* VHrejTrueLayer_ratio;
 
         std::map< unsigned int, VHHistos > histograms_;
 
