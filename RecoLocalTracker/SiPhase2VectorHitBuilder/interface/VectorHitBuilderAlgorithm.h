@@ -27,6 +27,9 @@ class VectorHitBuilderAlgorithm : public VectorHitBuilderAlgorithmBase {
            edmNew::DetSetVector<Phase2TrackerCluster1D>& clustersAcc, edmNew::DetSetVector<Phase2TrackerCluster1D>& clustersRej );
 
   //not implemented yet
+  bool checkClustersCompatibilityBeforeBuilding(edm::Handle< edmNew::DetSetVector<Phase2TrackerCluster1D> > clusters,
+                                                                         const detset & theLowerDetSet,
+                                                                         const detset & theUpperDetSet);
   bool checkClustersCompatibility(Local3DPoint& posinner, Local3DPoint& posouter, LocalError& errinner, LocalError& errouter);
 
   std::vector<VectorHit> buildVectorHits(const StackGeomDet * stack,

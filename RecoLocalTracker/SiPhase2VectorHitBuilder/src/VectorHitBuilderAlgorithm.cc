@@ -17,8 +17,7 @@ void VectorHitBuilderAlgorithm::run(edm::Handle< edmNew::DetSetVector<Phase2Trac
   const  edmNew::DetSetVector<Phase2TrackerCluster1D>* ClustersPhase2Collection = clusters.product();
 
 
-  std::map< DetId, std::vector<VectorHit> > temporary;
-  //std::map< DetId, std::vector<VectorHit> > tempVHacc, tempVHrej;
+  std::map< DetId, std::vector<VectorHit> > tempVHAcc, tempVHRej;
   //std::map< DetId, std::vector<Phase2TrackerCluster1D> > tempCLacc, tempCLrej;
   std::map< DetId, std::vector<VectorHit> >::iterator it_temporary;
 
@@ -39,12 +38,12 @@ void VectorHitBuilderAlgorithm::run(edm::Handle< edmNew::DetSetVector<Phase2Trac
     DetId detIdStack = theTkTopo->stack(detId1);
 
     //debug
-    LogTrace("VectorHitBuilderAlgorithm") << "  DetId stack : " << detIdStack.rawId();
+    std::cout << "  DetId stack : " << detIdStack.rawId() << std::endl;
     LogTrace("VectorHitBuilderAlgorithm") << "  DetId lower set of clusters  : " << lowerDetId.rawId();
     LogTrace("VectorHitBuilderAlgorithm") << "  DetId upper set of clusters  : " << upperDetId.rawId();
 
-    it_temporary = temporary.find(detIdStack);
-    if ( it_temporary != temporary.end() ) {
+    it_temporary = tempVHAcc.find(detIdStack);
+    if ( it_temporary != tempVHAcc.end() ) {
       LogTrace("VectorHitBuilderAlgorithm") << " this stack has already been analyzed -> skip it ";
       continue;
     }
@@ -55,19 +54,37 @@ void VectorHitBuilderAlgorithm::run(edm::Handle< edmNew::DetSetVector<Phase2Trac
     edmNew::DetSetVector<Phase2TrackerCluster1D>::const_iterator it_detUpper = ClustersPhase2Collection->find( upperDetId );
 
     if ( it_detLower != ClustersPhase2Collection->end() && it_detUpper != ClustersPhase2Collection->end() ){
-      gd = theTkGeom->idToDet(detIdStack);
-      stackDet = dynamic_cast<const StackGeomDet*>(gd);
-      std::vector<VectorHit> vhsInStack = buildVectorHits(stackDet, clusters, *it_detLower, *it_detUpper);
-      temporary[detIdStack] = vhsInStack;
+
+      if(checkClustersCompatibilityBeforeBuilding(clusters, *it_detLower, *it_detUpper)){
+        LogTrace("VectorHitBuilderAlgorithm") << "  compatible -> continue ... ";
+        gd = theTkGeom->idToDet(detIdStack);
+        stackDet = dynamic_cast<const StackGeomDet*>(gd);
+        std::vector<VectorHit> vhsInStack = buildVectorHits(stackDet, clusters, *it_detLower, *it_detUpper);
+        tempVHAcc[detIdStack] = vhsInStack;
+      } else { LogTrace("VectorHitBuilderAlgorithm") << "  not compatible, going to the next cluster"; }
+    
     }
 
   }
 
-  loadDetSetVector(temporary, vhAcc);
+  loadDetSetVector(tempVHAcc, vhAcc);
 
   LogDebug("VectorHitBuilderAlgorithm") << "End run VectorHitBuilderAlgorithm ... \n" ;
   return;
 
+}
+
+bool VectorHitBuilderAlgorithm::checkClustersCompatibilityBeforeBuilding(edm::Handle< edmNew::DetSetVector<Phase2TrackerCluster1D> > clusters,
+                                                                         const detset & theLowerDetSet,
+                                                                         const detset & theUpperDetSet)
+{
+  //order lower clusters in u
+  std::vector<Phase2TrackerCluster1D> lowerClusters;
+  for ( const_iterator cil = theLowerDetSet.begin(); cil != theLowerDetSet.end(); ++ cil ) {
+    Phase2TrackerCluster1DRef clusterLower = edmNew::makeRefTo( clusters, cil );
+    lowerClusters.push_back(*clusterLower);
+  }
+  return true;
 }
 
 bool VectorHitBuilderAlgorithm::checkClustersCompatibility(Local3DPoint& poslower, 
@@ -93,24 +110,24 @@ std::vector<VectorHit> VectorHitBuilderAlgorithm::buildVectorHits(const StackGeo
 
 
   for ( const_iterator cil = theLowerDetSet.begin(); cil != theLowerDetSet.end(); ++ cil ) {
-      //possibility to introducing the skipping of the clusters
-      //if(phase2OTClustersToSkip.empty() or (not phase2OTClustersToSkip[cil]) ) {
+    //possibility to introducing the skipping of the clusters
+    //if(phase2OTClustersToSkip.empty() or (not phase2OTClustersToSkip[cil]) ) {
 
-      Phase2TrackerCluster1DRef clusterLower = edmNew::makeRefTo( clusters, cil );
+    Phase2TrackerCluster1DRef clusterLower = edmNew::makeRefTo( clusters, cil );
 
-      for ( const_iterator ciu = theUpperDetSet.begin(); ciu != theUpperDetSet.end(); ++ ciu ) {
+    for ( const_iterator ciu = theUpperDetSet.begin(); ciu != theUpperDetSet.end(); ++ ciu ) {
 
-        LogTrace("VectorHitBuilderAlgorithm")<<" in the loop for upper clusters with index " << ciu << " on detId " << stack->geographicalId().rawId();
+      LogTrace("VectorHitBuilderAlgorithm")<<" in the loop for upper clusters with index " << ciu << " on detId " << stack->geographicalId().rawId();
 
-        Phase2TrackerCluster1DRef clusterUpper = edmNew::makeRefTo( clusters, ciu );
-        VectorHit vh = buildVectorHit( stack, clusterLower, clusterUpper);
-        LogTrace("VectorHitBuilderAlgorithm") << "-> Vectorhit " << vh ;
-        LogTrace("VectorHitBuilderAlgorithm") << std::endl;
-        //protection: the VH can also be empty!!
+      Phase2TrackerCluster1DRef clusterUpper = edmNew::makeRefTo( clusters, ciu );
+      VectorHit vh = buildVectorHit( stack, clusterLower, clusterUpper);
+      LogTrace("VectorHitBuilderAlgorithm") << "-> Vectorhit " << vh ;
+      LogTrace("VectorHitBuilderAlgorithm") << std::endl;
+      //protection: the VH can also be empty!!
 
-        if (vh.isValid()){
-          result.push_back(vh);
-        }
+      if (vh.isValid()){
+        result.push_back(vh);
+      }
 
     }
   }
@@ -135,55 +152,33 @@ VectorHit VectorHitBuilderAlgorithm::buildVectorHit(const StackGeomDet * stack,
   printCluster(stack->lowerDet(),&*lower);
   printCluster(stack->upperDet(),&*upper);
 
-  //FIXME::you should put the correct error when the StripCPE is ready
-  //FIXME StripClusterParameterEstimator::LocalValues parameters = parameterestimator->localParameters(*lowerClus_iter,*theLowerGeomDetUnit);
   const PixelGeomDetUnit* geomDetLower = dynamic_cast< const PixelGeomDetUnit* >(stack->lowerDet());
   const PixelGeomDetUnit* geomDetUpper = dynamic_cast< const PixelGeomDetUnit* >(stack->upperDet());
 
-  const PixelTopology * topoLower = &geomDetLower->specificTopology();
-  const PixelTopology * topoUpper = &geomDetUpper->specificTopology();
+  auto && lparamsLower = parameterestimator->localParameters( *lower, *geomDetLower );          // x, y, z, e2_xx, e2_xy, e2_yy
+  Global3DPoint gparamsLower = geomDetLower->surface().toGlobal(lparamsLower.first);
 
-  float pitchXlower = topoLower->pitch().first;
-  float pitchYlower = topoLower->pitch().second;
-  float ixLower = lower->center();
-  float iyLower = lower->column()+0.5; // halfway the column
+  auto && lparamsUpper = parameterestimator->localParameters( *upper, *geomDetUpper );
+  Global3DPoint gparamsUpper = geomDetUpper->surface().toGlobal(lparamsUpper.first);
 
-  LocalPoint lpLower( topoLower->localX(ixLower), topoLower->localY(iyLower), 0 );          // x, y, z
-  LocalError leLower( pow(pitchXlower, 2) / 12, 0, pow(pitchYlower, 2) / 12);               // e2_xx, e2_xy, e2_yy
+  //local parameters of upper cluster in lower system of reference
+  Local3DPoint lparamsUpperInLower = geomDetLower->surface().toLocal(gparamsUpper);
 
-  float pitchXupper = topoUpper->pitch().first;
-  float pitchYupper = topoUpper->pitch().second;
-  float ixUpper = upper->center();
-  float iyUpper = upper->column()+0.5; // halfway the column
+  LogTrace("VectorHitBuilderAlgorithm") << "\t lower global pos: " << gparamsLower ;
+  LogTrace("VectorHitBuilderAlgorithm") << "\t upper global pos: " << gparamsUpper ;
 
-  LocalPoint lpUpper( topoUpper->localX(ixUpper), topoUpper->localY(iyUpper), 0 );          // x, y, z
-  LocalError leUpper( pow(pitchXupper, 2) / 12, 0, pow(pitchYupper, 2) / 12);               // e2_xx, e2_xy, e2_yy
+  LogTrace("VectorHitBuilderAlgorithm") << "A:\t lower local pos: " << lparamsLower.first << " with error: " << lparamsLower.second << std::endl;
+  LogTrace("VectorHitBuilderAlgorithm") << "A:\t upper local pos in the lower sof " << lparamsUpperInLower << " with error: " << lparamsUpper.second << std::endl;
 
-  //moving the upper into the lower s.o.r.
-  Global3DPoint gpUpper = geomDetUpper->surface().toGlobal(lpUpper);
-  Local3DPoint lpUpperInLower = geomDetLower->surface().toLocal(gpUpper);
-
-  //Global3DPoint gpLower = geomDetLower->surface().toGlobal(lpLower);
-  //LogTrace("VectorHitBuilderAlgorithm") << "\t lower global pos: " << gpLower << std::endl;
-  //LogTrace("VectorHitBuilderAlgorithm") << "\t upper global pos: " << gpUpper << std::endl;
-
-  LogTrace("VectorHitBuilderAlgorithm") << "A:\t lower local pos " << lpLower << " with error: " << leLower << std::endl;
-  LogTrace("VectorHitBuilderAlgorithm") << "A:\t upper local pos in the lower sof " << lpUpperInLower << " with error: " << leUpper << std::endl;
-
-
-  bool ok = checkClustersCompatibility(lpLower, lpUpper, leLower, leUpper);
+  bool ok = checkClustersCompatibility(lparamsLower.first, lparamsUpper.first, lparamsLower.second, lparamsUpper.second);
 
   if(ok){
-
-    //in the lower reference of frame
-    //Local3DVector localVecINN = localPosCluOutINN - localPosCluInn;
-    //LogTrace("VectorHitBuilderAlgorithm") << "\t local vec in the lower sof " << localVecINN;
 
     AlgebraicSymMatrix22 covMat2Dzx;
     double chi22Dzx = 0.0;
     Local3DPoint pos2Dzx;
     Local3DVector dir2Dzx;
-    fit2Dzx(lpLower, lpUpperInLower, leLower,leUpper, pos2Dzx, dir2Dzx, covMat2Dzx, chi22Dzx);
+    fit2Dzx(lparamsLower.first, lparamsUpperInLower, lparamsLower.second, lparamsUpper.second, pos2Dzx, dir2Dzx, covMat2Dzx, chi22Dzx);
     LogTrace("VectorHitBuilderAlgorithm") << "\t  pos2Dzx: " << pos2Dzx;
     LogTrace("VectorHitBuilderAlgorithm") << "\t  dir2Dzx: " << dir2Dzx;
     LogTrace("VectorHitBuilderAlgorithm") << "\t  cov2Dzx: " << covMat2Dzx;
@@ -193,7 +188,7 @@ VectorHit VectorHitBuilderAlgorithm::buildVectorHit(const StackGeomDet * stack,
     double chi22Dzy = 0.0;
     Local3DPoint pos2Dzy;
     Local3DVector dir2Dzy;
-    fit2Dzy(lpLower, lpUpperInLower, leLower,leUpper, pos2Dzy, dir2Dzy, covMat2Dzy, chi22Dzy);
+    fit2Dzy(lparamsLower.first, lparamsUpperInLower, lparamsLower.second, lparamsUpper.second, pos2Dzy, dir2Dzy, covMat2Dzy, chi22Dzy);
     LogTrace("VectorHitBuilderAlgorithm") << "\t  pos2Dzy: " << pos2Dzy;
     LogTrace("VectorHitBuilderAlgorithm") << "\t  dir2Dzy: " << dir2Dzy;
     LogTrace("VectorHitBuilderAlgorithm") << "\t  cov2Dzy: " << covMat2Dzy;

@@ -10,7 +10,7 @@
 #include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "Geometry/TrackerGeometryBuilder/interface/StackGeomDet.h"
-#include "RecoLocalTracker/ClusterParameterEstimator/interface/StripClusterParameterEstimator.h"
+#include "RecoLocalTracker/Phase2TrackerRecHits/interface/Phase2StripCPE.h"
 #include "DataFormats/TrackerRecHit2D/interface/VectorHit.h"
 #include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
 
@@ -55,11 +55,12 @@ class VectorHitBuilderAlgorithmBase {
 
   const TrackerGeometry* theTkGeom;
   const TrackerTopology* theTkTopo;
-  edm::ESHandle< StripClusterParameterEstimator > parameterestimator;
+  const ClusterParameterEstimator<Phase2TrackerCluster1D>* parameterestimator;
   unsigned int nMaxVHforeachStack;
 
 private:
-  edm::ESInputTag cpeTag;
+  edm::ESInputTag cpeTag_;
+
 
 
 //  typedef SiStripRecHit2DCollection::FastFiller Collector;
