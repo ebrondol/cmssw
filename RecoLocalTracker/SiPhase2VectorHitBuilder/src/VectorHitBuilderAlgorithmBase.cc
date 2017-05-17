@@ -2,6 +2,7 @@
 #include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
 #include "RecoLocalTracker/Records/interface/TkStripCPERecord.h"
+#include "RecoLocalTracker/Phase2TrackerRecHits/interface/Phase2StripCPE.h"
 
 #include "Geometry/CommonTopologies/interface/PixelTopology.h"
 #include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
@@ -9,7 +10,7 @@
 
 VectorHitBuilderAlgorithmBase::VectorHitBuilderAlgorithmBase(const edm::ParameterSet& conf) :
   nMaxVHforeachStack(conf.getParameter<int>("maxVectorHitsinaStack")),
-  cpeTag(conf.getParameter<edm::ESInputTag>("CPE"))
+  cpeTag_(conf.getParameter<edm::ESInputTag>("CPE"))
 {}
 
 void VectorHitBuilderAlgorithmBase::initialize(const edm::EventSetup& es)
@@ -39,7 +40,10 @@ void VectorHitBuilderAlgorithmBase::initialize(const edm::EventSetup& es)
   es.get< TrackerTopologyRcd >().get(tTopoHandle);
   initTkTopo(tTopoHandle);
 
-  es.get< TkStripCPERecord >().get(cpeTag, parameterestimator);
+  // load the cpe via the eventsetup
+  edm::ESHandle<ClusterParameterEstimator<Phase2TrackerCluster1D> > cpe;
+  es.get<TkStripCPERecord>().get(cpeTag_, cpe);
+  parameterestimator = cpe.product();
 }
 
 void VectorHitBuilderAlgorithmBase::initTkGeom(edm::ESHandle< TrackerGeometry > tkGeomHandle){
@@ -87,24 +91,21 @@ void VectorHitBuilderAlgorithmBase::printCluster(const GeomDet* geomDetUnit, con
   unsigned int layer = theTkTopo->layer(geomDetUnit->geographicalId());
   unsigned int module = theTkTopo->module(geomDetUnit->geographicalId());
   LogTrace("VectorHitBuilder") << "Layer:" << layer << " and DetId: " << geomDetUnit->geographicalId().rawId() << std::endl;
-  if(topol.ncolumns() == 32) 
+  TrackerGeometry::ModuleType mType = theTkGeom->getDetectorType(geomDetUnit->geographicalId());
+  if (mType == TrackerGeometry::ModuleType::Ph2PSP) 
     LogTrace("VectorHitBuilder") << "Pixel cluster (module:" << module << ") " << std::endl;
-  else if(topol.ncolumns() == 2 ) 
+  else if (mType == TrackerGeometry::ModuleType::Ph2SS) 
     LogTrace("VectorHitBuilder") << "Strip cluster (module:" << module << ") " << std::endl;
   else LogTrace("VectorHitBuilder") << "no module?!" << std::endl;
   LogTrace("VectorHitBuilder") << "with pitch:" << topol.pitch().first << " , " << topol.pitch().second << std::endl;
   LogTrace("VectorHitBuilder") << " and width:" << pixelGeomDetUnit->surface().bounds().width() << " , lenght:" << pixelGeomDetUnit->surface().bounds().length() << std::endl;
 
 
-  //FIXME StripClusterParameterEstimator::LocalValues parameters =  parameterestimator->localParameters(*clustIt,geomDetUnit);
-  MeasurementPoint mpClu(clustIt->center(), clustIt->column() + 0.5);
-  Local3DPoint localPosClu = pixelGeomDetUnit->topology().localPosition(mpClu);
-  Global3DPoint globalPosClu = pixelGeomDetUnit->surface().toGlobal(localPosClu);
-  MeasurementError meClu(1./12,0.0,1./12);
-  LocalError localErrClu = pixelGeomDetUnit->topology().localError(mpClu,meClu);
+  auto && lparams = parameterestimator->localParameters( *clustIt, *pixelGeomDetUnit );
+  Global3DPoint gparams = pixelGeomDetUnit->surface().toGlobal(lparams.first);
 
-  LogTrace("VectorHitBuilder") << "\t global pos " << globalPosClu << std::endl;
-  LogTrace("VectorHitBuilder") << "\t local  pos " << localPosClu << "with err " << localErrClu << std::endl;
+  LogTrace("VectorHitBuilder") << "\t global pos " << gparams << std::endl;
+  LogTrace("VectorHitBuilder") << "\t local  pos " << lparams.first << "with err " << lparams.second << std::endl;
   LogTrace("VectorHitBuilder") << std::endl;
 
   return;
