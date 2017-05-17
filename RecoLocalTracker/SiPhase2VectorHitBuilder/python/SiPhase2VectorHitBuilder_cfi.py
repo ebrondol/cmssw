@@ -6,5 +6,5 @@ siPhase2VectorHits = cms.EDProducer("VectorHitBuilderEDProducer",
      maxVectorHits = cms.int32(999999999),
      maxVectorHitsinaStack = cms.int32(999),
      Algorithm = cms.string('VectorHitBuilderAlgorithm'),
-     CPE = cms.ESInputTag('StripCPEfromTrackAngleESProducer:StripCPEfromTrackAngle'),
+     CPE = cms.ESInputTag("phase2StripCPEESProducer", "Phase2StripCPE")
 )
