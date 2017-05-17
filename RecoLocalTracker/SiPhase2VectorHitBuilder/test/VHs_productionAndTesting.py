@@ -30,7 +30,8 @@ process.maxEvents = cms.untracked.PSet(
 
 # Input source
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring('/store/relval/CMSSW_9_1_0_pre1/RelValSingleMuPt10Extended/GEN-SIM-DIGI-RAW/90X_upgrade2023_realistic_v9_D4Timing-v1/00000/161D8583-1719-E711-BA42-0CC47A7C346E.root'),
+    #fileNames = cms.untracked.vstring('/store/relval/CMSSW_9_1_0_pre1/RelValSingleMuPt10Extended/GEN-SIM-DIGI-RAW/90X_upgrade2023_realistic_v9_D4Timing-v1/00000/161D8583-1719-E711-BA42-0CC47A7C346E.root'),
+    fileNames = cms.untracked.vstring('file:step2.root'),
     secondaryFileNames = cms.untracked.vstring(),
     skipEvents = cms.untracked.uint32(0)
 )
@@ -76,7 +77,8 @@ process.MessageLogger = cms.Service("MessageLogger",
 # Analyzer
 process.analysis = cms.EDAnalyzer('VectorHitsBuilderValidation',
     src = cms.string("siPhase2Clusters"),
-    src2 = cms.InputTag("siPhase2VectorHits", "vectorHitsAccepted"),
+    VH_acc = cms.InputTag("siPhase2VectorHits", "vectorHitsAccepted"),
+    VH_rej = cms.InputTag("siPhase2VectorHits", "vectorHitsRejected"),
     links = cms.InputTag("simSiPixelDigis", "Tracker")
 )
 process.TFileService = cms.Service('TFileService',
