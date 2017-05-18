@@ -155,10 +155,10 @@ VectorHit VectorHitBuilderAlgorithm::buildVectorHit(const StackGeomDet * stack,
   const PixelGeomDetUnit* geomDetLower = dynamic_cast< const PixelGeomDetUnit* >(stack->lowerDet());
   const PixelGeomDetUnit* geomDetUpper = dynamic_cast< const PixelGeomDetUnit* >(stack->upperDet());
 
-  auto && lparamsLower = parameterestimator->localParameters( *lower, *geomDetLower );          // x, y, z, e2_xx, e2_xy, e2_yy
+  auto && lparamsLower = cpe->localParameters( *lower, *geomDetLower );          // x, y, z, e2_xx, e2_xy, e2_yy
   Global3DPoint gparamsLower = geomDetLower->surface().toGlobal(lparamsLower.first);
 
-  auto && lparamsUpper = parameterestimator->localParameters( *upper, *geomDetUpper );
+  auto && lparamsUpper = cpe->localParameters( *upper, *geomDetUpper );
   Global3DPoint gparamsUpper = geomDetUpper->surface().toGlobal(lparamsUpper.first);
 
   //local parameters of upper cluster in lower system of reference
