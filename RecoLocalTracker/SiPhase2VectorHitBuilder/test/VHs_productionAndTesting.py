@@ -79,6 +79,7 @@ process.analysis = cms.EDAnalyzer('VectorHitsBuilderValidation',
     src = cms.string("siPhase2Clusters"),
     VH_acc = cms.InputTag("siPhase2VectorHits", "vectorHitsAccepted"),
     VH_rej = cms.InputTag("siPhase2VectorHits", "vectorHitsRejected"),
+    CPE = cms.ESInputTag("phase2StripCPEESProducer", "Phase2StripCPE"),
     links = cms.InputTag("simSiPixelDigis", "Tracker")
 )
 process.TFileService = cms.Service('TFileService',

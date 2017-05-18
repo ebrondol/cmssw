@@ -55,7 +55,7 @@ class VectorHitBuilderAlgorithmBase {
 
   const TrackerGeometry* theTkGeom;
   const TrackerTopology* theTkTopo;
-  const ClusterParameterEstimator<Phase2TrackerCluster1D>* parameterestimator;
+  const ClusterParameterEstimator<Phase2TrackerCluster1D>* cpe;
   unsigned int nMaxVHforeachStack;
 
 private:

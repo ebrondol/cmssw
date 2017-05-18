@@ -26,7 +26,7 @@ void VectorHitBuilderAlgorithmBase::initialize(const edm::EventSetup& es)
   }
   if(c_cache_id != cpe_cache_id) {
     es.get<TkStripCPERecord>().get(matcherTag, matcher);
-    es.get<TkStripCPERecord>().get(cpeTag, parameterestimator);
+    es.get<TkStripCPERecord>().get(cpeTag, cpe);
     cpe_cache_id = c_cache_id;
   }
   */
@@ -41,9 +41,9 @@ void VectorHitBuilderAlgorithmBase::initialize(const edm::EventSetup& es)
   initTkTopo(tTopoHandle);
 
   // load the cpe via the eventsetup
-  edm::ESHandle<ClusterParameterEstimator<Phase2TrackerCluster1D> > cpe;
-  es.get<TkStripCPERecord>().get(cpeTag_, cpe);
-  parameterestimator = cpe.product();
+  edm::ESHandle<ClusterParameterEstimator<Phase2TrackerCluster1D> > cpeHandle;
+  es.get<TkStripCPERecord>().get(cpeTag_, cpeHandle);
+  cpe = cpeHandle.product();
 }
 
 void VectorHitBuilderAlgorithmBase::initTkGeom(edm::ESHandle< TrackerGeometry > tkGeomHandle){
@@ -101,7 +101,7 @@ void VectorHitBuilderAlgorithmBase::printCluster(const GeomDet* geomDetUnit, con
   LogTrace("VectorHitBuilder") << " and width:" << pixelGeomDetUnit->surface().bounds().width() << " , lenght:" << pixelGeomDetUnit->surface().bounds().length() << std::endl;
 
 
-  auto && lparams = parameterestimator->localParameters( *clustIt, *pixelGeomDetUnit );
+  auto && lparams = cpe->localParameters( *clustIt, *pixelGeomDetUnit );
   Global3DPoint gparams = pixelGeomDetUnit->surface().toGlobal(lparams.first);
 
   LogTrace("VectorHitBuilder") << "\t global pos " << gparams << std::endl;
