@@ -39,7 +39,7 @@ class VectorHitBuilderAlgorithmBase {
   virtual void run(edm::Handle< edmNew::DetSetVector<Phase2TrackerCluster1D> >  clusters, VectorHitCollectionNew& vhAcc, VectorHitCollectionNew& vhRej, 
     edmNew::DetSetVector<Phase2TrackerCluster1D>& clustersAcc, edmNew::DetSetVector<Phase2TrackerCluster1D>& clustersRej) = 0;
 
-  virtual std::vector<VectorHit> buildVectorHits (const StackGeomDet * stack,
+  virtual std::map<VectorHit,bool> buildVectorHits (const StackGeomDet * stack,
                                          edm::Handle< edmNew::DetSetVector<Phase2TrackerCluster1D> > clusters,
                                          const detset & DSVinner, const detset & DSVouter,
                                          const std::vector<bool>& phase2OTClustersToSkip = std::vector<bool>()) = 0;
