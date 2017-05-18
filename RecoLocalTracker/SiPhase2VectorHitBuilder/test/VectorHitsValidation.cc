@@ -2,8 +2,11 @@
 #include "Geometry/TrackerGeometryBuilder/interface/StackGeomDet.h"
 #include "DataFormats/Phase2TrackerDigi/interface/Phase2TrackerDigi.h"
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
+#include "RecoLocalTracker/Records/interface/TkStripCPERecord.h"
 
-VectorHitsBuilderValidation::VectorHitsBuilderValidation(const edm::ParameterSet& conf) {
+VectorHitsBuilderValidation::VectorHitsBuilderValidation(const edm::ParameterSet& conf) :
+  cpeTag_(conf.getParameter<edm::ESInputTag>("CPE")) 
+{
   srcClu_ = consumes< edmNew::DetSetVector<Phase2TrackerCluster1D> >(edm::InputTag(conf.getParameter<std::string>("src")));
   VHacc_ = consumes< VectorHitCollectionNew >(edm::InputTag(conf.getParameter<edm::InputTag>("VH_acc")));
   VHrej_ = consumes< VectorHitCollectionNew >(edm::InputTag(conf.getParameter<edm::InputTag>("VH_rej")));
@@ -103,6 +106,11 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
 
   edm::Handle< VectorHitCollectionNew > vhsRej;
   event.getByToken(VHrej_, vhsRej);
+
+  // load the cpe via the eventsetup
+  edm::ESHandle<ClusterParameterEstimator<Phase2TrackerCluster1D> > cpeHandle;
+  eventSetup.get<TkStripCPERecord>().get(cpeTag_, cpeHandle);
+  cpe = cpeHandle.product();
 
   // Get the Phase2 DigiSimLink
   edm::Handle<edm::DetSetVector<PixelDigiSimLink> > siphase2SimLinks;
@@ -237,11 +245,11 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
   for (Phase2TrackerCluster1DCollectionNew::const_iterator DSViter = clusters->begin(); DSViter != clusters->end(); ++DSViter) {
     unsigned int rawid(DSViter->detId()); DetId detId(rawid);
     const GeomDetUnit* geomDetUnit(tkGeom->idToDetUnit(detId));
+    const PixelGeomDetUnit* theGeomDet = dynamic_cast< const PixelGeomDetUnit* >(geomDetUnit);
     for (edmNew::DetSet< Phase2TrackerCluster1D >::const_iterator clustIt = DSViter->begin(); clustIt != DSViter->end(); ++clustIt) {
-      MeasurementPoint mpClu(clustIt->center(), clustIt->column() + 0.5);
-      Local3DPoint localPosClu = geomDetUnit->topology().localPosition(mpClu);
-      Global3DPoint globalPosClu = geomDetUnit->surface().toGlobal(localPosClu);
-      LogTrace("VectorHitsBuilderValidation") << "phase2 OT clusters: " << globalPosClu << " DetId: " << rawid;
+      auto && lparams = cpe->localParameters( *clustIt, *theGeomDet );
+      Global3DPoint gparams = theGeomDet->surface().toGlobal(lparams.first);
+      LogTrace("VectorHitsBuilderValidation") << "phase2 OT clusters: " << gparams << " DetId: " << rawid;
     }
   }
 
@@ -1002,13 +1010,10 @@ void VectorHitsBuilderValidation::printCluster(const GeomDetUnit* geomDetUnit, c
   LogTrace("VectorHitsBuilderValidation") << " and width:" << theGeomDet->surface().bounds().width() << " , lenght:" << theGeomDet->surface().bounds().length() << std::endl;
 
 
-  //FIXME StripClusterParameterEstimator::LocalValues parameters =  parameterestimator->localParameters(*cluster,geomDetUnit);
-  MeasurementPoint mpClu((*cluster.cluster_phase2OT()).center(), (*cluster.cluster_phase2OT()).column() + 0.5);
-  Local3DPoint localPosClu = geomDetUnit->topology().localPosition(mpClu);
-  MeasurementError meClu(1./12,0.0,1./12);
-  LocalError localErrClu = geomDetUnit->topology().localError(mpClu,meClu);
+  auto && lparams = cpe->localParameters( *cluster.cluster_phase2OT(), *theGeomDet );
+  //Global3DPoint gparams = theGeomDet->surface().toGlobal(lparams.first);
 
-  LogTrace("VectorHitsBuilderValidation") << "\t local  pos " << localPosClu << "with err " << localErrClu << std::endl;
+  LogTrace("VectorHitsBuilderValidation") << "\t local  pos " << lparams.first << "with err " << lparams.second << std::endl;
 
   return;
 }

@@ -26,6 +26,7 @@
 #include "DataFormats/Phase2TrackerCluster/interface/Phase2TrackerCluster1D.h"
 #include "DataFormats/Phase2TrackerDigi/interface/Phase2TrackerDigi.h"
 #include "DataFormats/SiPixelDigi/interface/PixelDigi.h"
+#include "RecoLocalTracker/Phase2TrackerRecHits/interface/Phase2StripCPE.h"
 
 #include "SimDataFormats/TrackerDigiSimLink/interface/PixelDigiSimLink.h"
 #include "SimDataFormats/Track/interface/SimTrackContainer.h"
@@ -103,11 +104,15 @@ class VectorHitsBuilderValidation : public edm::EDAnalyzer {
         edm::EDGetTokenT< edmNew::DetSetVector<Phase2TrackerCluster1D> > srcClu_;
         edm::EDGetTokenT< VectorHitCollectionNew > VHacc_;
         edm::EDGetTokenT< VectorHitCollectionNew > VHrej_;
+        edm::ESInputTag cpeTag_;
+        const ClusterParameterEstimator<Phase2TrackerCluster1D>* cpe;
+
         edm::EDGetTokenT< edm::DetSetVector<PixelDigiSimLink> > siphase2OTSimLinksToken_;
         edm::EDGetTokenT< edm::PSimHitContainer > simHitsToken_;
         edm::EDGetTokenT< edm::SimTrackContainer> simTracksToken_;
         edm::EDGetTokenT< edm::SimVertexContainer > simVerticesToken_;
         //SiPixelVectorHitBuilderAlgorithmBase *algo;
+
         const TrackerGeometry* tkGeom;
         const TrackerTopology* tkTopo;
         const MagneticField* magField;
