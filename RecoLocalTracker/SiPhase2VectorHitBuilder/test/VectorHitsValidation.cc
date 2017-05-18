@@ -604,7 +604,6 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
     LogTrace("VectorHitsBuilderValidation") << "acc Layer: " << layerAcc << "  det id" << rawid << std::endl;
     for (edmNew::DetSet< VectorHit >::const_iterator vhIt = DSViter->begin(); vhIt != DSViter->end(); ++vhIt) {
       if( vhIt->isValid() ){
-        LogTrace("VectorHitsBuilderValidation") << "new vectorhit is going to be analyzed";
         VHaccLayer_->Fill(layerAcc); 
         VHacc++;
 
@@ -633,25 +632,23 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
     unsigned int rawid(DSViter->detId());
     DetId detId(rawid);
     int layerRej = getLayerNumber(detId);
+    LogTrace("VectorHitsBuilderValidation") << "rej Layer: " << layerRej << "  det id" << rawid << std::endl;
     for (edmNew::DetSet< VectorHit >::const_iterator vhIt = DSViter->begin(); vhIt != DSViter->end(); ++vhIt) {
-      //ERICA::do I need to check it also for rejected?
-      if( vhIt->isValid() ){
-        VHrejLayer_->Fill(layerRej);
-        VHrej++;
+      VHrejLayer_->Fill(layerRej);
+      VHrej++;
 
-        //compute if the vhits is 'true' or 'false'
-        bool istrue = isTrue(*vhIt, siphase2SimLinks, detId);
-        if(istrue){ 
-          LogTrace("VectorHitsBuilderValidation") << "this vectorhit is a 'true' vhit.";
-          VHrejTrueLayer_->Fill(layerRej); 
-          //VHrejTrueLayer_ratio->Fill(layerRej);
-          VHrejTrue++;
-        } else {       
-          LogTrace("VectorHitsBuilderValidation") << "this vectorhit is a 'false' vhit.";
-          VHrejFalse++;
-        }
-
+      //compute if the vhits is 'true' or 'false'
+      bool istrue = isTrue(*vhIt, siphase2SimLinks, detId);
+      if(istrue){
+        LogTrace("VectorHitsBuilderValidation") << "this vectorhit is a 'true' vhit.";
+        VHrejTrueLayer_->Fill(layerRej);
+        //VHrejTrueLayer_ratio->Fill(layerRej);
+        VHrejTrue++;
+      } else {
+        LogTrace("VectorHitsBuilderValidation") << "this vectorhit is a 'false' vhit.";
+        VHrejFalse++;
       }
+
     }
 
   }
@@ -1008,7 +1005,6 @@ void VectorHitsBuilderValidation::printCluster(const GeomDetUnit* geomDetUnit, c
   else std::cout << "no module?!" << std::endl;
   LogTrace("VectorHitsBuilderValidation") << "with pitch:" << topol.pitch().first << " , " << topol.pitch().second << std::endl;
   LogTrace("VectorHitsBuilderValidation") << " and width:" << theGeomDet->surface().bounds().width() << " , lenght:" << theGeomDet->surface().bounds().length() << std::endl;
-
 
   auto && lparams = cpe->localParameters( *cluster.cluster_phase2OT(), *theGeomDet );
   //Global3DPoint gparams = theGeomDet->surface().toGlobal(lparams.first);
