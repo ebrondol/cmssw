@@ -15,6 +15,7 @@ class SiPhase2RecHitMatcherESProducer: public edm::ESProducer {
   std::string name;
   std::shared_ptr<VectorHitBuilderEDProducer> matcher_;
   edm::ParameterSet pset_;
+//  std::string cpeName_;
 };
 #endif
 
