@@ -2,7 +2,7 @@
 #include "Geometry/TrackerGeometryBuilder/interface/StackGeomDet.h"
 #include "DataFormats/Phase2TrackerDigi/interface/Phase2TrackerDigi.h"
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
-#include "RecoLocalTracker/Records/interface/TkStripCPERecord.h"
+#include "RecoLocalTracker/Records/interface/TkPhase2OTCPERecord.h"
 
 VectorHitsBuilderValidation::VectorHitsBuilderValidation(const edm::ParameterSet& conf) :
   cpeTag_(conf.getParameter<edm::ESInputTag>("CPE")) 
@@ -109,7 +109,7 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
 
   // load the cpe via the eventsetup
   edm::ESHandle<ClusterParameterEstimator<Phase2TrackerCluster1D> > cpeHandle;
-  eventSetup.get<TkStripCPERecord>().get(cpeTag_, cpeHandle);
+  eventSetup.get<TkPhase2OTCPERecord>().get(cpeTag_, cpeHandle);
   cpe = cpeHandle.product();
 
   // Get the Phase2 DigiSimLink
