@@ -43,7 +43,7 @@ void VectorHitBuilderAlgorithmBase::initialize(const edm::EventSetup& es)
   // load the cpe via the eventsetup
   edm::ESHandle<ClusterParameterEstimator<Phase2TrackerCluster1D> > cpeHandle;
   es.get<TkPhase2OTCPERecord>().get(cpeTag_, cpeHandle);
-  initCpe(cpeHandle);
+  initCpe(cpeHandle.product());
 }
 
 void VectorHitBuilderAlgorithmBase::initTkGeom(edm::ESHandle< TrackerGeometry > tkGeomHandle){
@@ -52,8 +52,8 @@ void VectorHitBuilderAlgorithmBase::initTkGeom(edm::ESHandle< TrackerGeometry > 
 void VectorHitBuilderAlgorithmBase::initTkTopo(edm::ESHandle< TrackerTopology > tkTopoHandle){
   theTkTopo = tkTopoHandle.product();
 }
-void VectorHitBuilderAlgorithmBase::initCpe(edm::ESHandle< ClusterParameterEstimator<Phase2TrackerCluster1D> > cpeHandle){
-  cpe = cpeHandle.product();
+void VectorHitBuilderAlgorithmBase::initCpe(const ClusterParameterEstimator<Phase2TrackerCluster1D>* cpeProd){
+  cpe = cpeProd;
 }
 
 void VectorHitBuilderAlgorithmBase::printClusters(const edmNew::DetSetVector<Phase2TrackerCluster1D>& clusters){
