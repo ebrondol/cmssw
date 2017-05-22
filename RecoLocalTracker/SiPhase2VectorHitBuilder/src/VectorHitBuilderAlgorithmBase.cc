@@ -1,7 +1,7 @@
 #include "RecoLocalTracker/SiPhase2VectorHitBuilder/interface/VectorHitBuilderAlgorithmBase.h"
 #include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
-#include "RecoLocalTracker/Records/interface/TkStripCPERecord.h"
+#include "RecoLocalTracker/Records/interface/TkPhase2OTCPERecord.h"
 #include "RecoLocalTracker/Phase2TrackerRecHits/interface/Phase2StripCPE.h"
 
 #include "Geometry/CommonTopologies/interface/PixelTopology.h"
@@ -18,20 +18,20 @@ void VectorHitBuilderAlgorithmBase::initialize(const edm::EventSetup& es)
   //FIXME:ask Vincenzo
   /*
   uint32_t tk_cache_id = es.get<TrackerDigiGeometryRecord>().cacheIdentifier();
-  uint32_t c_cache_id = es.get<TkStripCPERecord>().cacheIdentifier();
+  uint32_t c_cache_id = es.get<TkPhase2OTCPERecord>().cacheIdentifier();
 
   if(tk_cache_id != tracker_cache_id) {
     es.get<TrackerDigiGeometryRecord>().get(tracker);
     tracker_cache_id = tk_cache_id;
   }
   if(c_cache_id != cpe_cache_id) {
-    es.get<TkStripCPERecord>().get(matcherTag, matcher);
-    es.get<TkStripCPERecord>().get(cpeTag, cpe);
+    es.get<TkPhase2OTCPERecord>().get(matcherTag, matcher);
+    es.get<TkPhase2OTCPERecord>().get(cpeTag, cpe);
     cpe_cache_id = c_cache_id;
   }
   */
 
-  // get the geometry
+  // get the geometry and topology
   edm::ESHandle< TrackerGeometry > geomHandle;
   es.get< TrackerDigiGeometryRecord >().get( geomHandle );
   initTkGeom(geomHandle);
@@ -42,8 +42,8 @@ void VectorHitBuilderAlgorithmBase::initialize(const edm::EventSetup& es)
 
   // load the cpe via the eventsetup
   edm::ESHandle<ClusterParameterEstimator<Phase2TrackerCluster1D> > cpeHandle;
-  es.get<TkStripCPERecord>().get(cpeTag_, cpeHandle);
-  cpe = cpeHandle.product();
+  es.get<TkPhase2OTCPERecord>().get(cpeTag_, cpeHandle);
+  initCpe(cpeHandle.product());
 }
 
 void VectorHitBuilderAlgorithmBase::initTkGeom(edm::ESHandle< TrackerGeometry > tkGeomHandle){
@@ -51,6 +51,9 @@ void VectorHitBuilderAlgorithmBase::initTkGeom(edm::ESHandle< TrackerGeometry > 
 }
 void VectorHitBuilderAlgorithmBase::initTkTopo(edm::ESHandle< TrackerTopology > tkTopoHandle){
   theTkTopo = tkTopoHandle.product();
+}
+void VectorHitBuilderAlgorithmBase::initCpe(const ClusterParameterEstimator<Phase2TrackerCluster1D>* cpeProd){
+  cpe = cpeProd;
 }
 
 void VectorHitBuilderAlgorithmBase::printClusters(const edmNew::DetSetVector<Phase2TrackerCluster1D>& clusters){

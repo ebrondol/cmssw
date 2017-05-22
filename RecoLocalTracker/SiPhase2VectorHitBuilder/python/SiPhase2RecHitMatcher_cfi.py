@@ -7,7 +7,8 @@ SiPhase2RecHitMatcherESProducer = cms.ESProducer("SiPhase2RecHitMatcherESProduce
      maxVectorHits = cms.int32(999999999),
      maxVectorHitsinaStack = cms.int32(999),
      Algorithm = cms.string('VectorHitBuilderAlgorithm'),
-     CPE = cms.ESInputTag('StripCPEfromTrackAngleESProducer:StripCPEfromTrackAngle'),
+     CPE = cms.ESInputTag("phase2StripCPEESProducer", "Phase2StripCPE"),
+     Phase2CPE_name = cms.string('Phase2StripCPE')
 #    NSigmaInside = cms.double(3.0)
 )
 

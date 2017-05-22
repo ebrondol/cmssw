@@ -4,8 +4,9 @@
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/Framework/interface/ModuleFactory.h"
 #include "FWCore/Framework/interface/ESProducer.h"
+#include "RecoLocalTracker/Records/interface/TkPhase2OTCPERecord.h"
 
-SiPhase2RecHitMatcherESProducer::SiPhase2RecHitMatcherESProducer(const edm::ParameterSet & p) 
+SiPhase2RecHitMatcherESProducer::SiPhase2RecHitMatcherESProducer(const edm::ParameterSet & p)
 {
   name = p.getParameter<std::string>("ComponentName");
   pset_ = p;
