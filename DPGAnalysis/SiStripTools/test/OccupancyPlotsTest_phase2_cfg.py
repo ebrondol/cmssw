@@ -5,6 +5,8 @@
 #   cmsRun DPGAnalysis/SiStripTools/test/OccupancyPlotsTest_phase2_cfg.py print globalTag=auto:phase2_realistic inputFiles=file:step3.root triggerPath="*" geometry="flat"
 # - Tilted + Phase2 Pixel Geometry
 #   cmsRun DPGAnalysis/SiStripTools/test/OccupancyPlotsTest_phase2_cfg.py print globalTag=auto:phase2_realistic inputFiles=file:step3.root triggerPath="*" geometry="tilted4021"
+# - Tilted + Phase2 Pixel Geometry (12 disks)
+#   cmsRun DPGAnalysis/SiStripTools/test/OccupancyPlotsTest_phase2_cfg.py print globalTag=auto:phase2_realistic inputFiles=file:step3.root triggerPath="*" geometry="tilted4025"
 
 import FWCore.ParameterSet.Config as cms
 import FWCore.ParameterSet.VarParsing as VarParsing
@@ -120,7 +122,8 @@ process.MessageLogger.cerr.FwkReport = cms.untracked.PSet(
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(options.maxEvents) )
 
 process.source = cms.Source("PoolSource",
-                    fileNames = cms.untracked.vstring(options.inputFiles),
+#                    fileNames = cms.untracked.vstring(options.inputFiles),
+                    fileNames =  cms.untracked.vstring("/store/relval/CMSSW_9_1_0_pre1/RelValTTbar_14TeV/GEN-SIM-RECO/PU25ns_90X_upgrade2023_realistic_v9_D11PU200-v1/00000/001D34A8-711A-E711-B2EA-0025905A6090.root"),
 #                    skipBadFiles = cms.untracked.bool(True),
                     inputCommands = cms.untracked.vstring("keep *", "drop *_MEtoEDMConverter_*_*")
                     )
@@ -147,6 +150,8 @@ if options.geometry == "tilted" :
   from DPGAnalysis.SiStripTools.occupancyplotsselections_phase2_tilted_cff import *
 if options.geometry == "tilted4021" :
   from DPGAnalysis.SiStripTools.occupancyplotsselections_phase2_tilted4021_cff import *
+if options.geometry == "tilted4025" :
+  from DPGAnalysis.SiStripTools.occupancyplotsselections_phase2_tilted4025_detailed_cff import *
 
 #process.ssclusmultprod = cms.EDProducer("SiStripClusterMultiplicityProducer",
 #                                        clusterdigiCollection = cms.InputTag("siStripClusters"),
@@ -219,6 +224,8 @@ if options.geometry == "tilted" :
   process.occupancyplots.file = cms.untracked.FileInPath("SLHCUpgradeSimulations/Geometry/data/PhaseII/Tilted/PixelSkimmedGeometry.txt")
 if options.geometry == "tilted4021" :
   process.occupancyplots.file = cms.untracked.FileInPath("SLHCUpgradeSimulations/Geometry/data/PhaseII/Tilted/PixelSkimmedGeometry4021.txt")
+if options.geometry == "tilted4025" :
+  process.occupancyplots.file = cms.untracked.FileInPath("SLHCUpgradeSimulations/Geometry/data/PhaseII/Tilted/PixelSkimmedGeometry4025.txt")
 process.occupancyplots.checkWithLabels = cms.bool(True)
 
 process.pixeloccupancyplots = process.occupancyplots.clone()
@@ -323,6 +330,8 @@ if options.geometry == "flat" :
   process.load('Configuration.Geometry.GeometryExtended2023D2Reco_cff')
 if options.geometry == "tilted4021" :
   process.load('Configuration.Geometry.GeometryExtended2023D4Reco_cff')
+if options.geometry == "tilted4025" :
+  process.load('Configuration.Geometry.GeometryExtended2023D11Reco_cff')
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag

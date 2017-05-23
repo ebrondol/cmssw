@@ -61,7 +61,7 @@ std::pair<float,float> phase2bin(int i) {
   float dz=-1; float dr=-1;
 
   if(i > 1000 && i < 1040) { dz=3.33;dr=0.4;}
-  if(i > 1040 && i < 1140) { dr=3.33;dz=0.4;}
+  if(i > 1040 && i < 1145) { dr=3.33;dz=0.4;}
   
   if(i > 2000 && i < 2550) { dz=2.5;dr=0.1;}
   if(i > 2550 && i < 3000) { dz=5.0;dr=0.1;}
@@ -317,7 +317,7 @@ void PlotOccupancyMapPhase2(TFile* ff, const char* module, const float min, cons
   size = &phase2bin;
 
   std::vector<SubDetParams> vsub;
-  SubDetParams ppix={"BPIX+FPIX",1000,1140}; vsub.push_back(ppix);
+  SubDetParams ppix={"BPIX+FPIX",1000,1145}; vsub.push_back(ppix);
   SubDetParams ptob={"TOB",2000,2900}; vsub.push_back(ptob);
   SubDetParams ptecm={"TEC-",3100,3300}; vsub.push_back(ptecm);
   SubDetParams ptecp={"TEC+",4100,4300}; vsub.push_back(ptecp);
@@ -363,7 +363,7 @@ void PlotOnTrackOccupancyPhase2(TFile* ff, const char* module, const char* ontrk
   size = &phase2bin;
 
   std::vector<SubDetParams> vsub;
-  SubDetParams ppix={"BPIX+FPIX",1000,1140}; vsub.push_back(ppix);
+  SubDetParams ppix={"BPIX+FPIX",1000,1145}; vsub.push_back(ppix);
   SubDetParams ptob={"TOB",2000,2900}; vsub.push_back(ptob);
   SubDetParams ptecm={"TEC-",3100,3300}; vsub.push_back(ptecm);
   SubDetParams ptecp={"TEC+",4100,4300}; vsub.push_back(ptecp);
@@ -578,12 +578,13 @@ TCanvas* drawMap(const char* cname, const TH1* hval, const TProfile* averadius, 
   etalabels.Add(etalab);
   
   // CMS label
-  TLatex *cmslab = new TLatex(0.15,0.965,"CMS");
+  TLatex *cmslab = new TLatex(0.305,0.965,"CMS Simulation Preliminary");
   cmslab->SetNDC();
+  cmslab->SetTextFont(42);
   cmslab->SetTextSize(0.04);
   cmslab->SetTextAlign(31);
   paperlabels.Add(cmslab);
-  TLatex *enelab = new TLatex(0.92,0.965,"#sqrt{s} = 7 TeV");
+  TLatex *enelab = new TLatex(0.92,0.965,"#sqrt{s} = 14 TeV");
   enelab->SetNDC();
   enelab->SetTextSize(0.04);
   enelab->SetTextAlign(31);
@@ -633,6 +634,7 @@ TCanvas* drawMap(const char* cname, const TH1* hval, const TProfile* averadius, 
   std::cout << modulesmult.GetSize() << std::endl;
   etalines.Draw();
   etalabels.Draw();
+  paperlabels.Draw();
   if(color>=0) mpalette.Draw();
   modulesmult.Draw();
  
