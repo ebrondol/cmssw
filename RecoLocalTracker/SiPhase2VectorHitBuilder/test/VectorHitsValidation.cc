@@ -81,6 +81,10 @@ void VectorHitsBuilderValidation::beginJob() {
   VHaccTrueLayer_ -> SetName("VHaccepted_true");
   VHrejTrueLayer_ = tdWid.make< TH1F >("VHrejTrueLayer","VHrejTrueLayer", 250, 0., 250.);
   VHrejTrueLayer_ -> SetName("VHrejected_true");
+  VHaccTrue_signal_Layer_ = tdWid.make< TH1F >("VHaccTrueSignalLayer","VHaccTrueSignalLayer", 250, 0., 250.);
+  VHaccTrue_signal_Layer_ -> SetName("VHaccepted_true_signal");
+  VHrejTrue_signal_Layer_ = tdWid.make< TH1F >("VHrejTrueSignalLayer","VHrejTrueSignalLayer", 250, 0., 250.);
+  VHrejTrue_signal_Layer_ -> SetName("VHrejected_true_signal");
 
   VHaccTrueLayer_ratio = tdWid.make< TH1F >("VHaccTrueLayer_ratio","VHaccTrueLayer_ratio", 250, 0., 250.);
   VHaccTrueLayer_ratio -> SetName("VHaccepted_true_ratio");
@@ -478,6 +482,8 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
 
               std::map< unsigned int, SimTrack >::const_iterator simTrackIt(simTracks.find(hitIt->trackId()));
               if (simTrackIt == simTracks.end()) continue;
+              //LogTrace("VectorHitsBuilderValidation") << "--> with hitIt. The SimTrack has p: " << simTrackIt->second.momentum();
+
 
               // Primary particles only
               processType = hitIt->processType();
@@ -549,18 +555,6 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
 
         double parallCorr = 0.0;
 
-/*
-        if (lowerDetId.subdetId() == StripSubdetector::TOB){
-          std::cout << stackDet->surface().bounds().thickness() << std::endl;
-          std::cout << stackDet->lowerDet()->position().perp() << std::endl;
-          std::cout << localPosClu_low.x() << std::endl;
-          parallCorr =  stackDet->surface().bounds().thickness() * localPosClu_low.x() / stackDet->lowerDet()->position().perp();
-        } else if (lowerDetId.subdetId() == StripSubdetector::TID){
-          std::cout << stackDet->surface().bounds().thickness() << std::endl;
-          parallCorr = 100 * tkTopo->side(lowerDetId);
-        }
-*/
-
         Global3DPoint origin(0,0,0);
         GlobalVector gV = gPosClu_low - origin;
         LogTrace("VectorHitsBuilderValidation") << " global vector passing to the origin:" << gV;
@@ -594,6 +588,8 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
   int VHaccFalse = 0.0;
   int VHrejTrue  = 0.0;
   int VHrejFalse = 0.0;
+  int VHaccTrue_signal  = 0.0;
+  int VHrejTrue_signal  = 0.0;
 
   // Loop over modules
   for (VectorHitCollectionNew::const_iterator DSViter = vhs->begin(); DSViter != vhs->end(); ++DSViter) {
@@ -608,12 +604,24 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
         VHacc++;
 
         //compute if the vhits is 'true' or 'false'
-        bool istrue = isTrue(*vhIt, siphase2SimLinks, detId);
-        if(istrue){
+        std::pair<bool,uint32_t> istrue = isTrue(*vhIt, siphase2SimLinks, detId);
+        if(istrue.first){
           LogTrace("VectorHitsBuilderValidation") << "this vectorhit is a 'true' vhit.";
           VHaccTrueLayer_->Fill(layerAcc); 
           //VHaccTrueLayer_ratio->Fill(layerAcc);
           VHaccTrue++;
+
+          //saving info of 'signal' track
+          std::map< unsigned int, SimTrack >::const_iterator simTrackIt(simTracks.find(istrue.second));
+          if (simTrackIt == simTracks.end()) continue;
+          LogTrace("VectorHitsBuilderValidation") << "this vectorhit is associated with SimTrackId: " << istrue.second;
+          LogTrace("VectorHitsBuilderValidation") << "the SimTrack has pt: " << simTrackIt->second.momentum().pt();
+          if (simTrackIt->second.momentum().pt() > 1 ) {
+            VHaccTrue_signal_Layer_->Fill(layerAcc); 
+            LogTrace("VectorHitsBuilderValidation") << "the vectorhit belongs to signal";
+            VHaccTrue_signal++;
+          }
+
         } else {
           LogTrace("VectorHitsBuilderValidation") << "this vectorhit is a 'false' vhit.";
           VHaccFalse++;
@@ -623,6 +631,7 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
     }
 
   } 
+
 
   //it is not really working..
   //VHaccTrueLayer_ratio->Divide(VHaccLayer_);
@@ -638,12 +647,24 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
       VHrej++;
 
       //compute if the vhits is 'true' or 'false'
-      bool istrue = isTrue(*vhIt, siphase2SimLinks, detId);
-      if(istrue){
+      std::pair<bool,uint32_t> istrue = isTrue(*vhIt, siphase2SimLinks, detId);
+      if(istrue.first){
         LogTrace("VectorHitsBuilderValidation") << "this vectorhit is a 'true' vhit.";
         VHrejTrueLayer_->Fill(layerRej);
         //VHrejTrueLayer_ratio->Fill(layerRej);
         VHrejTrue++;
+
+        //saving info of 'signal' track
+        std::map< unsigned int, SimTrack >::const_iterator simTrackIt(simTracks.find(istrue.second));
+        if (simTrackIt == simTracks.end()) continue;
+        LogTrace("VectorHitsBuilderValidation") << "this vectorhit is associated with SimTrackId: " << istrue.second;
+          LogTrace("VectorHitsBuilderValidation") << "the SimTrack has pt: " << simTrackIt->second.momentum().pt();
+          if (simTrackIt->second.momentum().pt() > 1 ) {
+            VHrejTrue_signal_Layer_->Fill(layerRej);
+            LogTrace("VectorHitsBuilderValidation") << "the vectorhit belongs to signal";
+            VHrejTrue_signal++;
+          }
+
       } else {
         LogTrace("VectorHitsBuilderValidation") << "this vectorhit is a 'false' vhit.";
         VHrejFalse++;
@@ -660,13 +681,14 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
   LogTrace("VectorHitsBuilderValidation") << "VH total: " << VHtot << " with " << VHacc << " VHs accepted and " << VHrej << " VHs rejected.";
   LogTrace("VectorHitsBuilderValidation") << "of the VH accepted, there are " << VHaccTrue << " true and " << VHaccFalse << " false.";
   LogTrace("VectorHitsBuilderValidation") << "of the VH rejected, there are " << VHrejTrue << " true and " << VHrejFalse << " false.";
+  LogTrace("VectorHitsBuilderValidation") << "of the true VH    , there are " << VHaccTrue_signal << " accepted belonging to signal and " << VHrejTrue_signal << " rejected belonging to signal.";
 
 //    CreateWindowCorrGraph();
 
 }
 
 // Check if the vector hit is true (both clusters are formed from the same SimTrack
-bool VectorHitsBuilderValidation::isTrue(const VectorHit vh, const edm::Handle< edm::DetSetVector< PixelDigiSimLink > >& siphase2SimLinks, DetId& detId) const{
+std::pair<bool,uint32_t> VectorHitsBuilderValidation::isTrue(const VectorHit vh, const edm::Handle< edm::DetSetVector< PixelDigiSimLink > >& siphase2SimLinks, DetId& detId) const{
 
   const GeomDet* geomDet(tkGeom->idToDet(detId));
   const StackGeomDet* stackDet = dynamic_cast<const StackGeomDet*>(geomDet);
@@ -699,12 +721,12 @@ bool VectorHitsBuilderValidation::isTrue(const VectorHit vh, const edm::Handle< 
     it_simTrackUpper = std::find(lowClusterSimTrackIds.begin(), lowClusterSimTrackIds.end(), simTrackId);
     if ( it_simTrackUpper != lowClusterSimTrackIds.end() ) {
       LogTrace("VectorHitBuilderAlgorithm") << " UpperSimTrackId found in lowClusterSimTrackIds ";
-      return true;
+      return std::make_pair(true,simTrackId);
     }
     //clusterSimTrackIds.push_back(UpperSimTrackId);
     //simTkIds.insert(trkid.begin(),trkid.end());
   }
-  return false;
+  return std::make_pair(false,0);
 }
 
 // Create the histograms
