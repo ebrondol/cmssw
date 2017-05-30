@@ -97,7 +97,7 @@ class VectorHitsBuilderValidation : public edm::EDAnalyzer {
         unsigned int getModuleNumber(const DetId& detid);
         void printCluster(const GeomDetUnit* geomDetUnit, const OmniClusterRef cluster);
 
-        bool isTrue(const VectorHit vh, const edm::Handle< edm::DetSetVector< PixelDigiSimLink > >& siphase2SimLinks, DetId& detId) const;
+        std::pair<bool,uint32_t> isTrue(const VectorHit vh, const edm::Handle< edm::DetSetVector< PixelDigiSimLink > >& siphase2SimLinks, DetId& detId) const;
         std::vector< std::pair<uint32_t, EncodedEventId> > getSimTrackIds(const edm::Handle< edm::DetSetVector< PixelDigiSimLink > >&, const DetId&, uint32_t) const;
         unsigned int getSimTrackId(const edm::Handle< edm::DetSetVector< PixelDigiSimLink > >& pixelSimLinks, const DetId& detId, unsigned int channel) const;
 
@@ -133,6 +133,8 @@ class VectorHitsBuilderValidation : public edm::EDAnalyzer {
         TH1F* VHrejLayer_;
         TH1F* VHaccTrueLayer_;
         TH1F* VHrejTrueLayer_;
+        TH1F* VHaccTrue_signal_Layer_;
+        TH1F* VHrejTrue_signal_Layer_;
         TH1F* VHaccTrueLayer_ratio;
         TH1F* VHrejTrueLayer_ratio;
 
