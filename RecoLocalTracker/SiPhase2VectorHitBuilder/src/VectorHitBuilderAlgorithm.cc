@@ -13,7 +13,6 @@ bool VectorHitBuilderAlgorithm::LocalPositionSort::operator()(Phase2TrackerClust
 }
 
 
-//FIXME::ERICA: not clear yet how to fullfill the acc/rej output
 void VectorHitBuilderAlgorithm::run(edm::Handle< edmNew::DetSetVector<Phase2TrackerCluster1D> > clusters, 
                                     VectorHitCollectionNew& vhAcc, 
                                     VectorHitCollectionNew& vhRej, 
@@ -26,7 +25,6 @@ void VectorHitBuilderAlgorithm::run(edm::Handle< edmNew::DetSetVector<Phase2Trac
 
 
   std::map< DetId, std::vector<VectorHit> > tempVHAcc, tempVHRej;
-  //std::map< DetId, std::vector<Phase2TrackerCluster1D> > tempCLacc, tempCLrej;
   std::map< DetId, std::vector<VectorHit> >::iterator it_temporary;
 
   //loop over the DetSetVector
@@ -67,15 +65,29 @@ void VectorHitBuilderAlgorithm::run(edm::Handle< edmNew::DetSetVector<Phase2Trac
       stackDet = dynamic_cast<const StackGeomDet*>(gd);
       std::vector<VectorHit> vhsInStack_Acc;
       std::vector<VectorHit> vhsInStack_Rej; 
-      std::map<VectorHit,bool> vhsInStack_AccRej = buildVectorHits(stackDet, clusters, *it_detLower, *it_detUpper);
+      const auto vhsInStack_AccRej = buildVectorHits(stackDet, clusters, *it_detLower, *it_detUpper);
 
       //storing accepted and rejected VHs
       for(auto vh : vhsInStack_AccRej ) {
-        if(vh.second == true)  vhsInStack_Acc.push_back(vh.first);
-        if(vh.second == false) vhsInStack_Rej.push_back(vh.first);
+        if(vh.second == true){
+          vhsInStack_Acc.push_back(vh.first);
+        }
+        else if(vh.second == false){
+          vhsInStack_Rej.push_back(vh.first);
+        }
       }
+
       tempVHAcc[detIdStack] = vhsInStack_Acc;
       tempVHRej[detIdStack] = vhsInStack_Rej;
+
+      LogTrace("VectorHitBuilderAlgorithm") << "For detId #" << detIdStack.rawId() << " the following VHits have been accepted:";
+      for (auto vhIt : vhsInStack_Acc){
+        LogTrace("VectorHitBuilderAlgorithm") << "accepted VH: " << vhIt;
+      }
+      LogTrace("VectorHitBuilderAlgorithm") << "For detId #" << detIdStack.rawId() << " the following VHits have been rejected:";
+      for (auto vhIt : vhsInStack_Rej){
+        LogTrace("VectorHitBuilderAlgorithm") << "rejected VH: " << vhIt;
+      }
     
     }
 
@@ -118,43 +130,31 @@ bool VectorHitBuilderAlgorithm::checkClustersCompatibility(Local3DPoint& poslowe
 
 //----------------------------------------------------------------------------
 //ERICA::in the DT code the global position is used to compute the alpha angle and put a cut on that.
-std::map<VectorHit,bool> VectorHitBuilderAlgorithm::buildVectorHits(const StackGeomDet * stack, 
+std::vector<std::pair<VectorHit,bool>> VectorHitBuilderAlgorithm::buildVectorHits(const StackGeomDet * stack, 
                                                                   edm::Handle< edmNew::DetSetVector<Phase2TrackerCluster1D> > clusters, 
                                                                   const detset & theLowerDetSet, 
                                                                   const detset & theUpperDetSet,
                                                                   const std::vector<bool>& phase2OTClustersToSkip)
 {
 
-  std::map<VectorHit,bool> result;
+  std::vector<std::pair<VectorHit,bool>> result;
   if(checkClustersCompatibilityBeforeBuilding(clusters, theLowerDetSet, theUpperDetSet)){
     LogDebug("VectorHitBuilderAlgorithm") << "  compatible -> continue ... " << std::endl;
   } else { LogTrace("VectorHitBuilderAlgorithm") << "  not compatible, going to the next cluster"; }
 
-  LogDebug("VectorHitBuilderAlgorithm") << "---- lower clusters " << std::endl;
   std::vector<Phase2TrackerCluster1DRef> lowerClusters;
   for ( const_iterator cil = theLowerDetSet.begin(); cil != theLowerDetSet.end(); ++ cil ) {
     Phase2TrackerCluster1DRef clusterLower = edmNew::makeRefTo( clusters, cil );
-    printCluster(stack->lowerDet(),&*clusterLower);
     lowerClusters.push_back(clusterLower);
   }
-  LogDebug("VectorHitBuilderAlgorithm") << "---- upper clusters " << std::endl;
   std::vector<Phase2TrackerCluster1DRef> upperClusters;
   for ( const_iterator ciu = theUpperDetSet.begin(); ciu != theUpperDetSet.end(); ++ ciu ) {
     Phase2TrackerCluster1DRef clusterUpper = edmNew::makeRefTo( clusters, ciu );
-    printCluster(stack->upperDet(),&*clusterUpper);
     upperClusters.push_back(clusterUpper);
   }
 
   std::sort(lowerClusters.begin(), lowerClusters.end(), LocalPositionSort(&*theTkGeom,&*cpe,&*stack->lowerDet()));
   std::sort(upperClusters.begin(), upperClusters.end(), LocalPositionSort(&*theTkGeom,&*cpe,&*stack->upperDet()));
-
-  LogDebug("VectorHitBuilderAlgorithm") << "---- after ordering: lower clusters " << std::endl;
-  for ( auto clu : lowerClusters)
-    printCluster(stack->lowerDet(),&*clu);
-  LogDebug("VectorHitBuilderAlgorithm") << "---- after ordering: upper clusters " << std::endl;
-  for ( auto clu : upperClusters)
-    printCluster(stack->upperDet(),&*clu);
-
   
   for ( auto cluL : lowerClusters){
     LogDebug("VectorHitBuilderAlgorithm") << " lower clusters " << std::endl;
@@ -167,26 +167,60 @@ std::map<VectorHit,bool> VectorHitBuilderAlgorithm::buildVectorHits(const StackG
       const PixelGeomDetUnit* gduUpp = dynamic_cast< const PixelGeomDetUnit* >(stack->upperDet());
       auto && lparamsUpp = cpe->localParameters( *cluU, *gduUpp );
 
+      //applying the parallax correction at the upper cluster
+      double pC = computeParallaxCorrection(gduLow,lparamsLow.first,gduUpp,lparamsUpp.first);
+      LogDebug("VectorHitBuilderAlgorithm") << " \t parallax correction:" << pC << std::endl;
+      double lpos_upp_corr = 0.0;
+      double lpos_low_corr = 0.0;
+      if(lparamsUpp.first.x() > lparamsLow.first.x()){
+        if(lparamsUpp.first.x() > 0){
+          lpos_low_corr = lparamsLow.first.x();
+          lpos_upp_corr = lparamsUpp.first.x() - fabs(pC);
+        }
+        if(lparamsUpp.first.x() < 0){
+          lpos_low_corr = lparamsLow.first.x() + fabs(pC);
+          lpos_upp_corr = lparamsUpp.first.x();
+        }
+      } else {
+        if(lparamsUpp.first.x() > 0){
+          lpos_low_corr = lparamsLow.first.x() - fabs(pC);
+          lpos_upp_corr = lparamsUpp.first.x();
+        }
+        if(lparamsUpp.first.x() < 0){
+          lpos_low_corr = lparamsLow.first.x();
+          lpos_upp_corr = lparamsUpp.first.x() + fabs(pC);
+        }
+      }
+      LogDebug("VectorHitBuilderAlgorithm") << " \t local pos upper corrected (x):" << lpos_upp_corr << std::endl;
+      LogDebug("VectorHitBuilderAlgorithm") << " \t local pos lower corrected (x):" << lpos_low_corr << std::endl;
+
       //building my tolerance : 10*sigma
+
       double delta = 10.0*sqrt(lparamsLow.second.xx()+lparamsUpp.second.xx()); 
       LogDebug("VectorHitBuilderAlgorithm") << " \t delta: " << delta << std::endl;
+/*
+      if(lpos_upp_corr < lpos_low_corr + delta){
+        LogDebug("VectorHitBuilderAlgorithm") << " \t lpos_upp_corr < lpos_low_corr + delta)!!" << std::endl;
+      }
+      if(lpos_upp_corr > lpos_low_corr - delta){
+        LogDebug("VectorHitBuilderAlgorithm") << " \t lpos_upp_corr > lpos_low_corr - delta! " << std::endl;
+      }
+*/
+      if( (lpos_upp_corr < lpos_low_corr + delta) && 
+          (lpos_upp_corr > lpos_low_corr - delta) ){
 
-      if( (lparamsUpp.first.x() < lparamsLow.first.x() + delta) && 
-          (lparamsUpp.first.x() > lparamsLow.first.x() - delta) ){
-
-        LogDebug("VectorHitBuilderAlgorithm") << " building VH! " << std::endl;
+        LogDebug("VectorHitBuilderAlgorithm") << " accepting VH! " << std::endl;
         VectorHit vh = buildVectorHit( stack, cluL, cluU);
-        LogTrace("VectorHitBuilderAlgorithm") << "-> Vectorhit " << vh ;
-        LogTrace("VectorHitBuilderAlgorithm") << std::endl;
         //protection: the VH can also be empty!!
         if (vh.isValid()){
-          result[vh] = true;
+          result.push_back(std::make_pair(vh, true));
         }
 
       } else {
+        LogDebug("VectorHitBuilderAlgorithm") << " rejecting VH: " << std::endl;
         //storing vh rejected for combinatiorial studies
         VectorHit vh = buildVectorHit( stack, cluL, cluU);
-        result[vh] = false;
+        result.push_back(std::make_pair(vh, false));
       }
       
     }
@@ -244,16 +278,13 @@ VectorHit VectorHitBuilderAlgorithm::buildVectorHit(const StackGeomDet * stack,
 
   const PixelGeomDetUnit* geomDetLower = dynamic_cast< const PixelGeomDetUnit* >(stack->lowerDet());
   const PixelGeomDetUnit* geomDetUpper = dynamic_cast< const PixelGeomDetUnit* >(stack->upperDet());
-  LogTrace("VectorHitBuilderAlgorithm") << "after geom det unit ";
 
   auto && lparamsLower = cpe->localParameters( *lower, *geomDetLower );          // x, y, z, e2_xx, e2_xy, e2_yy
   Global3DPoint gparamsLower = geomDetLower->surface().toGlobal(lparamsLower.first);
-  LogTrace("VectorHitBuilderAlgorithm") << "lower done ";
   LogTrace("VectorHitBuilderAlgorithm") << "\t lower global pos: " << gparamsLower ;
 
   auto && lparamsUpper = cpe->localParameters( *upper, *geomDetUpper );
   Global3DPoint gparamsUpper = geomDetUpper->surface().toGlobal(lparamsUpper.first);
-  LogTrace("VectorHitBuilderAlgorithm") << "upper done ";
   LogTrace("VectorHitBuilderAlgorithm") << "\t upper global pos: " << gparamsUpper ;
 
   //local parameters of upper cluster in lower system of reference

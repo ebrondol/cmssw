@@ -38,9 +38,9 @@ class VectorHitBuilderAlgorithmBase {
 
   //FIXME::ERICA::this should be template, return different collection for different algo used!!
   virtual void run(edm::Handle< edmNew::DetSetVector<Phase2TrackerCluster1D> >  clusters, VectorHitCollectionNew& vhAcc, VectorHitCollectionNew& vhRej, 
-    edmNew::DetSetVector<Phase2TrackerCluster1D>& clustersAcc, edmNew::DetSetVector<Phase2TrackerCluster1D>& clustersRej) = 0;
+                   edmNew::DetSetVector<Phase2TrackerCluster1D>& clustersAcc, edmNew::DetSetVector<Phase2TrackerCluster1D>& clustersRej) = 0;
 
-  virtual std::map<VectorHit,bool> buildVectorHits (const StackGeomDet * stack,
+  virtual std::vector<std::pair<VectorHit,bool>> buildVectorHits (const StackGeomDet * stack,
                                          edm::Handle< edmNew::DetSetVector<Phase2TrackerCluster1D> > clusters,
                                          const detset & DSVinner, const detset & DSVouter,
                                          const std::vector<bool>& phase2OTClustersToSkip = std::vector<bool>()) = 0;
@@ -48,6 +48,8 @@ class VectorHitBuilderAlgorithmBase {
   virtual VectorHit buildVectorHit(const StackGeomDet * stack,
                                    Phase2TrackerCluster1DRef lower,
                                    Phase2TrackerCluster1DRef upper) = 0;
+
+  double computeParallaxCorrection(const PixelGeomDetUnit*&, const Point3DBase<float, LocalTag>&, const PixelGeomDetUnit*&, const Point3DBase<float, LocalTag>&);
 
   void printClusters(const edmNew::DetSetVector<Phase2TrackerCluster1D>& clusters);
   void printCluster(const GeomDet* geomDetUnit, const Phase2TrackerCluster1D* cluster);
