@@ -555,18 +555,6 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
 
         double parallCorr = 0.0;
 
-/*
-        if (lowerDetId.subdetId() == StripSubdetector::TOB){
-          std::cout << stackDet->surface().bounds().thickness() << std::endl;
-          std::cout << stackDet->lowerDet()->position().perp() << std::endl;
-          std::cout << localPosClu_low.x() << std::endl;
-          parallCorr =  stackDet->surface().bounds().thickness() * localPosClu_low.x() / stackDet->lowerDet()->position().perp();
-        } else if (lowerDetId.subdetId() == StripSubdetector::TID){
-          std::cout << stackDet->surface().bounds().thickness() << std::endl;
-          parallCorr = 100 * tkTopo->side(lowerDetId);
-        }
-*/
-
         Global3DPoint origin(0,0,0);
         GlobalVector gV = gPosClu_low - origin;
         LogTrace("VectorHitsBuilderValidation") << " global vector passing to the origin:" << gV;
