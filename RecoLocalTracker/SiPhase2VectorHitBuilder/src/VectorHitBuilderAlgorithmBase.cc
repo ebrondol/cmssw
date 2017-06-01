@@ -56,6 +56,26 @@ void VectorHitBuilderAlgorithmBase::initCpe(const ClusterParameterEstimator<Phas
   cpe = cpeProd;
 }
 
+double VectorHitBuilderAlgorithmBase::computeParallaxCorrection(const PixelGeomDetUnit*& geomDetUnit_low, const Point3DBase<float, LocalTag>& lPosClu_low, 
+                                                                const PixelGeomDetUnit*& geomDetUnit_upp, const Point3DBase<float, LocalTag>& lPosClu_upp){
+  double parallCorr = 0.0;
+  Global3DPoint origin(0,0,0);
+  Global3DPoint gPosClu_low = geomDetUnit_low->surface().toGlobal(lPosClu_low);
+  GlobalVector gV = gPosClu_low - origin;
+  LogTrace("VectorHitsBuilderValidation") << " global vector passing to the origin:" << gV;
+
+  LocalVector lV = geomDetUnit_low->surface().toLocal(gV);
+  LogTrace("VectorHitsBuilderValidation") << " local vector passing to the origin (in low sor):" << lV;
+  LocalVector lV_norm = lV/lV.z();
+  LogTrace("VectorHitsBuilderValidation") << " normalized local vector passing to the origin (in low sor):" << lV_norm;
+
+  Global3DPoint gPosClu_upp = geomDetUnit_upp->surface().toGlobal(lPosClu_upp);
+  Local3DPoint lPosClu_uppInLow = geomDetUnit_low->surface().toLocal(gPosClu_upp);
+  parallCorr = lV_norm.x() * lPosClu_uppInLow.z();
+
+  return parallCorr;
+}
+
 void VectorHitBuilderAlgorithmBase::printClusters(const edmNew::DetSetVector<Phase2TrackerCluster1D>& clusters){
 
   int nCluster = 0;
@@ -86,7 +106,6 @@ void VectorHitBuilderAlgorithmBase::printClusters(const edmNew::DetSetVector<Pha
 void VectorHitBuilderAlgorithmBase::printCluster(const GeomDet* geomDetUnit, const Phase2TrackerCluster1D* clustIt){
 
   if (!geomDetUnit) return;
-
   const PixelGeomDetUnit* pixelGeomDetUnit = dynamic_cast< const PixelGeomDetUnit* >(geomDetUnit);
   const PixelTopology& topol = pixelGeomDetUnit->specificTopology();
   if (!pixelGeomDetUnit) return;

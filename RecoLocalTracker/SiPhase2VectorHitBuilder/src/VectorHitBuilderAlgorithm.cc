@@ -167,12 +167,39 @@ std::map<VectorHit,bool> VectorHitBuilderAlgorithm::buildVectorHits(const StackG
       const PixelGeomDetUnit* gduUpp = dynamic_cast< const PixelGeomDetUnit* >(stack->upperDet());
       auto && lparamsUpp = cpe->localParameters( *cluU, *gduUpp );
 
+      //applying the parallax correction at the upper cluster
+      double pC = computeParallaxCorrection(gduLow,lparamsLow.first,gduUpp,lparamsUpp.first);
+      LogDebug("VectorHitBuilderAlgorithm") << " \t parallax correction:" << pC << std::endl;
+      double lpos_upp_corr = 0.0;
+      double lpos_low_corr = 0.0;
+      if(lparamsUpp.first.x() > lparamsLow.first.x()){
+        if(lparamsUpp.first.x() > 0){
+          lpos_low_corr = lparamsLow.first.x();
+          lpos_upp_corr = lparamsUpp.first.x() - fabs(pC);
+        }
+        if(lparamsUpp.first.x() < 0){
+          lpos_low_corr = lparamsLow.first.x() + fabs(pC);
+          lpos_upp_corr = lparamsUpp.first.x();
+        }
+      } else {
+        if(lparamsUpp.first.x() > 0){
+          lpos_low_corr = lparamsLow.first.x() - fabs(pC);
+          lpos_upp_corr = lparamsUpp.first.x();
+        }
+        if(lparamsUpp.first.x() < 0){
+          lpos_low_corr = lparamsLow.first.x();
+          lpos_upp_corr = lparamsUpp.first.x() + fabs(pC);
+        }
+      }
+      LogDebug("VectorHitBuilderAlgorithm") << " \t local pos upper corrected (x):" << lpos_upp_corr << std::endl;
+      LogDebug("VectorHitBuilderAlgorithm") << " \t local pos lower corrected (x):" << lpos_low_corr << std::endl;
+
       //building my tolerance : 10*sigma
       double delta = 10.0*sqrt(lparamsLow.second.xx()+lparamsUpp.second.xx()); 
       LogDebug("VectorHitBuilderAlgorithm") << " \t delta: " << delta << std::endl;
 
-      if( (lparamsUpp.first.x() < lparamsLow.first.x() + delta) && 
-          (lparamsUpp.first.x() > lparamsLow.first.x() - delta) ){
+      if( (lpos_upp_corr < lpos_low_corr + delta) && 
+          (lpos_upp_corr > lpos_low_corr - delta) ){
 
         LogDebug("VectorHitBuilderAlgorithm") << " building VH! " << std::endl;
         VectorHit vh = buildVectorHit( stack, cluL, cluU);
