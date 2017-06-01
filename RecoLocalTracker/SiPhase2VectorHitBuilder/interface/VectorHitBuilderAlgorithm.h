@@ -42,7 +42,7 @@ class VectorHitBuilderAlgorithm : public VectorHitBuilderAlgorithmBase {
           const GeomDet * geomDet_;
   };
 
-  std::map<VectorHit,bool> buildVectorHits(const StackGeomDet * stack,
+  std::vector<std::pair<VectorHit,bool>> buildVectorHits(const StackGeomDet * stack, 
                                            edm::Handle< edmNew::DetSetVector<Phase2TrackerCluster1D> > clusters,
                                            const detset & DSVinner, const detset & DSVouter,
                                            const std::vector<bool>& phase2OTClustersToSkip = std::vector<bool>());
