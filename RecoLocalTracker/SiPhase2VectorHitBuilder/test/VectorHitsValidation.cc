@@ -548,7 +548,7 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
         Local3DPoint lPosClu_uppInLow = geomDetUnit_low->surface().toLocal(gPosClu_upp);
         LogTrace("VectorHitsBuilderValidation") << " upper local pos (in low sor):" << lPosClu_uppInLow;
 
-        //width = difference of centroids in precise coordinate (in low sor) + parallax correction
+        //width = difference of centroids in precise coordinate (in low sor) corrected with parallax correction
         deltaXlocal = lPosClu_uppInLow.x() - lPosClu_low.x();
         histogramLayer->second.deltaXlocal->Fill(deltaXlocal);
         LogTrace("VectorHitsBuilderValidation") << " deltaXlocal : " << deltaXlocal;
@@ -565,8 +565,32 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
         parallCorr = lV_norm.x() * lPosClu_uppInLow.z();
         LogTrace("VectorHitsBuilderValidation") << " parallalex correction:" << parallCorr;
 
+        double lpos_upp_corr = 0.0;
+        double lpos_low_corr = 0.0;
+        if(lPosClu_upp.x() > lPosClu_low.x()){
+          if(lPosClu_upp.x() > 0){
+            lpos_low_corr = lPosClu_low.x();
+            lpos_upp_corr = lPosClu_upp.x() - fabs(parallCorr);
+          }
+          if(lPosClu_upp.x() < 0){
+            lpos_low_corr = lPosClu_low.x() + fabs(parallCorr);
+            lpos_upp_corr = lPosClu_upp.x();
+          }
+        } else {
+          if(lPosClu_upp.x() > 0){
+            lpos_low_corr = lPosClu_low.x() - fabs(parallCorr);
+            lpos_upp_corr = lPosClu_upp.x();
+          }
+          if(lPosClu_upp.x() < 0){
+            lpos_low_corr = lPosClu_low.x();
+            lpos_upp_corr = lPosClu_upp.x() + fabs(parallCorr);
+          }
+        }
 
-        width = deltaXlocal - parallCorr;
+        LogDebug("VectorHitsBuilderValidation") << " \t local pos upper corrected (x):" << lpos_upp_corr << std::endl;
+        LogDebug("VectorHitsBuilderValidation") << " \t local pos lower corrected (x):" << lpos_low_corr << std::endl;
+
+        width = lpos_low_corr - lpos_upp_corr;
         histogramLayer->second.width->Fill(width);
         LogTrace("VectorHitsBuilderValidation") << " width:" << width;
 
@@ -720,7 +744,7 @@ std::pair<bool,uint32_t> VectorHitsBuilderValidation::isTrue(const VectorHit vh,
     if (trkid.size()==0) continue;
     it_simTrackUpper = std::find(lowClusterSimTrackIds.begin(), lowClusterSimTrackIds.end(), simTrackId);
     if ( it_simTrackUpper != lowClusterSimTrackIds.end() ) {
-      LogTrace("VectorHitBuilderAlgorithm") << " UpperSimTrackId found in lowClusterSimTrackIds ";
+      LogTrace("VectorHitsBuilderValidation") << " UpperSimTrackId found in lowClusterSimTrackIds ";
       return std::make_pair(true,simTrackId);
     }
     //clusterSimTrackIds.push_back(UpperSimTrackId);
