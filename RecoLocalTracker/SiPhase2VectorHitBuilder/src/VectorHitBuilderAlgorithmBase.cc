@@ -116,7 +116,7 @@ void VectorHitBuilderAlgorithmBase::printCluster(const GeomDet* geomDetUnit, con
   TrackerGeometry::ModuleType mType = theTkGeom->getDetectorType(geomDetUnit->geographicalId());
   if (mType == TrackerGeometry::ModuleType::Ph2PSP) 
     LogTrace("VectorHitBuilder") << "Pixel cluster (module:" << module << ") " << std::endl;
-  else if (mType == TrackerGeometry::ModuleType::Ph2SS) 
+  else if (mType == TrackerGeometry::ModuleType::Ph2SS || mType == TrackerGeometry::ModuleType::Ph2PSS) 
     LogTrace("VectorHitBuilder") << "Strip cluster (module:" << module << ") " << std::endl;
   else LogTrace("VectorHitBuilder") << "no module?!" << std::endl;
   LogTrace("VectorHitBuilder") << "with pitch:" << topol.pitch().first << " , " << topol.pitch().second << std::endl;
