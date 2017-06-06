@@ -105,8 +105,8 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
   event.getByToken(srcClu_, clusters);
 
   // Get the vector hits
-  edm::Handle< VectorHitCollectionNew > vhs;
-  event.getByToken(VHacc_, vhs);
+  edm::Handle< VectorHitCollectionNew > vhsAcc;
+  event.getByToken(VHacc_, vhsAcc);
 
   edm::Handle< VectorHitCollectionNew > vhsRej;
   event.getByToken(VHrej_, vhsRej);
@@ -257,6 +257,16 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
     }
   }
 
+  for (VectorHitCollectionNew::const_iterator DSViter = vhsAcc->begin(); DSViter != vhsAcc->end(); ++DSViter) {
+    for (edmNew::DetSet< VectorHit >::const_iterator vhIt = DSViter->begin(); vhIt != DSViter->end(); ++vhIt) {
+      LogTrace("VectorHitsBuilderValidation") << "accepted VH: " << *vhIt;
+    }
+  }
+  for (VectorHitCollectionNew::const_iterator DSViter = vhsRej->begin(); DSViter != vhsRej->end(); ++DSViter) {
+    for (edmNew::DetSet< VectorHit >::const_iterator vhIt = DSViter->begin(); vhIt != DSViter->end(); ++vhIt) {
+      LogTrace("VectorHitsBuilderValidation") << "rejected VH: " << *vhIt;
+    }
+  }
   // Validation
   eventNum = event.id().event();
 
@@ -266,7 +276,7 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
   std::vector<int> detIds;
 
   // Loop over modules
-  for (VectorHitCollectionNew::const_iterator DSViter = vhs->begin(); DSViter != vhs->end(); ++DSViter) {
+  for (VectorHitCollectionNew::const_iterator DSViter = vhsAcc->begin(); DSViter != vhsAcc->end(); ++DSViter) {
 
     // Get the detector unit's id
     unsigned int rawid(DSViter->detId());
@@ -537,53 +547,53 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
         const GeomDetUnit* geomDetUnit_upp(tkGeom->idToDetUnit(upperDetId));
         LogTrace("VectorHitsBuilderValidation") << " upperDetID : " << upperDetId.rawId();
 
-        Global3DPoint gPosClu_low = vhIt->lowerGlobalPos();
-        LogTrace("VectorHitsBuilderValidation") << " lower global pos (in its sor):" << gPosClu_low;
-        Global3DPoint gPosClu_upp = vhIt->upperGlobalPos();
-        LogTrace("VectorHitsBuilderValidation") << " upper global pos (in its sor):" << gPosClu_upp;
-        Local3DPoint lPosClu_low = geomDetUnit_low->surface().toLocal(gPosClu_low);
-        LogTrace("VectorHitsBuilderValidation") << " lower local pos (in its sor):" << lPosClu_low;
-        Local3DPoint lPosClu_upp = geomDetUnit_upp->surface().toLocal(gPosClu_upp);
-        LogTrace("VectorHitsBuilderValidation") << " upper local pos (in its sor):" << lPosClu_upp;
-        Local3DPoint lPosClu_uppInLow = geomDetUnit_low->surface().toLocal(gPosClu_upp);
-        LogTrace("VectorHitsBuilderValidation") << " upper local pos (in low sor):" << lPosClu_uppInLow;
+        auto && lparamsUpp = cpe->localParameters( *vhIt->upperClusterRef().cluster_phase2OT(), *geomDetUnit_upp );
+        LogTrace("VectorHitsBuilderValidation") << " upper local pos (in its sor):" << lparamsUpp.first;
+        Global3DPoint gparamsUpp = geomDetUnit_upp->surface().toGlobal(lparamsUpp.first);
+        LogTrace("VectorHitsBuilderValidation") << " upper global pos :" << gparamsUpp;
+        Local3DPoint lparamsUppInLow = geomDetUnit_low->surface().toLocal(gparamsUpp);
+        LogTrace("VectorHitsBuilderValidation") << " upper local pos (in low sor):" << lparamsUppInLow;
+        auto && lparamsLow = cpe->localParameters( *vhIt->lowerClusterRef().cluster_phase2OT(), *geomDetUnit_low );
+        LogTrace("VectorHitsBuilderValidation") << " lower local pos (in its sor):" << lparamsLow.first;
+        Global3DPoint gparamsLow = geomDetUnit_low->surface().toGlobal(lparamsLow.first);
+        LogTrace("VectorHitsBuilderValidation") << " lower global pos :" << gparamsLow;
 
         //width = difference of centroids in precise coordinate (in low sor) corrected with parallax correction
-        deltaXlocal = lPosClu_uppInLow.x() - lPosClu_low.x();
+        deltaXlocal = lparamsUppInLow.x() - lparamsLow.first.x();
         histogramLayer->second.deltaXlocal->Fill(deltaXlocal);
         LogTrace("VectorHitsBuilderValidation") << " deltaXlocal : " << deltaXlocal;
 
         double parallCorr = 0.0;
 
         Global3DPoint origin(0,0,0);
-        GlobalVector gV = gPosClu_low - origin;
-        LogTrace("VectorHitsBuilderValidation") << " global vector passing to the origin:" << gV;
+        GlobalVector gV = gparamsLow - origin;
+        //LogTrace("VectorHitsBuilderValidation") << " global vector passing to the origin:" << gV;
         LocalVector lV = geomDetUnit_low->surface().toLocal(gV);
-        LogTrace("VectorHitsBuilderValidation") << " local vector passing to the origin (in low sor):" << lV;
+        //LogTrace("VectorHitsBuilderValidation") << " local vector passing to the origin (in low sor):" << lV;
         LocalVector lV_norm = lV/lV.z();
-        LogTrace("VectorHitsBuilderValidation") << " normalized local vector passing to the origin (in low sor):" << lV_norm;
-        parallCorr = lV_norm.x() * lPosClu_uppInLow.z();
+        //LogTrace("VectorHitsBuilderValidation") << " normalized local vector passing to the origin (in low sor):" << lV_norm;
+        parallCorr = lV_norm.x() * lparamsUppInLow.z();
         LogTrace("VectorHitsBuilderValidation") << " parallalex correction:" << parallCorr;
 
         double lpos_upp_corr = 0.0;
         double lpos_low_corr = 0.0;
-        if(lPosClu_upp.x() > lPosClu_low.x()){
-          if(lPosClu_upp.x() > 0){
-            lpos_low_corr = lPosClu_low.x();
-            lpos_upp_corr = lPosClu_upp.x() - fabs(parallCorr);
+        if(lparamsUpp.first.x() > lparamsLow.first.x()){
+          if(lparamsUpp.first.x() > 0){
+            lpos_low_corr = lparamsLow.first.x();
+            lpos_upp_corr = lparamsUpp.first.x() - fabs(parallCorr);
           }
-          if(lPosClu_upp.x() < 0){
-            lpos_low_corr = lPosClu_low.x() + fabs(parallCorr);
-            lpos_upp_corr = lPosClu_upp.x();
+          if(lparamsUpp.first.x() < 0){
+            lpos_low_corr = lparamsLow.first.x() + fabs(parallCorr);
+            lpos_upp_corr = lparamsUpp.first.x();
           }
         } else {
-          if(lPosClu_upp.x() > 0){
-            lpos_low_corr = lPosClu_low.x() - fabs(parallCorr);
-            lpos_upp_corr = lPosClu_upp.x();
+          if(lparamsUpp.first.x() > 0){
+            lpos_low_corr = lparamsLow.first.x() - fabs(parallCorr);
+            lpos_upp_corr = lparamsUpp.first.x();
           }
-          if(lPosClu_upp.x() < 0){
-            lpos_low_corr = lPosClu_low.x();
-            lpos_upp_corr = lPosClu_upp.x() + fabs(parallCorr);
+          if(lparamsUpp.first.x() < 0){
+            lpos_low_corr = lparamsLow.first.x();
+            lpos_upp_corr = lparamsUpp.first.x() + fabs(parallCorr);
           }
         }
 
@@ -616,7 +626,7 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
   int VHrejTrue_signal  = 0.0;
 
   // Loop over modules
-  for (VectorHitCollectionNew::const_iterator DSViter = vhs->begin(); DSViter != vhs->end(); ++DSViter) {
+  for (VectorHitCollectionNew::const_iterator DSViter = vhsAcc->begin(); DSViter != vhsAcc->end(); ++DSViter) {
 
     unsigned int rawid(DSViter->detId());
     DetId detId(rawid);
