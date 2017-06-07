@@ -171,6 +171,7 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
   float upp_xx_global_err, upp_yy_global_err, upp_zz_global_err;
   float upp_xy_global_err, upp_zx_global_err, upp_zy_global_err;
   float deltaXVHSimHits, deltaYVHSimHits;
+  int multiplicity;
   float width, deltaXlocal;
   unsigned int processType(99);
 
@@ -218,6 +219,7 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
   tree -> Branch("upp_zy_global_err",&upp_zy_global_err,"upp_zy_global_err/F");
   tree -> Branch("deltaXVHSimHits",&deltaXVHSimHits,"deltaXVHSimHits/F");
   tree -> Branch("deltaYVHSimHits",&deltaYVHSimHits,"deltaYVHSimHits/F");
+  tree -> Branch("multiplicity",&multiplicity,"multiplicity/I");
   tree -> Branch("width",&width,"width/F");
   tree -> Branch("deltaXlocal",&deltaXlocal,"deltaXlocal/F");
   tree -> Branch("processType",&processType,"processType/i");
@@ -527,12 +529,19 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
         }// loop simhits
 
         nVHsTot++;
-        tree->Fill();
+        //tree->Fill();
 
         //******************************
         //combinatorial studies : not filling if more than 1 VH has been produced
         //******************************
-        if(DSViter->size()>1) continue;
+        multiplicity = DSViter->size();
+        if(DSViter->size()>1){
+          LogTrace("VectorHitsBuilderValidation") << " not filling if more than 1 VH has been produced";
+          width = -100;
+          deltaXlocal = -100;
+          tree->Fill();
+          continue;
+        }
 
         //curvature
         curvature = vh.curvatureORphi("curvature").first;
@@ -586,7 +595,7 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
             lpos_low_corr = lparamsLow.first.x() + fabs(parallCorr);
             lpos_upp_corr = lparamsUpp.first.x();
           }
-        } else {
+        } else if( lparamsUpp.first.x() < lparamsLow.first.x() ) {
           if(lparamsUpp.first.x() > 0){
             lpos_low_corr = lparamsLow.first.x() - fabs(parallCorr);
             lpos_upp_corr = lparamsUpp.first.x();
@@ -594,6 +603,15 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
           if(lparamsUpp.first.x() < 0){
             lpos_low_corr = lparamsLow.first.x();
             lpos_upp_corr = lparamsUpp.first.x() + fabs(parallCorr);
+          }
+        } else {
+          if(lparamsUpp.first.x() > 0){
+            lpos_upp_corr = lparamsUpp.first.x() - fabs(parallCorr);
+            lpos_low_corr = lparamsLow.first.x();
+          }
+          if(lparamsUpp.first.x() < 0){
+            lpos_upp_corr = lparamsUpp.first.x() + fabs(parallCorr);
+            lpos_low_corr = lparamsLow.first.x();
           }
         }
 
@@ -604,6 +622,7 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
         histogramLayer->second.width->Fill(width);
         LogTrace("VectorHitsBuilderValidation") << " width:" << width;
 
+        tree->Fill();
 
 
       }// vh valid
