@@ -10,6 +10,8 @@
 
 VectorHitBuilderAlgorithmBase::VectorHitBuilderAlgorithmBase(const edm::ParameterSet& conf) :
   nMaxVHforeachStack(conf.getParameter<int>("maxVectorHitsinaStack")),
+  barrelCut(conf.getParameter< std::vector< double > >("BarrelCut")),
+  endcapCut(conf.getParameter< std::vector< double > >("EndcapCut")),
   cpeTag_(conf.getParameter<edm::ESInputTag>("CPE"))
 {}
 
