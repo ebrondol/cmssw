@@ -208,9 +208,24 @@ std::vector<std::pair<VectorHit,bool>> VectorHitBuilderAlgorithm::buildVectorHit
       double delta = 10.0*sqrt(lparamsLow.second.xx()+lparamsUpp.second.xx()); 
       LogDebug("VectorHitBuilderAlgorithm") << " \t delta: " << delta << std::endl;
 
-      if( (lpos_upp_corr < lpos_low_corr + delta) && 
-          (lpos_upp_corr > lpos_low_corr - delta) ){
+      double width = lpos_low_corr - lpos_upp_corr;
+      LogDebug("VectorHitBuilderAlgorithm") << " \t width: " << delta << std::endl;
 
+      //old cut: indipendent from layer
+      //if( (lpos_upp_corr < lpos_low_corr + delta) && 
+      //    (lpos_upp_corr > lpos_low_corr - delta) ){
+
+      unsigned int layerStack = theTkTopo->layer(stack->geographicalId());
+      if(stack->subDetector() == GeomDetEnumerators::SubDetector::P2OTB ) LogDebug("VectorHitBuilderAlgorithm") << " \t is barrel.    " << std::endl;
+      if(stack->subDetector() == GeomDetEnumerators::SubDetector::P2OTEC) LogDebug("VectorHitBuilderAlgorithm") << " \t is endcap.    " << std::endl;
+      LogDebug("VectorHitBuilderAlgorithm") << " \t layer is : " << layerStack << std::endl;
+
+      float cut = 0.0;
+      if(stack->subDetector() == GeomDetEnumerators::SubDetector::P2OTB ) cut = barrelCut.at(layerStack);
+      if(stack->subDetector() == GeomDetEnumerators::SubDetector::P2OTEC) cut = endcapCut.at(layerStack);
+      LogDebug("VectorHitBuilderAlgorithm") << " \t the cut is:" << cut << std::endl;
+
+      if(fabs(width) < cut){
         LogDebug("VectorHitBuilderAlgorithm") << " accepting VH! " << std::endl;
         VectorHit vh = buildVectorHit( stack, cluL, cluU);
         //protection: the VH can also be empty!!

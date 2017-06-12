@@ -60,6 +60,8 @@ class VectorHitBuilderAlgorithmBase {
   const TrackerTopology* theTkTopo;
   const ClusterParameterEstimator<Phase2TrackerCluster1D>* cpe;
   unsigned int nMaxVHforeachStack;
+  std::vector< double > barrelCut;
+  std::vector< double > endcapCut;
 
 private:
   edm::ESInputTag cpeTag_;
