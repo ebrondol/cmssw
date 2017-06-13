@@ -156,12 +156,17 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
   int module_type; //1: pixel, 2: strip
   int VHacc = 0.0;
   int VHrej = 0.0;
+  int vh_isTrue;
+
   float x_global, y_global, z_global;
   float vh_x_local, vh_y_local;
   float vh_x_le, vh_y_le;
   float curvature, phi;
   float QOverPT, QOverP;
-  int sim_track_id;
+  float chi2;
+
+  int low_sim_trackId, upp_sim_trackId;
+  float vh_sim_trackPt;
   float sim_x_local, sim_y_local;
   float sim_x_global, sim_y_global, sim_z_global;
   float low_x_global, low_y_global, low_z_global;
@@ -182,6 +187,7 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
   tree -> Branch("module_id",&module_id,"module_id/I");
   tree -> Branch("module_type",&module_type,"module_type/I");
   tree -> Branch("module_number",&module_number,"module_number/I");
+  tree -> Branch("vh_isTrue",&vh_isTrue,"vh_isTrue/I");
   tree -> Branch("x_global",&x_global,"x_global/F");
   tree -> Branch("y_global",&y_global,"y_global/F");
   tree -> Branch("z_global",&z_global,"z_global/F");
@@ -190,10 +196,13 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
   tree -> Branch("vh_x_lError",&vh_x_le,"vh_x_le/F");
   tree -> Branch("vh_y_lError",&vh_y_le,"vh_y_le/F");
   tree -> Branch("curvature",&curvature,"curvature/F");
+  tree -> Branch("chi2",&chi2,"chi2/F");
   tree -> Branch("phi",&phi,"phi/F");
   tree -> Branch("QOverP",&QOverP,"QOverP/F");
   tree -> Branch("QOverPT",&QOverPT,"QOverPT/F");
-  tree -> Branch("sim_track_id",&sim_track_id,"sim_track_id/I");
+  tree -> Branch("low_sim_trackId",&low_sim_trackId,"low_sim_trackId/I");
+  tree -> Branch("upp_sim_trackId",&upp_sim_trackId,"upp_sim_trackId/I");
+  tree -> Branch("vh_sim_trackPt",&vh_sim_trackPt,"vh_sim_trackPt/F");
   tree -> Branch("sim_x_local",&sim_x_local,"sim_x_local/F");
   tree -> Branch("sim_y_local",&sim_y_local,"sim_y_local/F");
   tree -> Branch("sim_x_global",&sim_x_global,"sim_x_global/F");
@@ -310,6 +319,9 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
       if( vhIt->isValid() ){
 
         LogDebug("VectorHitsBuilderValidation") << " vh analyzing ..." ;
+        chi2 = vhIt->chi2();
+        LogTrace("VectorHitsBuilderValidation") << "VH chi2 " << chi2 << std::endl;
+
         Local3DPoint localPosVH = vhIt->localPosition();
         vh_x_local = localPosVH.x();
         vh_y_local = localPosVH.y();
@@ -427,6 +439,7 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
         std::vector< unsigned int > clusterSimTrackIds;
         std::set<std::pair<uint32_t, EncodedEventId> > simTkIds;
 
+        low_sim_trackId = 0;
         for (unsigned int istr(0); istr < (*(vhIt->lowerClusterRef().cluster_phase2OT())).size(); ++istr) {
           uint32_t channel = Phase2TrackerDigi::pixelToChannel((*(vhIt->lowerClusterRef().cluster_phase2OT())).firstRow() + istr, (*(vhIt->lowerClusterRef().cluster_phase2OT())).column());
           DetId detIdCluster = geomDetLower->geographicalId();
@@ -435,21 +448,34 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
           if (trkid.size()==0) continue;
           clusterSimTrackIds.push_back(LowerSimTrackId);
           simTkIds.insert(trkid.begin(),trkid.end());
-          sim_track_id = LowerSimTrackId;
+          low_sim_trackId = LowerSimTrackId;
           LogTrace("VectorHitsBuilderValidation") << "LowerSimTrackId " << LowerSimTrackId << std::endl;
         }
 
-/*
+        upp_sim_trackId = 0;
         for (unsigned int istr(0); istr < (*(vhIt->upperClusterRef().cluster_phase2OT())).size(); ++istr) {
           uint32_t channel = Phase2TrackerDigi::pixelToChannel((*(vhIt->upperClusterRef().cluster_phase2OT())).firstRow() + istr, (*(vhIt->upperClusterRef().cluster_phase2OT())).column());
           DetId detIdCluster = geomDetUpper->geographicalId();
           unsigned int UpperSimTrackId(getSimTrackId(siphase2SimLinks, detIdCluster, channel));
           std::vector<std::pair<uint32_t, EncodedEventId> > trkid(getSimTrackIds(siphase2SimLinks, detIdCluster, channel));
           if (trkid.size()==0) continue;
-          clusterSimTrackIds.push_back(UpperSimTrackId);
-          simTkIds.insert(trkid.begin(),trkid.end());
+          //clusterSimTrackIds.push_back(UpperSimTrackId);
+          upp_sim_trackId = UpperSimTrackId;
+          //simTkIds.insert(trkid.begin(),trkid.end());
         }
-*/
+
+        //compute if the vhits is 'true' or 'false' and save sim pT
+        std::pair<bool,uint32_t> istrue = isTrue(*vhIt, siphase2SimLinks, detId);
+        vh_isTrue = 0;
+        if(istrue.first){
+          vh_isTrue = 1;
+          //saving info of 'signal' track
+          std::map< unsigned int, SimTrack >::const_iterator simTrackIt(simTracks.find(istrue.second));
+//          if (simTrackIt == simTracks.end()) continue;
+          vh_sim_trackPt = simTrackIt->second.momentum().pt();
+        }
+
+
 
         // loop over all simHits
         unsigned int totalSimHits(0);
