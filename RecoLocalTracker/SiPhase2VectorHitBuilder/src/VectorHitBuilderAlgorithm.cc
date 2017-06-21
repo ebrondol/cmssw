@@ -77,6 +77,10 @@ void VectorHitBuilderAlgorithm::run(edm::Handle< edmNew::DetSetVector<Phase2Trac
         }
       }
 
+      //ERICA:: to be checked with map!
+      //sorting vhs for best chi2
+      std::sort(vhsInStack_Acc.begin(), vhsInStack_Acc.end());
+
       tempVHAcc[detIdStack] = vhsInStack_Acc;
       tempVHRej[detIdStack] = vhsInStack_Rej;
 
@@ -272,10 +276,6 @@ std::vector<std::pair<VectorHit,bool>> VectorHitBuilderAlgorithm::buildVectorHit
     }
   }
 */
-
-  //ERICA:: to be checked with map!
-  //sorting vhs for best chi2
-  //std::sort(result.begin(), result.end());
 
   //if( result.size() > nMaxVHforeachStack ){
   //  result.erase(result.begin()+nMaxVHforeachStack, result.end());
