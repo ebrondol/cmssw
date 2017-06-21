@@ -163,6 +163,7 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
   float vh_x_le, vh_y_le;
   float curvature, phi;
   float QOverPT, QOverP;
+  float chi2;
 
   int low_sim_trackId, upp_sim_trackId;
   float vh_sim_trackPt;
@@ -195,6 +196,7 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
   tree -> Branch("vh_x_lError",&vh_x_le,"vh_x_le/F");
   tree -> Branch("vh_y_lError",&vh_y_le,"vh_y_le/F");
   tree -> Branch("curvature",&curvature,"curvature/F");
+  tree -> Branch("chi2",&chi2,"chi2/F");
   tree -> Branch("phi",&phi,"phi/F");
   tree -> Branch("QOverP",&QOverP,"QOverP/F");
   tree -> Branch("QOverPT",&QOverPT,"QOverPT/F");
@@ -317,6 +319,9 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
       if( vhIt->isValid() ){
 
         LogDebug("VectorHitsBuilderValidation") << " vh analyzing ..." ;
+        chi2 = vhIt->chi2();
+        LogTrace("VectorHitsBuilderValidation") << "VH chi2 " << chi2 << std::endl;
+
         Local3DPoint localPosVH = vhIt->localPosition();
         vh_x_local = localPosVH.x();
         vh_y_local = localPosVH.y();
@@ -466,11 +471,9 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
           vh_isTrue = 1;
           //saving info of 'signal' track
           std::map< unsigned int, SimTrack >::const_iterator simTrackIt(simTracks.find(istrue.second));
-          if (simTrackIt == simTracks.end()) continue;
+//          if (simTrackIt == simTracks.end()) continue;
           vh_sim_trackPt = simTrackIt->second.momentum().pt();
         }
-
-
 
 
 
