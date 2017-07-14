@@ -32,7 +32,8 @@ process.maxEvents = cms.untracked.PSet(
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring('file:step2_TenMuExtendedE_0_200.root'),
     secondaryFileNames = cms.untracked.vstring(),
-    skipEvents = cms.untracked.uint32(0)
+    #skipEvents = cms.untracked.uint32(0),
+    #eventsToProcess = cms.untracked.VEventRange('1:952-1:952')
 )
 
 process.options = cms.untracked.PSet(
@@ -80,10 +81,11 @@ process.analysis = cms.EDAnalyzer('VectorHitsBuilderValidation',
     VH_acc = cms.InputTag("siPhase2VectorHits", "vectorHitsAccepted"),
     VH_rej = cms.InputTag("siPhase2VectorHits", "vectorHitsRejected"),
     CPE = cms.ESInputTag("phase2StripCPEESProducer", "Phase2StripCPE"),
-    links = cms.InputTag("simSiPixelDigis", "Tracker")
+    links = cms.InputTag("simSiPixelDigis", "Tracker"),
+    trackingParticleSrc = cms.InputTag('mix', 'MergedTrackTruth'),
 )
 process.TFileService = cms.Service('TFileService',
-    fileName = cms.string('file:VHs_validation_TenMu.root')
+    fileName = cms.string('file:VHs_validation_TenMu_new.root')
 )
 
 

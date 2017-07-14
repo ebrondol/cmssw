@@ -1,3 +1,6 @@
+#include "SimDataFormats/TrackingAnalysis/interface/TrackingParticle.h"
+#include "SimDataFormats/TrackingAnalysis/interface/TrackingParticleFwd.h"
+#include "SimTracker/TrackerHitAssociation/interface/ClusterTPAssociation.h"
 #include "RecoLocalTracker/SiPhase2VectorHitBuilder/test/VectorHitsValidation.h"
 #include "Geometry/TrackerGeometryBuilder/interface/StackGeomDet.h"
 #include "DataFormats/Phase2TrackerDigi/interface/Phase2TrackerDigi.h"
@@ -14,6 +17,7 @@ VectorHitsBuilderValidation::VectorHitsBuilderValidation(const edm::ParameterSet
   simHitsToken_ = consumes< edm::PSimHitContainer >(edm::InputTag("g4SimHits", "TrackerHitsPixelBarrelLowTof"));
   simTracksToken_ = consumes< edm::SimTrackContainer >(edm::InputTag("g4SimHits"));
   simVerticesToken_ = consumes< edm::SimVertexContainer >(edm::InputTag("g4SimHits")); 
+  trackingParticleToken_ = consumes< TrackingParticleCollection >(conf.getParameter<edm::InputTag>("trackingParticleSrc"));
 }
 
 VectorHitsBuilderValidation::~VectorHitsBuilderValidation() { 
@@ -148,6 +152,24 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
   eventSetup.get< IdealMagneticFieldRecord >().get(magFieldHandle);
   magField = magFieldHandle.product();
 
+  //Tracking Particle collection
+  edm::Handle<TrackingParticleCollection>  TPCollectionH;
+  event.getByToken(trackingParticleToken_,TPCollectionH);
+
+  auto clusterTPList = std::make_unique<ClusterTPAssociation>(TPCollectionH);
+  std::map<std::pair<size_t, EncodedEventId>, TrackingParticleRef> mapping;
+
+  for (TrackingParticleCollection::size_type itp = 0; itp < TPCollectionH.product()->size(); ++itp) {
+    TrackingParticleRef trackingParticle(TPCollectionH, itp);
+    EncodedEventId eid(trackingParticle->eventId());
+    for (std::vector<SimTrack>::const_iterator itrk  = trackingParticle->g4Track_begin(); 
+                                               itrk != trackingParticle->g4Track_end(); ++itrk) {
+      std::pair<uint32_t, EncodedEventId> trkid(itrk->trackId(), eid);
+      LogTrace("VectorHitsBuilderValidation") << "creating map for id: " << trkid.first << " with tp: " << trackingParticle.key() ;
+      mapping.insert(std::make_pair(trkid, trackingParticle));
+    }
+  }
+
   //set up for tree
   int eventNum;
   int layer;
@@ -165,7 +187,7 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
   float QOverPT, QOverP;
   float chi2;
 
-  int low_sim_trackId, upp_sim_trackId;
+  int low_tp_id, upp_tp_id;
   float vh_sim_trackPt;
   float sim_x_local, sim_y_local;
   float sim_x_global, sim_y_global, sim_z_global;
@@ -200,8 +222,8 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
   tree -> Branch("phi",&phi,"phi/F");
   tree -> Branch("QOverP",&QOverP,"QOverP/F");
   tree -> Branch("QOverPT",&QOverPT,"QOverPT/F");
-  tree -> Branch("low_sim_trackId",&low_sim_trackId,"low_sim_trackId/I");
-  tree -> Branch("upp_sim_trackId",&upp_sim_trackId,"upp_sim_trackId/I");
+  tree -> Branch("low_tp_id",&low_tp_id,"low_tp_id/I");
+  tree -> Branch("upp_tp_id",&upp_tp_id,"upp_tp_id/I");
   tree -> Branch("vh_sim_trackPt",&vh_sim_trackPt,"vh_sim_trackPt/F");
   tree -> Branch("sim_x_local",&sim_x_local,"sim_x_local/F");
   tree -> Branch("sim_y_local",&sim_y_local,"sim_y_local/F");
@@ -432,47 +454,62 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
         const GeomDetUnit* geomDetUpper = stackDet->upperDet();
         printCluster(geomDetUpper,vhIt->upperClusterRef());
         LogTrace("VectorHitsBuilderValidation") << "\t global pos upper " << vhIt->upperGlobalPos() << std::endl;
-        //LogTrace("VectorHitsBuilderValidation") << "\t global posErr upper " << vhIt->upperGlobalPosErr() << std::endl;
 
         //comparison with SIM hits
         LogDebug("VectorHitsBuilderValidation") << "comparison Clusters with sim hits ... " << std::endl;
         std::vector< unsigned int > clusterSimTrackIds;
+        std::vector< unsigned int > clusterSimTrackIdsUpp;
         std::set<std::pair<uint32_t, EncodedEventId> > simTkIds;
+        const GeomDetUnit* geomDetUnit_low(tkGeom->idToDetUnit(lowerDetId));
+        LogTrace("VectorHitsBuilderValidation") << " lowerDetID : " << lowerDetId.rawId();
+        const GeomDetUnit* geomDetUnit_upp(tkGeom->idToDetUnit(upperDetId));
+        LogTrace("VectorHitsBuilderValidation") << " upperDetID : " << upperDetId.rawId();
 
-        low_sim_trackId = 0;
         for (unsigned int istr(0); istr < (*(vhIt->lowerClusterRef().cluster_phase2OT())).size(); ++istr) {
           uint32_t channel = Phase2TrackerDigi::pixelToChannel((*(vhIt->lowerClusterRef().cluster_phase2OT())).firstRow() + istr, (*(vhIt->lowerClusterRef().cluster_phase2OT())).column());
-          DetId detIdCluster = geomDetLower->geographicalId();
-          unsigned int LowerSimTrackId(getSimTrackId(siphase2SimLinks, detIdCluster, channel));
-          std::vector<std::pair<uint32_t, EncodedEventId> > trkid(getSimTrackIds(siphase2SimLinks, detIdCluster, channel));
+          unsigned int LowerSimTrackId(getSimTrackId(siphase2SimLinks, lowerDetId, channel));
+          std::vector<std::pair<uint32_t, EncodedEventId> > trkid(getSimTrackIds(siphase2SimLinks, lowerDetId, channel));
           if (trkid.size()==0) continue;
           clusterSimTrackIds.push_back(LowerSimTrackId);
           simTkIds.insert(trkid.begin(),trkid.end());
-          low_sim_trackId = LowerSimTrackId;
           LogTrace("VectorHitsBuilderValidation") << "LowerSimTrackId " << LowerSimTrackId << std::endl;
         }
-
-        upp_sim_trackId = 0;
+        // In the case of PU, we need the TPs to find the proper SimTrackID
+	for (std::set<std::pair<uint32_t, EncodedEventId> >::const_iterator iset  = simTkIds.begin(); 
+	     iset != simTkIds.end(); iset++) {
+	  auto ipos = mapping.find(*iset);
+	  if (ipos != mapping.end()) {
+	    LogTrace("VectorHitsBuilderValidation") << "lower cluster in detid: " << lowerDetId.rawId() << " from tp: " << ipos->second.key() << " " << iset->first;
+	    LogTrace("VectorHitsBuilderValidation") << "with pt(): " << (*ipos->second).pt();
+            low_tp_id = ipos->second.key();
+            vh_sim_trackPt = (*ipos->second).pt();
+	  }
+        }
+	
+        simTkIds.clear();
         for (unsigned int istr(0); istr < (*(vhIt->upperClusterRef().cluster_phase2OT())).size(); ++istr) {
           uint32_t channel = Phase2TrackerDigi::pixelToChannel((*(vhIt->upperClusterRef().cluster_phase2OT())).firstRow() + istr, (*(vhIt->upperClusterRef().cluster_phase2OT())).column());
-          DetId detIdCluster = geomDetUpper->geographicalId();
-          unsigned int UpperSimTrackId(getSimTrackId(siphase2SimLinks, detIdCluster, channel));
-          std::vector<std::pair<uint32_t, EncodedEventId> > trkid(getSimTrackIds(siphase2SimLinks, detIdCluster, channel));
+          unsigned int UpperSimTrackId(getSimTrackId(siphase2SimLinks, upperDetId, channel));
+          std::vector<std::pair<uint32_t, EncodedEventId> > trkid(getSimTrackIds(siphase2SimLinks, upperDetId, channel));
           if (trkid.size()==0) continue;
-          //clusterSimTrackIds.push_back(UpperSimTrackId);
-          upp_sim_trackId = UpperSimTrackId;
-          //simTkIds.insert(trkid.begin(),trkid.end());
+          clusterSimTrackIdsUpp.push_back(UpperSimTrackId);
+          simTkIds.insert(trkid.begin(),trkid.end());
+          LogTrace("VectorHitsBuilderValidation") << "UpperSimTrackId " << UpperSimTrackId << std::endl;
         }
-
+        // In the case of PU, we need the TPs to find the proper SimTrackID
+        for (std::set<std::pair<uint32_t, EncodedEventId> >::const_iterator iset  = simTkIds.begin();
+             iset != simTkIds.end(); iset++) {
+          auto ipos = mapping.find(*iset);
+          if (ipos != mapping.end()) {
+            LogTrace("VectorHitsBuilderValidation") << "upper cluster in detid: " << upperDetId.rawId() << " from tp: " << ipos->second.key() << " " << iset->first << std::endl;
+            upp_tp_id = ipos->second.key();
+          }
+        }
         //compute if the vhits is 'true' or 'false' and save sim pT
         std::pair<bool,uint32_t> istrue = isTrue(*vhIt, siphase2SimLinks, detId);
         vh_isTrue = 0;
         if(istrue.first){
           vh_isTrue = 1;
-          //saving info of 'signal' track
-          std::map< unsigned int, SimTrack >::const_iterator simTrackIt(simTracks.find(istrue.second));
-//          if (simTrackIt == simTracks.end()) continue;
-          vh_sim_trackPt = simTrackIt->second.momentum().pt();
         }
 
 
@@ -577,10 +614,6 @@ void VectorHitsBuilderValidation::analyze(const edm::Event& event, const edm::Ev
         histogramLayer->second.curvature->Fill(curvature);
 
         //stub width
-        const GeomDetUnit* geomDetUnit_low(tkGeom->idToDetUnit(lowerDetId));
-        LogTrace("VectorHitsBuilderValidation") << " lowerDetID : " << lowerDetId.rawId();
-        const GeomDetUnit* geomDetUnit_upp(tkGeom->idToDetUnit(upperDetId));
-        LogTrace("VectorHitsBuilderValidation") << " upperDetID : " << upperDetId.rawId();
 
         auto && lparamsUpp = cpe->localParameters( *vhIt->upperClusterRef().cluster_phase2OT(), *geomDetUnit_upp );
         LogTrace("VectorHitsBuilderValidation") << " upper local pos (in its sor):" << lparamsUpp.first;
