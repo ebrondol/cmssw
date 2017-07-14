@@ -111,6 +111,7 @@ class VectorHitsBuilderValidation : public edm::EDAnalyzer {
         edm::EDGetTokenT< edm::PSimHitContainer > simHitsToken_;
         edm::EDGetTokenT< edm::SimTrackContainer> simTracksToken_;
         edm::EDGetTokenT< edm::SimVertexContainer > simVerticesToken_;
+        edm::EDGetTokenT<TrackingParticleCollection> trackingParticleToken_;
         //SiPixelVectorHitBuilderAlgorithmBase *algo;
 
         const TrackerGeometry* tkGeom;
