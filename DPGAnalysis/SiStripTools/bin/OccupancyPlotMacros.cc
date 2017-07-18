@@ -579,6 +579,8 @@ TCanvas* drawMap(const char* cname, const TH1* hval, const TProfile* averadius, 
   
   // CMS label
   TLatex *cmslab = new TLatex(0.305,0.965,"CMS Simulation Preliminary");
+  //TLatex *cmslab = new TLatex(0.371,0.965,"CMS Phase-2 Simulation Preliminary");
+  //TLatex *cmslab = new TLatex(0.276,0.965,"CMS Phase-2 Simulation");
   cmslab->SetNDC();
   cmslab->SetTextFont(42);
   cmslab->SetTextSize(0.04);
