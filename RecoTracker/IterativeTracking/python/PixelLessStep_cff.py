@@ -402,10 +402,10 @@ trackingPhase2PU140.toModify(pixelLessStepSelector,
             minNumberLayers = 1,
             maxNumberLostLayers = 2,
             minNumber3DLayers = 0,
-            d0_par1 = ( 0.6, 4.0 ),
-            dz_par1 = ( 0.45, 4.0 ),
-            d0_par2 = ( 0.7, 4.0 ),
-            dz_par2 = ( 0.55, 4.0 )
+            d0_par1 = ( 100., 4.0 ),
+            dz_par1 = ( 100., 4.0 ),
+            d0_par2 = ( 100., 4.0 ),
+            dz_par2 = ( 100., 4.0 )
         ),
     ),
     vertices = cms.InputTag("pixelVertices")#end of vpset
