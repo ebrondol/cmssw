@@ -1,5 +1,5 @@
 #include "RecoLocalTracker/SiPhase2VectorHitBuilder/interface/VectorHitBuilderAlgorithm.h"
-#include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
+#include "Geometry/CommonDetUnit/interface/GeomDet.h"
 #include "Geometry/CommonTopologies/interface/PixelTopology.h"
 #include "DataFormats/TrackerRecHit2D/interface/VectorHit2D.h"
 
