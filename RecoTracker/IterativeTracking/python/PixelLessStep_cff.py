@@ -408,7 +408,7 @@ trackingPhase2PU140.toModify(pixelLessStepSelector,
             dz_par2 = ( 100., 4.0 )
         ),
     ),
-    vertices = cms.InputTag("pixelVertices")#end of vpset
+    #vertices = cms.InputTag("pixelVertices")#end of vpset
 ) 
 
 trackingPhase2PU140.toModify(pixelLessStepSelector.trackSelectors[2], name = 'pixelLessStep')
