@@ -27,13 +27,17 @@ TrackerRecoGeometryESProducer::TrackerRecoGeometryESProducer(const edm::Paramete
     // The default parameter ("") makes this change transparent to the user
     // See FastSimulation/Configuration/data/ for examples of cfi's.
     geoLabel = p.getUntrackedParameter<std::string>("trackerGeometryLabel","");
+//    _usePhase2Stacks = false;
+//    if (p.existsAs<edm::InputTag>("usePhase2Stacks")) {
+      _usePhase2Stacks = p.getParameter<bool>("usePhase2Stacks");
+//      std::cout << "exists useStacks! " << _usePhase2Stacks << std::endl;
+//    }
 }
 
 TrackerRecoGeometryESProducer::~TrackerRecoGeometryESProducer() {}
 
 std::shared_ptr<GeometricSearchTracker> 
 TrackerRecoGeometryESProducer::produce(const TrackerRecoGeometryRecord & iRecord){ 
-
 
   edm::ESHandle<TrackerGeometry> tG;
   iRecord.getRecord<TrackerDigiGeometryRecord>().get( geoLabel, tG );
@@ -43,7 +47,7 @@ TrackerRecoGeometryESProducer::produce(const TrackerRecoGeometryRecord & iRecord
   const TrackerTopology *tTopo=tTopoHand.product();
 
   GeometricSearchTrackerBuilder builder;
-  _tracker  = std::shared_ptr<GeometricSearchTracker>(builder.build( tG->trackerDet(), &(*tG), tTopo ));
+  _tracker  = std::shared_ptr<GeometricSearchTracker>(builder.build( tG->trackerDet(), &(*tG), tTopo, _usePhase2Stacks ));
   return _tracker;
 }
 
