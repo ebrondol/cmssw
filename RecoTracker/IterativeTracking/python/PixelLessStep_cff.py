@@ -103,7 +103,7 @@ from Configuration.Eras.Modifier_trackingPhase2PU140_cff import trackingPhase2PU
 trackingPhase2PU140.toModify(pixelLessStepSeedLayers,
     layerList = [
         'TOB1+TOB2', 'TOB2+TOB3',
-        'TOB3+TOB4', 'TOB4+TOB5', 
+#        'TOB3+TOB4', 'TOB4+TOB5', 
         'TID1_pos+TID2_pos', 'TID1_neg+TID2_neg'
     ],
     TOB = cms.PSet(
