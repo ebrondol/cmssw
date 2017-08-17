@@ -193,12 +193,15 @@ reco::RecoToSimCollection QuickTrackAssociatorByHitsImpl::associateRecoToSimImpl
 			const edm::Ref<TrackingParticleCollection>& trackingParticleRef=iTrackingParticleQualityPair->first;
 			double numberOfSharedClusters=iTrackingParticleQualityPair->second;
 			double numberOfValidTrackClusters=weightedNumberOfTrackClusters(pTrack->recHitsBegin(), pTrack->recHitsEnd());
+                        LogTrace("QuickTrackAssociator") << "numberOfSharedClusters    : " << numberOfSharedClusters;
+                        LogTrace("QuickTrackAssociator") << "numberOfValidTrackClusters: " << numberOfValidTrackClusters;
 
 			if( numberOfSharedClusters == 0.0 ) continue; // No point in continuing if there was no association
 
 			//if electron subtract double counting
 			if( abs( trackingParticleRef->pdgId() ) == 11 && (trackingParticleRef->g4Track_end() - trackingParticleRef->g4Track_begin()) > 1 )
 			{
+                                LogTrace("QuickTrackAssociator") << "getDoubleCount.";
 				numberOfSharedClusters-=getDoubleCount( hitOrClusterAssociator, pTrack->recHitsBegin(), pTrack->recHitsEnd(), trackingParticleRef );
 			}
 
@@ -206,11 +209,16 @@ reco::RecoToSimCollection QuickTrackAssociatorByHitsImpl::associateRecoToSimImpl
 			if( absoluteNumberOfHits_ ) quality = numberOfSharedClusters;
 			else if( numberOfValidTrackClusters != 0.0 ) quality = numberOfSharedClusters / numberOfValidTrackClusters;
 			else quality=0;
+                        if(quality>1.0) edm::LogError("QuickTrackAssociator") << "quality bigger than 1!!";
+
 			if( quality > cutRecoToSim_ && !(threeHitTracksAreSpecial_ && pTrack->numberOfValidHits() == 3 && numberOfSharedClusters < 3.0) )
 			{
 				// Getting the RefToBase is dependent on the type of trackCollection, so delegate that to an overload.
 				returnValue.insert( ::getRefToTrackAt(trackCollection,i), std::make_pair( trackingParticleRef, quality ) );
 			}
+                        LogTrace("QuickTrackAssociator") << "numberOfSharedClusters    : " << numberOfSharedClusters;
+                        LogTrace("QuickTrackAssociator") << "numberOfValidTrackClusters: " << numberOfValidTrackClusters;
+                        LogTrace("QuickTrackAssociator") << "quality of the track: " << quality;
 		}
 	}
 	returnValue.post_insert();
@@ -258,6 +266,7 @@ reco::SimToRecoCollection QuickTrackAssociatorByHitsImpl::associateSimToRecoImpl
 			//if electron subtract double counting
 			if (abs(trackingParticleRef->pdgId())==11 && (trackingParticleRef->g4Track_end() - trackingParticleRef->g4Track_begin()) > 1 )
 			{
+                                LogTrace("QuickTrackAssociator") << "getDoubleCount.";
 				numberOfSharedClusters -= getDoubleCount( hitOrClusterAssociator, pTrack->recHitsBegin(), pTrack->recHitsEnd(), trackingParticleRef );
 			}
 
@@ -267,6 +276,7 @@ reco::SimToRecoCollection QuickTrackAssociatorByHitsImpl::associateSimToRecoImpl
 			else if( simToRecoDenominator_==denomsim && numberOfSimulatedHits != 0 ) quality = numberOfSharedClusters/static_cast<double>(numberOfSimulatedHits);
 			else if( simToRecoDenominator_==denomreco && numberOfValidTrackClusters != 0 ) quality=purity;
 			else quality=0;
+                        if(quality>1.0) edm::LogError("QuickTrackAssociator") << "quality bigger than 1!!";
 
 			if( quality>qualitySimToReco_ && !( threeHitTracksAreSpecial_ && numberOfSimulatedHits==3 && numberOfSharedClusters<3.0 ) && ( absoluteNumberOfHits_ || (purity>puritySimToReco_) ) )
 			{
@@ -282,6 +292,7 @@ reco::SimToRecoCollection QuickTrackAssociatorByHitsImpl::associateSimToRecoImpl
 
 template<typename T_TPCollection,typename iter> std::vector<std::pair<edm::Ref<TrackingParticleCollection>,double> > QuickTrackAssociatorByHitsImpl::associateTrack( const TrackerHitAssociator& hitAssociator, const T_TPCollection& trackingParticles, const TrackingParticleRefKeySet *trackingParticleKeys, iter begin, iter end ) const
 {
+        LogTrace("QuickTrackAssociator") << "QuickTrackAssociatorByHitsImpl::associateTrack1";
 	// The pairs in this vector have a Ref to the associated TrackingParticle as "first" and the weighted number of associated hits as "second"
 	std::vector< std::pair<edm::Ref<TrackingParticleCollection>,double> > returnValue;
 
@@ -323,6 +334,7 @@ template<typename T_TPCollection,typename iter> std::vector<std::pair<edm::Ref<T
 
 template<typename T_TPCollection,typename iter> std::vector< std::pair<edm::Ref<TrackingParticleCollection>,double> > QuickTrackAssociatorByHitsImpl::associateTrack( const ClusterTPAssociation& clusterToTPMap, const T_TPCollection& trackingParticles, const TrackingParticleRefKeySet *trackingParticleKeys, iter begin, iter end ) const
 {
+        LogTrace("QuickTrackAssociator") << "QuickTrackAssociatorByHitsImpl::associateTrack2";
 	// Note that the trackingParticles parameter is not actually required since all the information is in clusterToTPMap,
 	// but the method signature has to match the other overload because it is called from a templated method.
 
@@ -349,6 +361,7 @@ template<typename T_TPCollection,typename iter> std::vector< std::pair<edm::Ref<
 	std::map < TrackingParticleRef, double > lmap;
 	for( std::vector<OmniClusterRef>::const_iterator it=oClusters.begin(); it != oClusters.end(); ++it )
 	{
+                LogTrace("QuickTrackAssociator") << "\tanother cluster! " ;
 		auto range = clusterToTPMap.equal_range(*it);
 		const double weight = it->isPixel() ? pixelHitWeight_ : 1.0;
 		if( range.first != range.second )
@@ -384,12 +397,15 @@ template<typename T_TPCollection,typename iter> std::vector< std::pair<edm::Ref<
 				auto jpos=lmap.find( trackingParticle );
 				if( jpos != lmap.end() ) jpos->second += weight;
 				else lmap.insert( std::make_pair( trackingParticle, weight ) );
+                                LogTrace("QuickTrackAssociator") << "\twith weight: " << weight ;
 			}
 		}
 	}
+        LogTrace("QuickTrackAssociator") << "  lmap size: " << lmap.size();
 	// now copy the map to returnValue
 	for( auto ip=lmap.begin(); ip != lmap.end(); ++ip )
 	{
+                LogTrace("QuickTrackAssociator") << "  total clusters: " << ip->second ;
 		returnValue.push_back( std::make_pair( ip->first, ip->second ) );
 	}
 	return returnValue;
@@ -399,6 +415,7 @@ template<typename iter> std::vector<OmniClusterRef> QuickTrackAssociatorByHitsIm
 {
   std::vector<OmniClusterRef> returnValue;
   for (iter iRecHit = begin; iRecHit != end; ++iRecHit) {
+    LogTrace("QuickTrackAssociator") << "  detId: " << getHitFromIter(iRecHit)->geographicalId().rawId();
     const TrackingRecHit* rhit = getHitFromIter(iRecHit);
     if (rhit->isValid()) {
       int subdetid = rhit->geographicalId().subdetId();
@@ -455,6 +472,7 @@ template<typename iter> std::vector<OmniClusterRef> QuickTrackAssociatorByHitsIm
       }
     }
   }
+  LogTrace("QuickTrackAssociator") << "  total clusters: " << returnValue.size();
   return returnValue;
 }
 
@@ -557,6 +575,7 @@ template<typename iter> double QuickTrackAssociatorByHitsImpl::getDoubleCount( c
 
 template<typename iter> double QuickTrackAssociatorByHitsImpl::getDoubleCount( const ClusterTPAssociation& clusterToTPList, iter startIterator, iter endIterator, TrackingParticleRef associatedTrackingParticle ) const
 {
+  LogTrace("QuickTrackAssociator") << "QuickTrackAssociatorByHitsImpl::getDoubleCount";
 	// This code here was written by Subir Sarkar. I'm just splitting it off into a
 	// separate method. - Grimes 01/May/2014
 
@@ -565,11 +584,11 @@ template<typename iter> double QuickTrackAssociatorByHitsImpl::getDoubleCount( c
 
 	for( iter iHit=startIterator; iHit != endIterator; iHit++ )
 	{
-		int idcount=0;
-
 		std::vector < OmniClusterRef > oClusters=getMatchedClusters( iHit, iHit + 1 );  //only for the cluster being checked
 		for( std::vector<OmniClusterRef>::const_iterator it=oClusters.begin(); it != oClusters.end(); ++it )
 		{
+		        int idcount=0;
+
 			auto range = clusterToTPList.equal_range(*it);
 			if( range.first != range.second )
 			{
@@ -582,13 +601,14 @@ template<typename iter> double QuickTrackAssociatorByHitsImpl::getDoubleCount( c
 					}
 				}
 			}
+
+		        if( idcount > 1 ) {
+                          const auto subdetId = getHitFromIter(iHit)->geographicalId().subdetId();
+                          const double weight = (subdetId == PixelSubdetector::PixelBarrel || subdetId == PixelSubdetector::PixelEndcap) ?  pixelHitWeight_ : 1.0;
+                          doubleCount += weight*(idcount - 1);
+                        }
 		}
 
-		if( idcount > 1 ) {
-                  const auto subdetId = getHitFromIter(iHit)->geographicalId().subdetId();
-                  const double weight = (subdetId == PixelSubdetector::PixelBarrel || subdetId == PixelSubdetector::PixelEndcap) ?  pixelHitWeight_ : 1.0;
-                  doubleCount += weight*(idcount - 1);
-                }
 	}
 
 	return doubleCount;
@@ -625,6 +645,7 @@ reco::RecoToSimCollectionSeed QuickTrackAssociatorByHitsImpl::associateRecoToSim
 			//if electron subtract double counting
 			if( abs( trackingParticleRef->pdgId() ) == 11 && (trackingParticleRef->g4Track_end() - trackingParticleRef->g4Track_begin()) > 1 )
 			{
+                                LogTrace("QuickTrackAssociator") << "getDoubleCount.";
 				if( clusterToTPMap_ ) numberOfSharedClusters-=getDoubleCount( *clusterToTPMap_, pSeed->recHits().first, pSeed->recHits().second, trackingParticleRef );
 				else numberOfSharedClusters-=getDoubleCount( *hitAssociator_, pSeed->recHits().first, pSeed->recHits().second, trackingParticleRef );
 			}
@@ -633,6 +654,7 @@ reco::RecoToSimCollectionSeed QuickTrackAssociatorByHitsImpl::associateRecoToSim
 			if( absoluteNumberOfHits_ ) quality = numberOfSharedClusters;
 			else if( numberOfValidTrackClusters != 0.0 ) quality = numberOfSharedClusters / numberOfValidTrackClusters;
 			else quality=0;
+                        if(quality>1.0) edm::LogError("QuickTrackAssociator") << "quality bigger than 1!!";
 
 			if( quality > cutRecoToSim_ && !(threeHitTracksAreSpecial_ && pSeed->nHits() == 3 && numberOfSharedClusters < 3.0) )
 			{
@@ -685,6 +707,7 @@ reco::SimToRecoCollectionSeed QuickTrackAssociatorByHitsImpl::associateSimToReco
 			//if electron subtract double counting
 			if( abs( trackingParticleRef->pdgId() ) == 11 && (trackingParticleRef->g4Track_end() - trackingParticleRef->g4Track_begin()) > 1 )
 			{
+                                LogTrace("QuickTrackAssociator") << "getDoubleCount.";
 				if( clusterToTPMap_ ) numberOfSharedClusters-=getDoubleCount( *clusterToTPMap_, pSeed->recHits().first, pSeed->recHits().second, trackingParticleRef );
 				else numberOfSharedClusters-=getDoubleCount( *hitAssociator_, pSeed->recHits().first, pSeed->recHits().second, trackingParticleRef );
 			}
@@ -705,6 +728,7 @@ reco::SimToRecoCollectionSeed QuickTrackAssociatorByHitsImpl::associateSimToReco
 					/ static_cast<double>( numberOfSimulatedHits );
 			else if( simToRecoDenominator_ == denomreco && numberOfValidTrackClusters != 0.0 ) quality=purity;
 			else quality=0;
+                        if(quality>1.0) edm::LogError("QuickTrackAssociator") << "quality bigger than 1!!";
 
 			if( quality > qualitySimToReco_ && !(threeHitTracksAreSpecial_ && numberOfSimulatedHits == 3 && numberOfSharedClusters < 3.0)
 					&& (absoluteNumberOfHits_ || (purity > puritySimToReco_)) )
@@ -720,20 +744,21 @@ reco::SimToRecoCollectionSeed QuickTrackAssociatorByHitsImpl::associateSimToReco
 }
 
 template<typename iter> double QuickTrackAssociatorByHitsImpl::weightedNumberOfTrackClusters(iter begin, iter end) const {
+  LogTrace("QuickTrackAssociator") << "QuickTrackAssociatorByHitsImpl::weightedNumberOfTrackClusters";
 
   double weightedClusters = 0.0;
   for (iter iRecHit = begin; iRecHit != end; ++iRecHit) {
 
     const auto subdetId = getHitFromIter(iRecHit)->geographicalId().subdetId();
     const double weight = (subdetId == PixelSubdetector::PixelBarrel || subdetId == PixelSubdetector::PixelEndcap) ?  pixelHitWeight_ : 1.0;
-    LogTrace("QuickTrackAssociatorByHitsImpl") << "  detId: " << getHitFromIter(iRecHit)->geographicalId().rawId();
-    LogTrace("QuickTrackAssociatorByHitsImpl") << "  weight: " << weight;
+//    LogTrace("QuickTrackAssociator") << "  detId: " << getHitFromIter(iRecHit)->geographicalId().rawId();
+//    LogTrace("QuickTrackAssociator") << "  weight: " << weight;
     std::vector < OmniClusterRef > oClusters=getMatchedClusters( iRecHit, iRecHit + 1 );  //only for the cluster being checked
     for( std::vector<OmniClusterRef>::const_iterator it=oClusters.begin(); it != oClusters.end(); ++it ) {
       weightedClusters += weight;
     }
   }
-  LogTrace("QuickTrackAssociatorByHitsImpl") << "  total weighted clusters: " << weightedClusters;
 
+  LogTrace("QuickTrackAssociator") << "  total clusters: " << weightedClusters;
   return weightedClusters;
 }
