@@ -5,6 +5,8 @@
 
 #include "SimDataFormats/Associations/interface/TrackToTrackingParticleAssociator.h"
 
+#include "SimTracker/TrackerHitAssociation/interface/TrackerHitAssociator.h"
+
 #include "SimTracker/TrackerHitAssociation/interface/ClusterTPAssociation.h"
 
 #include "FWCore/Utilities/interface/IndexSet.h"
@@ -179,6 +181,8 @@ public:
 
   // called only by weightedNumberOfTrackClusters(..., ClusterTPAssociation)
   template<typename iter> double weightedNumberOfTrackClusters(iter begin, iter end) const ;
+
+  const TrackingRecHit* getMostProbableHit(const SiTrackerMultiRecHit*& mhit) const;
 
   /** @brief creates either a ClusterTPAssociation OR a TrackerHitAssociator and stores it in the provided unique_ptr. The other will be null.
    *
