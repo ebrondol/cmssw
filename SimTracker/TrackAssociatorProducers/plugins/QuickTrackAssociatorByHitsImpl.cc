@@ -797,12 +797,3 @@ template<typename iter> double QuickTrackAssociatorByHitsImpl::weightedNumberOfT
   return weightedClusters;
 }
 
-const TrackingRecHit* QuickTrackAssociatorByHitsImpl::getMostProbableHit(const SiTrackerMultiRecHit*& mHit) const{
-  std::vector<const TrackingRecHit*> componenthits = mHit->recHits();
-  int idmostprobable = 0;
-  for (unsigned int i=0; i < mHit->weights().size(); ++i){
-    if(mHit->weight(i) > mHit->weight(idmostprobable)) idmostprobable=i;
-  }
-
-  return componenthits[idmostprobable];
-}
