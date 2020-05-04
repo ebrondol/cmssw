@@ -140,7 +140,7 @@ void CaloParticleDebugger::analyze(const edm::Event& iEvent, const edm::EventSet
   std::vector<int> sorted_tracks_idx(tracks.size());
   iota(begin(sorted_tracks_idx), end(sorted_tracks_idx), 0);
   sort(begin(sorted_tracks_idx), end(sorted_tracks_idx), [&tracks](int i, int j) {
-    return tracks[i].momentum().eta() < tracks[j].momentum().eta();
+    return tracks[i].momentum().energy() > tracks[j].momentum().energy();
   });
 
   iEvent.getByToken(genParticlesToken_, genParticlesH);
@@ -201,10 +201,11 @@ void CaloParticleDebugger::analyze(const edm::Event& iEvent, const edm::EventSet
 
   if (printSimTracks_) {
     std::cout << "Printing SimTracks information" << std::endl;
-    std::cout << "IDX\tTrackId\tPDGID\tMOMENTUM(x,y,z,E)\tVertexIdx\tGenPartIdx" << std::endl;
+    std::cout << "IDX\tTrackId\tPDGID\tMOMENTUM(x,y,z,E)\tVertexIdx\tGenPartIdx\teta\tphi" << std::endl;
     for (auto i : sorted_tracks_idx) {
       auto const& t = tracks[i];
-      std::cout << i << "\t" << t.trackId() << "\t" << t << std::endl;
+      std::cout << i << "\t" << t.trackId() << "\t" << t
+        << ", " << t.momentum().eta() << ", " << t.momentum().phi() <<  std::endl;
     }
   }
 
@@ -247,12 +248,12 @@ void CaloParticleDebugger::analyze(const edm::Event& iEvent, const edm::EventSet
               << " p_t: " << t.momentum().Pt() << std::endl;
     double total_sim_energy = 0.;
     std::cout << "--> Overall simclusters's size: " << cp.simClusters().size() << std::endl;
-    // All the next mess just to print the simClusters ordered by eta
+    // All the next mess just to print the simClusters ordered by decreasing energy
     auto const& simcs = cp.simClusters();
     std::vector<int> sorted_sc_idx(simcs.size());
     iota(begin(sorted_sc_idx), end(sorted_sc_idx), 0);
     sort(begin(sorted_sc_idx), end(sorted_sc_idx), [&simcs](int i, int j) {
-      return simcs[i]->momentum().eta() < simcs[j]->momentum().eta();
+      return simcs[i]->energy() > simcs[j]->energy();
     });
     for (auto i : sorted_sc_idx) {
       auto const& simcl = *(simcs[i]);
