@@ -201,11 +201,12 @@ void CaloParticleDebugger::analyze(const edm::Event& iEvent, const edm::EventSet
 
   if (printSimTracks_) {
     std::cout << "Printing SimTracks information" << std::endl;
-    std::cout << "IDX\tTrackId\tPDGID\tMOMENTUM(x,y,z,E)\tVertexIdx\tGenPartIdx\teta\tphi" << std::endl;
+    std::cout << "IDX\tTrackId\tPDGID\tMOMENTUM(x,y,z,E)\tVertexIdx\tGenPartIdx\teta\tphi\tpt" << std::endl;
     for (auto i : sorted_tracks_idx) {
       auto const& t = tracks[i];
       std::cout << i << "\t" << t.trackId() << "\t" << t
-        << ", " << t.momentum().eta() << ", " << t.momentum().phi() <<  std::endl;
+        << ", " << t.momentum().eta() << ", " << t.momentum().phi()
+        << ", " << t.momentum().pt() << std::endl;
     }
   }
 

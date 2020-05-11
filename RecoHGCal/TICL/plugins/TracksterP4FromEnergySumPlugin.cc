@@ -80,7 +80,7 @@ namespace ticl {
     }
     std::transform(
         std::begin(barycentre), std::end(barycentre), std::begin(barycentre), [&energy](double val) -> double {
-          return energy >= 0. ? val / energy : val;
+          return energy > 0. ? val / energy : val;
         });
 
     math::XYZVector direction(barycentre[0] - vertex.x(), barycentre[1] - vertex.y(), barycentre[2] - vertex.z());
@@ -91,7 +91,7 @@ namespace ticl {
 
     math::XYZTLorentzVector cartesian(direction.X(), direction.Y(), direction.Z(), energy);
     // Convert px, py, pz, E vector to CMS standard pt/eta/phi/m vector
-    TracksterP4FromEnergySum::LorentzVector p4(cartesian);
+    TracksterMomentumPluginBase::LorentzVector p4(cartesian);
     return std::tuple(p4, raw_energy);
   }
 }  // namespace ticl
