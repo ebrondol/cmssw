@@ -7,6 +7,8 @@
 #include "HGCGraph.h"
 #include "DataFormats/Common/interface/ValueMap.h"
 
+#include <algorithm> // std::max
+
 template <typename TILES>
 void HGCGraphT<TILES>::makeAndConnectDoublets(const TILES &histo,
                                               const std::vector<TICLSeedingRegion> &regions,
@@ -226,7 +228,8 @@ void HGCGraphT<TILES>::findNtuplets(std::vector<HGCDoublet::HGCntuplet> &foundNt
                                     std::vector<int> &seedIndices,
                                     const unsigned int minClustersPerNtuplet,
                                     const bool outInDFS,
-                                    unsigned int maxOutInHops) {
+                                    unsigned int maxOutInHops,
+                                    std::vector<unsigned int> &outInHopsV) {
   HGCDoublet::HGCntuplet tmpNtuplet;
   tmpNtuplet.reserve(minClustersPerNtuplet);
   std::vector<std::pair<unsigned int, unsigned int>> outInToVisit;
@@ -235,9 +238,11 @@ void HGCGraphT<TILES>::findNtuplets(std::vector<HGCDoublet::HGCntuplet> &foundNt
     outInToVisit.clear();
     int seedIndex = allDoublets_[rootDoublet].seedIndex();
     int outInHops = 0;
+    unsigned int outInHopsPerformed = 0;
     allDoublets_[rootDoublet].findNtuplets(
         allDoublets_, tmpNtuplet, seedIndex, outInDFS, outInHops, maxOutInHops, outInToVisit);
     while (!outInToVisit.empty()) {
+      outInHopsPerformed = std::max(outInHopsPerformed, outInToVisit.back().second);
       allDoublets_[outInToVisit.back().first].findNtuplets(
           allDoublets_, tmpNtuplet, seedIndex, outInDFS, outInToVisit.back().second, maxOutInHops, outInToVisit);
       outInToVisit.pop_back();
@@ -246,6 +251,7 @@ void HGCGraphT<TILES>::findNtuplets(std::vector<HGCDoublet::HGCntuplet> &foundNt
     if (tmpNtuplet.size() > minClustersPerNtuplet) {
       foundNtuplets.push_back(tmpNtuplet);
       seedIndices.push_back(seedIndex);
+      outInHopsV.push_back(outInHopsPerformed);
     }
   }
 }
