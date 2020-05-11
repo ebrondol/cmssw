@@ -41,7 +41,8 @@ public:
                     std::vector<int> &seedIndices,
                     const unsigned int minClustersPerNtuplet,
                     const bool outInDFS,
-                    const unsigned int maxOutInHops);
+                    const unsigned int maxOutInHops,
+                    std::vector<unsigned int> & outInHopsV);
   void clear() {
     allDoublets_.clear();
     theRootDoublets_.clear();

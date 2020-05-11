@@ -127,12 +127,14 @@ void TiclDebugger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
                      std::begin(trackster.vertex_multiplicity()), std::end(trackster.vertex_multiplicity()), 0.) /
                      trackster.vertex_multiplicity().size()
               << std::endl;
+    std::cout << " outInHopsPerformed: " << trackster.outInHopsPerformed() << std::endl;
     if (trackster.seedID().id() != 0) {
       auto const& track = tracks[trackster.seedIndex()];
       std::cout << " Seeding Track:" << std::endl;
       std::cout << "   p: " << track.p() << " pt: " << track.pt()
                 << " charge: " << track.charge() << " eta: " << track.eta()
                 << " outerEta: " << track.outerEta() << " phi: " << track.phi() << " outerPhi: " << track.outerPhi()
+                << " missingOuterHits: " << track.hitPattern().numberOfLostHits(reco::HitPattern::MISSING_OUTER_HITS)
                 << std::endl;
     }
     bestCaloParticleMatches(trackster);

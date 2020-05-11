@@ -36,6 +36,7 @@ namespace ticl {
 
     Trackster()
         : seedIndex_(0),
+          outInHopsPerformed_(0),
           time_(0.f),
           timeError_(-1.f),
           regressed_energy_(0.f),
@@ -57,6 +58,7 @@ namespace ticl {
       seedID_ = pid;
       seedIndex_ = index;
     }
+    inline void setOutInHopsPerformed(int value) { outInHopsPerformed_ = value;}
     inline void setTimeAndError(float t, float tError) {
       time_ = t;
       timeError_ = tError;
@@ -120,6 +122,7 @@ namespace ticl {
     inline const std::vector<std::array<unsigned int, 2> > &edges() const { return edges_; }
     inline const edm::ProductID &seedID() const { return seedID_; }
     inline const int seedIndex() const { return seedIndex_; }
+    inline const int outInHopsPerformed() const { return outInHopsPerformed_; }
     inline const float time() const { return time_; }
     inline const float timeError() const { return timeError_; }
     inline const float regressed_energy() const { return regressed_energy_; }
@@ -166,6 +169,9 @@ namespace ticl {
     // created the trackster. For track-based seeding the pointer to the track
     // can be cooked using the previous ProductID and this index.
     int seedIndex_;
+
+    // The number of outIn searched performed to create the Trackster
+    int outInHopsPerformed_;
 
     // We also need the pointer to the original seeding region ??
     // something like:
