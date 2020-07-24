@@ -227,7 +227,21 @@ void PatternRecognitionbyCA<TILES>::makeTracksters(
     if (isRegionalIter) {
       seedToTracksterAssociation[t.seedIndex()].push_back(i);
     }
-    result.push_back(t);
+
+    std::pair<float, float> timeTrackster(-99., -1.);
+    hgcalsimclustertime::ComputeClusterTime timeEstimator;
+    timeTrackster = timeEstimator.fixSizeHighestDensity(times, timeErrors);
+    tmp.setTimeAndError(timeTrackster.first, timeTrackster.second);
+    std::copy(std::begin(effective_cluster_idx), std::end(effective_cluster_idx), std::back_inserter(tmp.vertices()));
+    // Propagate the correct graph connections
+    tmp.edges().reserve(ntuplet.size());
+    for (auto const & t : ntuplet) {
+      std::array<unsigned int, 2> edge = {{(unsigned int) doublets[t].innerClusterId(),
+                                          (unsigned int) doublets[t].outerClusterId()}};
+      tmp.edges().push_back(edge);
+    }
+    result.push_back(tmp);
+    tracksterId++;
   }
 
   for (auto &trackster : result) {
