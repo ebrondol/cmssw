@@ -128,6 +128,7 @@ void TiclDebugger::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
                      trackster.vertex_multiplicity().size()
               << std::endl;
     std::cout << " outInHopsPerformed: " << trackster.outInHopsPerformed() << std::endl;
+    std::cout << " link connections: " << trackster.edges().size() << std::endl;
     if (trackster.seedID().id() != 0) {
       auto const& track = tracks[trackster.seedIndex()];
       std::cout << " Seeding Track:" << std::endl;

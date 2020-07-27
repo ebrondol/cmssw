@@ -303,6 +303,7 @@ void PatternRecognitionbyCA<TILES>::mergeTrackstersTRK(
       auto &outTrackster = output.back();
       tracksters[0] = output.size() - 1;
       auto updated_size = outTrackster.vertices().size();
+      auto updated_edges_size = outTrackster.edges().size();
       for (unsigned int j = 1; j < numberOfTrackstersInSeed; ++j) {
         auto &thisTrackster = input[tracksters[j]];
         updated_size += thisTrackster.vertices().size();
@@ -317,6 +318,10 @@ void PatternRecognitionbyCA<TILES>::mergeTrackstersTRK(
         std::copy(std::begin(thisTrackster.vertex_multiplicity()),
                   std::end(thisTrackster.vertex_multiplicity()),
                   std::back_inserter(outTrackster.vertex_multiplicity()));
+        outTrackster.edges().reserve(updated_edges_size);
+        std::copy(std::begin(thisTrackster.edges()),
+                  std::end(thisTrackster.edges()),
+                  std::back_inserter(outTrackster.edges()));
       }
       tracksters.resize(1);
     }
