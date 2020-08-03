@@ -47,16 +47,13 @@ private:
   hgcal::RecHitTools rhtools_;
 };
 
-
-
 TICLTrackstersValidation::TICLTrackstersValidation(const edm::ParameterSet& iConfig)
     : folder_(iConfig.getParameter<std::string>("folder")) {
-  tracksterTokens_ =
-      edm::vector_transform(iConfig.getParameter<std::vector<edm::InputTag>>("tracksterCollections"),
-                            [this](edm::InputTag const& tag) { 
-                              trackstersCollectionsNames_.emplace_back(tag.label());
-                              return consumes<std::vector<Trackster>>(tag); 
-                              });
+  tracksterTokens_ = edm::vector_transform(iConfig.getParameter<std::vector<edm::InputTag>>("tracksterCollections"),
+                                           [this](edm::InputTag const& tag) {
+                                             trackstersCollectionsNames_.emplace_back(tag.label());
+                                             return consumes<std::vector<Trackster>>(tag);
+                                           });
 
   layerClustersToken_ = consumes<std::vector<reco::CaloCluster>>(iConfig.getParameter<edm::InputTag>("layerClusters"));
 }
@@ -66,7 +63,6 @@ TICLTrackstersValidation::~TICLTrackstersValidation() {}
 void TICLTrackstersValidation::dqmAnalyze(edm::Event const& iEvent,
                                           edm::EventSetup const& iSetup,
                                           Histograms_TICLTrackstersValidation const& histos) const {
-  
   edm::Handle<std::vector<reco::CaloCluster>> layerClustersH;
   iEvent.getByToken(layerClustersToken_, layerClustersH);
   auto const& layerClusters = *layerClustersH.product();
@@ -76,12 +72,10 @@ void TICLTrackstersValidation::dqmAnalyze(edm::Event const& iEvent,
     auto numberOfTracksters = trackster_h->size();
     //using .at() as [] is not const
     const auto& histo = histos.at(trackster_token.index());
-    for(unsigned int i = 0; i< numberOfTracksters; ++i)
-    {
+    for (unsigned int i = 0; i < numberOfTracksters; ++i) {
       const auto& thisTrackster = trackster_h->at(i);
       histo.energy_->Fill(thisTrackster.regressed_energy());
     }
-
   }
 }
 
@@ -89,7 +83,7 @@ void TICLTrackstersValidation::bookHistograms(DQMStore::IBooker& ibook,
                                               edm::Run const& run,
                                               edm::EventSetup const& iSetup,
                                               Histograms_TICLTrackstersValidation& histos) const {
-  int labelIndex = 0; 
+  int labelIndex = 0;
   for (const auto& trackster_token : tracksterTokens_) {
     auto& histo = histos[trackster_token.index()];
     ibook.setCurrentFolder(folder_ + "TICLTracksters/" + trackstersCollectionsNames_[labelIndex]);
@@ -97,7 +91,6 @@ void TICLTrackstersValidation::bookHistograms(DQMStore::IBooker& ibook,
 
     labelIndex++;
   }
-
 }
 
 void TICLTrackstersValidation::dqmBeginRun(edm::Run const& run,
