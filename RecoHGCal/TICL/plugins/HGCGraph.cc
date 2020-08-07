@@ -177,6 +177,7 @@ void HGCGraphT<TILES>::makeAndConnectDoublets(const TILES &histo,
                     bool isRootDoublet = thisDoublet.checkCompatibilityAndTag(allDoublets_,
                                                                               neigDoublets,
                                                                               r.directionAtOrigin,
+                                                                              r.origin,
                                                                               minCosTheta,
                                                                               minCosPointing,
                                                                               verbosity_ > Advanced);
