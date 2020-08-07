@@ -310,6 +310,7 @@ void PatternRecognitionbyCA<TILES>::mergeTrackstersTRK(
         if (PatternRecognitionAlgoBaseT<TILES>::algo_verbosity_ > PatternRecognitionAlgoBaseT<TILES>::Basic) {
           LogDebug("HGCPatternRecoByCA") << "Updated size: " << updated_size << std::endl;
         }
+        outTrackster.setOutInHopsPerformed(outTrackster.outInHopsPerformed() + thisTrackster.outInHopsPerformed());
         outTrackster.vertices().reserve(updated_size);
         outTrackster.vertex_multiplicity().reserve(updated_size);
         std::copy(std::begin(thisTrackster.vertices()),
