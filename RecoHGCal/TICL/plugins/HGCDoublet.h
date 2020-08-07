@@ -64,6 +64,7 @@ public:
   bool checkCompatibilityAndTag(std::vector<HGCDoublet> &allDoublets,
                                 const std::vector<int> &innerDoublets,
                                 const GlobalVector &refDir,
+                                const GlobalPoint &origin,
                                 float minCosTheta,
                                 float minCosPointing = 1.,
                                 bool debug = false);
@@ -77,6 +78,7 @@ public:
                  float minCosTheta,
                  float minCosPointing,
                  const GlobalVector &refDir,
+                 const GlobalPoint &origin,
                  bool debug = false) const;
 
   void findNtuplets(std::vector<HGCDoublet> &allDoublets,
