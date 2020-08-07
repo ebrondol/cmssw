@@ -119,7 +119,7 @@ void HGCGraphT<TILES>::makeAndConnectDoublets(const TILES &histo,
               // that case, the inner search window has already been enlarged.
               auto etaWindow = deltaIEta;
               auto phiWindow = deltaIPhi;
-              if (isGlobal && ieta > etaLimitIncreaseWindowBin) {
+              if (ieta > etaLimitIncreaseWindowBin) {
                 etaWindow++;
                 phiWindow++;
                 if (verbosity_ > Advanced) {
@@ -141,7 +141,7 @@ void HGCGraphT<TILES>::makeAndConnectDoublets(const TILES &histo,
                   if (verbosity_ > Guru) {
                     LogDebug("HGCGraph") << "Outer Global Bin: " << (oeta * nPhiBins + ophi)
                                          << " on layers I/O: " << currentInnerLayerId << "/" << currentOuterLayerId
-                                         << " with clusters: " << innerLayerHisto[oeta * nPhiBins + ophi].size()
+                                         << " with clusters: " << outerLayerHisto[oeta * nPhiBins + ophi].size()
                                          << std::endl;
                   }
                   for (auto outerClusterId : outerLayerHisto[oeta * nPhiBins + ophi]) {
