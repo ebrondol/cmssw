@@ -256,6 +256,18 @@ void TrackstersMergeProducer::produce(edm::Event &evt, const edm::EventSetup &es
     seedToTracksterAssociator[t.seedIndex()].emplace_back(resultTrackstersMerged->size(), TracksterIterIndex::TRK);
     resultTrackstersMerged->push_back(t);
     iterMergedTracksters.push_back(TracksterIterIndex::TRK);
+    //ERICA: Check after rebase in pre10
+    //if (debug_) {
+    //  LogDebug("TrackstersMergeProducer") << " Considering trackster " << tracksterTRK_idx
+    //                                      << " as used: " << usedTrackstersTRK[tracksterTRK_idx] << std::endl;
+    //}
+    //if (!usedTrackstersTRK[tracksterTRK_idx]) {
+    //  LogDebug("TrackstersMergeProducer")
+    //    << " Creating a charge hadron from TRK Trackster with track energy " << t.raw_energy() << " and direction "
+    //    << t.eigenvectors(0).eta() << ", " << t.eigenvectors(0).phi() << std::endl;
+    //  result->push_back(t);
+    //}
+    //tracksterTRK_idx++;
   }
 
   for (auto const &t : trackstersHAD) {
