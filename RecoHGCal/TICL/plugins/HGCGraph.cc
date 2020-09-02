@@ -240,19 +240,32 @@ void HGCGraphT<TILES>::findNtuplets(std::vector<HGCDoublet::HGCntuplet> &foundNt
     int seedIndex = allDoublets_[rootDoublet].seedIndex();
     int outInHops = 0;
     unsigned int outInHopsPerformed = 0;
+    if (verbosity_ > Expert) {
+      LogDebug("HGCGraph") << "Exploring ROOT doublet " << rootDoublet << std::endl;
+    }
     allDoublets_[rootDoublet].findNtuplets(
         allDoublets_, tmpNtuplet, seedIndex, outInDFS, outInHops, maxOutInHops, outInToVisit);
     while (!outInToVisit.empty()) {
       outInHopsPerformed = std::max(outInHopsPerformed, outInToVisit.back().second);
+      if (verbosity_ > Expert) {
+        LogDebug("HGCGraph") << "Exploring IN_OUT ROOT doublet " << outInToVisit.back().first << std::endl;
+      }
       allDoublets_[outInToVisit.back().first].findNtuplets(
           allDoublets_, tmpNtuplet, seedIndex, outInDFS, outInToVisit.back().second, maxOutInHops, outInToVisit);
       outInToVisit.pop_back();
     }
 
     if (tmpNtuplet.size() > minClustersPerNtuplet) {
+      if (verbosity_ > Expert) {
+        LogDebug("HGCGraph") << "Created Trackster of size " << tmpNtuplet.size() << std::endl;
+      }
       foundNtuplets.push_back(tmpNtuplet);
       seedIndices.push_back(seedIndex);
       outInHopsV.push_back(outInHopsPerformed);
+    } else {
+      if (verbosity_ > Expert) {
+        LogDebug("HGCGraph") << "Discarding Trackster of size " << tmpNtuplet.size() << std::endl;
+      }
     }
   }
 }
