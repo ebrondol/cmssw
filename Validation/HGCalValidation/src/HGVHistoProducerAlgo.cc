@@ -17,7 +17,7 @@ const double ScoreCutCPtoLC_ = 0.1;
 const double ScoreCutLCtoSC_ = 0.1;
 const double ScoreCutSCtoLC_ = 0.1;
 const double ScoreCutMCLtoCPFakeMerge_ = 0.6;
-const double ScoreCutCPtoMCLDup_ = 0.2;
+const double ScoreCutCPtoMCLDup_ = 0.4;
 
 HGVHistoProducerAlgo::HGVHistoProducerAlgo(const edm::ParameterSet& pset)
     :  //parameters for eta
@@ -1027,6 +1027,12 @@ void HGVHistoProducerAlgo::bookMultiClusterHistos(DQMStore::IBooker& ibook,
   histograms.h_sharedenergy_caloparticle2multicl.push_back(
       ibook.book1D("SharedEnergy_caloparticle2multicl",
                    "Shared Energy of CaloParticle per Multi Cluster",
+                   nintSharedEneFrac_,
+                   minMCLSharedEneFrac_,
+                   maxMCLSharedEneFrac_));
+  histograms.h_sharedenergy_caloparticle2multicl_assoc.push_back(
+      ibook.book1D("SharedEnergy_caloparticle2multicl_assoc",
+                   "Shared Energy of Associated CaloParticle per Multi Cluster",
                    nintSharedEneFrac_,
                    minMCLSharedEneFrac_,
                    maxMCLSharedEneFrac_));
@@ -2817,6 +2823,7 @@ void HGVHistoProducerAlgo::multiClusters_to_CaloParticles(const Histograms& hist
                                                                          multiClusters[bestmclId].energy() / CPenergy);
       histograms.h_sharedenergy_caloparticle2multicl_vs_phi[count]->Fill(cP[cpId].g4Tracks()[0].momentum().phi(),
                                                                          multiClusters[bestmclId].energy() / CPenergy);
+      histograms.h_sharedenergy_caloparticle2multicl_assoc[count]->Fill(mclsharedenergyfrac[cpId][bestmclId]);
     }
     if (assocDup >= 2) {
       auto match = std::find_if(std::begin(score3d[cpId]), std::end(score3d[cpId]), is_assoc);
