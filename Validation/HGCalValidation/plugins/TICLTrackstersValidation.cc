@@ -210,6 +210,7 @@ void TICLTrackstersValidation::fillDescriptions(edm::ConfigurationDescriptions& 
                                            edm::InputTag("ticlTrackstersMIP"),
                                            edm::InputTag("ticlTrackstersEM"),
                                            edm::InputTag("ticlTrackstersHAD"),
+                                           edm::InputTag("ticlTrackstersDummy"),
                                            edm::InputTag("ticlTrackstersMerge")};
   desc.add<std::vector<edm::InputTag>>("tracksterCollections", source_vector);
   desc.add<edm::InputTag>("layerClusters", edm::InputTag("hgcalLayerClusters"));
