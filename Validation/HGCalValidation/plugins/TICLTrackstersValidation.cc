@@ -213,7 +213,7 @@ void TICLTrackstersValidation::bookHistograms(DQMStore::IBooker& ibook,
 void TICLTrackstersValidation::dqmBeginRun(edm::Run const& run,
                                            edm::EventSetup const& iSetup,
                                            Histograms_TICLTrackstersValidation& histograms) const {
-  rhtools_.getEventSetup(iSetup);
+    edm::ESHandle<CaloGeometry> geom; iSetup.get<CaloGeometryRecord>().get(geom); rhtools_.setGeometry(*geom);
 }
 
 void TICLTrackstersValidation::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
