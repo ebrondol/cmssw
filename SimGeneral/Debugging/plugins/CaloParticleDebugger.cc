@@ -71,7 +71,11 @@ private:
   edm::EDGetTokenT<std::vector<SimCluster>> simClustersToken_;
   std::vector<edm::EDGetTokenT<std::vector<PCaloHit>>> collectionTagsToken_;
   int geometryType_ = 0;
-  // ----------member data ---------------------------
+  const bool printSimTracks_;
+  const bool printSimVertices_;
+  const bool printGenP_;
+  const bool printTrackingP_;
+  const bool printSimCl_;
 };
 
 //
@@ -92,7 +96,12 @@ CaloParticleDebugger::CaloParticleDebugger(const edm::ParameterSet& iConfig)
       trackingParticles_(iConfig.getParameter<edm::InputTag>("trackingParticles")),
       caloParticles_(iConfig.getParameter<edm::InputTag>("caloParticles")),
       simClusters_(iConfig.getParameter<edm::InputTag>("simClusters")),
-      collectionTags_(iConfig.getParameter<std::vector<edm::InputTag>>("collectionTags")) {
+      collectionTags_(iConfig.getParameter<std::vector<edm::InputTag>>("collectionTags")),
+      printSimTracks_(iConfig.getParameter<bool>("printSimTracks")),
+      printSimVertices_(iConfig.getParameter<bool>("printSimVertices")),
+      printGenP_(iConfig.getParameter<bool>("printGenP")),
+      printTrackingP_(iConfig.getParameter<bool>("printTrackingP")),
+      printSimCl_(iConfig.getParameter<bool>("printSimCl")) {
   edm::ConsumesCollector&& iC = consumesCollector();
   simTracksToken_ = iC.consumes<std::vector<SimTrack>>(simTracks_);
   genParticlesToken_ = iC.consumes<std::vector<reco::GenParticle>>(genParticles_);
@@ -131,7 +140,7 @@ void CaloParticleDebugger::analyze(const edm::Event& iEvent, const edm::EventSet
   std::vector<int> sorted_tracks_idx(tracks.size());
   iota(begin(sorted_tracks_idx), end(sorted_tracks_idx), 0);
   sort(begin(sorted_tracks_idx), end(sorted_tracks_idx), [&tracks](int i, int j) {
-    return tracks[i].momentum().eta() < tracks[j].momentum().eta();
+    return tracks[i].momentum().energy() > tracks[j].momentum().energy();
   });
 
   iEvent.getByToken(genParticlesToken_, genParticlesH);
@@ -178,83 +187,116 @@ void CaloParticleDebugger::analyze(const edm::Event& iEvent, const edm::EventSet
   std::map<int, float> detIdToTotalSimEnergy;
   fillSimHits(detIdToTotalSimEnergy, iEvent, iSetup);
 
-  int idx = 0;
-
   std::map<int, int> trackid_to_track_index;
-  std::cout << "Printing SimTracks information" << std::endl;
-  std::cout << "IDX\tTrackId\tPDGID\tMOMENTUM(x,y,z,E)\tVertexIdx\tGenPartIdx" << std::endl;
   for (auto i : sorted_tracks_idx) {
     auto const& t = tracks[i];
-    std::cout << idx << "\t" << t.trackId() << "\t" << t << std::endl;
-    trackid_to_track_index[t.trackId()] = idx;
-    idx++;
+    trackid_to_track_index[t.trackId()] = i;
   }
 
-  std::cout << "Printing GenParticles information" << std::endl;
-  std::cout << "IDX\tPDGID\tMOMENTUM(x,y,z)\tVertex(x,y,z)" << std::endl;
-  for (auto i : sorted_genParticles_idx) {
-    auto const& gp = genParticles[i];
-    std::cout << i << "\t" << gp.pdgId() << "\t" << gp.momentum() << "\t" << gp.vertex() << std::endl;
-  }
-
-  std::cout << "Printing SimVertex information" << std::endl;
-  std::cout << "IDX\tPOSITION(x,y,z)\tPARENT_INDEX\tVERTEX_ID" << std::endl;
+  std::map<int, int> vtxid_to_vertex_index;
   for (auto i : sorted_vertices_idx) {
     auto const& v = vertices[i];
-    std::cout << i << "\t" << v << std::endl;
-  }
-  std::cout << "Printing TrackingParticles information" << std::endl;
-  for (auto i : sorted_tp_idx) {
-    auto const& tp = trackingpart[i];
-    std::cout << i << "\t" << tp << std::endl;
+    vtxid_to_vertex_index[v.vertexId()] = i;
   }
 
-  std::cout << "Printing CaloParticles information" << std::endl;
-  idx = 0;
+  if (printSimTracks_) {
+    std::cout << "Printing SimTracks information" << std::endl;
+    std::cout << "IDX\tTrackId\tPDGID\tMOMENTUM(x,y,z,E)\tVertexIdx\tGenPartIdx\teta\tphi\tpt" << std::endl;
+    for (auto i : sorted_tracks_idx) {
+      auto const& t = tracks[i];
+      std::cout << i << "\t" << t.trackId() << "\t" << t
+        << ", " << t.momentum().eta() << ", " << t.momentum().phi()
+        << ", " << t.momentum().pt() << std::endl;
+    }
+  }
+
+  if (printGenP_) {
+    std::cout << "Printing GenParticles information" << std::endl;
+    std::cout << "IDX\tPDGID\tMOMENTUM(x,y,z)\tVertex(x,y,z)" << std::endl;
+    for (auto i : sorted_genParticles_idx) {
+      auto const& gp = genParticles[i];
+      std::cout << i << "\t" << gp.pdgId() << "\t" << gp.momentum() << "\t" << gp.vertex() << std::endl;
+    }
+  }
+
+  if (printSimVertices_) {
+    std::cout << "Printing SimVertex information" << std::endl;
+    std::cout << "IDX\tPOSITION(x,y,z)\tPARENT_INDEX\tVERTEX_ID" << std::endl;
+    for (auto i : sorted_vertices_idx) {
+      auto const& v = vertices[i];
+      std::cout << i << "\t" << v << std::endl;
+    }
+  }
+
+  if (printTrackingP_) {
+    std::cout << "Printing TrackingParticles information" << std::endl;
+    for (auto i : sorted_tp_idx) {
+      auto const& tp = trackingpart[i];
+      std::cout << i << "\t" << tp << std::endl;
+    }
+  }
+
+  std::cout << "\n\n**** Printing CaloParticles information ****" << std::endl << std::endl;
   for (auto i : sorted_cp_idx) {
     auto const& cp = calopart[i];
-    std::cout << "\n\n"
-              << idx++ << " |Eta|: " << std::abs(cp.momentum().eta()) << "\tType: " << cp.pdgId()
-              << "\tEnergy: " << cp.energy() << "\tIdx: " << cp.g4Tracks()[0].trackId()
-              << std::endl;  // << cp << std::endl;
+    std::cout << std::endl << i << " Eta: " << cp.momentum().eta() << " Phi: " << cp.momentum().phi() << "\tType: " << cp.pdgId()
+              << "\tEnergy: " << cp.energy() << "\tpt: " << sqrt(cp.momentum().Perp2())
+              << "\tIdx: " << cp.g4Tracks()[0].trackId() << std::endl;
+    auto const& t = tracks[trackid_to_track_index[cp.g4Tracks()[0].trackId()]];
+    std::cout << "  Printing SimTracks information" << std::endl;
+    std::cout << "  IDX\tTrackId\tPDGID\tMOMENTUM(x,y,z,E)\tVertexIdx\tGenPartIdx\tPt" << std::endl;
+    std::cout << "  " << trackid_to_track_index[cp.g4Tracks()[0].trackId()] << "\t" << t.trackId() << "\t" << t
+              << " p_t: " << t.momentum().Pt() << std::endl;
     double total_sim_energy = 0.;
-    double total_cp_energy = 0.;
     std::cout << "--> Overall simclusters's size: " << cp.simClusters().size() << std::endl;
-    // All the next mess just to print the simClusters ordered
+    // All the next mess just to print the simClusters ordered by decreasing energy
     auto const& simcs = cp.simClusters();
     std::vector<int> sorted_sc_idx(simcs.size());
     iota(begin(sorted_sc_idx), end(sorted_sc_idx), 0);
     sort(begin(sorted_sc_idx), end(sorted_sc_idx), [&simcs](int i, int j) {
-      return simcs[i]->momentum().eta() < simcs[j]->momentum().eta();
+      return simcs[i]->energy() > simcs[j]->energy();
     });
     for (auto i : sorted_sc_idx) {
-      std::cout << *(simcs[i]);
+      auto const& simcl = *(simcs[i]);
+      std::cout << "    " << i << " Eta: " << simcl.momentum().eta() << "\tType: " << simcl.pdgId()
+                << "\tEnergy: " << simcl.energy() << "\tKey: " << i << std::endl;
+      auto const& t = tracks[trackid_to_track_index[simcl.g4Tracks()[0].trackId()]];
+      std::cout << "    Printing SimTracks information" << std::endl;
+      std::cout << "    IDX\tTrackId\tPDGID\tMOMENTUM(x,y,z,E)\tVertexIdx\tGenPartIdx" << std::endl;
+      std::cout << "    " << trackid_to_track_index[cp.g4Tracks()[0].trackId()] << "\t" << t.trackId() << "\t" << t
+                << std::endl;
+      auto vidx = simcl.g4Tracks()[0].vertIndex();
+      if (vidx >= 0) {
+        auto const& v = vertices[vtxid_to_vertex_index[vidx]];
+        auto const& pos = v.position();
+        std::cout << "    Vtx: (x,y,z) " << pos << " (R,Z) " << pos.rho() << ", " << pos.Z()
+                  << " (Eta,phi): " << pos.Eta() << ", " << pos.Phi() << std::endl;
+      }
+      std::cout << "    cells: " << simcl.numberOfRecHits() << std::endl;
     }
-
     for (auto const& sc : cp.simClusters()) {
       for (auto const& cl : sc->hits_and_fractions()) {
         total_sim_energy += detIdToTotalSimEnergy[cl.first] * cl.second;
-        total_cp_energy += cp.energy() * cl.second;
       }
     }
     std::cout << "--> Overall SC energy (sum using sim energies): " << total_sim_energy << std::endl;
-    std::cout << "--> Overall SC energy (sum using CaloP energies): " << total_cp_energy << std::endl;
   }
 
-  idx = 0;
-  std::cout << "Printing SimClusters information" << std::endl;
-  for (auto i : sorted_simcl_idx) {
-    auto const& simcl = simclusters[i];
-    std::cout << "\n\n"
-              << idx++ << " |Eta|: " << std::abs(simcl.momentum().eta()) << "\tType: " << simcl.pdgId()
-              << "\tEnergy: " << simcl.energy() << "\tKey: " << i << std::endl;  // << simcl << std::endl;
-    double total_sim_energy = 0.;
-    std::cout << "--> Overall simclusters's size: " << simcl.numberOfRecHits() << std::endl;
-    for (auto const& cl : simcl.hits_and_fractions()) {
-      total_sim_energy += detIdToTotalSimEnergy[cl.first] * cl.second;
+  if (printSimCl_) {
+    std::cout << "Printing SimClusters information" << std::endl;
+    for (auto i : sorted_simcl_idx) {
+      auto const& simcl = simclusters[i];
+      std::cout << "\n\n"
+                << i << " Eta: " << simcl.momentum().eta() << "\tType: " << simcl.pdgId()
+                << "\tEnergy: " << simcl.energy() << "\tKey: " << i << std::endl;  // << simcl << std::endl;
+      double total_sim_energy = 0.;
+      std::cout << "--> Overall simclusters's size: " << simcl.numberOfRecHits() << std::endl;
+      for (auto const& cl : simcl.hits_and_fractions()) {
+        total_sim_energy += detIdToTotalSimEnergy[cl.first] * cl.second;
+      }
+      std::cout << simcl << std::endl;
+      std::cout << "--> Overall SimCluster energy (sum using sim energies): " << total_sim_energy << std::endl;
     }
-    std::cout << simcl << std::endl;
-    std::cout << "--> Overall SimCluster energy (sum using sim energies): " << total_sim_energy << std::endl;
   }
 }
 
@@ -344,6 +386,11 @@ void CaloParticleDebugger::fillSimHits(std::map<int, float>& detIdToTotalSimEner
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
 void CaloParticleDebugger::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
+  desc.add<bool>("printSimTracks", false);
+  desc.add<bool>("printSimVertices", false);
+  desc.add<bool>("printGenP", false);
+  desc.add<bool>("printTrackingP", false);
+  desc.add<bool>("printSimCl", false);
   desc.add<edm::InputTag>("simTracks", edm::InputTag("g4SimHits"));
   desc.add<edm::InputTag>("genParticles", edm::InputTag("genParticles"));
   desc.add<edm::InputTag>("simVertices", edm::InputTag("g4SimHits"));

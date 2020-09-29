@@ -304,8 +304,8 @@ void TrackstersMergeProducer::produce(edm::Event &evt, const edm::EventSetup &es
     }
     if (!usedTrackstersTRK[tracksterTRK_idx]) {
       LogDebug("TrackstersMergeProducer")
-          << " Creating a charge hadron from TRK Trackster with track energy " << t.raw_energy() << " and direction "
-          << t.eigenvectors(0).eta() << ", " << t.eigenvectors(0).phi() << std::endl;
+        << " Creating a charge hadron from TRK Trackster with track energy " << t.raw_energy() << " and direction "
+        << t.eigenvectors(0).eta() << ", " << t.eigenvectors(0).phi() << std::endl;
       result->push_back(t);
     }
     tracksterTRK_idx++;
