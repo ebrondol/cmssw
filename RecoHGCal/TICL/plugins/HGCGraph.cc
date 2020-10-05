@@ -7,6 +7,8 @@
 #include "HGCGraph.h"
 #include "DataFormats/Common/interface/ValueMap.h"
 
+#include <algorithm> // std::max
+
 template <typename TILES>
 void HGCGraphT<TILES>::makeAndConnectDoublets(const TILES &histo,
                                               const std::vector<TICLSeedingRegion> &regions,
@@ -110,7 +112,7 @@ void HGCGraphT<TILES>::makeAndConnectDoublets(const TILES &histo,
               // that case, the inner search window has already been enlarged.
               auto etaWindow = deltaIEta;
               auto phiWindow = deltaIPhi;
-              if (isGlobal && ieta > etaLimitIncreaseWindowBin) {
+              if (ieta > etaLimitIncreaseWindowBin) {
                 etaWindow++;
                 phiWindow++;
                 if (verbosity_ > Advanced) {
@@ -132,7 +134,7 @@ void HGCGraphT<TILES>::makeAndConnectDoublets(const TILES &histo,
                   if (verbosity_ > Guru) {
                     LogDebug("HGCGraph") << "Outer Global Bin: " << (oeta * nPhiBins + ophi)
                                          << " on layers I/O: " << currentInnerLayerId << "/" << currentOuterLayerId
-                                         << " with clusters: " << innerLayerHisto[oeta * nPhiBins + ophi].size()
+                                         << " with clusters: " << outerLayerHisto[oeta * nPhiBins + ophi].size()
                                          << std::endl;
                   }
                   for (auto outerClusterId : outerLayerHisto[oeta * nPhiBins + ophi]) {
@@ -168,6 +170,7 @@ void HGCGraphT<TILES>::makeAndConnectDoublets(const TILES &histo,
                     bool isRootDoublet = thisDoublet.checkCompatibilityAndTag(allDoublets_,
                                                                               neigDoublets,
                                                                               r.directionAtOrigin,
+                                                                              r.origin,
                                                                               minCosTheta,
                                                                               minCosPointing,
                                                                               verbosity_ > Advanced);
@@ -210,7 +213,8 @@ void HGCGraphT<TILES>::findNtuplets(std::vector<HGCDoublet::HGCntuplet> &foundNt
                                     std::vector<int> &seedIndices,
                                     const unsigned int minClustersPerNtuplet,
                                     const bool outInDFS,
-                                    unsigned int maxOutInHops) {
+                                    unsigned int maxOutInHops,
+                                    std::vector<unsigned int> &outInHopsV) {
   HGCDoublet::HGCntuplet tmpNtuplet;
   tmpNtuplet.reserve(minClustersPerNtuplet);
   std::vector<std::pair<unsigned int, unsigned int>> outInToVisit;
@@ -219,17 +223,33 @@ void HGCGraphT<TILES>::findNtuplets(std::vector<HGCDoublet::HGCntuplet> &foundNt
     outInToVisit.clear();
     int seedIndex = allDoublets_[rootDoublet].seedIndex();
     int outInHops = 0;
+    unsigned int outInHopsPerformed = 0;
+    if (verbosity_ > Expert) {
+      LogDebug("HGCGraph") << "Exploring ROOT doublet " << rootDoublet << std::endl;
+    }
     allDoublets_[rootDoublet].findNtuplets(
         allDoublets_, tmpNtuplet, seedIndex, outInDFS, outInHops, maxOutInHops, outInToVisit);
     while (!outInToVisit.empty()) {
+      outInHopsPerformed = std::max(outInHopsPerformed, outInToVisit.back().second);
+      if (verbosity_ > Expert) {
+        LogDebug("HGCGraph") << "Exploring IN_OUT ROOT doublet " << outInToVisit.back().first << std::endl;
+      }
       allDoublets_[outInToVisit.back().first].findNtuplets(
           allDoublets_, tmpNtuplet, seedIndex, outInDFS, outInToVisit.back().second, maxOutInHops, outInToVisit);
       outInToVisit.pop_back();
     }
 
     if (tmpNtuplet.size() > minClustersPerNtuplet) {
+      if (verbosity_ > Expert) {
+        LogDebug("HGCGraph") << "Created Trackster of size " << tmpNtuplet.size() << std::endl;
+      }
       foundNtuplets.push_back(tmpNtuplet);
       seedIndices.push_back(seedIndex);
+      outInHopsV.push_back(outInHopsPerformed);
+    } else {
+      if (verbosity_ > Expert) {
+        LogDebug("HGCGraph") << "Discarding Trackster of size " << tmpNtuplet.size() << std::endl;
+      }
     }
   }
 }

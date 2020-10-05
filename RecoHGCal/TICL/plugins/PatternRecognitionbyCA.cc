@@ -75,6 +75,7 @@ void PatternRecognitionbyCA<TILES>::makeTracksters(
 
   bool isRegionalIter = (input.regions[0].index != -1);
   std::vector<HGCDoublet::HGCntuplet> foundNtuplets;
+  std::vector<unsigned int> outInHopsV;
   std::vector<int> seedIndices;
   std::vector<uint8_t> layer_cluster_usage(input.layerClusters.size(), 0);
   theGraph_->makeAndConnectDoublets(input.tiles,
@@ -93,7 +94,8 @@ void PatternRecognitionbyCA<TILES>::makeTracksters(
                                     rhtools_.lastLayer(type),
                                     max_delta_time_);
 
-  theGraph_->findNtuplets(foundNtuplets, seedIndices, min_clusters_per_ntuplet_, out_in_dfs_, max_out_in_hops_);
+  theGraph_->findNtuplets(
+      foundNtuplets, seedIndices, min_clusters_per_ntuplet_, out_in_dfs_, max_out_in_hops_, outInHopsV);
   //#ifdef FP_DEBUG
   const auto &doublets = theGraph_->getAllDoublets();
   int tracksterId = 0;
@@ -152,12 +154,20 @@ void PatternRecognitionbyCA<TILES>::makeTracksters(
     if (isRegionalIter) {
       seedToTracksterAssociation[tmp.seedIndex()].push_back(tracksterId);
     }
+    tmp.setOutInHopsPerformed(outInHopsV[tracksterId]);
 
     std::pair<float, float> timeTrackster(-99., -1.);
     hgcalsimclustertime::ComputeClusterTime timeEstimator;
     timeTrackster = timeEstimator.fixSizeHighestDensity(times, timeErrors);
     tmp.setTimeAndError(timeTrackster.first, timeTrackster.second);
     std::copy(std::begin(effective_cluster_idx), std::end(effective_cluster_idx), std::back_inserter(tmp.vertices()));
+    // Propagate the correct graph connections
+    tmp.edges().reserve(ntuplet.size());
+    for (auto const & t : ntuplet) {
+      std::array<unsigned int, 2> edge = {{(unsigned int) doublets[t].innerClusterId(),
+                                          (unsigned int) doublets[t].outerClusterId()}};
+      tmp.edges().push_back(edge);
+    }
     result.push_back(tmp);
     tracksterId++;
   }
@@ -218,12 +228,14 @@ void PatternRecognitionbyCA<TILES>::mergeTrackstersTRK(
       auto &outTrackster = output.back();
       tracksters[0] = output.size() - 1;
       auto updated_size = outTrackster.vertices().size();
+      auto updated_edges_size = outTrackster.edges().size();
       for (unsigned int j = 1; j < numberOfTrackstersInSeed; ++j) {
         auto &thisTrackster = input[tracksters[j]];
         updated_size += thisTrackster.vertices().size();
         if (PatternRecognitionAlgoBaseT<TILES>::algo_verbosity_ > PatternRecognitionAlgoBaseT<TILES>::Basic) {
           LogDebug("HGCPatternRecoByCA") << "Updated size: " << updated_size << std::endl;
         }
+        outTrackster.setOutInHopsPerformed(outTrackster.outInHopsPerformed() + thisTrackster.outInHopsPerformed());
         outTrackster.vertices().reserve(updated_size);
         outTrackster.vertex_multiplicity().reserve(updated_size);
         std::copy(std::begin(thisTrackster.vertices()),
@@ -232,6 +244,10 @@ void PatternRecognitionbyCA<TILES>::mergeTrackstersTRK(
         std::copy(std::begin(thisTrackster.vertex_multiplicity()),
                   std::end(thisTrackster.vertex_multiplicity()),
                   std::back_inserter(outTrackster.vertex_multiplicity()));
+        outTrackster.edges().reserve(updated_edges_size);
+        std::copy(std::begin(thisTrackster.edges()),
+                  std::end(thisTrackster.edges()),
+                  std::back_inserter(outTrackster.edges()));
       }
       tracksters.resize(1);
     }

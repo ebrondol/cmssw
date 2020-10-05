@@ -4,6 +4,7 @@ from RecoHGCal.TICL.MIPStep_cff import *
 from RecoHGCal.TICL.TrkStep_cff import *
 from RecoHGCal.TICL.EMStep_cff import *
 from RecoHGCal.TICL.HADStep_cff import *
+from RecoHGCal.TICL.DummyStep_cff import *
 from RecoHGCal.TICL.ticlLayerTileProducer_cfi import ticlLayerTileProducer
 from RecoHGCal.TICL.ticlCandidateFromTrackstersProducer_cfi import ticlCandidateFromTrackstersProducer as _ticlCandidateFromTrackstersProducer
 from RecoHGCal.TICL.pfTICLProducer_cfi import pfTICLProducer as _pfTICLProducer
@@ -27,6 +28,7 @@ pfTICL = _pfTICLProducer.clone()
 ticlPFTask = cms.Task(ticlCandidateFromTracksters, pfTICL)
 
 iterTICLTask = cms.Task(ticlLayerTileTask
+    ,ticlDummyStepTask
     ,ticlMIPStepTask
     ,ticlTrkStepTask
     ,ticlEMStepTask

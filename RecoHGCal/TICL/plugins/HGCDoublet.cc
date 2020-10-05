@@ -3,6 +3,7 @@
 bool HGCDoublet::checkCompatibilityAndTag(std::vector<HGCDoublet> &allDoublets,
                                           const std::vector<int> &innerDoublets,
                                           const GlobalVector &refDir,
+                                          const GlobalPoint &origin,
                                           float minCosTheta,
                                           float minCosPointing,
                                           bool debug) {
@@ -27,7 +28,9 @@ bool HGCDoublet::checkCompatibilityAndTag(std::vector<HGCDoublet> &allDoublets,
       zi[j] = otherDoublet.innerZ();
       seedi[j] = otherDoublet.seedIndex();
       if (debug) {
-        LogDebug("HGCDoublet") << i + j << " is doublet " << otherDoubletId << std::endl;
+        LogDebug("HGCDoublet") << i + j << " is doublet " << otherDoubletId
+          << "[" << otherDoublet.innerClusterId() << ", " << otherDoublet.outerClusterId() << "]"
+          <<  std::endl;
       }
     }
     for (int j = 0; j < vs; ++j) {
@@ -35,7 +38,7 @@ bool HGCDoublet::checkCompatibilityAndTag(std::vector<HGCDoublet> &allDoublets,
         ok[j] = 0;
         continue;
       }
-      ok[j] = areAligned(xi[j], yi[j], zi[j], xo, yo, zo, minCosTheta, minCosPointing, refDir, debug);
+      ok[j] = areAligned(xi[j], yi[j], zi[j], xo, yo, zo, minCosTheta, minCosPointing, refDir, origin, debug);
       if (debug) {
         LogDebug("HGCDoublet") << "Are aligned for InnerDoubletId: " << i + j << " is " << ok[j] << std::endl;
       }
@@ -70,6 +73,7 @@ int HGCDoublet::areAligned(double xi,
                            float minCosTheta,
                            float minCosPointing,
                            const GlobalVector &refDir,
+                           const GlobalPoint &origin,
                            bool debug) const {
   auto dx1 = xo - xi;
   auto dy1 = yo - yi;
@@ -110,13 +114,23 @@ int HGCDoublet::areAligned(double xi,
   auto minCosPointing_sq = minCosPointing * minCosPointing;
   bool isWithinLimitsPointing = (dot_pointing_sq > minCosPointing_sq * mag_pointing_sq * mag2sq);
   if (debug) {
-    LogDebug("HGCDoublet") << "-- Are Aligned -- dot_pointing_sq: " << dot_pointing * dot_pointing
-                           << " mag_pointing_sq: " << mag_pointing_sq << " mag2sq: " << mag2sq
-                           << " isWithinLimits: " << isWithinLimitsPointing << std::endl;
+    LogDebug("HGCDoublet") << "Pointing direction: " << pointingDir << std::endl;
+    LogDebug("HGCDoublet") << "-- Are Aligned -- dot_pointing: " << dot_pointing << " mag_pointing: " << mag_pointing
+                           << " mag2: " << mag2 << " cosTheta_pointing: " << cosTheta_pointing
+                           << " isWithinLimits: " << (cosTheta_pointing > minCosPointing) << std::endl;
   }
-  // by squaring cosTheta and multiplying by the squares of the magnitudes
-  // an equivalent comparison is made without the division and square root which are costly FP ops.
-  return isWithinLimits && isWithinLimitsPointing;
+
+  const GlobalVector originOuter(xo - origin.x(), yo - origin.y(), zo - origin.z());
+  auto dot_pointing_origin = pointingDir.dot(originOuter);
+  auto cosTheta_pointing_origin = dot_pointing_origin / (originOuter.mag2() * mag_pointing);
+  if (debug) {
+    LogDebug("HGCDoublet") << "Pointing direction with origin: " << pointingDir << std::endl;
+    LogDebug("HGCDoublet") << "-- Are Aligned -- dot_pointing_origin: " << dot_pointing_origin << " mag_pointing: " << mag_pointing
+                           << " mag2: " << mag2 << " cosTheta_pointing: " << cosTheta_pointing_origin
+                           << " isWithinLimits: " << (cosTheta_pointing_origin > minCosPointing) << std::endl;
+  }
+
+  return (cosTheta > minCosTheta) && (cosTheta_pointing > minCosPointing);
 }
 
 void HGCDoublet::findNtuplets(std::vector<HGCDoublet> &allDoublets,
@@ -130,12 +144,19 @@ void HGCDoublet::findNtuplets(std::vector<HGCDoublet> &allDoublets,
     alreadyVisited_ = true;
     tmpNtuplet.push_back(theDoubletId_);
     unsigned int numberOfOuterNeighbors = outerNeighbors_.size();
+    LogDebug("HGCDoublet") << "Added doublet " << theDoubletId_
+      << "(" << innerClusterId_ << ", " << outerClusterId_ << ")"
+      << " exploring " << numberOfOuterNeighbors << " outers" << std::endl;
     for (unsigned int i = 0; i < numberOfOuterNeighbors; ++i) {
       allDoublets[outerNeighbors_[i]].findNtuplets(
           allDoublets, tmpNtuplet, seedIndex, outInDFS, outInHops, maxOutInHops, outInToVisit);
     }
     if (outInDFS && outInHops < maxOutInHops) {
+      LogDebug("HGCDoublet") << "Adding " << innerNeighbors_.size() << " inner doublets from OutIn at size " << outInHops << std::endl;
       for (auto inN : innerNeighbors_) {
+        LogDebug("HGCDoublet") << "Adding inner doublet from OutIn: " << inN
+          << " (" << allDoublets[inN].innerClusterId() << ", " << allDoublets[inN].outerClusterId()
+          << ")" << std::endl;
         outInToVisit.emplace_back(inN, outInHops + 1);
       }
     }
