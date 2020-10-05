@@ -2031,7 +2031,6 @@ def append_hgcalMultiClustersPlots(collection = 'ticlMultiClustersFromTracksters
   #            numberOfEventsHistogram=_multiplicity_zplus_numberOfEventsHistogram
   #            ))
 
-
 #=================================================================================================
 # hitValidation
 def _hgcalHitFolders(dirName="HGCalSimHitsV/HGCalEESensitive"):
