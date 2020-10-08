@@ -6,7 +6,7 @@ import collections
 
 import six
 import ROOT
-from ROOT import TFile
+from ROOT import TFile, TString
 from ROOT import gDirectory
 ROOT.gROOT.SetBatch(True)
 ROOT.PyConfig.IgnoreCommandLineOptions = True
@@ -2030,6 +2030,45 @@ def append_hgcalMultiClustersPlots(collection = 'ticlMultiClustersFromTracksters
   #            purpose=PlotPurpose.Timing, page=collection,
   #            numberOfEventsHistogram=_multiplicity_zplus_numberOfEventsHistogram
   #            ))
+
+#=================================================================================================
+def create_hgcalTrackstersPlotter(files, collection = 'ticlTrackstersMerge'):
+
+  hgcalTrackstersPlotter = Plotter()
+  dqmfolder = "DQMData/Run 1/HGCAL/Run summary/TICLTracksters/" + collection
+  _multiplicity_tracksters_numberOfEventsHistogram = dqmfolder+"/Number of Trackster per Event"
+
+  templateFile = ROOT.TFile.Open(files[0]) # assuming all files have same structure
+  keys = gDirectory.GetDirectory(dqmfolder,True).GetListOfKeys()
+  key = keys[0]
+  while key:
+    obj = key.ReadObj()
+    name = obj.GetName()
+    fileName = TString(name)
+    fileName.ReplaceAll(" ","_")
+    pg= PlotGroup(fileName.Data(),[
+                  Plot(name,
+                       xtitle=obj.GetXaxis().GetTitle(), ytitle=obj.GetYaxis().GetTitle(),
+                       #drawCommand = "", # may want to customize for TH2 (colz, etc.)
+                       normalizeToNumberOfEvents = True, **_common)
+                  ],
+                  ncols=1) # probably need more ofr cosAngle_Beta_
+
+    hgcalTrackstersPlotter.append("TICLDebugger", [
+              dqmfolder
+              ], PlotFolder(
+                pg,
+                loopSubFolders=False,
+                purpose=PlotPurpose.PF, page="TICLDebugger",
+                numberOfEventsHistogram=_multiplicity_tracksters_numberOfEventsHistogram)
+              )
+
+    key = keys.After(key)
+
+  templateFile.Close()
+
+  return hgcalTrackstersPlotter
+
 
 #=================================================================================================
 # hitValidation
