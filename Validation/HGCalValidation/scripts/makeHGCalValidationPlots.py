@@ -29,11 +29,12 @@ def main(opts):
     if opts.collection=="hgcalLayerClusters":
 	hgclayclus = [hgcalPlots.hgcalLayerClustersPlotter]
 	val.doPlots(hgclayclus, plotterDrawArgs=drawArgs)
-    elif opts.collection in ["hgcalMultiClusters","ticlMultiClustersFromTrackstersMerge","ticlMultiClustersFromTrackstersTrk","ticlMultiClustersFromTrackstersEM","ticlMultiClustersFromTrackstersHAD"]:
+    elif opts.collection in ["hgcalMultiClusters","ticlMultiClustersFromTrackstersMerge","ticlMultiClustersFromTrackstersTrk","ticlMultiClustersFromTrackstersEM","ticlMultiClustersFromTrackstersHAD","ticlMultiClustersFromTrackstersDummy"]:
         hgcmulticlus = [hgcalPlots.create_hgcalMultiClustersPlotter(opts.collection)]
         val.doPlots(hgcmulticlus, plotterDrawArgs=drawArgs)
-    elif opts.collection in ["ticlTrackstersMerge","ticlTrackstersTrk","ticlTrackstersEM","ticlTrackstersHAD","ticlTrackstersDummy"]:
-        hgctracksters = [hgcalPlots.create_hgcalTrackstersPlotter(sample.files(), opts.collection)]
+        # TICLDebugger plots
+        tracksterCollection = opts.collection.replace("ticlMultiClustersFromTracksters","ticlTracksters")
+        hgctracksters = [hgcalPlots.create_hgcalTrackstersPlotter(sample.files(), tracksterCollection)]
         val.doPlots(hgctracksters, plotterDrawArgs=drawArgs)
     elif opts.collection=="hitValidation":
     	hgchit = [hgcalPlots.hgcalHitPlotter]
@@ -100,8 +101,8 @@ if __name__ == "__main__":
                         help="Validation name for HTML page generation (enters to <title> element) (default '')")
     parser.add_argument("--verbose", action="store_true", default = False,
                         help="Be verbose")
-    parser.add_argument("--collection", choices=["hgcalLayerClusters", "hgcalMultiClusters", "ticlMultiClustersFromTrackstersMerge", "ticlMultiClustersFromTrackstersTrk", "ticlMultiClustersFromTrackstersEM", "ticlMultiClustersFromTrackstersHAD", "ticlTrackstersMerge", "ticlTrackstersTrk", "ticlTrackstersEM", "ticlTrackstersHAD", "ticlTrackstersDummy", "hitValidation", "hitCalibration", "all"], default="hgcalLayerClusters",
-                        help="Choose output plots collections: hgcalLayerCluster, hgcalMultiClusters, ticlMultiClustersFromTrackstersMerge, ticlMultiClustersFromTrackstersTrk, ticlMultiClustersFromTrackstersEM, ticlMultiClustersFromTrackstersHAD, ticlTrackstersMerge, ticlTrackstersTrk, ticlTrackstersEM, ticlTrackstersHAD, ticlTrackstersDummy, hitValidation, hitCalibration, all")
+    parser.add_argument("--collection", choices=["hgcalLayerClusters", "hgcalMultiClusters", "ticlMultiClustersFromTrackstersMerge", "ticlMultiClustersFromTrackstersTrk", "ticlMultiClustersFromTrackstersEM", "ticlMultiClustersFromTrackstersHAD", "hitValidation", "hitCalibration", "all"], default="hgcalLayerClusters",
+                        help="Choose output plots collections: hgcalLayerCluster, hgcalMultiClusters, ticlMultiClustersFromTrackstersMerge, ticlMultiClustersFromTrackstersTrk, ticlMultiClustersFromTrackstersEM, ticlMultiClustersFromTrackstersHAD, hitValidation, hitCalibration, all")
 
     opts = parser.parse_args()
 
