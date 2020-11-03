@@ -9,6 +9,7 @@ from Validation.RecoTrack.plotting.validation import SeparateValidation, SimpleV
 import Validation.HGCalValidation.hgcalPlots as hgcalPlots
 import Validation.RecoTrack.plotting.plotting as plotting
 
+<<<<<<< HEAD
 trackstersIters = ["ticlMultiClustersFromTrackstersMerge", "ticlMultiClustersFromTrackstersMIP",
                    "ticlMultiClustersFromTrackstersTrk","ticlMultiClustersFromTrackstersTrkEM",
                    "ticlMultiClustersFromTrackstersEM", "ticlMultiClustersFromTrackstersHAD",
@@ -23,6 +24,9 @@ allLabel = 'all'
 
 collection_choices = [layerClustersGeneralLabel]
 collection_choices.extend([multiclustersGeneralLabel]+[trackstersGeneralLabel]+[hitValidationLabel]+[hitCalibrationLabel]+[allLabel])
+=======
+collections = ["hgcalMultiClusters","ticlMultiClustersFromTrackstersMerge","ticlMultiClustersFromTrackstersTrk","ticlMultiClustersFromTrackstersTrkEM","ticlMultiClustersFromTrackstersEM","ticlMultiClustersFromTrackstersHAD","ticlMultiClustersFromTrackstersDummy"]
+>>>>>>> Add TrkEM iteration to validation
 
 def main(opts):
 
