@@ -36,6 +36,7 @@ subDirs = cms.untracked.vstring(
   'HGCAL/HGCalValidator/hgcalMultiClusters/',
   'HGCAL/HGCalValidator/ticlMultiClustersFromTrackstersDummy/',
   'HGCAL/HGCalValidator/ticlMultiClustersFromTrackstersTrk/',
+  'HGCAL/HGCalValidator/ticlMultiClustersFromTrackstersTrkEM/',
   'HGCAL/HGCalValidator/ticlMultiClustersFromTrackstersEM/',
   'HGCAL/HGCalValidator/ticlMultiClustersFromTrackstersHAD/',
   'HGCAL/HGCalValidator/ticlMultiClustersFromTrackstersMerge/',
