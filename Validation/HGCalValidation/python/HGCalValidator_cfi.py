@@ -15,6 +15,7 @@ hgcalValidator = DQMEDAnalyzer(
     #2dlayerclusters, pfclusters, multiclusters
     label_lcl = cms.InputTag("hgcalLayerClusters"),
     label_mcl = cms.VInputTag(
+      cms.InputTag("ticlMultiClustersFromTrackstersDummy"),
       cms.InputTag("ticlMultiClustersFromTrackstersTrk"),
       cms.InputTag("ticlMultiClustersFromTrackstersEM"),
       cms.InputTag("ticlMultiClustersFromTrackstersHAD"),
@@ -27,9 +28,10 @@ hgcalValidator = DQMEDAnalyzer(
     #Select caloParticles for efficiency or pass through
     doCaloParticleSelection = cms.untracked.bool(True),
     #Layer Cluster related plots
-    dolayerclustersPlots = cms.untracked.bool(True),
+    doLayerClustersPlots = cms.untracked.bool(True),
     #Multi Cluster related plots
-    domulticlustersPlots = cms.untracked.bool(True),
+    doMultiClustersPlots = cms.untracked.bool(True),
+    doCPSelForAllMCPlots = cms.untracked.bool(False),
 
     #The cumulative material budget in front of each layer. To be more specific, it
     #is the material budget just in front of the active material (not including it).
@@ -64,3 +66,11 @@ premix_stage2.toModify(hgcalValidator,
 
 from Configuration.Eras.Modifier_phase2_hgcalV10_cff import phase2_hgcalV10
 phase2_hgcalV10.toModify(hgcalValidator, totallayers_to_monitor = cms.int32(50))
+
+
+# Run validator for CP with only one SimCluters
+
+hgcalValidator2 = hgcalValidator.clone(
+    doCPSelForAllMCPlots = cms.untracked.bool(True),
+    dirName = cms.string('HGCAL/HGCalValidator_1SimCl/')
+)
