@@ -3,12 +3,30 @@
 from __future__ import print_function
 import os
 import argparse
+from time import time
 
 from Validation.RecoTrack.plotting.validation import SimpleValidation, SimpleSample
 import Validation.HGCalValidation.hgcalPlots as hgcalPlots
 import Validation.RecoTrack.plotting.plotting as plotting
 
+<<<<<<< HEAD
 collections = ["hgcalMultiClusters","ticlMultiClustersFromTrackstersMerge","ticlMultiClustersFromTrackstersTrk","ticlMultiClustersFromTrackstersTrkEM","ticlMultiClustersFromTrackstersEM","ticlMultiClustersFromTrackstersHAD","ticlMultiClustersFromTrackstersDummy"]
+=======
+trackstersIters = ["ticlMultiClustersFromTrackstersMerge", "ticlMultiClustersFromTrackstersMIP",
+                   "ticlMultiClustersFromTrackstersTrk","ticlMultiClustersFromTrackstersTrkEM",
+                   "ticlMultiClustersFromTrackstersEM", "ticlMultiClustersFromTrackstersHAD",
+                   "ticlMultiClustersFromTrackstersDummy"]
+
+layerClustersGeneralLabel = 'hgcalLayerClusters'
+multiclustersGeneralLabel = 'hgcalMultiClusters'
+trackstersGeneralLabel = 'allTiclMultiClusters'
+hitValidationLabel = 'hitValidation'
+hitCalibrationLabel = 'hitCalibration'
+allLabel = 'all'
+
+collection_choices = [layerClustersGeneralLabel]
+collection_choices.extend([multiclustersGeneralLabel]+[trackstersGeneralLabel]+[hitValidationLabel]+[hitCalibrationLabel]+[allLabel])
+>>>>>>> ebrondol/fixValidation_all
 
 def main(opts):
 
@@ -28,55 +46,62 @@ def main(opts):
     val = SimpleValidation([sample], opts.outputDir[0])
     htmlReport = val.createHtmlReport(validationName=opts.html_validation_name[0])   
 
-    if opts.collection=="hgcalLayerClusters":
+    if opts.collection==layerClustersGeneralLabel:
 	hgclayclus = [hgcalPlots.hgcalLayerClustersPlotter]
-	val.doPlots(hgclayclus, plotterDrawArgs=drawArgs)
-    elif opts.collection in collections:
-        hgcmulticlus = [hgcalPlots.create_hgcalMultiClustersPlotter(opts.collection)]
+	hgcalPlots.append_hgcalLayerClustersPlots("hgcalLayerClusters", "Layer Clusters")
+        val.doPlots(hgclayclus, plotterDrawArgs=drawArgs)
+    elif opts.collection == multiclustersGeneralLabel:
+        hgcmulticlus = [hgcalPlots.hgcalMultiClustersPlotter]
+        hgcalPlots.append_hgcalMultiClustersPlots(multiclustersGeneralLabel, "MultiClusters")
         val.doPlots(hgcmulticlus, plotterDrawArgs=drawArgs)
-        # TICLDebugger plots
-        tracksterCollection = opts.collection.replace("ticlMultiClustersFromTracksters","ticlTracksters")
-        hgctracksters = [hgcalPlots.create_hgcalTrackstersPlotter(sample.files(), tracksterCollection)]
+    elif (opts.collection == trackstersGeneralLabel) :
+        hgcmulticlus = [hgcalPlots.hgcalMultiClustersPlotter]
+        for i_iter in trackstersIters :
+            tracksterCollection = i_iter.replace("ticlMultiClustersFromTracksters","ticlTracksters")
+            hgcalPlots.append_hgcalMultiClustersPlots(i_iter, tracksterCollection)
+        val.doPlots(hgcmulticlus, plotterDrawArgs=drawArgs)
+        for i_iter in trackstersIters :
+            tracksterCollection = i_iter.replace("ticlMultiClustersFromTracksters","ticlTracksters")
+            hgctracksters = [hgcalPlots.create_hgcalTrackstersPlotter(sample.files(), tracksterCollection)]
         val.doPlots(hgctracksters, plotterDrawArgs=drawArgs)
-    elif opts.collection=="hitValidation":
+    elif opts.collection==hitValidationLabel:
     	hgchit = [hgcalPlots.hgcalHitPlotter]
+        hgcalPlots.append_hgcalHitsPlots('HGCalSimHitsV', "Simulated Hits")
+        hgcalPlots.append_hgcalHitsPlots('HGCalRecHitsV', "Reconstruced Hits")
+        hgcalPlots.append_hgcalDigisPlots('HGCalDigisV', "Digis")
     	val.doPlots(hgchit, plotterDrawArgs=drawArgs)   
-    elif opts.collection=="hitCalibration":
+    elif opts.collection==hitCalibrationLabel:
         hgchitcalib = [hgcalPlots.hgcalHitCalibPlotter]
         val.doPlots(hgchitcalib, plotterDrawArgs=drawArgs)
     else :
-        #In case of all you have to keep a specific order in one to one 
-        #correspondance between subdirprefix and collections and validation names
-	#layer clusters 
-	hgclayclus = [hgcalPlots.hgcalLayerClustersPlotter]
-	val.doPlots(hgclayclus, plotterDrawArgs=drawArgs)
-        #multiclusters
-        sample = SimpleSample(opts.subdirprefix[1], opts.html_sample, filenames)
-        val = SimpleValidation([sample], opts.outputDir[1])
-        htmlReport_2 = val.createHtmlReport(validationName=opts.html_validation_name[1])
-        hgcmulticlus = [hgcalPlots.hgcalMultiClustersPlotter]
-        val.doPlots(hgcmulticlus, plotterDrawArgs=drawArgs)
+
         #hits
-	sample = SimpleSample(opts.subdirprefix[2], opts.html_sample, filenames)
-	val = SimpleValidation([sample], opts.outputDir[2])
-	htmlReport_3 = val.createHtmlReport(validationName=opts.html_validation_name[2])
-	hgchit = [hgcalPlots.hgcalHitPlotter]
-        val.doPlots(hgchit, plotterDrawArgs=drawArgs)
+    	hgchit = [hgcalPlots.hgcalHitPlotter]
+        hgcalPlots.append_hgcalHitsPlots('HGCalSimHitsV', "Simulated Hits")
+        hgcalPlots.append_hgcalHitsPlots('HGCalRecHitsV', "Reconstruced Hits")
+        hgcalPlots.append_hgcalDigisPlots('HGCalDigisV', "Digis")
+    	val.doPlots(hgchit, plotterDrawArgs=drawArgs)   
+
         #calib
-        sample = SimpleSample(opts.subdirprefix[3], opts.html_sample, filenames)
-        val = SimpleValidation([sample], opts.outputDir[3])
-        htmlReport_4 = val.createHtmlReport(validationName=opts.html_validation_name[3])
         hgchitcalib = [hgcalPlots.hgcalHitCalibPlotter]
         val.doPlots(hgchitcalib, plotterDrawArgs=drawArgs)
+
+ 	#layer clusters 
+	hgclayclus = [hgcalPlots.hgcalLayerClustersPlotter]
+	hgcalPlots.append_hgcalLayerClustersPlots("hgcalLayerClusters", "Layer Clusters")
+	val.doPlots(hgclayclus, plotterDrawArgs=drawArgs)
+
+        #multiclusters
+        hgcmulticlus = [hgcalPlots.hgcalMultiClustersPlotter]
+        for i_iter in trackstersIters :
+            tracksterCollection = i_iter.replace("ticlMultiClustersFromTracksters","ticlTracksters")
+            hgcalPlots.append_hgcalMultiClustersPlots(i_iter, tracksterCollection)
+        val.doPlots(hgcmulticlus, plotterDrawArgs=drawArgs)
 
     if opts.no_html:
         print("Plots created into directory '%s'." % opts.outputDir)
     else:
         htmlReport.write()
-	if(opts.collection=="all"):
-		htmlReport_2.write()
-                htmlReport_3.write()
-		htmlReport_4.write()
 
         print("Plots and HTML report created into directory '%s'. You can just move it to some www area and access the pages via web browser" % (','.join(opts.outputDir)))
 
@@ -103,14 +128,13 @@ if __name__ == "__main__":
                         help="Validation name for HTML page generation (enters to <title> element) (default '')")
     parser.add_argument("--verbose", action="store_true", default = False,
                         help="Be verbose")
-    collections_arg = collections + ["hgcalLayerClusters", "hitValidation", "hitCalibration", "all"]
-    parser.add_argument("--collection", choices=collections_arg, default="hgcalLayerClusters",
-                        help="Choose output plots collections: "+", ".join(collections_arg))
+    parser.add_argument("--collection", choices=collection_choices, default=layerClustersGeneralLabel,
+                        help="Choose output plots collections among possible choices")    
 
     opts = parser.parse_args()
 
-    if opts.collection == "all" and len(opts.outputDir)==1:
-	raise RuntimeError("need to assign names for all directories")
+#    if opts.collection == "all" and len(opts.outputDir)==1:
+#	raise RuntimeError("need to assign names for all directories")
 
     for f in opts.files:
         if not os.path.exists(f):
