@@ -25,8 +25,9 @@ public:
                               int deltaIPhi,
                               float minCosThetai,
                               float maxCosPointing,
+                              float root_doublet_max_distance_from_seed_squared,
                               float etaLimitIncreaseWindow,
-                              int missing_layers,
+                              int skip_layers,
                               int maxNumberOfLayers,
                               float maxDeltaTime);
 
@@ -40,7 +41,8 @@ public:
                     std::vector<int> &seedIndices,
                     const unsigned int minClustersPerNtuplet,
                     const bool outInDFS,
-                    const unsigned int maxOutInHops);
+                    const unsigned int maxOutInHops,
+                    std::vector<unsigned int> & outInHopsV);
   void clear() {
     allDoublets_.clear();
     theRootDoublets_.clear();

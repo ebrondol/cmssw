@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 CaloParticleSelectionForEfficiency = cms.PSet(
     ptMinCP = cms.double(0.5),
-    ptMaxCP = cms.double(250.),
+    ptMaxCP = cms.double(300.),
     minRapidityCP = cms.double(-3.1),
     maxRapidityCP = cms.double(3.1),
     #--z position of the origin vertex less than lipCP
@@ -11,7 +11,7 @@ CaloParticleSelectionForEfficiency = cms.PSet(
     tipCP = cms.double(60),
     chargedOnlyCP = cms.bool(False),
     stableOnlyCP = cms.bool(False),
-    pdgIdCP = cms.vint32(11, -11, 13, -13, 22, 111, 211, -211, 321, -321),
+    pdgIdCP = cms.vint32(11, -11, 13, -13, 22, 111, 211, -211, 321, -321, 310, 130),
     #--signal only means no PU particles
     signalOnlyCP = cms.bool(True),
     #--intime only means no OOT PU particles
