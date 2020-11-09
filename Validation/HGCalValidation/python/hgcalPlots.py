@@ -2024,12 +2024,13 @@ def append_hgcalMultiClustersPlots(collection = 'ticlMultiClustersFromTracksters
 
 
 #=================================================================================================
-def create_hgcalTrackstersPlotter(files, collection = 'ticlTrackstersMerge'):
+def create_hgcalTrackstersPlotter(files, collection = 'ticlTrackstersMerge', name_collection = "MultiClustersMerge"):
 
   hgcalTrackstersPlotter = Plotter()
   dqmfolder = "DQMData/Run 1/HGCAL/Run summary/TICLTracksters/" + collection
   _multiplicity_tracksters_numberOfEventsHistogram = dqmfolder+"/Number of Trackster per Event"
 
+  _common["ymin"] = 0.0
   templateFile = ROOT.TFile.Open(files[0]) # assuming all files have same structure
   keys = gDirectory.GetDirectory(dqmfolder,True).GetListOfKeys()
   key = keys[0]
@@ -2046,12 +2047,12 @@ def create_hgcalTrackstersPlotter(files, collection = 'ticlTrackstersMerge'):
                   ],
                   ncols=1) # probably need more ofr cosAngle_Beta_
 
-    hgcalTrackstersPlotter.append("TICLDebugger", [
+    hgcalTrackstersPlotter.append(name_collection+"_TICLDebugger", [
               dqmfolder
               ], PlotFolder(
                 pg,
                 loopSubFolders=False,
-                purpose=PlotPurpose.PF, page="TICLDebugger",
+                purpose=PlotPurpose.Timing, page="MultiClusters", section=name_collection,
                 numberOfEventsHistogram=_multiplicity_tracksters_numberOfEventsHistogram)
               )
 

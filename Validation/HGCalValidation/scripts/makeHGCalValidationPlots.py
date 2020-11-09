@@ -9,10 +9,7 @@ from Validation.RecoTrack.plotting.validation import SimpleValidation, SimpleSam
 import Validation.HGCalValidation.hgcalPlots as hgcalPlots
 import Validation.RecoTrack.plotting.plotting as plotting
 
-<<<<<<< HEAD
-collections = ["hgcalMultiClusters","ticlMultiClustersFromTrackstersMerge","ticlMultiClustersFromTrackstersTrk","ticlMultiClustersFromTrackstersTrkEM","ticlMultiClustersFromTrackstersEM","ticlMultiClustersFromTrackstersHAD","ticlMultiClustersFromTrackstersDummy"]
-=======
-trackstersIters = ["ticlMultiClustersFromTrackstersMerge", "ticlMultiClustersFromTrackstersMIP",
+trackstersIters = ["ticlMultiClustersFromTrackstersMerge", #"ticlMultiClustersFromTrackstersMIP",
                    "ticlMultiClustersFromTrackstersTrk","ticlMultiClustersFromTrackstersTrkEM",
                    "ticlMultiClustersFromTrackstersEM", "ticlMultiClustersFromTrackstersHAD",
                    "ticlMultiClustersFromTrackstersDummy"]
@@ -26,7 +23,6 @@ allLabel = 'all'
 
 collection_choices = [layerClustersGeneralLabel]
 collection_choices.extend([multiclustersGeneralLabel]+[trackstersGeneralLabel]+[hitValidationLabel]+[hitCalibrationLabel]+[allLabel])
->>>>>>> ebrondol/fixValidation_all
 
 def main(opts):
 
@@ -62,8 +58,8 @@ def main(opts):
         val.doPlots(hgcmulticlus, plotterDrawArgs=drawArgs)
         for i_iter in trackstersIters :
             tracksterCollection = i_iter.replace("ticlMultiClustersFromTracksters","ticlTracksters")
-            hgctracksters = [hgcalPlots.create_hgcalTrackstersPlotter(sample.files(), tracksterCollection)]
-        val.doPlots(hgctracksters, plotterDrawArgs=drawArgs)
+            hgctracksters = [hgcalPlots.create_hgcalTrackstersPlotter(sample.files(), tracksterCollection, tracksterCollection)]
+            val.doPlots(hgctracksters, plotterDrawArgs=drawArgs)
     elif opts.collection==hitValidationLabel:
     	hgchit = [hgcalPlots.hgcalHitPlotter]
         hgcalPlots.append_hgcalHitsPlots('HGCalSimHitsV', "Simulated Hits")
@@ -97,6 +93,10 @@ def main(opts):
             tracksterCollection = i_iter.replace("ticlMultiClustersFromTracksters","ticlTracksters")
             hgcalPlots.append_hgcalMultiClustersPlots(i_iter, tracksterCollection)
         val.doPlots(hgcmulticlus, plotterDrawArgs=drawArgs)
+        for i_iter in trackstersIters :
+            tracksterCollection = i_iter.replace("ticlMultiClustersFromTracksters","ticlTracksters")
+            hgctracksters = [hgcalPlots.create_hgcalTrackstersPlotter(sample.files(), tracksterCollection, tracksterCollection)]
+            val.doPlots(hgctracksters, plotterDrawArgs=drawArgs)
 
     if opts.no_html:
         print("Plots created into directory '%s'." % opts.outputDir)
