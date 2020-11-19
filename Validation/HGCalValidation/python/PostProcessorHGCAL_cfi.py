@@ -32,7 +32,7 @@ eff_multiclusters.extend(["merge_eta 'MultiCluster Merge Rate vs #eta' NumMerge_
 eff_multiclusters.extend(["merge_phi 'MultiCluster Merge Rate vs #phi' NumMerge_MultiCluster_Phi Denom_MultiCluster_Phi"])
 
 subdirs = ['HGCAL/HGCalValidator/hgcalMultiClusters/']
-iterations = ['Dummy','TrkEM','EM','HAD','Merge']
+iterations = ['Dummy','TrkEM','EM','Trk','HAD','Merge']
 subdirs.extend('HGCAL/HGCalValidator/ticlMultiClustersFromTracksters'+iteration+'/' for iteration in iterations)
 
 postProcessorHGCALmulticlusters = DQMEDHarvester('DQMGenericClient',
