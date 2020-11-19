@@ -19,10 +19,11 @@ multiclustersGeneralLabel = 'hgcalMultiClusters'
 trackstersGeneralLabel = 'allTiclMultiClusters'
 hitValidationLabel = 'hitValidation'
 hitCalibrationLabel = 'hitCalibration'
+caloParticlesLabel = 'caloParticles'
 allLabel = 'all'
 
 collection_choices = [layerClustersGeneralLabel]
-collection_choices.extend([multiclustersGeneralLabel]+[trackstersGeneralLabel]+[hitValidationLabel]+[hitCalibrationLabel]+[allLabel])
+collection_choices.extend([multiclustersGeneralLabel]+[trackstersGeneralLabel]+[hitValidationLabel]+[hitCalibrationLabel]+[allLabel]+[caloParticlesLabel])
 
 def main(opts):
 
@@ -63,6 +64,17 @@ def main(opts):
             tracksterCollection = i_iter.replace("ticlMultiClustersFromTracksters","ticlTracksters")
             hgctracksters = [hgcalPlots.create_hgcalTrackstersPlotter(sample.files(), tracksterCollection, tracksterCollection)]
             val.doPlots(hgctracksters, plotterDrawArgs=drawArgs)
+    #elif opts.collection==caloParticlesLabel:
+        particletypes = {"pion-":"-211", "pion+":"211", "pion0": "111",
+                         "muon-": "-13", "muon+":"13", 
+                         "electron-": "-11", "electron+": "11", "photon": "22", 
+                         "kaon-": "-321", "kaon+": "321"}
+        hgcaloPart = [hgcalPlots.hgcalCaloParticlesPlotter]
+        for i_part, i_partID in particletypes.iteritems() :
+            print(i_part)
+            print(i_partID)
+            hgcalPlots.append_hgcalCaloParticlesPlots(sample.files(), i_partID, i_part)
+        val.doPlots(hgcaloPart, plotterDrawArgs=drawArgs)
     elif opts.collection==hitValidationLabel:
     	hgchit = [hgcalPlots.hgcalHitPlotter]
         hgcalPlots.append_hgcalHitsPlots('HGCalSimHitsV', "Simulated Hits")
