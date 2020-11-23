@@ -71,8 +71,6 @@ def main(opts):
                          "kaon-": "-321", "kaon+": "321"}
         hgcaloPart = [hgcalPlots.hgcalCaloParticlesPlotter]
         for i_part, i_partID in particletypes.iteritems() :
-            print(i_part)
-            print(i_partID)
             hgcalPlots.append_hgcalCaloParticlesPlots(sample.files(), i_partID, i_part)
         val.doPlots(hgcaloPart, plotterDrawArgs=drawArgs)
     elif opts.collection==hitValidationLabel:
@@ -92,8 +90,6 @@ def main(opts):
                          "kaon-": "-321", "kaon+": "321"}
         hgcaloPart = [hgcalPlots.hgcalCaloParticlesPlotter]
         for i_part, i_partID in particletypes.iteritems() :
-            print(i_part)
-            print(i_partID)
             hgcalPlots.append_hgcalCaloParticlesPlots(sample.files(), i_partID, i_part)
         val.doPlots(hgcaloPart, plotterDrawArgs=drawArgs)
 
