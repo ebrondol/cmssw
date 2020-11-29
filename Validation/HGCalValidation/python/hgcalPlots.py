@@ -2028,14 +2028,14 @@ def append_hgcalMultiClustersPlots(collection = 'ticlMultiClustersFromTracksters
   #            ))
 
 #=================================================================================================
-list_2D_histos = ["Delta Energy (O-I) vs Layer Number (I)",
-                  "Energy vs Delta Energy", 
-                  "Ingoing links Layer Number", 
-                  "Outgoing links vs Layer Number",
-                  "Raw Energy vs Regressed Energy",
-                  "Relative Delta Energy (O-I)_I vs Layer Number (I)"]
-
 def create_hgcalTrackstersPlotter(files, collection = 'ticlTrackstersMerge', name_collection = "MultiClustersMerge"):
+  list_2D_histos = ["Delta Energy (O-I) vs Layer Number (I)",
+                    "Energy vs Delta Energy", 
+                    "Ingoing links Layer Number", 
+                    "Outgoing links vs Layer Number",
+                    "Raw Energy vs Regressed Energy",
+                    "Relative Delta Energy (O-I)_I vs Layer Number (I)"]
+
   hgcalTrackstersPlotter = Plotter()
   dqmfolder = "DQMData/Run 1/HGCAL/Run summary/TICLTracksters/" + collection
   #_multiplicity_tracksters_numberOfEventsHistogram = dqmfolder+"/Number of Trackster per Event"
@@ -2056,7 +2056,10 @@ def create_hgcalTrackstersPlotter(files, collection = 'ticlTrackstersMerge', nam
                        **_common)
                   ],
                   ncols=1) # probably need more for cosAngle_Beta_
-    if name in list_2D_histos :
+    print(name)
+    print(list_2D_histos)
+    if str(name) in list_2D_histos :
+        print('  is 2D!')
         pg= PlotOnSideGroup(fileName.Data(),
                             Plot(name,
                             xtitle=obj.GetXaxis().GetTitle(), ytitle=obj.GetYaxis().GetTitle(),
@@ -2081,12 +2084,13 @@ def create_hgcalTrackstersPlotter(files, collection = 'ticlTrackstersMerge', nam
 
 #=================================================================================================
 _common_Calo = {"stat": False, "drawStyle": "hist", "staty": 0.65, "ymin": 0.0, "ylog": False}
-list_2D_histos = ["caloparticle_nHits_matched_layer",
-                  "caloparticle_nHits_matched_layer_1SimCl",
-                  "caloparticle_sum_energy_layer"]
 
 hgcalCaloParticlesPlotter = Plotter()
+
 def append_hgcalCaloParticlesPlots(files, collection = '-211', name_collection = "pion-"):
+  list_2D_histos = ["caloparticle_nHits_matched_layer",
+                    "caloparticle_nHits_matched_layer_1SimCl",
+                    "caloparticle_sum_energy_layer"]
 
   dqmfolder = "DQMData/Run 1/HGCAL/Run summary/HGCalValidator/SelectedCaloParticles/" + collection
   print(dqmfolder)
