@@ -183,6 +183,16 @@ void PatternRecognitionbyCA<TILES>::makeTracksters(
       //if a seeding region does not lead to any trackster
       tmp.setSeed(input.regions[0].collectionID, seedIndices[tracksterId]);
 
+      tmp.setOutInHopsPerformed(outInHopsV[tracksterId]);
+
+      // Propagate the correct graph connections
+      tmp.edges().reserve(ntuplet.size());
+      for (auto const & t : ntuplet) {
+        std::array<unsigned int, 2> edge = {{(unsigned int) doublets[t].innerClusterId(),
+                                            (unsigned int) doublets[t].outerClusterId()}};
+        tmp.edges().push_back(edge);
+      }
+
       std::copy(std::begin(effective_cluster_idx), std::end(effective_cluster_idx), std::back_inserter(tmp.vertices()));
       tmpTracksters.push_back(tmp);
     }
