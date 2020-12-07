@@ -1180,7 +1180,7 @@ class ROC:
 
 
 # Plot styles
-_plotStylesColor = [4, 2, ROOT.kBlack, ROOT.kOrange+7, ROOT.kMagenta-3, 3]
+_plotStylesColor = [4, 2, ROOT.kBlack, ROOT.kOrange+7, ROOT.kMagenta-3, ROOT.kGreen+2]
 _plotStylesMarker = [21, 20, 22, 34, 33, 23]
 
 def _drawFrame(pad, bounds, zmax=None, xbinlabels=None, xbinlabelsize=None, xbinlabeloption=None, ybinlabels=None, suffix=""):
