@@ -2029,13 +2029,6 @@ def append_hgcalMultiClustersPlots(collection = 'ticlMultiClustersFromTracksters
 
 #=================================================================================================
 def create_hgcalTrackstersPlotter(files, collection = 'ticlTrackstersMerge', name_collection = "MultiClustersMerge"):
-  list_2D_histos = ["Delta Energy (O-I) vs Layer Number (I)",
-                    "Energy vs Delta Energy", 
-                    "Ingoing links Layer Number", 
-                    "Outgoing links vs Layer Number",
-                    "Raw Energy vs Regressed Energy",
-                    "Raw Energy vs Regressed Energy 1plus LC",
-                    "Relative Delta Energy (O-I)_I vs Layer Number (I)"]
   grouped = {"cosAngle Beta": PlotGroup("cosAngle_Beta_per_layer",[],ncols=10), "cosAngle Beta Weighted": PlotGroup("cosAngle_Beta_Weighted_per_layer",[],ncols=10)}
   groupingFlag = " on Layer "
 
@@ -2063,7 +2056,7 @@ def create_hgcalTrackstersPlotter(files, collection = 'ticlTrackstersMerge', nam
                                      )
     else:
         pg = None
-        if str(name) in list_2D_histos :
+        if obj.InheritsFrom("TH2"):
             pg = PlotOnSideGroup(plotName.Data(),
                                  Plot(name,
                                       xtitle=obj.GetXaxis().GetTitle(), ytitle=obj.GetYaxis().GetTitle(),
@@ -2074,7 +2067,7 @@ def create_hgcalTrackstersPlotter(files, collection = 'ticlTrackstersMerge', nam
             pg = PlotGroup(plotName.Data(),
                            [Plot(name,
                                  xtitle=obj.GetXaxis().GetTitle(), ytitle=obj.GetYaxis().GetTitle(),
-                                 drawCommand = "COLZ", # may want to customize for TH2 (colz, etc.)
+                                 drawCommand = "COLZ", # ineffective for TH1
                                  **_common)
                            ],
                            ncols=1, legendDh=-0.03 * len(files))
@@ -2106,10 +2099,6 @@ _common_Calo = {"stat": False, "drawStyle": "hist", "staty": 0.65, "ymin": 0.0, 
 hgcalCaloParticlesPlotter = Plotter()
 
 def append_hgcalCaloParticlesPlots(files, collection = '-211', name_collection = "pion-"):
-  list_2D_histos = ["caloparticle_nHits_matched_layer",
-                    "caloparticle_nHits_matched_layer_1SimCl",
-                    "caloparticle_sum_energy_layer"]
-
   dqmfolder = "DQMData/Run 1/HGCAL/Run summary/HGCalValidator/SelectedCaloParticles/" + collection
   print(dqmfolder)
 #  _common["ymin"] = 0.0
@@ -2129,13 +2118,12 @@ def append_hgcalCaloParticlesPlots(files, collection = '-211', name_collection =
                   ],
                   ncols=1)
 
-    if name in list_2D_histos :
+    if obj.InheritsFrom("TH2"):
         pg= PlotOnSideGroup(plotName.Data(),
                       Plot(name,
                            xtitle=obj.GetXaxis().GetTitle(), ytitle=obj.GetYaxis().GetTitle(),
                            drawCommand = "COLZ",
-                           normalizeToNumberOfEvents = True, **_common_Calo)
-                      ,
+                           normalizeToNumberOfEvents = True, **_common_Calo),
                       ncols=1)
 
     hgcalCaloParticlesPlotter.append("CaloParticles_"+name_collection, [
