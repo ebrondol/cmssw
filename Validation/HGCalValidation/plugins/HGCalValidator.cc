@@ -17,8 +17,9 @@ HGCalValidator::HGCalValidator(const edm::ParameterSet& pset)
       doCaloParticlePlots_(pset.getUntrackedParameter<bool>("doCaloParticlePlots")),
       doCaloParticleSelection_(pset.getUntrackedParameter<bool>("doCaloParticleSelection")),
       doSimClustersPlots_(pset.getUntrackedParameter<bool>("dosimclustersPlots")),
-      doLayerClustersPlots_(pset.getUntrackedParameter<bool>("dolayerclustersPlots")),
-      doMultiClustersPlots_(pset.getUntrackedParameter<bool>("domulticlustersPlots")),
+      doLayerClustersPlots_(pset.getUntrackedParameter<bool>("doLayerClustersPlots")),
+      doMultiClustersPlots_(pset.getUntrackedParameter<bool>("doMultiClustersPlots")),
+      doCPSelForAllMCPlots_(pset.getUntrackedParameter<bool>("doCPSelForAllMCPlots")),
       label_clustersmask(pset.getParameter<std::vector<edm::InputTag>>("LayerClustersInputMask")),
       cummatbudinxo_(pset.getParameter<edm::FileInPath>("cummatbudinxo")) {
   //In this way we can easily generalize to associations between other objects also.
@@ -114,7 +115,7 @@ void HGCalValidator::bookHistograms(DQMStore::IBooker& ibook,
   }
 
   //Booking histograms concerning with simclusters
-  if (dosimclustersPlots_) {
+  if (doSimClustersPlots_) {
     ibook.cd();
     ibook.setCurrentFolder(dirName_ + "simClusters/ClusterLevel");
     histoProducerAlgo_->bookSimClusterHistos(
@@ -300,7 +301,7 @@ void HGCalValidator::dqmAnalyze(const edm::Event& event,
   // ##############################################
   // fill simcluster histograms
   // ##############################################
-  if (dosimclustersPlots_) {
+  if (doSimClustersPlots_) {
     histoProducerAlgo_->fill_simcluster_histos(
         histograms.histoProducerAlgo, simclusters, totallayers_to_monitor_, thicknesses_to_monitor_);
 
