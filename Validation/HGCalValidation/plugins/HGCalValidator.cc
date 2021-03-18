@@ -16,9 +16,9 @@ HGCalValidator::HGCalValidator(const edm::ParameterSet& pset)
       SaveGeneralInfo_(pset.getUntrackedParameter<bool>("SaveGeneralInfo")),
       doCaloParticlePlots_(pset.getUntrackedParameter<bool>("doCaloParticlePlots")),
       doCaloParticleSelection_(pset.getUntrackedParameter<bool>("doCaloParticleSelection")),
-      doSimClustersPlots_(pset.getUntrackedParameter<bool>("dosimclustersPlots")),
-      doLayerClustersPlots_(pset.getUntrackedParameter<bool>("dolayerclustersPlots")),
-      doMultiClustersPlots_(pset.getUntrackedParameter<bool>("domulticlustersPlots")),
+      doSimClustersPlots_(pset.getUntrackedParameter<bool>("doSimClustersPlots")),
+      doLayerClustersPlots_(pset.getUntrackedParameter<bool>("doLayerClustersPlots")),
+      doMultiClustersPlots_(pset.getUntrackedParameter<bool>("doMultiClustersPlots")),
       doCPSelForAllMCPlots_(pset.getUntrackedParameter<bool>("doCPSelForAllMCPlots")),
       label_clustersmask(pset.getParameter<std::vector<edm::InputTag>>("LayerClustersInputMask")),
       cummatbudinxo_(pset.getParameter<edm::FileInPath>("cummatbudinxo")) {

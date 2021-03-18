@@ -34,7 +34,7 @@ hgcalValidator = DQMEDAnalyzer(
     #Select caloParticles for efficiency or pass through
     doCaloParticleSelection = cms.untracked.bool(True),
     #SimCluster related plots
-    dosimclustersPlots = cms.untracked.bool(True),
+    doSimClustersPlots = cms.untracked.bool(True),
     #Layer Cluster related plots
     doLayerClustersPlots = cms.untracked.bool(True),
     #Multi Cluster related plots
