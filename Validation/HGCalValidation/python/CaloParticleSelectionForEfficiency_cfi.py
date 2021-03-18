@@ -12,7 +12,7 @@ CaloParticleSelectionForEfficiency = cms.PSet(
     chargedOnlyCP = cms.bool(False),
     stableOnlyCP = cms.bool(False),
     #311: K0, 130: K0_short, 310: K0_long
-    pdgIdCP = cms.vint32(11, -11, 13, -13, 22, 111, 211, -211, 321, -321, 311),
+    pdgIdCP = cms.vint32(11, -11, 13, -13, 22, 111, 211, -211, 321, -321, 311, 130, 310),
     #--signal only means no PU particles
     signalOnlyCP = cms.bool(True),
     #--intime only means no OOT PU particles
