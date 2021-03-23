@@ -58,18 +58,16 @@ eff_multiclusters.extend(["merge_eta 'MultiCluster Merge Rate vs #eta' NumMerge_
 eff_multiclusters.extend(["merge_phi 'MultiCluster Merge Rate vs #phi' NumMerge_MultiCluster_Phi Denom_MultiCluster_Phi"])
 
 postProcessorHGCALmulticlusters = DQMEDHarvester('DQMGenericClient',
-subDirs = cms.untracked.vstring(
-  'HGCAL/HGCalValidator/hgcalMultiClusters/',
-  'HGCAL/HGCalValidator/ticlMultiClustersFromTrackstersTrk/',
-  'HGCAL/HGCalValidator/ticlMultiClustersFromTrackstersTrkEM/',
-  'HGCAL/HGCalValidator/ticlMultiClustersFromTrackstersEM/',
-  'HGCAL/HGCalValidator/ticlMultiClustersFromTrackstersHAD/',
-  'HGCAL/HGCalValidator/ticlMultiClustersFromTrackstersMerge/',
-  ),
+subdirs = ['HGCAL/HGCalValidator/hgcalMultiClusters/']
+iterations = ['TrkEM','EM','Trk','HAD','Merge']
+subdirs.extend('HGCAL/HGCalValidator/ticlMultiClustersFromTracksters'+iteration+'/' for iteration in iterations)
 
-efficiency = cms.vstring(eff_multiclusters),
-resolution = cms.vstring(),
-cumulativeDists = cms.untracked.vstring(),
-noFlowDists = cms.untracked.vstring(),
-outputFileName = cms.untracked.string(""),
-verbose = cms.untracked.uint32(4))
+postProcessorHGCALmulticlusters = DQMEDHarvester('DQMGenericClient',
+  subDirs = cms.untracked.vstring(subdirs),
+  efficiency = cms.vstring(eff_multiclusters),
+  resolution = cms.vstring(),
+  cumulativeDists = cms.untracked.vstring(),
+  noFlowDists = cms.untracked.vstring(),
+  outputFileName = cms.untracked.string(""),
+  verbose = cms.untracked.uint32(4)
+)
