@@ -17,7 +17,7 @@ const double ScoreCutCPtoLC_ = 0.1;
 const double ScoreCutLCtoSC_ = 0.1;
 const double ScoreCutSCtoLC_ = 0.1;
 const double ScoreCutMCLtoCPFakeMerge_ = 0.6;
-const double ScoreCutCPtoMCLDup_ = 0.4;
+const double ScoreCutCPtoMCLDup_ = 0.2;
 
 HGVHistoProducerAlgo::HGVHistoProducerAlgo(const edm::ParameterSet& pset)
     :  //parameters for eta
