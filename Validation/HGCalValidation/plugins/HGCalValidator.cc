@@ -205,6 +205,8 @@ void HGCalValidator::cpParametersAndSelection(const Histograms& histograms,
                                               unsigned int layers,
                                               std::unordered_map<DetId, const HGCRecHit*> const& hitMap) const {
   selected_cPeff.reserve(cPeff.size());
+  std::cout << "selected_cPeff.size at beginning = " << selected_cPeff.size() << std::endl;
+  std::cout << "cPeff.size at beginning = " << cPeff.size() << std::endl;
 
   size_t j = 0;
   for (auto const& caloParticle : cPeff) {
@@ -219,6 +221,7 @@ void HGCalValidator::cpParametersAndSelection(const Histograms& histograms,
     }
     ++j;
   }  //end of loop over caloparticles
+  std::cout << "selected_cPeff.size at the end = " << selected_cPeff.size() << std::endl;
 }
 
 void HGCalValidator::dqmAnalyze(const edm::Event& event,
@@ -373,6 +376,9 @@ void HGCalValidator::dqmAnalyze(const edm::Event& event,
                                << ":" << label_lcl.instance() << ": " << clusters.size() << "\n";
   }
 
+  std::cout << "doCPSelForAllMCPlots_ = " << doCPSelForAllMCPlots_ << std::endl;
+  std::cout << "selected_cPeff size = " << selected_cPeff.size() << std::endl;
+  std::cout << "cPIndices size = " << cPIndices.size() << std::endl;
   // ##############################################
   // fill multicluster histograms
   // ##############################################

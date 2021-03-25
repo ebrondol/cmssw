@@ -67,6 +67,9 @@ public:
     if (intimeOnly_ && !(cp.eventId().bunchCrossing() == 0))
       return false;
 
+    std::cout << "  cp.simClusters().size() = " << cp.simClusters().size() << std::endl;
+    std::cout << "  maxSimClusters_ = " << maxSimClusters_ << std::endl;
+
     if (cp.simClusters().size() > maxSimClusters_)
       return false;
 
